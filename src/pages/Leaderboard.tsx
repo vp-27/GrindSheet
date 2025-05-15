@@ -24,21 +24,21 @@ const Leaderboard: React.FC = () => {
   const { users, categories, exercises, exerciseLogs } = useAppContext();
   
   const [leaderboardType, setLeaderboardType] = useState<LeaderboardType>(LeaderboardType.MAX_WEIGHT);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
-  const [selectedExerciseId, setSelectedExerciseId] = useState<string>('');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
+  const [selectedExerciseId, setSelectedExerciseId] = useState<string>('all');
   
   // Get filtered exercises based on selected category
-  const filteredExercises = selectedCategoryId
-    ? exercises.filter(e => e.categoryId === selectedCategoryId)
-    : exercises;
+  const filteredExercises = selectedCategoryId === 'all'
+    ? exercises
+    : exercises.filter(e => e.categoryId === selectedCategoryId);
   
   // Get leaderboard data
   const leaderboardData = getLeaderboard(
     exerciseLogs,
     users,
     leaderboardType,
-    selectedExerciseId || undefined,
-    selectedCategoryId || undefined
+    selectedExerciseId === 'all' ? undefined : selectedExerciseId,
+    selectedCategoryId === 'all' ? undefined : selectedCategoryId
   );
   
   // Handle category change
@@ -46,10 +46,10 @@ const Leaderboard: React.FC = () => {
     setSelectedCategoryId(value);
     
     // If we have an exercise selected but it's not in the new category, clear it
-    if (selectedExerciseId) {
+    if (selectedExerciseId !== 'all') {
       const exercise = exercises.find(e => e.id === selectedExerciseId);
-      if (exercise && exercise.categoryId !== value) {
-        setSelectedExerciseId('');
+      if (exercise && exercise.categoryId !== value && value !== 'all') {
+        setSelectedExerciseId('all');
       }
     }
   };
@@ -92,7 +92,7 @@ const Leaderboard: React.FC = () => {
                     <SelectValue placeholder="All Categories" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Categories</SelectItem>
+                    <SelectItem value="all">All Categories</SelectItem>
                     {categories.map(category => (
                       <SelectItem key={category.id} value={category.id}>
                         {category.name}
@@ -106,13 +106,13 @@ const Leaderboard: React.FC = () => {
                 <Select
                   value={selectedExerciseId}
                   onValueChange={setSelectedExerciseId}
-                  disabled={leaderboardType === LeaderboardType.MAX_WEIGHT && !selectedExerciseId}
+                  disabled={leaderboardType === LeaderboardType.MAX_WEIGHT && selectedExerciseId === 'all'}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select Exercise" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">All Exercises</SelectItem>
+                    <SelectItem value="all">All Exercises</SelectItem>
                     {filteredExercises.map(exercise => (
                       <SelectItem key={exercise.id} value={exercise.id}>
                         {exercise.name}
@@ -124,7 +124,7 @@ const Leaderboard: React.FC = () => {
             </div>
             
             <TabsContent value="maxWeight" className="space-y-4">
-              {leaderboardType === LeaderboardType.MAX_WEIGHT && !selectedExerciseId ? (
+              {leaderboardType === LeaderboardType.MAX_WEIGHT && selectedExerciseId === 'all' ? (
                 <div className="text-center py-8 text-muted-foreground">
                   Please select an exercise to view the max weight leaderboard
                 </div>
