@@ -57,7 +57,7 @@ const AddExercise: React.FC = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       exerciseId: selectedExercise?.id || '',
-      weight: '',
+      weight: 0,
       note: '',
     },
   });

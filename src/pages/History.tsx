@@ -15,15 +15,15 @@ import { format } from 'date-fns';
 
 const History: React.FC = () => {
   const { currentUser, exercises, exerciseLogs, categories } = useAppContext();
-  const [selectedExerciseId, setSelectedExerciseId] = useState<string>('');
+  const [selectedExerciseId, setSelectedExerciseId] = useState<string>('all');
   
   // Filter logs for the current user
   const userLogs = exerciseLogs.filter(log => log.userId === currentUser.id);
   
   // Filter logs by selected exercise if any
-  const filteredLogs = selectedExerciseId
-    ? userLogs.filter(log => log.exerciseId === selectedExerciseId)
-    : userLogs;
+  const filteredLogs = selectedExerciseId === 'all'
+    ? userLogs
+    : userLogs.filter(log => log.exerciseId === selectedExerciseId);
   
   // Sort logs by timestamp (newest first)
   const sortedLogs = [...filteredLogs].sort(
@@ -57,7 +57,7 @@ const History: React.FC = () => {
             <SelectValue placeholder="Filter by exercise" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Exercises</SelectItem>
+            <SelectItem value="all">All Exercises</SelectItem>
             {categories.map(category => (
               <React.Fragment key={category.id}>
                 <SelectItem value={`category-${category.id}`} className="font-semibold bg-muted" disabled>
