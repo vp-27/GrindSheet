@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,13 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				gain: '#10b981', // Green color for gains
+				loss: '#ef4444', // Red color for losses
+				fitness: {
+					blue: '#3b82f6', // Primary app color
+					green: '#10b981', // For positive gains
+					orange: '#f97316', // For competitive elements
 				}
 			},
 			borderRadius: {
