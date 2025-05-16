@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/Layout';
 import { useAppContext } from '@/context/AppContext';
@@ -19,8 +18,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { useAuth } from '@/context/AuthContext';
 
 const Leaderboard: React.FC = () => {
+  const { profile } = useAuth();
   const { users, categories, exercises, exerciseLogs } = useAppContext();
   
   const [leaderboardType, setLeaderboardType] = useState<LeaderboardType>(LeaderboardType.MAX_WEIGHT);
@@ -31,6 +32,15 @@ const Leaderboard: React.FC = () => {
   const filteredExercises = selectedCategoryId === 'all'
     ? exercises
     : exercises.filter(e => e.categoryId === selectedCategoryId);
+  
+  // Use profile data as the only user for now
+  // In a real multi-user app, this would come from a users API call
+  const users = profile ? [{ 
+    id: profile.id,
+    name: profile.name,
+    username: profile.username,
+    avatarUrl: profile.avatar_url
+  }] : [];
   
   // Get leaderboard data
   const leaderboardData = getLeaderboard(
