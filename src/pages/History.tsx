@@ -1,5 +1,6 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { useAppContext } from '@/context/AppContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,7 +16,15 @@ import { format } from 'date-fns';
 
 const History: React.FC = () => {
   const { currentUser, exercises, exerciseLogs, categories } = useAppContext();
-  const [selectedExerciseId, setSelectedExerciseId] = useState<string>('all');
+  const [searchParams] = useSearchParams();
+  const exerciseParam = searchParams.get('exercise');
+  const [selectedExerciseId, setSelectedExerciseId] = useState<string>(exerciseParam || 'all');
+  
+  useEffect(() => {
+    if (exerciseParam) {
+      setSelectedExerciseId(exerciseParam);
+    }
+  }, [exerciseParam]);
   
   // Filter logs for the current user
   const userLogs = exerciseLogs.filter(log => log.userId === currentUser.id);
@@ -43,7 +52,7 @@ const History: React.FC = () => {
   
   return (
     <Layout title="History">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 pb-16">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Exercise History</h1>
         </div>

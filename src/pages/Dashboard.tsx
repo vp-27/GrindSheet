@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import ProgressChart from '@/components/dashboard/ProgressChart';
@@ -50,21 +50,121 @@ const Dashboard: React.FC = () => {
     
     return new Date(bLogs[0].timestamp).getTime() - new Date(aLogs[0].timestamp).getTime();
   });
+
+  // Prepare chart data based on selection
+  const getChartData = () => {
+    if (selectedExerciseForChart) {
+      // Single exercise chart
+      return getProgressChartData(userLogs, selectedExerciseForChart.id);
+    } else if (selectedCategory) {
+      // Multiple exercises in category chart
+      const categoryExercises = exercises.filter(ex => ex.categoryId === selectedCategory.id);
+      
+      // Get all unique dates from logs for these exercises
+      const allDates = new Set<string>();
+      categoryExercises.forEach(exercise => {
+        const exerciseLogs = userLogs.filter(log => log.exerciseId === exercise.id);
+        exerciseLogs.forEach(log => {
+          allDates.add(new Date(log.timestamp).toLocaleDateString());
+        });
+      });
+
+      // Create a map of dates
+      const dateArray = Array.from(allDates).sort((a, b) => 
+        new Date(a).getTime() - new Date(b).getTime()
+      );
+
+      // For each exercise, map its progress over these dates
+      const multiData: Record<string, any>[] = [];
+      
+      dateArray.forEach(date => {
+        const dataPoint: Record<string, any> = { date };
+        
+        categoryExercises.forEach(exercise => {
+          const logsOnDate = userLogs.filter(log => 
+            log.exerciseId === exercise.id && 
+            new Date(log.timestamp).toLocaleDateString() === date
+          );
+          
+          if (logsOnDate.length > 0) {
+            // Use the latest log for that date
+            dataPoint[exercise.name] = logsOnDate[0].weight;
+          }
+        });
+        
+        multiData.push(dataPoint);
+      });
+      
+      return multiData;
+    } else {
+      // Overall percentage gain chart across all exercises
+      // Get the oldest log date for each exercise as starting point
+      const exerciseStartPoints: Record<string, { date: Date, weight: number }> = {};
+      
+      userLogs.forEach(log => {
+        if (!exerciseStartPoints[log.exerciseId] || 
+            new Date(log.timestamp) < exerciseStartPoints[log.exerciseId].date) {
+          exerciseStartPoints[log.exerciseId] = {
+            date: new Date(log.timestamp),
+            weight: log.weight
+          };
+        }
+      });
+      
+      // Get all unique dates from logs
+      const allDates = userLogs.map(log => new Date(log.timestamp).toLocaleDateString());
+      const uniqueDates = Array.from(new Set(allDates)).sort((a, b) => 
+        new Date(a).getTime() - new Date(b).getTime()
+      );
+      
+      // Calculate percentage gain for each date
+      const percentageData = uniqueDates.map((date, index) => {
+        // Get logs for this date
+        const logsOnDate = userLogs.filter(log => 
+          new Date(log.timestamp).toLocaleDateString() === date
+        );
+        
+        // Calculate total percentage gain across all exercises for this date
+        let totalGain = 0;
+        let exerciseCount = 0;
+        
+        logsOnDate.forEach(log => {
+          const startPoint = exerciseStartPoints[log.exerciseId];
+          if (startPoint && startPoint.weight > 0) {
+            // Calculate percentage gain from starting weight
+            const percentGain = ((log.weight - startPoint.weight) / startPoint.weight) * 100;
+            totalGain += percentGain;
+            exerciseCount++;
+          }
+        });
+        
+        // Average percentage gain across all exercises
+        const avgGain = exerciseCount > 0 ? totalGain / exerciseCount : 0;
+        
+        // If it's the first date, set gain to 0 as baseline
+        const percentGain = index === 0 ? 0 : avgGain;
+        
+        return {
+          date,
+          percentGain: parseFloat(percentGain.toFixed(2))
+        };
+      });
+      
+      return percentageData;
+    }
+  };
   
-  // Get chart data for selected exercise or first exercise if none selected
-  const selectedExerciseId = selectedExerciseForChart?.id || (progressItems.length > 0 ? progressItems[0].exercise.id : "");
-  const chartData = selectedExerciseId 
-    ? getProgressChartData(userLogs, selectedExerciseId)
-    : [];
+  const chartData = getChartData();
   
   const chartTitle = selectedExerciseForChart 
     ? `Progress: ${selectedExerciseForChart.name}`
-    : progressItems.length > 0
-    ? `Progress: ${progressItems[0].exercise.name}`
-    : "Progress";
+    : selectedCategory
+    ? `Progress: ${selectedCategory.name} Exercises`
+    : "Overall Progress";
   
   const handleSelectCategory = (categoryId: string | null) => {
     setSelectedCategory(categoryId ? categories.find(c => c.id === categoryId) || null : null);
+    setSelectedExerciseForChart(null);
   };
   
   const handleExerciseClick = (exercise: Exercise) => {
@@ -78,7 +178,7 @@ const Dashboard: React.FC = () => {
   
   return (
     <Layout title="Dashboard">
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4 pb-16">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Welcome, {currentUser.name}</h1>
         </div>
@@ -86,7 +186,10 @@ const Dashboard: React.FC = () => {
         {/* Progress Chart */}
         <ProgressChart 
           data={chartData} 
-          title={chartTitle} 
+          title={chartTitle}
+          multiple={selectedCategory !== null && selectedExerciseForChart === null}
+          showPercentage={!selectedCategory && !selectedExerciseForChart}
+          exerciseId={selectedExerciseForChart?.id}
         />
         
         {/* Category Filter */}

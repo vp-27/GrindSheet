@@ -9,7 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import AddExercise from "./pages/AddExercise";
 import History from "./pages/History";
 import Leaderboard from "./pages/Leaderboard";
-import Profile from "./pages/Profile";
+import Settings from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -26,7 +26,7 @@ const App = () => (
             <Route path="/add-exercise" element={<AddExercise />} />
             <Route path="/history" element={<History />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
-            <Route path="/profile" element={<Profile />} />
+            <Route path="/profile" element={<Settings />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
