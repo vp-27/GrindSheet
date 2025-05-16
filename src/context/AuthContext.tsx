@@ -9,7 +9,7 @@ type AuthContextType = {
   profile: any | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<{error: any}>;
-  signUp: (email: string, password: string, userData: any) => Promise<{error: any}>;
+  signUp: (email: string, password: string, userData: any) => Promise<{error: any, user: any}>;
   signOut: () => Promise<{error: any}>;
   updateProfile: (profile: any) => Promise<{error: any, data: any}>;
 };
@@ -88,19 +88,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const signUp = async (email: string, password: string, userData: any) => {
     try {
-      const { error } = await supabase.auth.signUp({
+      // Use signUp with autoConfirm option
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             name: userData.name,
             username: userData.username,
-          }
+          },
+          // This enables auto sign-in after signup
+          emailRedirectTo: window.location.origin,
         }
       });
-      return { error };
+      
+      // If signup succeeds, immediately sign in with the credentials
+      if (!error && data.user) {
+        // Try to sign in immediately
+        await signIn(email, password);
+      }
+      
+      return { error, user: data.user };
     } catch (error) {
-      return { error };
+      return { error, user: null };
     }
   };
 

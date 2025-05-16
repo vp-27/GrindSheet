@@ -70,7 +70,7 @@ const Auth = () => {
     
     setIsLoading(true);
 
-    const { error } = await signUp(email, password, { name, username });
+    const { error, user } = await signUp(email, password, { name, username });
     
     setIsLoading(false);
     
@@ -80,12 +80,13 @@ const Auth = () => {
         description: error.message || 'Please check your information and try again.',
         variant: 'destructive',
       });
-    } else {
+    } else if (user) {
       toast({
         title: 'Account created',
-        description: 'Please check your email to verify your account.',
+        description: 'Your account has been successfully created! You can now sign in.',
       });
-      // Stay on the page as user needs to verify email
+      // Navigate to home since signUp will automatically sign in
+      navigate('/');
     }
   };
 
