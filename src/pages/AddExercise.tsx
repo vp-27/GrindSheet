@@ -1,227 +1,179 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { PlusCircle, ChevronLeft } from 'lucide-react';
 import Layout from '@/components/Layout';
-import { useAppContext } from '@/context/AppContext';
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import {
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
+import { 
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
-import { calculateProgress } from '@/utils/progressUtils';
+import { useAppContext } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 
-const formSchema = z.object({
-  exerciseId: z.string().min(1, { message: 'Please select an exercise' }),
-  weight: z.coerce
-    .number()
-    .positive({ message: 'Weight must be a positive number' }),
-  note: z.string().optional(),
-});
-
-const AddExercise: React.FC = () => {
-  const {
-    currentUser,
-    categories,
-    exercises,
-    exerciseLogs,
-    addExerciseLog,
-    selectedCategory,
-    selectedExercise,
-    setSelectedExercise,
-    setSelectedCategory,
-  } = useAppContext();
-  
+const AddExercise = () => {
+  const { categories, exercises, addExerciseLog } = useAppContext();
+  const { profile } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
-  const [filteredExercises, setFilteredExercises] = useState(exercises);
   
-  // Form definition
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      exerciseId: selectedExercise?.id || '',
-      weight: 0,
-      note: '',
-    },
-  });
-  
-  // Filter exercises when category changes
-  useEffect(() => {
-    if (selectedCategory) {
-      setFilteredExercises(exercises.filter(e => e.categoryId === selectedCategory.id));
-    } else {
-      setFilteredExercises(exercises);
-    }
-  }, [selectedCategory, exercises]);
-  
-  // Set form value when selected exercise changes
-  useEffect(() => {
-    if (selectedExercise) {
-      form.setValue('exerciseId', selectedExercise.id);
-      
-      // Try to pre-fill the weight with the user's last entry for this exercise
-      const lastLog = exerciseLogs
-        .filter(log => log.userId === currentUser.id && log.exerciseId === selectedExercise.id)
-        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
-      
-      if (lastLog) {
-        form.setValue('weight', lastLog.weight);
-      }
-    }
-  }, [selectedExercise, form, currentUser.id, exerciseLogs]);
-  
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    // Add the exercise log
-    addExerciseLog({
-      userId: currentUser.id,
-      exerciseId: values.exerciseId,
-      weight: values.weight,
-      note: values.note,
-    });
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
+  const [selectedExerciseId, setSelectedExerciseId] = useState<string>('');
+  const [weight, setWeight] = useState<string>('');
+  const [note, setNote] = useState<string>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Filter exercises based on selected category
+  const filteredExercises = exercises.filter(exercise => 
+    exercise.categoryId === selectedCategoryId
+  );
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    // Calculate if this is a PR
-    const exercise = exercises.find(e => e.id === values.exerciseId);
-    if (exercise) {
-      const userLogs = exerciseLogs.filter(log => 
-        log.userId === currentUser.id && log.exerciseId === values.exerciseId
-      );
-      const progress = calculateProgress(userLogs, values.exerciseId, exercise);
-      
-      if (values.weight > (progress.personalRecord || 0)) {
-        toast.success('New personal record! 🎉', {
-          description: `You just set a new PR for ${exercise.name}!`,
-        });
-      } else {
-        toast.success('Exercise logged!');
-      }
+    if (!selectedExerciseId || !weight) {
+      toast({
+        title: 'Missing information',
+        description: 'Please select an exercise and enter the weight.',
+        variant: 'destructive',
+      });
+      return;
     }
+
+    setIsSubmitting(true);
     
-    // Reset form and navigate back to dashboard
-    form.reset();
-    setSelectedExercise(null);
-    navigate('/');
+    try {
+      await addExerciseLog({
+        userId: profile?.id || '',
+        exerciseId: selectedExerciseId,
+        weight: parseFloat(weight),
+        note: note,
+      });
+      
+      toast({
+        title: 'Exercise logged',
+        description: 'Your exercise has been successfully logged!',
+      });
+      
+      navigate('/');
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to log exercise. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-  
-  const handleSelectCategory = (categoryId: string) => {
-    const category = categories.find(c => c.id === categoryId);
-    setSelectedCategory(category || null);
-  };
-  
-  const handleSelectExercise = (exerciseId: string) => {
-    const exercise = exercises.find(e => e.id === exerciseId);
-    setSelectedExercise(exercise || null);
-  };
-  
+
   return (
-    <Layout title="Log Exercise">
-      <div className="mt-4">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="exerciseId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Exercise</FormLabel>
-                  <Select
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      handleSelectExercise(value);
-                    }}
-                    value={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select an exercise" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <React.Fragment key={category.id}>
-                          <SelectItem
-                            value={`category-${category.id}`}
-                            className="font-semibold bg-muted"
-                            onSelect={() => handleSelectCategory(category.id)}
-                            disabled
-                          >
-                            {category.name}
-                          </SelectItem>
-                          {exercises
-                            .filter((ex) => ex.categoryId === category.id)
-                            .map((exercise) => (
-                              <SelectItem key={exercise.id} value={exercise.id}>
-                                {exercise.name}
-                              </SelectItem>
-                            ))}
-                        </React.Fragment>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+    <Layout title="Add Exercise">
+      <div className="flex flex-col gap-4">
+        <Button 
+          variant="ghost" 
+          className="w-fit -ml-2 mb-2"
+          onClick={() => navigate('/')}
+        >
+          <ChevronLeft className="mr-2 h-4 w-4" />
+          Back
+        </Button>
+        
+        <h1 className="text-2xl font-bold">Log Exercise</h1>
+        
+        <Card className="p-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="category">Category</Label>
+              <Select
+                value={selectedCategoryId}
+                onValueChange={setSelectedCategoryId}
+              >
+                <SelectTrigger id="category">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map(category => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             
-            <FormField
-              control={form.control}
-              name="weight"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Weight (lbs)</FormLabel>
-                  <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="Enter weight"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="exercise">Exercise</Label>
+              <Select
+                value={selectedExerciseId}
+                onValueChange={setSelectedExerciseId}
+                disabled={!selectedCategoryId}
+              >
+                <SelectTrigger id="exercise">
+                  <SelectValue placeholder={
+                    selectedCategoryId 
+                      ? "Select an exercise" 
+                      : "Select a category first"
+                  } />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredExercises.length > 0 ? (
+                    filteredExercises.map(exercise => (
+                      <SelectItem key={exercise.id} value={exercise.id}>
+                        {exercise.name}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem value="none" disabled>
+                      No exercises found
+                    </SelectItem>
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
             
-            <FormField
-              control={form.control}
-              name="note"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Note (optional)</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="How did it feel? Any achievements?"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Add any comments about this set or your performance
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="weight">Weight (kg)</Label>
+              <Input
+                id="weight"
+                type="number"
+                step="0.5"
+                min="0"
+                value={weight}
+                onChange={e => setWeight(e.target.value)}
+                placeholder="Enter weight"
+              />
+            </div>
             
-            <Button type="submit" className="w-full">
-              Log Exercise
+            <div className="space-y-2">
+              <Label htmlFor="note">Note (optional)</Label>
+              <Textarea
+                id="note"
+                value={note}
+                onChange={e => setNote(e.target.value)}
+                placeholder="Add a note about this set"
+                rows={3}
+              />
+            </div>
+            
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Logging...' : 'Log Exercise'}
+              <PlusCircle className="ml-2 h-4 w-4" />
             </Button>
           </form>
-        </Form>
+        </Card>
       </div>
     </Layout>
   );

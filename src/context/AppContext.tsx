@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Category, Exercise, ExerciseLog } from '../types';
@@ -6,7 +5,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
 
 interface AppContextType {
-  users: User[];
   categories: Category[];
   exercises: Exercise[];
   exerciseLogs: ExerciseLog[];
@@ -22,7 +20,6 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const [users, setUsers] = useState<User[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [exerciseLogs, setExerciseLogs] = useState<ExerciseLog[]>([]);
@@ -41,20 +38,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       navigate('/auth');
     }
   }, [user, loading, navigate]);
-
-  // Set up the current user as the only user in the users array
-  useEffect(() => {
-    if (profile) {
-      setUsers([{
-        id: profile.id,
-        name: profile.name,
-        username: profile.username,
-        avatarUrl: profile.avatar_url,
-      }]);
-    } else {
-      setUsers([]);
-    }
-  }, [profile]);
 
   // Fetch categories, exercises, and exercise logs from Supabase
   useEffect(() => {
@@ -297,7 +280,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   return (
     <AppContext.Provider 
       value={{
-        users,
         categories,
         exercises,
         exerciseLogs,

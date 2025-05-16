@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Home, Trophy, History, User, Plus, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { useAppContext } from '@/context/AppContext';
+import { useAuth } from '@/context/AuthContext';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -23,12 +23,11 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children, title }) => {
-  const { currentUser, setCurrentUser, users } = useAppContext();
+  const { profile, signOut } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const handleSwitchUser = (user: typeof currentUser) => {
-    setCurrentUser(user);
-    setIsDropdownOpen(false);
+  const handleLogout = async () => {
+    await signOut();
   };
 
   return (
@@ -45,15 +44,15 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="p-0 h-auto">
                 <Avatar>
-                  <AvatarImage src={currentUser.avatarUrl} alt={currentUser.name} />
-                  <AvatarFallback>{currentUser.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
+                  <AvatarFallback>{profile?.name?.substring(0, 2).toUpperCase() || 'U'}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end">
               <DropdownMenuLabel>
-                <div className="font-medium">{currentUser.name}</div>
-                <div className="text-xs text-muted-foreground">@{currentUser.username}</div>
+                <div className="font-medium">{profile?.name}</div>
+                <div className="text-xs text-muted-foreground">@{profile?.username}</div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuGroup>
@@ -63,26 +62,11 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
                     <span>Settings</span>
                   </Link>
                 </DropdownMenuItem>
-              </DropdownMenuGroup>
-              <DropdownMenuSeparator />
-              <DropdownMenuLabel>Switch User</DropdownMenuLabel>
-              {users.map(user => (
-                <DropdownMenuItem 
-                  key={user.id} 
-                  className={cn(
-                    "flex items-center gap-2 cursor-pointer",
-                    user.id === currentUser.id && "bg-muted"
-                  )}
-                  onClick={() => handleSwitchUser(user)}
-                  disabled={user.id === currentUser.id}
-                >
-                  <Avatar className="h-6 w-6">
-                    <AvatarImage src={user.avatarUrl} alt={user.name} />
-                    <AvatarFallback>{user.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <span>{user.name}</span>
+                <DropdownMenuItem onClick={handleLogout}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Sign out</span>
                 </DropdownMenuItem>
-              ))}
+              </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

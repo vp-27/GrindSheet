@@ -1,223 +1,241 @@
-
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useMemo } from 'react';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import Layout from '@/components/Layout';
-import ProgressChart from '@/components/dashboard/ProgressChart';
-import ProgressCard from '@/components/dashboard/ProgressCard';
-import CategoryFilter from '@/components/dashboard/CategoryFilter';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppContext } from '@/context/AppContext';
-import { calculateProgress, getProgressChartData } from '@/utils/progressUtils';
-import { Exercise, Progress } from '@/types';
+import { useAuth } from '@/context/AuthContext';
+import { format } from 'date-fns';
 
-const Dashboard: React.FC = () => {
-  const { 
-    currentUser, 
-    exercises, 
-    exerciseLogs,
-    categories,
-    selectedCategory,
-    setSelectedCategory,
-    setSelectedExercise
-  } = useAppContext();
-  
-  const [selectedExerciseForChart, setSelectedExerciseForChart] = useState<Exercise | null>(null);
-  const navigate = useNavigate();
-  
-  // Filter logs for the current user
-  const userLogs = exerciseLogs.filter(log => log.userId === currentUser.id);
-  
-  // Filter exercises by selected category
-  const filteredExercises = selectedCategory
-    ? exercises.filter(ex => ex.categoryId === selectedCategory.id)
-    : exercises;
-  
-  // Calculate progress for each exercise
-  const progressItems: Progress[] = filteredExercises.map(exercise => 
-    calculateProgress(userLogs, exercise.id, exercise)
-  ).filter(progress => progress.currentWeight > 0) // Only show exercises with logged weights
-  .sort((a, b) => {
-    // Sort by most recent first (based on timestamp of the latest log)
-    const aLogs = userLogs
-      .filter(log => log.exerciseId === a.exercise.id)
-      .sort((x, y) => new Date(y.timestamp).getTime() - new Date(x.timestamp).getTime());
-      
-    const bLogs = userLogs
-      .filter(log => log.exerciseId === b.exercise.id)
-      .sort((x, y) => new Date(y.timestamp).getTime() - new Date(x.timestamp).getTime());
-      
-    if (aLogs.length === 0) return 1;
-    if (bLogs.length === 0) return -1;
-    
-    return new Date(bLogs[0].timestamp).getTime() - new Date(aLogs[0].timestamp).getTime();
-  });
+const Dashboard = () => {
+  const { categories, exercises, exerciseLogs } = useAppContext();
+  const { profile } = useAuth();
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
-  // Prepare chart data based on selection
-  const getChartData = () => {
-    if (selectedExerciseForChart) {
-      // Single exercise chart
-      return getProgressChartData(userLogs, selectedExerciseForChart.id);
-    } else if (selectedCategory) {
-      // Multiple exercises in category chart
-      const categoryExercises = exercises.filter(ex => ex.categoryId === selectedCategory.id);
-      
-      // Get all unique dates from logs for these exercises
-      const allDates = new Set<string>();
-      categoryExercises.forEach(exercise => {
-        const exerciseLogs = userLogs.filter(log => log.exerciseId === exercise.id);
-        exerciseLogs.forEach(log => {
-          allDates.add(new Date(log.timestamp).toLocaleDateString());
-        });
-      });
-
-      // Create a map of dates
-      const dateArray = Array.from(allDates).sort((a, b) => 
-        new Date(a).getTime() - new Date(b).getTime()
-      );
-
-      // For each exercise, map its progress over these dates
-      const multiData: Record<string, any>[] = [];
-      
-      dateArray.forEach(date => {
-        const dataPoint: Record<string, any> = { date };
-        
-        categoryExercises.forEach(exercise => {
-          const logsOnDate = userLogs.filter(log => 
-            log.exerciseId === exercise.id && 
-            new Date(log.timestamp).toLocaleDateString() === date
-          );
-          
-          if (logsOnDate.length > 0) {
-            // Use the latest log for that date
-            dataPoint[exercise.name] = logsOnDate[0].weight;
-          }
-        });
-        
-        multiData.push(dataPoint);
-      });
-      
-      return multiData;
-    } else {
-      // Overall percentage gain chart across all exercises
-      // Get the oldest log date for each exercise as starting point
-      const exerciseStartPoints: Record<string, { date: Date, weight: number }> = {};
-      
-      userLogs.forEach(log => {
-        if (!exerciseStartPoints[log.exerciseId] || 
-            new Date(log.timestamp) < exerciseStartPoints[log.exerciseId].date) {
-          exerciseStartPoints[log.exerciseId] = {
-            date: new Date(log.timestamp),
-            weight: log.weight
-          };
-        }
-      });
-      
-      // Get all unique dates from logs
-      const allDates = userLogs.map(log => new Date(log.timestamp).toLocaleDateString());
-      const uniqueDates = Array.from(new Set(allDates)).sort((a, b) => 
-        new Date(a).getTime() - new Date(b).getTime()
-      );
-      
-      // Calculate percentage gain for each date
-      const percentageData = uniqueDates.map((date, index) => {
-        // Get logs for this date
-        const logsOnDate = userLogs.filter(log => 
-          new Date(log.timestamp).toLocaleDateString() === date
-        );
-        
-        // Calculate total percentage gain across all exercises for this date
-        let totalGain = 0;
-        let exerciseCount = 0;
-        
-        logsOnDate.forEach(log => {
-          const startPoint = exerciseStartPoints[log.exerciseId];
-          if (startPoint && startPoint.weight > 0) {
-            // Calculate percentage gain from starting weight
-            const percentGain = ((log.weight - startPoint.weight) / startPoint.weight) * 100;
-            totalGain += percentGain;
-            exerciseCount++;
-          }
-        });
-        
-        // Average percentage gain across all exercises
-        const avgGain = exerciseCount > 0 ? totalGain / exerciseCount : 0;
-        
-        // If it's the first date, set gain to 0 as baseline
-        const percentGain = index === 0 ? 0 : avgGain;
-        
-        return {
-          date,
-          percentGain: parseFloat(percentGain.toFixed(2))
-        };
-      });
-      
-      return percentageData;
+  // Filter logs based on selected category
+  const filteredLogs = useMemo(() => {
+    if (!selectedCategoryId) {
+      return exerciseLogs;
     }
-  };
-  
-  const chartData = getChartData();
-  
-  const chartTitle = selectedExerciseForChart 
-    ? `Progress: ${selectedExerciseForChart.name}`
-    : selectedCategory
-    ? `Progress: ${selectedCategory.name} Exercises`
-    : "Overall Progress";
-  
-  const handleSelectCategory = (categoryId: string | null) => {
-    setSelectedCategory(categoryId ? categories.find(c => c.id === categoryId) || null : null);
-    setSelectedExerciseForChart(null);
-  };
-  
-  const handleExerciseClick = (exercise: Exercise) => {
-    setSelectedExerciseForChart(exercise);
-  };
-  
-  const handleExerciseLogClick = (exercise: Exercise) => {
-    setSelectedExercise(exercise);
-    navigate('/add-exercise');
-  };
-  
+    
+    const categoryExercises = exercises.filter(
+      exercise => exercise.categoryId === selectedCategoryId
+    ).map(exercise => exercise.id);
+    
+    return exerciseLogs.filter(log => 
+      categoryExercises.includes(log.exerciseId)
+    );
+  }, [exerciseLogs, exercises, selectedCategoryId]);
+
+  // Prepare data for the progress chart
+  const progressData = useMemo(() => {
+    // Use a map to keep track of the best weight for each exercise
+    const bestWeights = new Map();
+    
+    // Process logs to find the best weight for each exercise
+    filteredLogs.forEach(log => {
+      const currentBest = bestWeights.get(log.exerciseId) || 0;
+      if (log.weight > currentBest) {
+        bestWeights.set(log.exerciseId, log.weight);
+      }
+    });
+    
+    // Transform to the format expected by recharts
+    return Array.from(bestWeights.entries()).map(([exerciseId, weight]) => {
+      const exercise = exercises.find(e => e.id === exerciseId);
+      return {
+        name: exercise ? exercise.name : 'Unknown',
+        weight: weight as number,
+      };
+    });
+  }, [filteredLogs, exercises]);
+
+  // Get recent logs (last 5)
+  const recentLogs = useMemo(() => {
+    return filteredLogs.slice(0, 5);
+  }, [filteredLogs]);
+
+  // Calculate exercise progress
+  const exerciseProgress = useMemo(() => {
+    const progress = new Map();
+    
+    // Group logs by exercise
+    filteredLogs.forEach(log => {
+      if (!progress.has(log.exerciseId)) {
+        progress.set(log.exerciseId, {
+          exerciseId: log.exerciseId,
+          logs: [],
+        });
+      }
+      
+      progress.get(log.exerciseId).logs.push(log);
+    });
+    
+    // Calculate progress for each exercise
+    return Array.from(progress.values()).map(item => {
+      const exercise = exercises.find(e => e.id === item.exerciseId);
+      const sortedLogs = [...item.logs].sort((a, b) => 
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      );
+      
+      const firstLog = sortedLogs[0];
+      const lastLog = sortedLogs[sortedLogs.length - 1];
+      const progressPercentage = firstLog && lastLog 
+        ? ((lastLog.weight - firstLog.weight) / firstLog.weight) * 100
+        : 0;
+      
+      return {
+        exerciseId: item.exerciseId,
+        exerciseName: exercise?.name || 'Unknown',
+        firstWeight: firstLog?.weight || 0,
+        currentWeight: lastLog?.weight || 0,
+        progressPercentage,
+      };
+    }).sort((a, b) => b.progressPercentage - a.progressPercentage);
+  }, [filteredLogs, exercises]);
+
   return (
     <Layout title="Dashboard">
-      <div className="flex flex-col gap-4 pb-16">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Welcome, {currentUser.name}</h1>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-2">
+          <h1 className="text-2xl font-bold">Welcome, {profile?.name || 'User'}</h1>
+          <p className="text-muted-foreground">
+            Track your progress and see your strength gains
+          </p>
         </div>
         
-        {/* Progress Chart */}
-        <ProgressChart 
-          data={chartData} 
-          title={chartTitle}
-          multiple={selectedCategory !== null && selectedExerciseForChart === null}
-          showPercentage={!selectedCategory && !selectedExerciseForChart}
-          exerciseId={selectedExerciseForChart?.id}
-        />
+        <div className="flex gap-2 overflow-x-auto pb-2">
+          <Button
+            variant={selectedCategoryId === null ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSelectedCategoryId(null)}
+          >
+            All
+          </Button>
+          
+          {categories.map(category => (
+            <Button
+              key={category.id}
+              variant={selectedCategoryId === category.id ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedCategoryId(category.id)}
+            >
+              {category.name}
+            </Button>
+          ))}
+        </div>
         
-        {/* Category Filter */}
-        <CategoryFilter 
-          categories={categories} 
-          selectedCategoryId={selectedCategory?.id || null} 
-          onSelectCategory={handleSelectCategory} 
-        />
-        
-        {/* Progress Cards */}
-        {progressItems.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            No exercises logged yet. Tap the + button to log your first exercise!
-          </div>
-        ) : (
-          <div className="grid gap-4">
-            {progressItems.map((progress) => (
-              <ProgressCard 
-                key={progress.exercise.id} 
-                progress={progress}
-                onClick={() => {
-                  handleExerciseClick(progress.exercise);
-                  handleExerciseLogClick(progress.exercise);
-                }}
-              />
-            ))}
-          </div>
-        )}
+        <Tabs defaultValue="progress">
+          <TabsList className="grid grid-cols-3 mb-4">
+            <TabsTrigger value="progress">Progress</TabsTrigger>
+            <TabsTrigger value="recent">Recent</TabsTrigger>
+            <TabsTrigger value="stats">Stats</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="progress">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Strength Progress</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {progressData.length > 0 ? (
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={progressData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Bar dataKey="weight" fill="#8884d8" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                ) : (
+                  <div className="text-center p-8">
+                    <p>No exercise data available. Start logging exercises!</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="recent">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Recent Workouts</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                {recentLogs.length > 0 ? (
+                  recentLogs.map(log => {
+                    const exercise = exercises.find(e => e.id === log.exerciseId);
+                    const category = categories.find(c => c.id === exercise?.categoryId);
+                    
+                    return (
+                      <div key={log.id} className="p-4 border-b last:border-0">
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <div className="font-medium">{exercise?.name || 'Unknown Exercise'}</div>
+                            <div className="text-sm text-muted-foreground">
+                              {format(new Date(log.timestamp), 'MMM d, yyyy')}
+                              {log.note && <span> - {log.note}</span>}
+                            </div>
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            <div className="font-bold">{log.weight} kg</div>
+                            {category && (
+                              <Badge variant="outline" className="text-xs">
+                                {category.name}
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="text-center p-8">
+                    <p>No recent workouts. Start logging exercises!</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="stats">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Progress Stats</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                {exerciseProgress.length > 0 ? (
+                  exerciseProgress.map(progress => (
+                    <div key={progress.exerciseId} className="p-4 border-b last:border-0">
+                      <div className="flex justify-between items-center">
+                        <div className="font-medium">{progress.exerciseName}</div>
+                        <Badge 
+                          variant={progress.progressPercentage > 0 ? "default" : "destructive"}
+                          className="text-xs"
+                        >
+                          {progress.progressPercentage > 0 ? '+' : ''}
+                          {progress.progressPercentage.toFixed(1)}%
+                        </Badge>
+                      </div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        {progress.firstWeight} kg → {progress.currentWeight} kg
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center p-8">
+                    <p>No progress data available. Log more exercises to see your progress!</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </Layout>
   );
