@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Progress } from '@/types';
 import { cn } from '@/lib/utils';
@@ -16,39 +15,42 @@ const ProgressCard: React.FC<ProgressCardProps> = ({ progress, onClick }) => {
     currentWeight, 
     previousWeight, 
     percentGainFromPrevious,
-    personalRecord 
+    personalRecord,
+    weightUnit = 'lbs' // Default to lbs if not specified
   } = progress;
 
   const isGain = percentGainFromPrevious && percentGainFromPrevious > 0;
   const isLoss = percentGainFromPrevious && percentGainFromPrevious < 0;
+  const isPR = personalRecord === currentWeight && currentWeight > 0;
 
   return (
     <Card 
       className={cn(
         "cursor-pointer hover:border-primary/50 transition-all duration-200",
-        isGain && "hover:border-gain",
-        isLoss && "hover:border-loss"
+        isGain && "hover:border-green-500",
+        isLoss && "hover:border-red-500",
+        isPR && "hover:border-yellow-500"
       )}
       onClick={onClick}
     >
       <CardContent className="p-4">
         <div className="flex justify-between items-center">
           <h3 className="font-medium">{exercise.name}</h3>
-          <div className="font-bold text-lg">{currentWeight} lbs</div>
+          <div className="font-bold text-lg">{currentWeight} {weightUnit}</div>
         </div>
 
         <div className="flex justify-between items-center mt-2 text-sm text-muted-foreground">
-          <div>Previous: {previousWeight || '-'} lbs</div>
+          <div>Previous: {previousWeight || '-'} {weightUnit}</div>
           
-          {personalRecord === currentWeight && (
-            <div className="text-fitness-orange font-medium">PR!</div>
+          {isPR && (
+            <div className="text-yellow-500 font-medium">PR!</div>
           )}
         </div>
 
         {percentGainFromPrevious !== undefined && (
           <div className={cn(
             "flex items-center mt-1 text-sm",
-            isGain ? "text-gain" : isLoss ? "text-loss" : "text-muted-foreground"
+            isGain ? "text-green-500" : isLoss ? "text-red-500" : "text-muted-foreground"
           )}>
             {isGain ? (
               <ArrowUp className="h-4 w-4 mr-1" />

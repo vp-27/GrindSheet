@@ -1,6 +1,16 @@
-
-import { ExerciseLog, Progress, Exercise, ProgressChartData, LeaderboardEntry, LeaderboardType, User } from '../types';
+import { ExerciseLog, Progress, Exercise, ProgressChartData, LeaderboardEntry, LeaderboardType, User, Category } from '../types';
 import { getExerciseById } from '../data/mockData';
+
+// Helper function to convert weight to lbs (we'll keep this for any legacy kg data)
+export const convertWeight = (weight: number, fromUnit: string = 'kg'): number => {
+  if (fromUnit === 'lbs') return weight;
+  
+  if (fromUnit === 'kg') {
+    return weight * 2.20462; // kg to lbs
+  }
+  
+  return weight; // Default case
+};
 
 export const calculateProgress = (logs: ExerciseLog[], exerciseId: string, exercise: Exercise): Progress => {
   // Filter logs for this exercise and sort by timestamp (newest first)
@@ -15,17 +25,32 @@ export const calculateProgress = (logs: ExerciseLog[], exerciseId: string, exerc
     };
   }
 
-  // Current weight is the most recent log
-  const currentWeight = exerciseLogs[0].weight;
+  // Get the most recent log
+  const mostRecentLog = exerciseLogs[0];
+  
+  // Convert weight to lbs if needed
+  const weightUnit = 'lbs'; // Always use lbs for display
+  const currentWeight = mostRecentLog.weightUnit === 'kg' 
+    ? convertWeight(mostRecentLog.weight, 'kg') 
+    : mostRecentLog.weight;
   
   // Previous weight is the second most recent log (if it exists)
-  const previousWeight = exerciseLogs.length > 1 ? exerciseLogs[1].weight : undefined;
+  const previousWeight = exerciseLogs.length > 1 
+    ? (exerciseLogs[1].weightUnit === 'kg' 
+        ? convertWeight(exerciseLogs[1].weight, 'kg') 
+        : exerciseLogs[1].weight) 
+    : undefined;
   
   // Starting weight is the oldest log
-  const startingWeight = exerciseLogs[exerciseLogs.length - 1].weight;
+  const oldestLog = exerciseLogs[exerciseLogs.length - 1];
+  const startingWeight = oldestLog.weightUnit === 'kg'
+    ? convertWeight(oldestLog.weight, 'kg')
+    : oldestLog.weight;
   
-  // Personal record is the highest weight ever recorded
-  const personalRecord = Math.max(...exerciseLogs.map(log => log.weight));
+  // Personal record is the highest weight ever recorded (convert all to lbs first)
+  const personalRecord = Math.max(...exerciseLogs.map(log => 
+    log.weightUnit === 'kg' ? convertWeight(log.weight, 'kg') : log.weight
+  ));
   
   // Calculate percentage gains
   const percentGainFromPrevious = previousWeight 
@@ -43,19 +68,126 @@ export const calculateProgress = (logs: ExerciseLog[], exerciseId: string, exerc
     startingWeight,
     personalRecord,
     percentGainFromPrevious,
-    percentGainFromStart
+    percentGainFromStart,
+    weightUnit
   };
 };
 
 export const getProgressChartData = (logs: ExerciseLog[], exerciseId: string): ProgressChartData[] => {
   // Filter logs for this exercise and sort by timestamp (oldest first)
-  return logs
+  const exerciseLogs = logs
     .filter(log => log.exerciseId === exerciseId)
-    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
-    .map(log => ({
+    .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  
+  if (exerciseLogs.length === 0) return [];
+  
+  // Calculate the starting weight for percentage gains
+  const startingWeight = exerciseLogs[0].weight;
+  
+  return exerciseLogs.map(log => {
+    const percentGain = ((log.weight - startingWeight) / startingWeight) * 100;
+    
+    return {
       date: new Date(log.timestamp).toLocaleDateString(),
-      weight: log.weight
-    }));
+      weight: log.weight,
+      percentGain: percentGain
+    };
+  });
+};
+
+// New function to get category-based progress chart data
+export const getCategoryProgressChartData = (logs: ExerciseLog[], exercises: Exercise[], categoryId: string): any[] => {
+  // Get all exercises for this category
+  const categoryExercises = exercises.filter(exercise => exercise.categoryId === categoryId);
+  
+  if (categoryExercises.length === 0) return [];
+  
+  // Group logs by date for this chart
+  const logsByDate = new Map();
+  
+  // Process all logs for exercises in this category
+  categoryExercises.forEach(exercise => {
+    const exerciseLogs = logs
+      .filter(log => log.exerciseId === exercise.id)
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+      
+    exerciseLogs.forEach(log => {
+      const date = new Date(log.timestamp).toLocaleDateString();
+      
+      if (!logsByDate.has(date)) {
+        logsByDate.set(date, {
+          date,
+        });
+      }
+      
+      // Store the latest weight for this exercise for this date
+      logsByDate.get(date)[exercise.name] = log.weight;
+    });
+  });
+  
+  // Convert the map to an array and sort by date
+  return Array.from(logsByDate.values())
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+};
+
+// New function to get overall progress chart data across all categories
+export const getOverallProgressChartData = (
+  logs: ExerciseLog[], 
+  exercises: Exercise[], 
+  categories: Category[]
+): any[] => {
+  const chartData = new Map();
+  
+  // Create a map of category IDs to names for quick lookup
+  const categoryNames = new Map(categories.map(cat => [cat.id, cat.name]));
+  
+  // Group logs by date and category
+  logs.forEach(log => {
+    const date = new Date(log.timestamp).toLocaleDateString();
+    const exercise = exercises.find(e => e.id === log.exerciseId);
+    
+    if (!exercise) return;
+    
+    const categoryId = exercise.categoryId;
+    const categoryName = categoryNames.get(categoryId) || 'Unknown';
+    
+    if (!chartData.has(date)) {
+      chartData.set(date, {
+        date,
+      });
+    }
+    
+    // For each category, we'll track the average weight across all exercises
+    const dayData = chartData.get(date);
+    
+    if (!dayData[categoryName]) {
+      dayData[categoryName] = {
+        total: 0,
+        count: 0,
+      };
+    }
+    
+    dayData[categoryName].total += log.weight;
+    dayData[categoryName].count += 1;
+  });
+  
+  // Calculate the average for each category and convert to final format
+  const result = Array.from(chartData.values()).map(dayData => {
+    const formattedDay = { date: dayData.date };
+    
+    // Calculate average for each category
+    Object.entries(dayData).forEach(([key, value]) => {
+      if (key !== 'date' && typeof value === 'object') {
+        const { total, count } = value as { total: number, count: number };
+        formattedDay[key] = count > 0 ? total / count : 0;
+      }
+    });
+    
+    return formattedDay;
+  });
+  
+  // Sort by date
+  return result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 };
 
 export const calculateAllTimeGainLeaderboard = (
@@ -130,6 +262,13 @@ export const calculateAllTimeGainLeaderboard = (
     userGains.set(user.id, avgGainPercent);
   });
   
+  // Ensure all users are included, even if they have no logs
+  users.forEach(user => {
+    if (!userGains.has(user.id)) {
+      userGains.set(user.id, 0);
+    }
+  });
+  
   // Convert to leaderboard entries and sort
   return Array.from(userGains.entries())
     .map(([userId, value]) => ({
@@ -159,6 +298,13 @@ export const calculateMaxWeightLeaderboard = (
         userMaxWeights.set(log.userId, log.weight);
       }
     });
+  
+  // Ensure all users are included, even if they have no logs
+  users.forEach(user => {
+    if (!userMaxWeights.has(user.id)) {
+      userMaxWeights.set(user.id, 0);
+    }
+  });
   
   // Convert to leaderboard entries and sort
   return Array.from(userMaxWeights.entries())

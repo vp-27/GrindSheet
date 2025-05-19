@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   name: string;
@@ -26,6 +25,7 @@ export interface ExerciseLog {
   weight: number;
   timestamp: string;
   note?: string;
+  weightUnit?: string; // Added to track the unit used
 }
 
 export interface Progress {
@@ -36,6 +36,7 @@ export interface Progress {
   personalRecord?: number;
   percentGainFromPrevious?: number;
   percentGainFromStart?: number;
+  weightUnit?: string; // Added to display the correct unit
 }
 
 export interface LeaderboardEntry {
@@ -55,4 +56,5 @@ export enum LeaderboardType {
 export interface ProgressChartData {
   date: string;
   weight: number;
+  percentGain?: number; // Added to track percentage gains for visualization
 }

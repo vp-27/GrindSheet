@@ -1,10 +1,9 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { PlusCircle, ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Dumbbell } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -56,6 +55,7 @@ const AddExercise = () => {
         exerciseId: selectedExerciseId,
         weight: parseFloat(weight),
         note: note,
+        weightUnit: 'lbs' // Always use lbs now
       });
       
       toast({
@@ -75,104 +75,116 @@ const AddExercise = () => {
     }
   };
 
+  const selectedExercise = exercises.find(ex => ex.id === selectedExerciseId);
+
   return (
-    <Layout title="Add Exercise">
+    <Layout title="Log Exercise">
       <div className="flex flex-col gap-4">
-        <Button 
-          variant="ghost" 
-          className="w-fit -ml-2 mb-2"
-          onClick={() => navigate('/')}
-        >
-          <ChevronLeft className="mr-2 h-4 w-4" />
-          Back
-        </Button>
+        <div className="flex items-center gap-2 mb-2">
+          <Button 
+            variant="ghost" 
+            className="p-0 h-auto" 
+            onClick={() => navigate('/')}
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </Button>
+        </div>
         
-        <h1 className="text-2xl font-bold">Log Exercise</h1>
-        
-        <Card className="p-4">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="category">Category</Label>
-              <Select
-                value={selectedCategoryId}
-                onValueChange={setSelectedCategoryId}
-              >
-                <SelectTrigger id="category">
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map(category => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+        <Card className="shadow-sm border border-gray-100 overflow-hidden">
+          <CardHeader className="pb-3 bg-gray-50">
+            <div className="flex justify-between items-center">
+              <CardTitle className="text-lg font-medium text-gray-900">
+                {selectedExercise ? selectedExercise.name : 'Log Exercise'}
+              </CardTitle>
+              <Dumbbell className="h-5 w-5 text-gray-400" />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="exercise">Exercise</Label>
-              <Select
-                value={selectedExerciseId}
-                onValueChange={setSelectedExerciseId}
-                disabled={!selectedCategoryId}
-              >
-                <SelectTrigger id="exercise">
-                  <SelectValue placeholder={
-                    selectedCategoryId 
-                      ? "Select an exercise" 
-                      : "Select a category first"
-                  } />
-                </SelectTrigger>
-                <SelectContent>
-                  {filteredExercises.length > 0 ? (
-                    filteredExercises.map(exercise => (
-                      <SelectItem key={exercise.id} value={exercise.id}>
-                        {exercise.name}
+          </CardHeader>
+          <CardContent className="pt-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="category" className="text-gray-700 text-sm">Category</Label>
+                <Select
+                  value={selectedCategoryId}
+                  onValueChange={setSelectedCategoryId}
+                >
+                  <SelectTrigger id="category" className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0">
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(category => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
                       </SelectItem>
-                    ))
-                  ) : (
-                    <SelectItem value="none" disabled>
-                      No exercises found
-                    </SelectItem>
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="weight">Weight (kg)</Label>
-              <Input
-                id="weight"
-                type="number"
-                step="0.5"
-                min="0"
-                value={weight}
-                onChange={e => setWeight(e.target.value)}
-                placeholder="Enter weight"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="note">Note (optional)</Label>
-              <Textarea
-                id="note"
-                value={note}
-                onChange={e => setNote(e.target.value)}
-                placeholder="Add a note about this set"
-                rows={3}
-              />
-            </div>
-            
-            <Button 
-              type="submit" 
-              className="w-full" 
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Logging...' : 'Log Exercise'}
-              <PlusCircle className="ml-2 h-4 w-4" />
-            </Button>
-          </form>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="exercise" className="text-gray-700 text-sm">Exercise</Label>
+                <Select
+                  value={selectedExerciseId}
+                  onValueChange={setSelectedExerciseId}
+                  disabled={!selectedCategoryId}
+                >
+                  <SelectTrigger id="exercise" className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0">
+                    <SelectValue placeholder={
+                      selectedCategoryId 
+                        ? "Select an exercise" 
+                        : "Select a category first"
+                    } />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {filteredExercises.length > 0 ? (
+                      filteredExercises.map(exercise => (
+                        <SelectItem key={exercise.id} value={exercise.id}>
+                          {exercise.name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="none" disabled>
+                        No exercises found
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="weight" className="text-gray-700 text-sm">Weight (lbs)</Label>
+                <Input
+                  id="weight"
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  value={weight}
+                  onChange={e => setWeight(e.target.value)}
+                  placeholder="Enter weight"
+                  className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="note" className="text-gray-700 text-sm">Note (optional)</Label>
+                <Textarea
+                  id="note"
+                  value={note}
+                  onChange={e => setNote(e.target.value)}
+                  placeholder="Add a note about this set"
+                  rows={3}
+                  className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
+                />
+              </div>
+              
+              <Button 
+                type="submit" 
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white" 
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Logging...' : 'Log Exercise'}
+              </Button>
+            </form>
+          </CardContent>
         </Card>
       </div>
     </Layout>

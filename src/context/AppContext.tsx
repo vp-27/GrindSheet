@@ -48,11 +48,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       }
       
       try {
-        // Fetch categories
+        // Fetch categories (global for all users)
         const { data: categoriesData, error: categoriesError } = await supabase
           .from('categories')
           .select('*')
-          .eq('user_id', user.id)
           .order('name');
           
         if (categoriesError) throw categoriesError;
@@ -66,11 +65,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         
         setCategories(mappedCategories);
 
-        // Fetch exercises
+        // Fetch exercises (global for all users)
         const { data: exercisesData, error: exercisesError } = await supabase
           .from('exercises')
           .select('*')
-          .eq('user_id', user.id)
           .order('name');
           
         if (exercisesError) throw exercisesError;
@@ -210,7 +208,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       const { data, error } = await supabase
         .from('exercises')
         .select('*')
-        .eq('user_id', user.id)
         .order('name');
         
       if (error) throw error;
@@ -236,7 +233,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       const { data, error } = await supabase
         .from('categories')
         .select('*')
-        .eq('user_id', user.id)
         .order('name');
         
       if (error) throw error;

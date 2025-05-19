@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +8,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import Dashboard from "./pages/Dashboard";
 import AddExercise from "./pages/AddExercise";
 import History from "./pages/History";
+import ExerciseDetail from "./pages/ExerciseDetail";
 import Leaderboard from "./pages/Leaderboard";
 import Settings from "./pages/Profile";
 import NotFound from "./pages/NotFound";
@@ -27,6 +27,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/add-exercise" element={<AddExercise />} />
+              <Route path="/exercise-detail" element={<ExerciseDetail />} />
               <Route path="/history" element={<History />} />
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/profile" element={<Settings />} />

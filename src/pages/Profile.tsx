@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -13,9 +12,8 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
+import { ChevronRight, Edit2, Plus, Settings, Trash2, User, Pencil } from 'lucide-react';
 
 const Profile: React.FC = () => {
   const { user, profile, signOut, updateProfile } = useAuth();
@@ -80,21 +78,19 @@ const Profile: React.FC = () => {
       setLoading(true);
       
       try {
-        // Fetch categories
+        // Fetch all categories (shared across all users)
         const { data: categoriesData, error: categoriesError } = await supabase
           .from('categories')
           .select('*')
-          .eq('user_id', user.id)
           .order('name');
           
         if (categoriesError) throw categoriesError;
         setCategories(categoriesData || []);
 
-        // Fetch exercises
+        // Fetch all exercises (shared across all users)
         const { data: exercisesData, error: exercisesError } = await supabase
           .from('exercises')
           .select('*')
-          .eq('user_id', user.id)
           .order('name');
           
         if (exercisesError) throw exercisesError;
@@ -150,11 +146,10 @@ const Profile: React.FC = () => {
           .eq('id', editingCategory.id)
           .select();
       } else {
-        // Insert new category
+        // Insert new category (global for all users)
         response = await supabase
           .from('categories')
           .insert({
-            user_id: user?.id,
             name: data.name,
             description: data.description,
           })
@@ -163,11 +158,10 @@ const Profile: React.FC = () => {
       
       if (response.error) throw response.error;
       
-      // Refresh categories
+      // Refresh categories - get all categories
       const { data: refreshedCategories } = await supabase
         .from('categories')
         .select('*')
-        .eq('user_id', user?.id)
         .order('name');
         
       setCategories(refreshedCategories || []);
@@ -221,11 +215,10 @@ const Profile: React.FC = () => {
       
       if (response.error) throw response.error;
       
-      // Refresh exercises
+      // Refresh exercises - get all exercises
       const { data: refreshedExercises } = await supabase
         .from('exercises')
         .select('*')
-        .eq('user_id', user?.id)
         .order('name');
         
       setExercises(refreshedExercises || []);
@@ -281,11 +274,10 @@ const Profile: React.FC = () => {
         
       if (error) throw error;
       
-      // Refresh categories
+      // Refresh categories - get all categories
       const { data: refreshedCategories } = await supabase
         .from('categories')
         .select('*')
-        .eq('user_id', user?.id)
         .order('name');
         
       setCategories(refreshedCategories || []);
@@ -294,7 +286,6 @@ const Profile: React.FC = () => {
       const { data: refreshedExercises } = await supabase
         .from('exercises')
         .select('*')
-        .eq('user_id', user?.id)
         .order('name');
         
       setExercises(refreshedExercises || []);
@@ -325,11 +316,10 @@ const Profile: React.FC = () => {
         
       if (error) throw error;
       
-      // Refresh exercises
+      // Refresh exercises - get all exercises
       const { data: refreshedExercises } = await supabase
         .from('exercises')
         .select('*')
-        .eq('user_id', user?.id)
         .order('name');
         
       setExercises(refreshedExercises || []);
@@ -375,332 +365,393 @@ const Profile: React.FC = () => {
 
   return (
     <Layout title="Profile">
-      <div className="flex flex-col gap-6 pb-16">
-        <div className="flex flex-col items-center gap-4 mt-4">
-          <Avatar className="h-24 w-24">
-            <AvatarImage src={profile.avatar_url} alt={profile.name} />
-            <AvatarFallback className="text-2xl">
-              {profile.name?.substring(0, 2).toUpperCase() || 'U'}
-            </AvatarFallback>
-          </Avatar>
-          <h1 className="text-2xl font-bold">{profile.name}</h1>
-          <div className="text-muted-foreground">@{profile.username}</div>
-          
-          <div className="flex gap-4">
-            <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
-              <DialogTrigger asChild>
-                <Button variant="outline">Edit Profile</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)}>
-                  <DialogHeader>
-                    <DialogTitle>Edit Profile</DialogTitle>
-                    <DialogDescription>
-                      Update your profile information
-                    </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="name" className="text-right">
-                        Name
-                      </Label>
-                      <Input
-                        id="name"
-                        value={profileForm.watch('name')}
-                        onChange={(e) => profileForm.setValue('name', e.target.value)}
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="username" className="text-right">
-                        Username
-                      </Label>
-                      <Input
-                        id="username"
-                        value={profileForm.watch('username')}
-                        onChange={(e) => profileForm.setValue('username', e.target.value)}
-                        className="col-span-3"
-                      />
-                    </div>
-                    <div className="grid grid-cols-4 items-center gap-4">
-                      <Label htmlFor="avatarUrl" className="text-right">
-                        Avatar URL
-                      </Label>
-                      <Input
-                        id="avatarUrl"
-                        value={profileForm.watch('avatarUrl')}
-                        onChange={(e) => profileForm.setValue('avatarUrl', e.target.value)}
-                        className="col-span-3"
-                        placeholder="https://api.dicebear.com/7.x/avataaars/svg?seed=YourName"
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button type="submit">Save changes</Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
-            
-            <Button variant="outline" onClick={handleLogout}>Log Out</Button>
-          </div>
-        </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-3 mb-4">
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="categories">Categories</TabsTrigger>
+          <TabsTrigger value="exercises">Exercises</TabsTrigger>
+        </TabsList>
         
-        <Separator />
-        
-        <Tabs defaultValue="profile" value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-3 mb-6">
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="exercises">Exercises</TabsTrigger>
-            <TabsTrigger value="categories">Categories</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="profile">
-            <section>
-              <h2 className="font-semibold text-lg mb-2">About the App</h2>
-              <p className="text-muted-foreground text-sm mb-6">
-                FitTrack helps you and your friends track strength training progress, compete on leaderboards, 
-                and visualize gains across different exercises. Simply log your latest weight for each exercise 
-                and let the app handle all the stats, history, and rankings.
-              </p>
-            </section>
-          </TabsContent>
-          
-          <TabsContent value="exercises">
-            <section>
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="font-semibold text-lg">Manage Exercises</h2>
-                <Dialog open={isAddExerciseOpen} onOpenChange={setIsAddExerciseOpen}>
-                  <DialogTrigger asChild>
-                    <Button size="sm" variant="outline">Add Exercise</Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <form onSubmit={exerciseForm.handleSubmit(handleAddExercise)}>
-                      <DialogHeader>
-                        <DialogTitle>{editingExercise ? 'Edit Exercise' : 'Add New Exercise'}</DialogTitle>
-                        <DialogDescription>
-                          {editingExercise 
-                            ? 'Update the exercise details below' 
-                            : 'Add a new exercise to track your progress'}
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="name" className="text-right">
-                            Name
-                          </Label>
-                          <Input
-                            id="name"
-                            value={exerciseForm.watch('name')}
-                            onChange={(e) => exerciseForm.setValue('name', e.target.value)}
-                            className="col-span-3"
-                            placeholder="Bench Press"
-                            required
-                          />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="description" className="text-right">
-                            Description
-                          </Label>
-                          <Input
-                            id="description"
-                            value={exerciseForm.watch('description')}
-                            onChange={(e) => exerciseForm.setValue('description', e.target.value)}
-                            className="col-span-3"
-                            placeholder="Barbell bench press"
-                          />
-                        </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="category" className="text-right">
-                            Category
-                          </Label>
-                          <select
-                            id="category"
-                            value={exerciseForm.watch('categoryId')}
-                            onChange={(e) => exerciseForm.setValue('categoryId', e.target.value)}
-                            className="col-span-3 p-2 border rounded"
-                            required
-                          >
-                            <option value="">Select a category</option>
-                            {categories.map((category) => (
-                              <option key={category.id} value={category.id}>
-                                {category.name}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <Button type="submit">
-                          {editingExercise ? 'Update Exercise' : 'Add Exercise'}
-                        </Button>
-                      </DialogFooter>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-              </div>
-              
-              {loading ? (
-                <p>Loading exercises...</p>
-              ) : (
-                <div className="grid grid-cols-1 gap-4">
-                  {categories.map(category => {
-                    const categoryExercises = exercises.filter(
-                      exercise => exercise.category_id === category.id
-                    );
-                    
-                    if (categoryExercises.length === 0) return null;
-                    
-                    return (
-                      <Card key={category.id} className="overflow-hidden">
-                        <CardHeader className="bg-muted pb-2">
-                          <CardTitle className="text-md">{category.name}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                          {categoryExercises.map(exercise => (
-                            <div key={exercise.id} className="p-3 border-b last:border-0 flex justify-between items-center">
-                              <div>
-                                <div className="font-medium">{exercise.name}</div>
-                                {exercise.description && (
-                                  <div className="text-xs text-muted-foreground">{exercise.description}</div>
-                                )}
-                              </div>
-                              <div className="flex gap-2">
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost"
-                                  onClick={() => handleEditExercise(exercise)}
-                                >
-                                  Edit
-                                </Button>
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost" 
-                                  className="text-red-500"
-                                  onClick={() => handleDeleteExercise(exercise.id)}
-                                >
-                                  Delete
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
-                  
-                  {exercises.length === 0 && (
-                    <div className="text-center p-8 border rounded">
-                      <p>No exercises found. Add your first exercise!</p>
-                    </div>
-                  )}
+        {/* Profile Tab */}
+        <TabsContent value="profile" className="space-y-4">
+          {/* Profile Summary */}
+          <Card className="shadow-sm border border-gray-100">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16">
+                  <AvatarImage src={profile.avatar_url} alt={profile.name} />
+                  <AvatarFallback className="bg-gray-100 text-gray-700">
+                    {profile.name?.substring(0, 2).toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <h2 className="text-xl font-medium">{profile.name}</h2>
+                  <p className="text-sm text-gray-500">@{profile.username}</p>
                 </div>
-              )}
-            </section>
-          </TabsContent>
-          
-          <TabsContent value="categories">
-            <section>
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="font-semibold text-lg">Manage Categories</h2>
-                <Dialog open={isAddCategoryOpen} onOpenChange={setIsAddCategoryOpen}>
+                <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
                   <DialogTrigger asChild>
-                    <Button size="sm" variant="outline">Add Category</Button>
+                    <Button variant="ghost" size="icon" className="rounded-full">
+                      <Edit2 className="h-5 w-5 text-gray-500" />
+                    </Button>
                   </DialogTrigger>
-                  <DialogContent>
-                    <form onSubmit={categoryForm.handleSubmit(handleAddCategory)}>
+                  <DialogContent className="sm:max-w-[425px]">
+                    <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)}>
                       <DialogHeader>
-                        <DialogTitle>{editingCategory ? 'Edit Category' : 'Add New Category'}</DialogTitle>
+                        <DialogTitle>Edit Profile</DialogTitle>
                         <DialogDescription>
-                          {editingCategory 
-                            ? 'Update the category details below' 
-                            : 'Create a new category for organizing exercises'}
+                          Update your profile information
                         </DialogDescription>
                       </DialogHeader>
                       <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="name" className="text-right">
-                            Name
-                          </Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="name">Name</Label>
                           <Input
                             id="name"
-                            value={categoryForm.watch('name')}
-                            onChange={(e) => categoryForm.setValue('name', e.target.value)}
-                            className="col-span-3"
-                            placeholder="Chest"
-                            required
+                            value={profileForm.watch('name')}
+                            onChange={(e) => profileForm.setValue('name', e.target.value)}
+                            className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
                           />
                         </div>
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="description" className="text-right">
-                            Description
-                          </Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="username">Username</Label>
                           <Input
-                            id="description"
-                            value={categoryForm.watch('description')}
-                            onChange={(e) => categoryForm.setValue('description', e.target.value)}
-                            className="col-span-3"
-                            placeholder="Chest exercises"
+                            id="username"
+                            value={profileForm.watch('username')}
+                            onChange={(e) => profileForm.setValue('username', e.target.value)}
+                            className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="avatarUrl">Avatar URL</Label>
+                          <Input
+                            id="avatarUrl"
+                            value={profileForm.watch('avatarUrl')}
+                            onChange={(e) => profileForm.setValue('avatarUrl', e.target.value)}
+                            className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
+                            placeholder="https://api.dicebear.com/7.x/avataaars/svg?seed=YourName"
                           />
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button type="submit">
-                          {editingCategory ? 'Update Category' : 'Add Category'}
-                        </Button>
+                        <Button type="submit" className="bg-gray-900 hover:bg-gray-800">Save changes</Button>
                       </DialogFooter>
                     </form>
                   </DialogContent>
                 </Dialog>
               </div>
-              
-              {loading ? (
-                <p>Loading categories...</p>
-              ) : (
-                <div className="grid grid-cols-1 gap-4">
-                  {categories.map(category => (
-                    <Card key={category.id} className="overflow-hidden">
-                      <CardContent className="p-3 flex justify-between items-center">
+            </CardContent>
+          </Card>
+          
+          {/* Logout Button */}
+          <Card 
+            className="shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={handleLogout}
+          >
+            <CardContent className="p-4 flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div className="bg-red-50 p-2 rounded-full">
+                  <LogOut className="h-5 w-5 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="font-medium text-red-600">Log Out</h3>
+                  <p className="text-sm text-gray-500">Sign out of your account</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* Categories Tab */}
+        <TabsContent value="categories" className="space-y-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">Categories</h2>
+            <Button 
+              onClick={() => {
+                setEditingCategory(null);
+                categoryForm.reset({ name: '', description: '' });
+                setIsAddCategoryOpen(true);
+              }}
+              className="bg-gray-900 hover:bg-gray-800"
+            >
+              <Plus className="h-4 w-4 mr-2" /> Add Category
+            </Button>
+          </div>
+          
+          {loading ? (
+            <div className="text-center py-10">Loading categories...</div>
+          ) : categories.length > 0 ? (
+            <div className="space-y-3">
+              {categories.map(category => (
+                <Card key={category.id} className="shadow-sm border border-gray-100">
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="font-medium text-lg">{category.name}</h3>
+                        <p className="text-sm text-gray-500">{category.description || 'No description'}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditCategory(category)}
+                          className="border-gray-200"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleDeleteCategory(category.id)}
+                          className="border-gray-200 text-red-500 hover:text-red-600"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card className="shadow-sm border border-gray-100">
+              <CardContent className="p-6 text-center">
+                <p className="text-gray-500">No categories found. Create your first category!</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+        
+        {/* Exercises Tab */}
+        <TabsContent value="exercises" className="space-y-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-bold">Exercises</h2>
+            <Button 
+              onClick={() => {
+                setEditingExercise(null);
+                exerciseForm.reset({ name: '', description: '', categoryId: '' });
+                setIsAddExerciseOpen(true);
+              }}
+              className="bg-gray-900 hover:bg-gray-800"
+            >
+              <Plus className="h-4 w-4 mr-2" /> Add Exercise
+            </Button>
+          </div>
+          
+          {loading ? (
+            <div className="text-center py-10">Loading exercises...</div>
+          ) : exercises.length > 0 ? (
+            <div className="space-y-3">
+              {exercises.map(exercise => {
+                const category = categories.find(c => c.id === exercise.category_id);
+                return (
+                  <Card key={exercise.id} className="shadow-sm border border-gray-100">
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-center">
                         <div>
-                          <div className="font-medium">{category.name}</div>
-                          {category.description && (
-                            <div className="text-xs text-muted-foreground">{category.description}</div>
-                          )}
+                          <h3 className="font-medium text-lg">{exercise.name}</h3>
+                          <p className="text-sm text-gray-500">{exercise.description || 'No description'}</p>
+                          <div className="mt-1 inline-block bg-gray-100 text-xs text-gray-700 px-2 py-1 rounded-md">
+                            {category?.name || 'Uncategorized'}
+                          </div>
                         </div>
                         <div className="flex gap-2">
                           <Button 
-                            size="sm" 
-                            variant="ghost"
-                            onClick={() => handleEditCategory(category)}
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEditExercise(exercise)}
+                            className="border-gray-200"
                           >
-                            Edit
+                            <Pencil className="h-4 w-4" />
                           </Button>
                           <Button 
-                            size="sm" 
-                            variant="ghost" 
-                            className="text-red-500"
-                            onClick={() => handleDeleteCategory(category.id)}
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleDeleteExercise(exercise.id)}
+                            className="border-gray-200 text-red-500 hover:text-red-600"
                           >
-                            Delete
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          ) : (
+            <Card className="shadow-sm border border-gray-100">
+              <CardContent className="p-6 text-center">
+                <p className="text-gray-500">No exercises found. Create your first exercise!</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
+      
+      {/* Modals for editing exercises and categories */}
+      <Dialog open={isAddExerciseOpen} onOpenChange={setIsAddExerciseOpen}>
+        <DialogContent>
+          <form onSubmit={exerciseForm.handleSubmit(handleAddExercise)}>
+            <DialogHeader>
+              <DialogTitle>{editingExercise ? 'Edit Exercise' : 'Add New Exercise'}</DialogTitle>
+              <DialogDescription>
+                {editingExercise 
+                  ? 'Update the exercise details below' 
+                  : 'Add a new exercise to track your progress'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  value={exerciseForm.watch('name')}
+                  onChange={(e) => exerciseForm.setValue('name', e.target.value)}
+                  className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  placeholder="Bench Press"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Input
+                  id="description"
+                  value={exerciseForm.watch('description')}
+                  onChange={(e) => exerciseForm.setValue('description', e.target.value)}
+                  className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  placeholder="Barbell bench press"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+                <select
+                  id="category"
+                  value={exerciseForm.watch('categoryId')}
+                  onChange={(e) => exerciseForm.setValue('categoryId', e.target.value)}
+                  className="w-full p-2.5 border border-gray-200 rounded-md text-sm focus:outline-none"
+                  required
+                >
+                  <option value="">Select a category</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
                   ))}
-                  
-                  {categories.length === 0 && (
-                    <div className="text-center p-8 border rounded">
-                      <p>No categories found. Add your first category!</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </section>
-          </TabsContent>
-        </Tabs>
-      </div>
+                </select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="submit" className="bg-gray-900 hover:bg-gray-800">
+                {editingExercise ? 'Update Exercise' : 'Add Exercise'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
+      <Dialog open={isAddCategoryOpen} onOpenChange={setIsAddCategoryOpen}>
+        <DialogContent>
+          <form onSubmit={categoryForm.handleSubmit(handleAddCategory)}>
+            <DialogHeader>
+              <DialogTitle>{editingCategory ? 'Edit Category' : 'Add New Category'}</DialogTitle>
+              <DialogDescription>
+                {editingCategory 
+                  ? 'Update the category details below' 
+                  : 'Create a new category for organizing exercises'}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  value={categoryForm.watch('name')}
+                  onChange={(e) => categoryForm.setValue('name', e.target.value)}
+                  className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  placeholder="Chest"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Description</Label>
+                <Input
+                  id="description"
+                  value={categoryForm.watch('description')}
+                  onChange={(e) => categoryForm.setValue('description', e.target.value)}
+                  className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  placeholder="Chest exercises"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="submit" className="bg-gray-900 hover:bg-gray-800">
+                {editingCategory ? 'Update Category' : 'Add Category'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
+
+// Define missing icons
+const Dumbbell = (props) => (
+  <svg
+    {...props}
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M7 5v14" />
+    <path d="M17 5v14" />
+    <path d="M3 7h4" />
+    <path d="M3 17h4" />
+    <path d="M17 7h4" />
+    <path d="M17 17h4" />
+  </svg>
+);
+
+const Folder = (props) => (
+  <svg
+    {...props}
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" />
+  </svg>
+);
+
+const LogOut = (props) => (
+  <svg
+    {...props}
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+    <polyline points="16 17 21 12 16 7" />
+    <line x1="21" y1="12" x2="9" y2="12" />
+  </svg>
+);
 
 export default Profile;
