@@ -4,8 +4,8 @@
   "description": "Competitive weight tracker app.",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#f9fafb",
+  "theme_color": "#f9fafb",
   "icons": [
     {
       "src": "/favicon.ico",
