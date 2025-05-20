@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAppContext } from '@/context/AppContext';
 import { calculateProgress, getOverallProgressChartData, getCategoryProgressChartData } from '@/utils/progressUtils';
-import { AreaChart, BarChart3, Award, ArrowUpRight } from 'lucide-react';
+import { AreaChart, BarChart3, ArrowUpRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 
@@ -80,15 +80,27 @@ const Dashboard = () => {
     navigate(`/exercise-detail?exercise=${exerciseId}`);
   };
 
-  // Navigate to leaderboards page
-  const handleViewLeaderboards = () => {
-    navigate('/leaderboard');
-  };
-
   return (
     <Layout title="Home">
       <div className="flex flex-col gap-6">
-        {/* Category Filter */}
+        {/* Progress Chart - blended into background, no card */}
+        <div className="mb-4">
+          {chartData.length > 0 ? (
+            <ProgressChart 
+              data={chartData} 
+              multiple={true}
+              categoryId={selectedCategoryId || undefined}
+              weightUnit="lbs"
+              showPercentage={false}
+            />
+          ) : (
+            <div className="text-center text-gray-500 py-10">
+              No data available for chart. Start logging exercises to see your progress!
+            </div>
+          )}
+        </div>
+        
+        {/* Category Filter - moved below chart */}
         <div className="flex gap-2 overflow-x-auto pb-2 px-1">
           <Button
             variant={selectedCategoryId === null ? "default" : "outline"}
@@ -112,41 +124,13 @@ const Dashboard = () => {
           ))}
         </div>
         
-        {/* Progress Chart */}
-        <Card className="shadow-sm border border-gray-100 overflow-hidden">
-          <CardHeader className="pb-2 bg-gray-50">
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-lg font-medium text-gray-900">Progress Chart</CardTitle>
-              <AreaChart className="text-gray-400 h-5 w-5" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            {chartData.length > 0 ? (
-              <ProgressChart 
-                data={chartData} 
-                multiple={true}
-                categoryId={selectedCategoryId || undefined}
-                weightUnit="lbs"
-                showPercentage={false}
-              />
-            ) : (
-              <div className="text-center text-gray-500 py-10">
-                No data available for chart. Start logging exercises to see your progress!
-              </div>
-            )}
-          </CardContent>
-        </Card>
-        
         {/* Exercise Progress */}
         <div className="px-1">
-          <div className="flex justify-between items-center mb-3">
+          <div className="flex items-center mb-3">
             <div className="flex items-center gap-2">
               <Dumbbell className="text-gray-500 h-5 w-5" />
               <h2 className="text-lg font-medium text-gray-900">Your Progress</h2>
             </div>
-            <Button variant="outline" size="sm" onClick={handleViewLeaderboards} className="border-gray-200 hover:bg-gray-50">
-              <Award className="mr-2 h-4 w-4" /> Leaderboards
-            </Button>
           </div>
           
           {exerciseProgressItems.length > 0 ? (
@@ -206,14 +190,15 @@ const Dashboard = () => {
         </div>
         
         {/* Recent Activity */}
-        <Card className="shadow-sm border border-gray-100 overflow-hidden">
-          <CardHeader className="pb-2 bg-gray-50">
-            <div className="flex justify-between items-center">
-              <CardTitle className="text-lg font-medium text-gray-900">Recent Workouts</CardTitle>
-              <BarChart3 className="text-gray-400 h-5 w-5" />
+        <div className="px-1">
+          <div className="flex items-center mb-3">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="text-gray-500 h-5 w-5" />
+              <h2 className="text-lg font-medium text-gray-900">Recent Workouts</h2>
             </div>
-          </CardHeader>
-          <CardContent className="p-0">
+          </div>
+          <Card className="shadow-sm border border-gray-100 overflow-hidden">
+            <CardContent className="p-0">
             {recentLogs.length > 0 ? (
               recentLogs.map(log => {
                 const exercise = exercises.find(e => e.id === log.exerciseId);
@@ -247,6 +232,7 @@ const Dashboard = () => {
             )}
           </CardContent>
         </Card>
+        </div>
       </div>
     </Layout>
   );

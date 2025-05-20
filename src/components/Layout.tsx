@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Home, Trophy, History, User, Plus, Settings, LogOut } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
 import { Card } from '@/components/ui/card';
@@ -24,6 +24,7 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children, title }) => {
   const { profile, signOut } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     await signOut();
@@ -36,36 +37,12 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
         <h1 className="text-xl font-semibold text-gray-900">
           {title || "Home"}
         </h1>
-        
-        <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="p-0 h-auto">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
-                <AvatarFallback className="bg-gray-200 text-gray-700">{profile?.name?.substring(0, 2).toUpperCase() || 'U'}</AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end">
-            <DropdownMenuLabel>
-              <div className="font-medium">{profile?.name}</div>
-              <div className="text-xs text-muted-foreground">@{profile?.username}</div>
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem asChild>
-                <Link to="/profile" className="cursor-pointer" onClick={() => setIsDropdownOpen(false)}>
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleLogout} className="text-red-500 focus:text-red-500">
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Sign out</span>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Button variant="ghost" className="p-0 h-auto" onClick={() => navigate('/profile')}>
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
+            <AvatarFallback className="bg-gray-200 text-gray-700">{profile?.name?.substring(0, 2).toUpperCase() || 'U'}</AvatarFallback>
+          </Avatar>
+        </Button>
       </header>
       
       {/* Main content */}
