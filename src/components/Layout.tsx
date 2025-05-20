@@ -51,13 +51,27 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
       </main>
       
       {/* Apple-style bottom navigation with glass effect */}
-      <div className="sticky bottom-3 z-10 backdrop-blur-lg bg-white/70 dark:bg-gray-900/70 mb-3">
-        <nav className="flex justify-around items-center p-2 max-w-lg mx-auto">
-          <NavLink to="/" icon={<Home />} label="Home" />
-          <NavLink to="/leaderboard" icon={<Trophy />} label="Leaderboard" />
-          <AddExerciseButton />
-          <NavLink to="/history" icon={<History />} label="History" />
-          <NavLink to="/profile" icon={<Settings />} label="Profile" />
+      <div className="sticky bottom-3 z-10 backdrop-blur-lg bg-white/70 dark:bg-gray-900/70 mb-3 w-full sm:max-w-lg sm:mx-auto rounded-xl px-2 sm:px-0">
+        <nav className="relative flex items-center justify-between p-2">
+          <div className="flex-1 flex justify-center items-center">
+            <NavLink to="/" icon={<Home />} label="Home" />
+          </div>
+          <div className="flex-1 flex justify-center items-center">
+            <NavLink to="/leaderboard" icon={<Trophy />} label="Leaderboard" />
+          </div>
+          <div className="flex-1 flex justify-center items-center">
+            <div className="w-16 h-14 flex-shrink-0" />
+          </div>
+          <div className="flex-1 flex justify-center items-center">
+            <NavLink to="/history" icon={<History />} label="History" />
+          </div>
+          <div className="flex-1 flex justify-center items-center">
+            <NavLink to="/profile" icon={<Settings />} label="Profile" />
+          </div>
+          {/* Absolutely positioned AddExerciseButton for precise centering */}
+          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <AddExerciseButton />
+          </div>
         </nav>
       </div>
     </div>
@@ -74,19 +88,19 @@ const NavLink: React.FC<{ to: string; icon: React.ReactNode; label: string }> = 
     <Link 
       to={to} 
       className={cn(
-        "flex flex-col items-center px-3 py-1 rounded text-xs",
+        "flex flex-col items-center px-3 py-1 rounded text-xs w-full",
         isActive ? "text-green-600 font-medium" : "text-gray-500"
       )}
     >
       <div className="text-lg mb-0.5">{icon}</div>
-      <span>{label}</span>
+      <span className="text-center truncate w-full">{label}</span>
     </Link>
   );
 };
 
 const AddExerciseButton: React.FC = () => {
   return (
-    <Link to="/add-exercise" className="relative -mt-6">
+    <Link to="/add-exercise">
       <Button className="rounded-full h-14 w-14 flex items-center justify-center shadow-lg bg-green-600 hover:bg-green-700 text-white">
         <Plus className="h-6 w-6" />
       </Button>
