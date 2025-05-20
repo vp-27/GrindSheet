@@ -26,7 +26,7 @@ const Leaderboard: React.FC = () => {
   const { profile } = useAuth();
   const { categories, exercises, exerciseLogs } = useAppContext();
   
-  const [leaderboardType, setLeaderboardType] = useState<LeaderboardType>(LeaderboardType.ALLTIME_GAIN);
+  const [leaderboardType, setLeaderboardType] = useState<LeaderboardType>(LeaderboardType.MAX_WEIGHT);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>('all');
   const [users, setUsers] = useState<any[]>([]); // Use correct User type if imported
@@ -124,8 +124,8 @@ const Leaderboard: React.FC = () => {
     switch(leaderboardType) {
       case LeaderboardType.MAX_WEIGHT:
         return selectedExerciseId === 'all' 
-          ? 'Select an exercise to view max weight records' 
-          : `Max Weight for ${exerciseName}`;
+          ? 'Select an exercise to view PR Leaders' 
+          : `PR Leaders for ${exerciseName}`;
       case LeaderboardType.ALLTIME_GAIN:
         return `All-time Gains${exerciseName !== 'All Exercises' ? ` - ${exerciseName}` : ''}`;
       case LeaderboardType.RECENT_GAIN:
@@ -141,43 +141,49 @@ const Leaderboard: React.FC = () => {
       return (
         <div className="text-center py-8 text-muted-foreground">
           {leaderboardType === LeaderboardType.MAX_WEIGHT && selectedExerciseId === 'all'
-            ? "Please select an exercise to view max weight records"
+            ? "Please select an exercise to view PR Leaders"
             : "No data available for this selection"}
         </div>
       );
     }
 
-    return leaderboardData.map((entry, index) => (
-      <div 
-        key={entry.userId} 
-        className={`flex items-center justify-between p-4 ${
-          index !== leaderboardData.length - 1 ? "border-b" : ""
-        }`}
-      >
-        <div className="flex items-center space-x-3">
-          <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-            index === 0 ? "bg-yellow-400" :
-            index === 1 ? "bg-gray-300" :
-            index === 2 ? "bg-amber-600" : "bg-gray-100"
-          } ${index < 3 ? "text-gray-900" : "text-gray-500"} font-bold`}>
-            {index + 1}
+    return leaderboardData.map((entry, index) => {
+      const rawWeight = entry.value;
+      return (
+        <div 
+          key={entry.userId} 
+          className={`flex items-center justify-between p-4 ${
+            index !== leaderboardData.length - 1 ? "border-b" : ""
+          }`}
+        >
+          <div className="flex items-center space-x-3">
+            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+              index === 0 ? "bg-yellow-400" :
+              index === 1 ? "bg-gray-300" :
+              index === 2 ? "bg-amber-600" : "bg-gray-100"
+            } ${index < 3 ? "text-gray-900" : "text-gray-500"} font-bold`}>
+              {index + 1}
+            </div>
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={entry.user.avatarUrl} alt={entry.user.name} />
+              <AvatarFallback>
+                {entry.user.name.substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div>{entry.user.name}</div>
           </div>
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={entry.user.avatarUrl} alt={entry.user.name} />
-            <AvatarFallback>
-              {entry.user.name.substring(0, 2).toUpperCase()}
-            </AvatarFallback>
-          </Avatar>
-          <div>{entry.user.name}</div>
+          <div className="font-bold">
+            {leaderboardType === LeaderboardType.MAX_WEIGHT
+              ? `${entry.value.toFixed(1)} lbs`
+              : <>
+                  {entry.value.toFixed(1)}%{' '}
+                  <span className="text-xs text-gray-400 font-normal">({rawWeight.toFixed(1)} lbs)</span>
+                </>
+            }
+          </div>
         </div>
-        <div className="font-bold">
-          {leaderboardType === LeaderboardType.MAX_WEIGHT
-            ? `${entry.value.toFixed(1)} lbs`
-            : `${entry.value.toFixed(1)}%`
-          }
-        </div>
-      </div>
-    ));
+      );
+    });
   };
   
   // Generate category leaderboards
@@ -231,42 +237,82 @@ const Leaderboard: React.FC = () => {
   const categoryLeaders = getCategoryLeaders();
   const exerciseLeaders = getExerciseLeaders();
 
+  // Render a compact category leader card, clickable
   const renderCategoryLeaderCard = (categoryId, data) => {
     const { category, leader } = data;
+    const rawWeight = leader.value;
     return (
-      <Card key={categoryId} className="shadow-sm border border-gray-100">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-medium text-gray-900">{category.name}</h3>
-            {leaderboardType === LeaderboardType.MAX_WEIGHT ? (
-              <span className="text-sm text-gray-500">Best Lifter</span>
-            ) : (
-              <span className="text-sm text-gray-500">Biggest Gainer</span>
-            )}
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <div className="bg-yellow-400 text-gray-900 w-8 h-8 rounded-full flex items-center justify-center">
-              <Medal size={16} />
-            </div>
-            <Avatar className="h-10 w-10">
-              <AvatarImage src={leader.user.avatarUrl} alt={leader.user.name} />
-              <AvatarFallback>
-                {leader.user.name.substring(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="font-medium">{leader.user.name}</span>
-              <span className="text-sm text-gray-500">
-                {leaderboardType === LeaderboardType.MAX_WEIGHT
-                  ? `${leader.value.toFixed(1)} lbs`
-                  : `${leader.value.toFixed(1)}% gain`
-                }
-              </span>
+      <Card
+        key={categoryId}
+        className="shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition"
+        onClick={() => {
+          setSelectedCategoryId(categoryId);
+          setSelectedExerciseId('all');
+        }}
+      >
+        <CardContent className="p-3 flex items-center gap-3 sm:gap-4">
+          <div className="flex flex-col items-center justify-center">
+            <div className="bg-yellow-400 text-gray-900 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-base sm:text-lg">
+              1
             </div>
           </div>
+          <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
+            <AvatarImage src={leader.user.avatarUrl} alt={leader.user.name} />
+            <AvatarFallback>
+              {leader.user.name.substring(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <span className="font-medium truncate block text-sm sm:text-base">{leader.user.name}</span>
+            <span className="text-xs text-gray-500 block truncate">{category.name}</span>
+          </div>
+          <span className="font-bold text-sm sm:text-base whitespace-nowrap">
+            {leaderboardType === LeaderboardType.MAX_WEIGHT
+              ? `${leader.value.toFixed(1)} lbs`
+              : <>
+                  {leader.value.toFixed(1)}%{' '}
+                  <span className="text-xs text-gray-400 font-normal">({rawWeight.toFixed(1)} lbs)</span>
+                </>
+            }
+          </span>
         </CardContent>
       </Card>
+    );
+  };
+
+  // Render a compact exercise leader card, clickable
+  const renderExerciseLeaderCard = (exerciseId, data) => {
+    const { exercise, leader } = data as { exercise: any, leader: any };
+    const rawWeight = leader.value;
+    return (
+      <div
+        key={exerciseId}
+        className="flex items-center justify-between py-2 border-b last:border-b-0 cursor-pointer hover:bg-gray-50 px-2 rounded"
+        onClick={() => setSelectedExerciseId(exerciseId)}
+      >
+        <div className="flex items-center gap-2">
+          <div className="bg-yellow-400 text-gray-900 w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm">1</div>
+          <Avatar className="h-6 w-6">
+            <AvatarImage src={leader.user.avatarUrl} />
+            <AvatarFallback>
+              {leader.user.name.substring(0, 1)}
+            </AvatarFallback>
+          </Avatar>
+          <span className="font-medium text-xs sm:text-sm truncate max-w-[6rem]">{leader.user.name}</span>
+        </div>
+        <div className="flex flex-col items-end">
+          <span className="text-xs text-gray-500 truncate max-w-[6rem]">{exercise.name}</span>
+          <span className="font-bold text-xs sm:text-sm">
+            {leaderboardType === LeaderboardType.MAX_WEIGHT
+              ? `${leader.value.toFixed(1)} lbs`
+              : <>
+                  {leader.value.toFixed(1)}%{' '}
+                  <span className="text-xs text-gray-400 font-normal">({rawWeight.toFixed(1)} lbs)</span>
+                </>
+            }
+          </span>
+        </div>
+      </div>
     );
   };
 
@@ -274,7 +320,7 @@ const Leaderboard: React.FC = () => {
     <Layout title="Rankings">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-4">
-          <Tabs defaultValue="allTimeGain" onValueChange={(value) => {
+          <Tabs defaultValue="maxWeight" onValueChange={(value) => {
             switch(value) {
               case "maxWeight":
                 setLeaderboardType(LeaderboardType.MAX_WEIGHT);
@@ -288,9 +334,9 @@ const Leaderboard: React.FC = () => {
             }
           }}>
             <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="maxWeight">PR Leaders</TabsTrigger>
               <TabsTrigger value="allTimeGain">All-time Gain</TabsTrigger>
               <TabsTrigger value="recentGain">Recent Gain</TabsTrigger>
-              <TabsTrigger value="maxWeight">Max Weight</TabsTrigger>
             </TabsList>
             
             <div className="mt-4 space-y-4">
@@ -339,9 +385,21 @@ const Leaderboard: React.FC = () => {
               {selectedCategoryId === 'all' && (
                 <>
                   <h2 className="text-lg font-medium text-gray-900">Category Leaders</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {Object.entries(categoryLeaders).map(([categoryId, data]) => 
+                  <div className="grid grid-cols-2 gap-3">
+                    {Object.entries(categoryLeaders).map(([categoryId, data]) =>
                       renderCategoryLeaderCard(categoryId, data)
+                    )}
+                  </div>
+                </>
+              )}
+              
+              {/* Exercise Leaders for selected category (if not 'all') */}
+              {selectedCategoryId !== 'all' && Object.keys(exerciseLeaders).length > 0 && (
+                <>
+                  <h3 className="text-base font-medium text-gray-900 mt-2 mb-1">Exercise Leaders</h3>
+                  <div className="bg-white rounded shadow-sm border border-gray-100 divide-y">
+                    {Object.entries(exerciseLeaders).map(([exerciseId, data]) =>
+                      renderExerciseLeaderCard(exerciseId, data as { exercise: any, leader: any })
                     )}
                   </div>
                 </>
@@ -352,34 +410,22 @@ const Leaderboard: React.FC = () => {
               
               <Card className="shadow-sm border border-gray-100">
                 <CardContent className="p-0">
-                  {selectedExerciseId !== 'all' || leaderboardType !== LeaderboardType.MAX_WEIGHT ? 
-                    renderLeaderboardEntries() :
-                    <div className="p-4">
-                      <h3 className="font-medium text-gray-600 mb-2">Exercise Champions</h3>
-                      <div className="grid grid-cols-1 gap-2">
-                        {Object.entries(exerciseLeaders).slice(0, 5).map(([exerciseId, data]) => (
-                          <div key={exerciseId} className="flex items-center justify-between py-2 border-b">
-                            <div className="text-sm">{data.exercise.name}</div>
-                            <div className="flex items-center gap-3">
-                              <Avatar className="h-6 w-6">
-                                <AvatarImage src={data.leader.user.avatarUrl} />
-                                <AvatarFallback>
-                                  {data.leader.user.name.substring(0, 1)}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="font-medium">{data.leader.user.name}</span>
-                              <span className="text-sm">
-                                {leaderboardType === LeaderboardType.MAX_WEIGHT
-                                  ? `${data.leader.value.toFixed(1)} lbs`
-                                  : `${data.leader.value.toFixed(1)}%`
-                                }
-                              </span>
-                            </div>
-                          </div>
-                        ))}
+                  {/* If Max Weight and no exercise selected, show all exercise max leaders */}
+                  {leaderboardType === LeaderboardType.MAX_WEIGHT && selectedExerciseId === 'all' ? (
+                    Object.keys(exerciseLeaders).length > 0 ? (
+                      <div className="divide-y">
+                        {Object.entries(exerciseLeaders).map(([exerciseId, data]) =>
+                          renderExerciseLeaderCard(exerciseId, data as { exercise: any, leader: any })
+                        )}
                       </div>
-                    </div>
-                  }
+                    ) : (
+                      <div className="text-center py-8 text-muted-foreground">
+                        No data available for this selection
+                      </div>
+                    )
+                  ) : (
+                    renderLeaderboardEntries()
+                  )}
                 </CardContent>
               </Card>
             </div>
