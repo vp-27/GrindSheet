@@ -9,6 +9,8 @@ interface AppContextType {
   exercises: Exercise[];
   exerciseLogs: ExerciseLog[];
   addExerciseLog: (log: Omit<ExerciseLog, 'id' | 'timestamp'>) => Promise<void>;
+  updateExerciseLog: (log: ExerciseLog) => Promise<void>;
+  deleteExerciseLog: (id: string) => Promise<void>;
   selectedCategory: Category | null;
   setSelectedCategory: (category: Category | null) => void;
   selectedExercise: Exercise | null;
@@ -273,6 +275,40 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     }
   };
 
+  const updateExerciseLog = async (log: ExerciseLog) => {
+    if (!user) return;
+    try {
+      const { error } = await supabase
+        .from('exercise_logs')
+        .update({
+          exercise_id: log.exerciseId,
+          weight: log.weight,
+          note: log.note,
+        })
+        .eq('id', log.id);
+      if (error) throw error;
+      fetchExerciseLogs();
+    } catch (error) {
+      console.error('Error updating exercise log:', error);
+      throw error;
+    }
+  };
+
+  const deleteExerciseLog = async (id: string) => {
+    if (!user) return;
+    try {
+      const { error } = await supabase
+        .from('exercise_logs')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      fetchExerciseLogs();
+    } catch (error) {
+      console.error('Error deleting exercise log:', error);
+      throw error;
+    }
+  };
+
   return (
     <AppContext.Provider 
       value={{
@@ -280,6 +316,8 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         exercises,
         exerciseLogs,
         addExerciseLog,
+        updateExerciseLog,
+        deleteExerciseLog,
         selectedCategory,
         setSelectedCategory,
         selectedExercise,

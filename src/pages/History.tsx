@@ -1,17 +1,23 @@
-
 import React, { useState } from 'react';
 import { format } from 'date-fns';
 import Layout from '@/components/Layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar } from 'lucide-react';
+import { Calendar, Pencil, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { useAppContext } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
 
 const History = () => {
-  const { exerciseLogs, exercises, categories } = useAppContext();
+  const { exerciseLogs, exercises, categories, updateExerciseLog, deleteExerciseLog } = useAppContext();
   const { profile } = useAuth();
-  
+  const [editLog, setEditLog] = useState(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editForm, setEditForm] = useState({ weight: '', note: '' });
+
   // Group logs by date
   const logsByDate = React.useMemo(() => {
     const grouped = {};
@@ -50,6 +56,31 @@ const History = () => {
     return category;
   };
 
+  // Edit dialog handlers
+  const openEditDialog = (log) => {
+    setEditLog(log);
+    setEditForm({ weight: log.weight, note: log.note || '' });
+    setEditDialogOpen(true);
+  };
+
+  const handleEditChange = (e) => {
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    if (!editLog) return;
+    await updateExerciseLog({ ...editLog, weight: Number(editForm.weight), note: editForm.note });
+    setEditDialogOpen(false);
+    setEditLog(null);
+  };
+
+  const handleDelete = async (logId) => {
+    if (window.confirm('Delete this log?')) {
+      await deleteExerciseLog(logId);
+    }
+  };
+
   return (
     <Layout title="History">
       <div className="flex flex-col gap-6">
@@ -77,7 +108,7 @@ const History = () => {
                 
                 return (
                   <CardContent key={log.id} className="p-4 border-b last:border-0">
-                    <div className="flex justify-between items-center">
+                    <div className="flex justify-between items-center gap-2">
                       <div>
                         <div className="font-medium">{exerciseName}</div>
                         <div className="text-sm text-muted-foreground">
@@ -86,12 +117,20 @@ const History = () => {
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1">
-                        <div className="font-bold">{log.weight} kg</div>
+                        <div className="font-bold">{log.weight} lb</div>
                         {category && (
                           <Badge variant="outline" className="text-xs">
                             {category.name}
                           </Badge>
                         )}
+                        <div className="flex gap-2 mt-2">
+                          <Button variant="outline" size="icon" className="border-gray-200" onClick={() => openEditDialog(log)}>
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button variant="outline" size="icon" className="border-gray-200 text-red-500 hover:text-red-600" onClick={() => handleDelete(log.id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -100,6 +139,49 @@ const History = () => {
             </Card>
           </div>
         ))}
+
+        {/* Edit Exercise Log Dialog */}
+        <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+          <DialogContent>
+            <form onSubmit={handleEditSubmit}>
+              <DialogHeader>
+                <DialogTitle>Edit Exercise Log</DialogTitle>
+                <DialogDescription>Update the weight or note for this log. Date and time cannot be changed.</DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="weight">Weight (kg)</Label>
+                  <Input
+                    id="weight"
+                    name="weight"
+                    type="number"
+                    value={editForm.weight}
+                    onChange={handleEditChange}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="note">Note</Label>
+                  <Input
+                    id="note"
+                    name="note"
+                    value={editForm.note}
+                    onChange={handleEditChange}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Date & Time</Label>
+                  <div className="text-sm text-muted-foreground">
+                    {editLog && format(new Date(editLog.timestamp), 'EEEE, MMMM d, yyyy h:mm a')}
+                  </div>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="submit" className="bg-gray-900 hover:bg-gray-800">Update Log</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );

@@ -149,6 +149,7 @@ const Leaderboard: React.FC = () => {
 
     return leaderboardData.map((entry, index) => {
       const rawWeight = entry.value;
+      const user = entry.user || { name: 'Unknown', avatarUrl: undefined };
       return (
         <div 
           key={entry.userId} 
@@ -165,12 +166,12 @@ const Leaderboard: React.FC = () => {
               {index + 1}
             </div>
             <Avatar className="h-8 w-8">
-              <AvatarImage src={entry.user.avatarUrl} alt={entry.user.name} />
+              <AvatarImage src={user.avatarUrl} alt={user.name} />
               <AvatarFallback>
-                {entry.user.name.substring(0, 2).toUpperCase()}
+                {user.name?.substring(0, 2).toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
-            <div>{entry.user.name}</div>
+            <div>{user.name}</div>
           </div>
           <div className="font-bold">
             {leaderboardType === LeaderboardType.MAX_WEIGHT
@@ -241,6 +242,7 @@ const Leaderboard: React.FC = () => {
   const renderCategoryLeaderCard = (categoryId, data) => {
     const { category, leader } = data;
     const rawWeight = leader.value;
+    const user = leader.user || { name: 'Unknown', avatarUrl: undefined };
     return (
       <Card
         key={categoryId}
@@ -257,13 +259,13 @@ const Leaderboard: React.FC = () => {
             </div>
           </div>
           <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
-            <AvatarImage src={leader.user.avatarUrl} alt={leader.user.name} />
+            <AvatarImage src={user.avatarUrl} alt={user.name} />
             <AvatarFallback>
-              {leader.user.name.substring(0, 2).toUpperCase()}
+              {user.name?.substring(0, 2).toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <span className="font-medium truncate block text-sm sm:text-base">{leader.user.name}</span>
+            <span className="font-medium truncate block text-sm sm:text-base">{user.name}</span>
             <span className="text-xs text-gray-500 block truncate">{category.name}</span>
           </div>
           <span className="font-bold text-sm sm:text-base whitespace-nowrap">
@@ -284,6 +286,7 @@ const Leaderboard: React.FC = () => {
   const renderExerciseLeaderCard = (exerciseId, data) => {
     const { exercise, leader } = data as { exercise: any, leader: any };
     const rawWeight = leader.value;
+    const user = leader.user || { name: 'Unknown', avatarUrl: undefined };
     return (
       <div
         key={exerciseId}
@@ -293,12 +296,12 @@ const Leaderboard: React.FC = () => {
         <div className="flex items-center gap-2">
           <div className="bg-yellow-400 text-gray-900 w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm">1</div>
           <Avatar className="h-6 w-6">
-            <AvatarImage src={leader.user.avatarUrl} />
+            <AvatarImage src={user.avatarUrl} />
             <AvatarFallback>
-              {leader.user.name.substring(0, 1)}
+              {user.name?.substring(0, 1) || 'U'}
             </AvatarFallback>
           </Avatar>
-          <span className="font-medium text-xs sm:text-sm truncate max-w-[6rem]">{leader.user.name}</span>
+          <span className="font-medium text-xs sm:text-sm truncate max-w-[6rem]">{user.name}</span>
         </div>
         <div className="flex flex-col items-end">
           <span className="text-xs text-gray-500 truncate max-w-[6rem]">{exercise.name}</span>
