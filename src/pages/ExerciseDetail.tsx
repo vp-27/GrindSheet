@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import { getProgressChartData, calculateProgress } from '@/utils/progressUtils';
+import { getCategoryColors, getCategoryKeyByName } from '@/utils/categoryColors';
 
 const ExerciseDetail = () => {
   const { exercises, categories, exerciseLogs, addExerciseLog } = useAppContext();
@@ -60,6 +61,13 @@ const ExerciseDetail = () => {
     if (!exerciseId) return [];
     return getProgressChartData(exerciseLogs, exerciseId);
   }, [exerciseLogs, exerciseId]);
+
+  // Get category colors
+  const categoryColors = useMemo(() => {
+    if (!category) return null;
+    const categoryKey = getCategoryKeyByName(category.name);
+    return getCategoryColors(categoryKey);
+  }, [category]);
   
   // Redirect if no exercise ID or invalid ID
   useEffect(() => {
@@ -124,68 +132,119 @@ const ExerciseDetail = () => {
   
   return (
     <Layout title={exercise.name}>
-      <div className="flex flex-col gap-4">
-        {/* Header with back button */}
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col gap-6 pb-6">
+        {/* Header with back button and category badge */}
+        <div className="flex items-center justify-between">
           <Button 
             variant="ghost" 
-            className="p-0 h-auto" 
+            className="p-2 h-auto rounded-full hover:bg-gray-100 transition-colors" 
             onClick={() => navigate('/')}
           >
             <ChevronLeft className="h-5 w-5" />
           </Button>
-          <h1 className="text-xl font-semibold">{exercise.name}</h1>
-          {category && (
-            <span className="text-sm bg-green-100 text-green-800 px-2 py-1 rounded-full">
-              {category.name}
-            </span>
+          {category && categoryColors && (
+            <div className="flex items-center gap-2">
+              <span 
+                className="text-xs font-semibold px-3 py-1.5 rounded-full border backdrop-blur-sm"
+                style={{ 
+                  backgroundColor: `${categoryColors.primary}15`,
+                  borderColor: `${categoryColors.primary}30`,
+                  color: categoryColors.primary 
+                }}
+              >
+                {category.name}
+              </span>
+            </div>
           )}
         </div>
         
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 gap-3">
-          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-            <CardContent className="p-3 flex flex-col items-center justify-center">
-              <p className="text-sm text-green-800 font-medium">Current Weight</p>
-              <p className="text-xl font-bold text-green-800">
-                {progress?.currentWeight || 0} lbs
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200">
-            <CardContent className="p-3 flex flex-col items-center justify-center">
-              <p className="text-sm text-amber-800 font-medium">Personal Record</p>
-              <p className="text-xl font-bold text-amber-800">
-                {progress?.personalRecord || 0} lbs
-              </p>
-            </CardContent>
-          </Card>
+        {/* Hero Stats Section */}
+        <div className="relative">
+          {/* Background blur effect */}
+          <div 
+            className="absolute inset-0 rounded-3xl opacity-20 blur-xl"
+            style={{ backgroundColor: categoryColors?.primary || '#10b981' }}
+          />
+          
+          {/* Stats container */}
+          <div className="relative backdrop-blur-sm bg-white/80 rounded-3xl border border-gray-200/50 p-6 shadow-lg">
+            <div className="grid grid-cols-2 gap-6">
+              {/* Current Weight */}
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <div 
+                    className="w-3 h-3 rounded-full mr-2"
+                    style={{ backgroundColor: categoryColors?.primary || '#10b981' }}
+                  />
+                  <p className="text-sm font-medium text-gray-600">Current</p>
+                </div>
+                <p className="text-3xl font-bold text-gray-900">
+                  {progress?.currentWeight || 0}
+                </p>
+                <p className="text-sm text-gray-500">lbs</p>
+              </div>
+              
+              {/* Personal Record */}
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Trophy className="w-3 h-3 text-amber-500 mr-2" />
+                  <p className="text-sm font-medium text-gray-600">Record</p>
+                </div>
+                <p className="text-3xl font-bold text-gray-900">
+                  {progress?.personalRecord || 0}
+                </p>
+                <p className="text-sm text-gray-500">lbs</p>
+              </div>
+            </div>
+            
+            {/* Progress indicator */}
+            {progress?.percentGainFromStart !== undefined && progress.percentGainFromStart > 0 && (
+              <div className="mt-4 pt-4 border-t border-gray-200/50">
+                <div className="flex items-center justify-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-green-500" />
+                  <span className="text-sm font-medium text-gray-700">
+                    +{progress.percentGainFromStart.toFixed(1)}% total progress
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
         
         {/* Progress Chart */}
-        <Card>
-          <CardHeader className="pb-0">
-            <CardTitle className="text-lg">Progress History</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="relative">
+          <div className="backdrop-blur-sm bg-white/90 rounded-2xl border border-gray-200/30 p-6 shadow-sm">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Progress History</h3>
+              <p className="text-sm text-gray-500">Track your weight progression over time</p>
+            </div>
             <ProgressChart
               data={chartData}
-              title={exercise.name}
               exerciseId={exercise.id}
               weightUnit="lbs"
             />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
         
         {/* Log New Weight Form */}
-        <Card className="border-green-200">
-          <CardHeader className="pb-0">
-            <CardTitle className="text-lg text-green-800">Log New Weight</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <div className="relative">
+          {/* Subtle background glow */}
+          <div 
+            className="absolute inset-0 rounded-2xl opacity-10 blur-lg"
+            style={{ backgroundColor: categoryColors?.primary || '#10b981' }}
+          />
+          
+          <div className="relative backdrop-blur-sm bg-white/90 rounded-2xl border border-gray-200/30 p-6 shadow-sm">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Log New Weight</h3>
+              <p className="text-sm text-gray-500">Record your latest workout progress</p>
+            </div>
+            
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="weight" className="text-green-800">Weight (lbs)</Label>
+                <Label htmlFor="weight" className="text-sm font-medium text-gray-700">
+                  Weight (lbs)
+                </Label>
                 <Input
                   id="weight"
                   type="number"
@@ -194,32 +253,45 @@ const ExerciseDetail = () => {
                   value={weight}
                   onChange={e => setWeight(e.target.value)}
                   placeholder="Enter weight"
-                  className="border-green-200 focus:border-green-400 focus:ring-green-400"
+                  className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0 text-lg h-12"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="note" className="text-green-800">Note (optional)</Label>
+                <Label htmlFor="note" className="text-sm font-medium text-gray-700">
+                  Note (optional)
+                </Label>
                 <Textarea
                   id="note"
                   value={note}
                   onChange={e => setNote(e.target.value)}
-                  placeholder="Add a note about this set"
-                  rows={2}
-                  className="border-green-200 focus:border-green-400 focus:ring-green-400"
+                  placeholder="Add a note about this set..."
+                  rows={3}
+                  className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0 resize-none"
                 />
               </div>
               
               <Button 
                 type="submit" 
-                className="w-full bg-green-600 hover:bg-green-700" 
+                className="w-full h-12 rounded-xl font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl active:scale-[0.98]"
+                style={{ 
+                  backgroundColor: categoryColors?.primary || '#10b981',
+                  boxShadow: `0 4px 20px ${categoryColors?.primary || '#10b981'}30`
+                }}
                 disabled={isSubmitting}
               >
-                {isSubmitting ? 'Logging...' : 'Log Weight'}
+                {isSubmitting ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Logging...
+                  </div>
+                ) : (
+                  'Log Weight'
+                )}
               </Button>
             </form>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
         
         {/* Recent Logs */}
         <Card>

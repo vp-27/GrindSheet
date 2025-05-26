@@ -8,6 +8,7 @@ import { calculateProgress, getOverallProgressChartData, getExerciseProgressChar
 import { AreaChart, BarChart3, ArrowUpRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
+import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
 
 const Dashboard = () => {
   const { categories, exercises, exerciseLogs } = useAppContext();
@@ -15,8 +16,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
-  // Chart colors that match the ProgressChart component
-  const chartColors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+  // Use the same color system as the rest of the app
+  const chartColors = getCategoryChartColors();
   
   // Get color for a category based on its index
   const getCategoryColor = (categoryIndex: number) => {
