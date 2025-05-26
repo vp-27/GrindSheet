@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useAppContext } from '@/context/AppContext';
 import { useAuth } from '@/context/AuthContext';
+import { getCategoryColors, getCategoryKeyByName } from '@/utils/categoryColors';
 
 const History = () => {
   const { exerciseLogs, exercises, categories, updateExerciseLog, deleteExerciseLog } = useAppContext();
@@ -105,9 +106,14 @@ const History = () => {
               {logsByDate[date].map(log => {
                 const exerciseName = getExerciseName(log.exerciseId);
                 const category = getCategoryForExercise(log.exerciseId);
-                
+                const categoryKey = category ? getCategoryKeyByName(category.name) : undefined;
+                const categoryColors = categoryKey ? getCategoryColors(categoryKey) : undefined;
                 return (
-                  <CardContent key={log.id} className="p-4 border-b last:border-0">
+                  <CardContent 
+                    key={log.id} 
+                    className={`p-4 border-b last:border-0 transition-shadow ${categoryColors ? categoryColors.shadow : ''}`}
+                    style={categoryColors ? { boxShadow: `0 2px 12px 0 ${categoryColors.primary}22` } : {}}
+                  >
                     <div className="flex justify-between items-center gap-2">
                       <div>
                         <div className="font-medium">{exerciseName}</div>
@@ -119,9 +125,9 @@ const History = () => {
                       <div className="flex flex-col items-end gap-1">
                         <div className="font-bold">{log.weight} lb</div>
                         {category && (
-                          <Badge variant="outline" className="text-xs">
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${categoryColors ? categoryColors.text : ''}`} style={categoryColors ? { background: categoryColors.light, color: categoryColors.primary } : {}}>
                             {category.name}
-                          </Badge>
+                          </span>
                         )}
                         <div className="flex gap-2 mt-2">
                           <Button variant="outline" size="icon" className="border-gray-200" onClick={() => openEditDialog(log)}>
