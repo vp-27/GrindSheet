@@ -4,7 +4,7 @@ import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAppContext } from '@/context/AppContext';
-import { calculateProgress, getOverallProgressChartData, getCategoryProgressChartData } from '@/utils/progressUtils';
+import { calculateProgress, getOverallProgressChartData, getExerciseProgressChartData } from '@/utils/progressUtils';
 import { AreaChart, BarChart3, ArrowUpRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
@@ -14,6 +14,14 @@ const Dashboard = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+
+  // Chart colors that match the ProgressChart component
+  const chartColors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+  
+  // Get color for a category based on its index
+  const getCategoryColor = (categoryIndex: number) => {
+    return chartColors[categoryIndex % chartColors.length];
+  };
 
   // Filter logs based on selected category
   const filteredLogs = useMemo(() => {
@@ -33,11 +41,11 @@ const Dashboard = () => {
   // Get chart data based on selection
   const chartData = useMemo(() => {
     if (!selectedCategoryId) {
-      // Overall progress chart (by category)
+      // Overall progress chart (by category) - show percentage growth
       return getOverallProgressChartData(exerciseLogs, exercises, categories);
     } else {
-      // Category-specific chart (by exercise)
-      return getCategoryProgressChartData(exerciseLogs, exercises, selectedCategoryId);
+      // Category-specific chart (by exercise) - show percentage growth
+      return getExerciseProgressChartData(exerciseLogs, exercises, selectedCategoryId);
     }
   }, [exerciseLogs, exercises, categories, selectedCategoryId]);
 
@@ -91,7 +99,13 @@ const Dashboard = () => {
               multiple={true}
               categoryId={selectedCategoryId || undefined}
               weightUnit="lbs"
-              showPercentage={false}
+              showPercentage={!selectedCategoryId} // Show percentage for "all", raw weight for specific categories
+              title={selectedCategoryId ? 
+                `${categories.find(c => c.id === selectedCategoryId)?.name} Progress (Weight in lbs)` : 
+                "Overall Progress (% Growth by Category)"
+              }
+              blendWithBackground={true}
+              customColors={chartColors} // Pass the same colors used in category buttons
             />
           ) : (
             <div className="text-center text-gray-500 py-10">
@@ -111,17 +125,31 @@ const Dashboard = () => {
             All
           </Button>
           
-          {categories.map(category => (
-            <Button
-              key={category.id}
-              variant={selectedCategoryId === category.id ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedCategoryId(category.id)}
-              className="rounded-full whitespace-nowrap"
-            >
-              {category.name}
-            </Button>
-          ))}
+          {categories.map((category, index) => {
+            const categoryColor = getCategoryColor(index);
+            const isSelected = selectedCategoryId === category.id;
+            
+            return (
+              <Button
+                key={category.id}
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedCategoryId(category.id)}
+                className={`rounded-full whitespace-nowrap border-2 transition-all duration-200 ${
+                  isSelected 
+                    ? 'text-white border-transparent' 
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+                style={{
+                  backgroundColor: isSelected ? categoryColor : 'transparent',
+                  color: isSelected ? 'white' : categoryColor,
+                  borderColor: isSelected ? categoryColor : undefined
+                }}
+              >
+                {category.name}
+              </Button>
+            );
+          })}
         </div>
         
         {/* Exercise Progress */}

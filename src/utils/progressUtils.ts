@@ -130,20 +130,47 @@ export const getCategoryProgressChartData = (logs: ExerciseLog[], exercises: Exe
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 };
 
-// New function to get overall progress chart data across all categories
+// Function to get overall progress chart data with percentage growth by categories
 export const getOverallProgressChartData = (
   logs: ExerciseLog[], 
   exercises: Exercise[], 
   categories: Category[]
 ): any[] => {
   const chartData = new Map();
+  const categoryStartWeights = new Map(); // Track the first recorded weight for each category
   
   // Create a map of category IDs to names for quick lookup
   const categoryNames = new Map(categories.map(cat => [cat.id, cat.name]));
   
-  // Group logs by date and category
-  logs.forEach(log => {
-    const date = new Date(log.timestamp).toLocaleDateString();
+  // Sort logs by timestamp to ensure proper chronological order
+  const sortedLogs = [...logs].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  
+  // First pass: establish starting weights for each category
+  sortedLogs.forEach(log => {
+    const exercise = exercises.find(e => e.id === log.exerciseId);
+    if (!exercise) return;
+    
+    const categoryId = exercise.categoryId;
+    const categoryName = categoryNames.get(categoryId) || 'Unknown';
+    
+    // Only set if this is the earliest weight for this category
+    if (!categoryStartWeights.has(categoryName)) {
+      categoryStartWeights.set(categoryName, log.weight);
+    }
+  });
+  
+  // Initialize all categories with starting data to ensure complete coverage
+  const allDates = new Set();
+  sortedLogs.forEach(log => {
+    const logDate = new Date(log.timestamp);
+    const date = `${logDate.getMonth() + 1}/${logDate.getDate()}/${logDate.getFullYear()}`;
+    allDates.add(date);
+  });
+  
+  // Second pass: group logs by date and category, calculating percentage gains
+  sortedLogs.forEach(log => {
+    const logDate = new Date(log.timestamp);
+    const date = `${logDate.getMonth() + 1}/${logDate.getDate()}/${logDate.getFullYear()}`;
     const exercise = exercises.find(e => e.id === log.exerciseId);
     
     if (!exercise) return;
@@ -157,29 +184,132 @@ export const getOverallProgressChartData = (
       });
     }
     
-    // For each category, we'll track the average weight across all exercises
     const dayData = chartData.get(date);
     
     if (!dayData[categoryName]) {
       dayData[categoryName] = {
-        total: 0,
-        count: 0,
+        maxWeight: 0,
+        latestWeight: 0,
       };
     }
     
-    dayData[categoryName].total += log.weight;
-    dayData[categoryName].count += 1;
+    // Track the maximum and latest weight for this category on this date
+    dayData[categoryName].maxWeight = Math.max(dayData[categoryName].maxWeight, log.weight);
+    dayData[categoryName].latestWeight = log.weight; // Will be overwritten by later logs on same day
   });
   
-  // Calculate the average for each category and convert to final format
+  // Calculate percentage gains for each category based on their starting weights
   const result = Array.from(chartData.values()).map(dayData => {
     const formattedDay = { date: dayData.date };
     
-    // Calculate average for each category
-    Object.entries(dayData).forEach(([key, value]) => {
-      if (key !== 'date' && typeof value === 'object') {
-        const { total, count } = value as { total: number, count: number };
-        formattedDay[key] = count > 0 ? total / count : 0;
+    // Ensure all categories are represented with data points for better line continuity
+    categories.forEach(category => {
+      const categoryName = category.name;
+      if (dayData[categoryName]) {
+        const { maxWeight } = dayData[categoryName] as { maxWeight: number; latestWeight: number };
+        const startWeight = categoryStartWeights.get(categoryName) || maxWeight;
+        
+        // Calculate percentage gain from start weight
+        const percentGain = startWeight > 0 ? ((maxWeight - startWeight) / startWeight) * 100 : 0;
+        formattedDay[categoryName] = Math.round(percentGain * 100) / 100; // Round to 2 decimal places
+      } else {
+        // Fill missing data with previous value or 0 to maintain line continuity
+        formattedDay[categoryName] = 0;
+      }
+    });
+    
+    return formattedDay;
+  });
+  
+  // Sort by date and fill gaps for better line continuity
+  const sortedResult = result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  
+  // Forward fill missing values to ensure continuous lines
+  for (let i = 1; i < sortedResult.length; i++) {
+    categories.forEach(category => {
+      const categoryName = category.name;
+      if (sortedResult[i][categoryName] === 0 && sortedResult[i-1][categoryName] > 0) {
+        sortedResult[i][categoryName] = sortedResult[i-1][categoryName];
+      }
+    });
+  }
+  
+  return sortedResult;
+};
+
+// Function to get exercise progress chart data for a specific category (RAW WEIGHT in lbs)
+export const getExerciseProgressChartData = (
+  logs: ExerciseLog[], 
+  exercises: Exercise[], 
+  categoryId: string
+): any[] => {
+  const chartData = new Map();
+  
+  // Get all exercises for this category
+  const categoryExercises = exercises.filter(exercise => exercise.categoryId === categoryId);
+  
+  if (categoryExercises.length === 0) return [];
+  
+  console.log(`Processing category with ${categoryExercises.length} exercises:`, categoryExercises.map(e => e.name));
+  
+  // Sort logs by timestamp to ensure proper chronological order
+  const sortedLogs = [...logs].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+  
+  // Filter logs to only include those for exercises in this category
+  const categoryLogs = sortedLogs.filter(log => 
+    categoryExercises.some(ex => ex.id === log.exerciseId)
+  );
+  
+  console.log(`Found ${categoryLogs.length} logs for this category`);
+  
+  // Collect all unique dates for this category
+  const allDates = new Set();
+  categoryLogs.forEach(log => {
+    const logDate = new Date(log.timestamp);
+    const date = `${logDate.getMonth() + 1}/${logDate.getDate()}/${logDate.getFullYear()}`;
+    allDates.add(date);
+  });
+  
+  // Initialize chart data structure for all dates
+  Array.from(allDates).forEach(date => {
+    chartData.set(date, { date });
+  });
+  
+  // Process all logs for exercises in this category
+  categoryLogs.forEach(log => {
+    const exercise = categoryExercises.find(ex => ex.id === log.exerciseId);
+    if (!exercise) return;
+    
+    const logDate = new Date(log.timestamp);
+    const date = `${logDate.getMonth() + 1}/${logDate.getDate()}/${logDate.getFullYear()}`;
+    const exerciseName = exercise.name;
+    
+    const dayData = chartData.get(date);
+    
+    if (!dayData[exerciseName]) {
+      dayData[exerciseName] = {
+        maxWeight: 0,
+      };
+    }
+    
+    // Convert to lbs if needed and track the maximum weight for this exercise on this date
+    const weightInLbs = log.weightUnit === 'kg' ? convertWeight(log.weight, 'kg') : log.weight;
+    dayData[exerciseName].maxWeight = Math.max(dayData[exerciseName].maxWeight || 0, weightInLbs);
+  });
+  
+  // Convert to result format with raw weights (no percentage calculation)
+  const result = Array.from(chartData.values()).map(dayData => {
+    const formattedDay = { date: dayData.date };
+    
+    // Ensure ALL exercises in the category are represented
+    categoryExercises.forEach(exercise => {
+      const exerciseName = exercise.name;
+      if (dayData[exerciseName]) {
+        const { maxWeight } = dayData[exerciseName] as { maxWeight: number };
+        formattedDay[exerciseName] = Math.round(maxWeight * 100) / 100; // Round to 2 decimal places
+      } else {
+        // Initialize with null for exercises with no data on this date
+        formattedDay[exerciseName] = null;
       }
     });
     
@@ -187,7 +317,28 @@ export const getOverallProgressChartData = (
   });
   
   // Sort by date
-  return result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const sortedResult = result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  
+  // Forward fill missing values to maintain line continuity for each exercise
+  for (let i = 1; i < sortedResult.length; i++) {
+    categoryExercises.forEach(exercise => {
+      const exerciseName = exercise.name;
+      // If current value is null but previous has a value, forward fill
+      if (sortedResult[i][exerciseName] === null && sortedResult[i-1][exerciseName] !== null) {
+        sortedResult[i][exerciseName] = sortedResult[i-1][exerciseName];
+      }
+    });
+  }
+  
+  // Only return results that have at least one non-null exercise value
+  const finalResult = sortedResult.filter(day => 
+    categoryExercises.some(exercise => day[exercise.name] !== null)
+  );
+  
+  console.log(`Final result has ${finalResult.length} data points with exercises:`, 
+    finalResult.length > 0 ? Object.keys(finalResult[0]).filter(k => k !== 'date') : []);
+  
+  return finalResult;
 };
 
 export const calculateAllTimeGainLeaderboard = (

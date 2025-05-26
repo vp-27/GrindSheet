@@ -17,6 +17,7 @@ interface ProgressChartProps {
   weightUnit?: string; // Added to display the correct weight unit
   appleStyle?: boolean; // Added to support Apple iOS styling
   blendWithBackground?: boolean; // New prop for Robinhood-style charts
+  customColors?: string[]; // Allow custom colors to be passed in
 }
 
 // Define timeframe options
@@ -31,7 +32,8 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
   showPercentage = false,
   weightUnit = 'lb',
   appleStyle = false,
-  blendWithBackground = false
+  blendWithBackground = false,
+  customColors
 }) => {
   const navigate = useNavigate();
   const [timeframe, setTimeframe] = useState<TimeframeOption>('ALL');
@@ -50,9 +52,9 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
   }
 
   // Updated colors for Apple-style charts (more muted and elegant)
-  const colors = appleStyle 
+  const colors = customColors || (appleStyle 
     ? ['#34C759', '#5AC8FA', '#FF9500', '#FF2D55', '#AF52DE', '#000000']
-    : ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+    : ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']);
 
   const handleViewHistory = () => {
     if (exerciseId) {
@@ -65,11 +67,6 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
   };
 
   const formatUnit = showPercentage ? '%' : weightUnit;
-
-  // Container styling for Robinhood-style charts
-  const containerStyles = blendWithBackground 
-    ? { marginLeft: '-16px', marginRight: '-16px', width: 'calc(100% + 32px)' } 
-    : {};
 
   return (
     <div>
@@ -86,14 +83,14 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
           </Button>
         </div>
       )}
-      <div className={`${blendWithBackground ? 'px-0' : 'p-0'}`} style={containerStyles}>
+      <div className={`${blendWithBackground ? 'px-0' : 'p-0'}`}>
         <ResponsiveContainer width="100%" height={240}>
           <LineChart
             data={data}
             margin={{
               top: 5,
-              right: blendWithBackground ? 0 : 20,
-              left: blendWithBackground ? 0 : 0,
+              right: 5, // Reduced right margin
+              left: 10, // Reduced left margin
               bottom: 5,
             }}
           >
@@ -104,21 +101,22 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
             />
             <XAxis 
               dataKey="date" 
-              tick={{ fontSize: 10, fill: appleStyle ? '#8E8E93' : undefined }}
+              tick={{ fontSize: 10, fill: appleStyle ? '#8E8E93' : '#6B7280' }}
               tickFormatter={(value) => {
                 const date = new Date(value);
                 return `${date.getMonth() + 1}/${date.getDate()}`;
               }}
-              axisLine={!blendWithBackground && !appleStyle}
-              tickLine={!blendWithBackground && !appleStyle}
-              hide={blendWithBackground}
+              axisLine={!appleStyle}
+              tickLine={!appleStyle}
+              hide={false} // Always show X-axis for clarity
             />
             <YAxis 
               tickFormatter={(value) => `${value}${formatUnit}`}
-              tick={{ fontSize: 10, fill: appleStyle ? '#8E8E93' : undefined }}
-              axisLine={!blendWithBackground && !appleStyle}
-              tickLine={!blendWithBackground && !appleStyle}
-              hide={blendWithBackground}
+              tick={{ fontSize: 10, fill: appleStyle ? '#8E8E93' : '#6B7280' }}
+              axisLine={!appleStyle}
+              tickLine={!appleStyle}
+              hide={false} // Always show Y-axis for clarity
+              domain={showPercentage ? ['dataMin', 'dataMax'] : ['dataMin', 'dataMax']} // Keep percentage charts within data range, not forced to 100%
             />
             <Tooltip 
               formatter={(value, name) => {
@@ -137,8 +135,23 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
                 padding: '8px 12px'
               } : undefined}
             />
-            {multiple && !blendWithBackground && (
-              <Legend wrapperStyle={appleStyle ? { fontSize: '11px', color: '#8E8E93' } : undefined} />
+            {multiple && !showPercentage && (
+              <Legend 
+                layout="horizontal"
+                align="center"
+                verticalAlign="bottom"
+                wrapperStyle={{
+                  fontSize: '13px',
+                  color: appleStyle ? '#8E8E93' : '#374151',
+                  paddingTop: '12px',
+                  fontWeight: '500',
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'center',
+                  gap: '16px'
+                }}
+                iconType="line"
+              />
             )}
             {multiple ? (
               <>
