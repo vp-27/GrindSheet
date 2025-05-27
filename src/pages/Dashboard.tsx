@@ -158,7 +158,7 @@ const Dashboard = () => {
                 onClick={() => setSelectedCategoryId(null)}
                 className={`rounded-2xl px-6 py-3 font-medium transition-all duration-300 whitespace-nowrap ${
                   selectedCategoryId === null 
-                    ? 'bg-gradient-to-r from-primary/70 to-primary text-primary-foreground shadow-lg hover:shadow-xl transform hover:scale-105' 
+                    ? 'bg-black text-white shadow-lg hover:shadow-xl transform hover:scale-105 hover:bg-gray-800' 
                     : 'bg-card border-border hover:shadow-md'
                 }`}
               >

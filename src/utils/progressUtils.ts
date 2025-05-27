@@ -131,13 +131,25 @@ export const getCategoryProgressChartData = (logs: ExerciseLog[], exercises: Exe
 };
 
 // Function to get overall progress chart data with percentage growth by categories
+// 
+// IMPORTANT: This function solves the "different exercise baseline" problem by:
+// 1. Calculating percentage gains PER EXERCISE based on each exercise's own starting weight
+// 2. Averaging the PERCENTAGE GAINS (not raw weights) for each category
+// 
+// Example scenario that this fixes:
+// Day 1: Shoulder Press 20lbs (0% gain)
+// Day 2: Shoulder Press 22lbs (10% gain) + Lateral Raises 10lbs (0% gain) 
+// Result: Category shows 5% gain average (not a false weight drop)
+//
+// This ensures that adding new exercises with different baselines doesn't
+// artificially affect the category's progress visualization.
 export const getOverallProgressChartData = (
   logs: ExerciseLog[], 
   exercises: Exercise[], 
   categories: Category[]
 ): any[] => {
   const chartData = new Map();
-  const categoryStartWeights = new Map(); // Track the first recorded weight for each category
+  const exerciseStartWeights = new Map(); // Track the first recorded weight for each exercise
   
   // Create a map of category IDs to names for quick lookup
   const categoryNames = new Map(categories.map(cat => [cat.id, cat.name]));
@@ -145,17 +157,16 @@ export const getOverallProgressChartData = (
   // Sort logs by timestamp to ensure proper chronological order
   const sortedLogs = [...logs].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   
-  // First pass: establish starting weights for each category
+  // First pass: establish starting weights for each exercise
   sortedLogs.forEach(log => {
     const exercise = exercises.find(e => e.id === log.exerciseId);
     if (!exercise) return;
     
-    const categoryId = exercise.categoryId;
-    const categoryName = categoryNames.get(categoryId) || 'Unknown';
+    const exerciseId = exercise.id;
     
-    // Only set if this is the earliest weight for this category
-    if (!categoryStartWeights.has(categoryName)) {
-      categoryStartWeights.set(categoryName, log.weight);
+    // Only set if this is the earliest weight for this exercise
+    if (!exerciseStartWeights.has(exerciseId)) {
+      exerciseStartWeights.set(exerciseId, log.weight);
     }
   });
   
@@ -167,7 +178,7 @@ export const getOverallProgressChartData = (
     allDates.add(date);
   });
   
-  // Second pass: group logs by date and category, calculating percentage gains
+  // Second pass: group logs by date and exercise, then calculate per-exercise percentage gains
   sortedLogs.forEach(log => {
     const logDate = new Date(log.timestamp);
     const date = `${logDate.getMonth() + 1}/${logDate.getDate()}/${logDate.getFullYear()}`;
@@ -177,6 +188,7 @@ export const getOverallProgressChartData = (
     
     const categoryId = exercise.categoryId;
     const categoryName = categoryNames.get(categoryId) || 'Unknown';
+    const exerciseId = exercise.id;
     
     if (!chartData.has(date)) {
       chartData.set(date, {
@@ -188,17 +200,26 @@ export const getOverallProgressChartData = (
     
     if (!dayData[categoryName]) {
       dayData[categoryName] = {
-        maxWeight: 0,
-        latestWeight: 0,
+        exerciseProgress: new Map(), // Track percentage progress per exercise
+        latestTimestamp: log.timestamp
       };
     }
     
-    // Track the maximum and latest weight for this category on this date
-    dayData[categoryName].maxWeight = Math.max(dayData[categoryName].maxWeight, log.weight);
-    dayData[categoryName].latestWeight = log.weight; // Will be overwritten by later logs on same day
+    // Calculate percentage gain for this exercise and store it
+    const startWeight = exerciseStartWeights.get(exerciseId) || log.weight;
+    const percentGain = startWeight > 0 ? ((log.weight - startWeight) / startWeight) * 100 : 0;
+    
+    // Track the latest percentage gain for each exercise in this category on this date
+    if (!dayData[categoryName].exerciseProgress.has(exerciseId) || 
+        new Date(log.timestamp) >= new Date(dayData[categoryName].latestTimestamp)) {
+      dayData[categoryName].exerciseProgress.set(exerciseId, percentGain);
+      if (new Date(log.timestamp) >= new Date(dayData[categoryName].latestTimestamp)) {
+        dayData[categoryName].latestTimestamp = log.timestamp;
+      }
+    }
   });
   
-  // Calculate percentage gains for each category based on their starting weights
+  // Calculate average percentage gains for each category
   const result = Array.from(chartData.values()).map(dayData => {
     const formattedDay = { date: dayData.date };
     
@@ -206,12 +227,16 @@ export const getOverallProgressChartData = (
     categories.forEach(category => {
       const categoryName = category.name;
       if (dayData[categoryName]) {
-        const { maxWeight } = dayData[categoryName] as { maxWeight: number; latestWeight: number };
-        const startWeight = categoryStartWeights.get(categoryName) || maxWeight;
+        const categoryData = dayData[categoryName] as { exerciseProgress: Map<string, number>; latestTimestamp: string };
         
-        // Calculate percentage gain from start weight
-        const percentGain = startWeight > 0 ? ((maxWeight - startWeight) / startWeight) * 100 : 0;
-        formattedDay[categoryName] = Math.round(percentGain * 100) / 100; // Round to 2 decimal places
+        // Calculate the average percentage gain for this category on this date
+        // This averages the individual percentage gains of each exercise, not raw weights
+        const progressValues = Array.from(categoryData.exerciseProgress.values());
+        const avgPercentGain = progressValues.length > 0 
+          ? progressValues.reduce((sum, percent) => sum + percent, 0) / progressValues.length 
+          : 0;
+        
+        formattedDay[categoryName] = Math.round(avgPercentGain * 100) / 100; // Round to 2 decimal places
       } else {
         // Fill missing data with previous value or 0 to maintain line continuity
         formattedDay[categoryName] = 0;
