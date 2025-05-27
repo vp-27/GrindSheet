@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
+import ExerciseMiniCard from '@/components/ExerciseMiniCard';
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -13,12 +15,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
-import { ChevronRight, Edit2, Plus, Settings as SettingsIcon, Trash2, User, Pencil, LogOut, Folder, Palette, Dumbbell } from 'lucide-react';
-import ThemeSelector from '@/components/ThemeSelector';
+import { ChevronRight, Edit2, Plus, Settings as SettingsIcon, Trash2, User, Pencil, LogOut, Folder, Palette, Dumbbell, Sun, Moon, Monitor } from 'lucide-react';
 import { getCategoryColors, getCategoryKeyByName } from '@/utils/categoryColors';
+import '@/components/ui/color-indicator.css';
 
 const Settings: React.FC = () => {
   const { user, profile, signOut, updateProfile } = useAuth();
+  const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('profile');
@@ -432,11 +435,7 @@ const Settings: React.FC = () => {
                   <DialogFooter>
                     <Button 
                       type="submit" 
-                      className="w-full h-12 rounded-xl font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl"
-                      style={{ 
-                        backgroundColor: '#3b82f6',
-                        boxShadow: '0 4px 20px #3b82f630'
-                      }}
+                      className="w-full h-12 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
                     >
                       Save Changes
                     </Button>
@@ -448,249 +447,184 @@ const Settings: React.FC = () => {
         </div>
 
         {/* Settings Sections */}
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* Theme Settings */}
-          <div className="relative">
-            <div 
-              className="absolute inset-0 rounded-2xl opacity-10 blur-lg"
-              style={{ backgroundColor: '#8b5cf6' }}
-            />
-            <div className="relative backdrop-blur-sm bg-card/90 rounded-2xl border border-border/30 p-6 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <div 
-                  className="w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm"
-                  style={{ 
-                    backgroundColor: '#8b5cf615',
-                    color: '#8b5cf6'
-                  }}
-                >
-                  <Palette className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground">Appearance</h3>
-                  <p className="text-sm text-muted-foreground">Customize your app theme</p>
-                </div>
+          <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center">
+                <Palette className="h-5 w-5 text-muted-foreground" />
               </div>
-              <ThemeSelector />
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">Appearance</h3>
+                <p className="text-sm text-muted-foreground">Choose how the app looks to you</p>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { value: 'light' as const, label: 'Light', icon: 'Sun' },
+                { value: 'dark' as const, label: 'Dark', icon: 'Moon' },
+                { value: 'system' as const, label: 'System', icon: 'Monitor' }
+              ].map((themeOption) => {
+                const isSelected = theme === themeOption.value;
+                const IconComponent = themeOption.icon === 'Sun' ? Sun : 
+                                     themeOption.icon === 'Moon' ? Moon : Monitor;
+                
+                return (
+                  <Button
+                    key={themeOption.value}
+                    variant={isSelected ? "default" : "outline"}
+                    className={`h-20 flex flex-col gap-2 p-3 rounded-xl transition-all duration-200 ${
+                      isSelected 
+                        ? 'bg-primary text-primary-foreground shadow-md border-primary' 
+                        : 'bg-background/60 border-border/60 hover:bg-background/80 text-foreground hover:border-border'
+                    }`}
+                    onClick={() => setTheme(themeOption.value)}
+                  >
+                    <IconComponent className="h-5 w-5" />
+                    <span className="text-sm font-medium">{themeOption.label}</span>
+                  </Button>
+                );
+              })}
             </div>
           </div>
 
           {/* Categories Management */}
-          <div className="relative">
-            <div 
-              className="absolute inset-0 rounded-2xl opacity-10 blur-lg"
-              style={{ backgroundColor: '#10b981' }}
-            />
-            <div className="relative backdrop-blur-sm bg-card/90 rounded-2xl border border-border/30 p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div 
-                    className="w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm"
-                    style={{ 
-                      backgroundColor: '#10b98115',
-                      color: '#10b981'
-                    }}
-                  >
-                    <Folder className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground">Categories</h3>
-                    <p className="text-sm text-muted-foreground">Manage exercise categories</p>
-                  </div>
+          <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center">
+                  <Folder className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <Button 
-                  onClick={() => {
-                    setEditingCategory(null);
-                    categoryForm.reset({ name: '', description: '' });
-                    setIsAddCategoryOpen(true);
-                  }}
-                  className="h-10 rounded-xl font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl"
-                  style={{ 
-                    backgroundColor: '#10b981',
-                    boxShadow: '0 4px 20px #10b98130'
-                  }}
-                >
-                  <Plus className="h-4 w-4 mr-2" /> Add
-                </Button>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">Categories</h3>
+                  <p className="text-sm text-muted-foreground">Manage exercise categories</p>
+                </div>
               </div>
-              
-              {loading ? (
-                <div className="text-center py-6 text-muted-foreground">Loading categories...</div>
-              ) : categories.length > 0 ? (
-                <div className="space-y-3 max-h-64 overflow-y-auto">
-                  {categories.map(category => {
-                    const categoryKey = getCategoryKeyByName(category.name);
-                    const colors = getCategoryColors(categoryKey);
-                    
-                    return (
-                      <div 
-                        key={category.id} 
-                        className="flex items-center justify-between p-3 rounded-xl border backdrop-blur-sm"
-                        style={{
-                          backgroundColor: `${colors.primary}10`,
-                          borderColor: `${colors.primary}20`
-                        }}
-                      >
+              <Button 
+                onClick={() => {
+                  setEditingCategory(null);
+                  categoryForm.reset({ name: '', description: '' });
+                  setIsAddCategoryOpen(true);
+                }}
+                className="h-10 px-4 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
+              >
+                <Plus className="h-4 w-4 mr-2" /> Add Category
+              </Button>
+            </div>
+            
+            {loading ? (
+              <div className="text-center py-8 text-muted-foreground">Loading categories...</div>
+            ) : categories.length > 0 ? (
+              <div className="space-y-3 max-h-64 overflow-y-auto">
+                {categories.map(category => {
+                  const categoryKey = getCategoryKeyByName(category.name);
+                  const colors = getCategoryColors(categoryKey);
+                  
+                  return (
+                    <div 
+                      key={category.id} 
+                      className="flex items-center justify-between p-4 rounded-xl bg-background/60 border border-border/60 hover:bg-background/80 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`category-indicator category-indicator--${categoryKey}`} />
                         <div>
                           <h4 className="font-medium text-foreground">{category.name}</h4>
                           <p className="text-sm text-muted-foreground">{category.description || 'No description'}</p>
                         </div>
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleEditCategory(category)}
-                            className="h-8 w-8 rounded-lg hover:bg-background/60"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleDeleteCategory(category.id)}
-                            className="h-8 w-8 rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
                       </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-6 text-muted-foreground">
-                  No categories found. Create your first category!
-                </div>
-              )}
-            </div>
+                      <div className="flex gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleEditCategory(category)}
+                          className="h-8 w-8 rounded-lg hover:bg-muted/60 text-muted-foreground hover:text-foreground"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => handleDeleteCategory(category.id)}
+                          className="h-8 w-8 rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No categories found. Create your first category!
+              </div>
+            )}
           </div>
 
           {/* Exercises Management */}
-          <div className="relative">
-            <div 
-              className="absolute inset-0 rounded-2xl opacity-10 blur-lg"
-              style={{ backgroundColor: '#f59e0b' }}
-            />
-            <div className="relative backdrop-blur-sm bg-card/90 rounded-2xl border border-border/30 p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div 
-                    className="w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm"
-                    style={{ 
-                      backgroundColor: '#f59e0b15',
-                      color: '#f59e0b'
-                    }}
-                  >
-                    <Dumbbell className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground">Exercises</h3>
-                    <p className="text-sm text-muted-foreground">Manage your exercises</p>
-                  </div>
+          <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center">
+                  <Dumbbell className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <Button 
-                  onClick={() => {
-                    setEditingExercise(null);
-                    exerciseForm.reset({ name: '', description: '', categoryId: '' });
-                    setIsAddExerciseOpen(true);
-                  }}
-                  className="h-10 rounded-xl font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl"
-                  style={{ 
-                    backgroundColor: '#f59e0b',
-                    boxShadow: '0 4px 20px #f59e0b30'
-                  }}
-                >
-                  <Plus className="h-4 w-4 mr-2" /> Add
-                </Button>
+                <div>
+                  <h3 className="text-lg font-semibold text-foreground">Exercises</h3>
+                  <p className="text-sm text-muted-foreground">Manage your exercises</p>
+                </div>
               </div>
-              
-              {loading ? (
-                <div className="text-center py-6 text-muted-foreground">Loading exercises...</div>
-              ) : exercises.length > 0 ? (
-                <div className="space-y-3 max-h-64 overflow-y-auto">
-                  {exercises.map(exercise => {
-                    const category = categories.find(c => c.id === exercise.category_id);
-                    const categoryKey = category ? getCategoryKeyByName(category.name) : 'default';
-                    const colors = getCategoryColors(categoryKey);
-                    
-                    return (
-                      <div 
-                        key={exercise.id} 
-                        className="flex items-center justify-between p-3 rounded-xl border backdrop-blur-sm"
-                        style={{
-                          backgroundColor: `${colors.primary}10`,
-                          borderColor: `${colors.primary}20`
-                        }}
-                      >
-                        <div className="flex-1">
-                          <h4 className="font-medium text-foreground">{exercise.name}</h4>
-                          <p className="text-sm text-muted-foreground">{exercise.description || 'No description'}</p>
-                          <span 
-                            className="inline-block mt-1 text-xs px-2 py-1 rounded-md font-medium"
-                            style={{
-                              backgroundColor: `${colors.primary}15`,
-                              color: colors.primary
-                            }}
-                          >
-                            {category?.name || 'Uncategorized'}
-                          </span>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleEditExercise(exercise)}
-                            className="h-8 w-8 rounded-lg hover:bg-background/60"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleDeleteExercise(exercise.id)}
-                            className="h-8 w-8 rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="text-center py-6 text-muted-foreground">
-                  No exercises found. Create your first exercise!
-                </div>
-              )}
+              <Button 
+                onClick={() => {
+                  setEditingExercise(null);
+                  exerciseForm.reset({ name: '', description: '', categoryId: '' });
+                  setIsAddExerciseOpen(true);
+                }}
+                className="h-10 px-4 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
+              >
+                <Plus className="h-4 w-4 mr-2" /> Add Exercise
+              </Button>
             </div>
+            
+            {loading ? (
+              <div className="text-center py-8 text-muted-foreground">Loading exercises...</div>
+            ) : exercises.length > 0 ? (
+              <div className="grid gap-3 max-h-64 overflow-y-auto">
+                {exercises.map(exercise => {
+                  const category = categories.find(c => c.id === exercise.category_id);
+                  
+                  return (
+                    <ExerciseMiniCard
+                      key={exercise.id}
+                      exercise={exercise}
+                      category={category}
+                      onEdit={() => handleEditExercise(exercise)}
+                      onDelete={() => handleDeleteExercise(exercise.id)}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No exercises found. Create your first exercise!
+              </div>
+            )}
           </div>
 
           {/* Logout Section */}
-          <div className="relative">
-            <div 
-              className="absolute inset-0 rounded-2xl opacity-10 blur-lg"
-              style={{ backgroundColor: '#ef4444' }}
-            />
-            <div 
-              className="relative backdrop-blur-sm bg-card/90 rounded-2xl border border-border/30 p-6 shadow-sm cursor-pointer hover:bg-red-50/50 dark:hover:bg-red-950/20 transition-colors"
-              onClick={handleLogout}
-            >
-              <div className="flex items-center gap-3">
-                <div 
-                  className="w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-sm"
-                  style={{ 
-                    backgroundColor: '#ef444415',
-                    color: '#ef4444'
-                  }}
-                >
-                  <LogOut className="h-5 w-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-red-600 dark:text-red-400">Sign Out</h3>
-                  <p className="text-sm text-muted-foreground">Sign out of your account</p>
-                </div>
-                <ChevronRight className="h-5 w-5 text-muted-foreground ml-auto" />
+          <div 
+            className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 p-6 shadow-sm cursor-pointer hover:bg-red-50/20 dark:hover:bg-red-950/10 transition-colors group"
+            onClick={handleLogout}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-950/30 flex items-center justify-center">
+                <LogOut className="h-5 w-5 text-red-600 dark:text-red-400" />
               </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-red-600 dark:text-red-400">Sign Out</h3>
+                <p className="text-sm text-muted-foreground">Sign out of your account</p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors" />
             </div>
           </div>
         </div>
@@ -752,11 +686,7 @@ const Settings: React.FC = () => {
             <DialogFooter>
               <Button 
                 type="submit" 
-                className="w-full h-12 rounded-xl font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl"
-                style={{ 
-                  backgroundColor: '#f59e0b',
-                  boxShadow: '0 4px 20px #f59e0b30'
-                }}
+                className="w-full h-12 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
               >
                 {editingExercise ? 'Update Exercise' : 'Add Exercise'}
               </Button>
@@ -802,11 +732,7 @@ const Settings: React.FC = () => {
             <DialogFooter>
               <Button 
                 type="submit" 
-                className="w-full h-12 rounded-xl font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl"
-                style={{ 
-                  backgroundColor: '#10b981',
-                  boxShadow: '0 4px 20px #10b98130'
-                }}
+                className="w-full h-12 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
               >
                 {editingCategory ? 'Update Category' : 'Add Category'}
               </Button>
