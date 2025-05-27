@@ -132,14 +132,6 @@ const History = () => {
   return (
     <Layout title="History">
       <div className="flex flex-col gap-8 pb-6">
-        {/* Header Section */}
-        <div className="relative">
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold text-foreground mb-2">Workout History</h1>
-            <p className="text-muted-foreground">Track all your workout sessions and progress over time</p>
-          </div>
-        </div>
-        
         {sortedDates.length === 0 && (
           <div className="relative">
             <div className="backdrop-blur-sm bg-card/90 rounded-2xl border p-12 text-center shadow-sm">

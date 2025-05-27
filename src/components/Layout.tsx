@@ -34,7 +34,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Minimal header */}
       <header className="p-4 flex justify-between items-center">
-        <h1 className="text-xl font-semibold text-foreground">
+        <h1 className="text-3xl font-bold text-foreground">
           {title || "Home"}
         </h1>
         <Button variant="ghost" className="p-0 h-auto" onClick={() => navigate('/profile')}>
