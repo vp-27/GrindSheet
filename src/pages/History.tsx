@@ -186,22 +186,20 @@ const History = () => {
                   {/* Category indicators */}
                   {dayCategories.map((category, catIndex) => {
                     const categoryIndex = categories.findIndex(cat => cat.id === category.id);
-                    const colorClasses = [
-                      'bg-blue-500/10 text-blue-600 border-blue-200',
-                      'bg-emerald-500/10 text-emerald-600 border-emerald-200', 
-                      'bg-purple-500/10 text-purple-600 border-purple-200',
-                      'bg-orange-500/10 text-orange-600 border-orange-200',
-                      'bg-pink-500/10 text-pink-600 border-pink-200',
-                      'bg-cyan-500/10 text-cyan-600 border-cyan-200',
-                      'bg-yellow-500/10 text-yellow-600 border-yellow-200',
-                      'bg-red-500/10 text-red-600 border-red-200'
-                    ];
-                    const categoryColorClass = categoryIndex >= 0 ? colorClasses[categoryIndex % colorClasses.length] : 'bg-emerald-500/10 text-emerald-600 border-emerald-200';
+                    const categoryColor = categoryIndex >= 0 ? getCategoryColor(categoryIndex) : '#10b981';
                     
                     return (
                       <span 
                         key={category.id}
-                        className={`text-xs font-medium px-2.5 py-1 rounded-full border ${categoryColorClass}`}
+                        className="text-xs font-medium px-2.5 py-1 rounded-full border"
+                        style={{ 
+                          // eslint-disable-next-line
+                          backgroundColor: `${categoryColor}10`,
+                          // eslint-disable-next-line
+                          color: categoryColor,
+                          // eslint-disable-next-line
+                          borderColor: `${categoryColor}25`
+                        }}
                       >
                         {category.name}
                       </span>
@@ -211,87 +209,78 @@ const History = () => {
               </div>
               
               {/* Day's Workouts Container */}
-              <div className="backdrop-blur-sm bg-card/90 rounded-2xl border shadow-sm overflow-hidden">
-                <div className="divide-y divide-border/50">
+              <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+                <div className="divide-y divide-border">
                   {dayLogs.map((log, index) => {
                     const exerciseName = getExerciseName(log.exerciseId);
                     const category = getCategoryForExercise(log.exerciseId);
                     const categoryIndex = categories.findIndex(cat => cat.id === category?.id);
                     const categoryColor = categoryIndex >= 0 ? getCategoryColor(categoryIndex) : '#10b981';
                     
-                    // Get Tailwind-safe color classes based on category index
-                    const colorClasses = [
-                      'bg-blue-500',
-                      'bg-emerald-500', 
-                      'bg-purple-500',
-                      'bg-orange-500',
-                      'bg-pink-500',
-                      'bg-cyan-500',
-                      'bg-yellow-500',
-                      'bg-red-500'
-                    ];
-                    const categoryColorClass = categoryIndex >= 0 ? colorClasses[categoryIndex % colorClasses.length] : 'bg-emerald-500';
-                    
                     return (
                       <div 
                         key={log.id} 
-                        className="p-4 sm:p-5 group transition-all duration-200 hover:bg-muted/30 active:bg-muted/40"
+                        className="p-5 group transition-all duration-200 hover:bg-muted/20 active:bg-muted/30"
                       >
-                        <div className="flex justify-between items-start gap-3 sm:gap-4">
-                          <div className="flex items-start gap-3 flex-1 min-w-0">
-                            {/* Category indicator */}
-                            <div 
-                              className={`w-3 h-3 rounded-full mt-1.5 flex-shrink-0 ${categoryColorClass}`}
-                            />
-                            
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-foreground truncate text-sm sm:text-base">{exerciseName}</h3>
-                              
-                              <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground mt-1">
-                                <Clock className="w-3 h-3" />
-                                <span>{format(new Date(log.timestamp), 'h:mm a')}</span>
-                                {category && (
-                                  <>
-                                    <span>•</span>
-                                    <span className="truncate">{category.name}</span>
-                                  </>
-                                )}
-                              </div>
-                              
-                              {log.note && (
-                                <div className="text-xs sm:text-sm text-muted-foreground mt-2 p-2 bg-muted/50 rounded-lg">
-                                  {log.note}
+                        <div className="flex justify-between items-start gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="font-semibold text-foreground truncate">{exerciseName}</h3>
+                              {category && (
+                                <div 
+                                  className="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium flex-shrink-0"
+                                  style={{ 
+                                    // eslint-disable-next-line
+                                    backgroundColor: `${categoryColor}15`,
+                                    // eslint-disable-next-line
+                                    color: categoryColor,
+                                    // eslint-disable-next-line
+                                    border: `1px solid ${categoryColor}25`
+                                  }}
+                                >
+                                  {category.name}
                                 </div>
                               )}
                             </div>
+                            
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                              <Clock className="w-3 h-3 flex-shrink-0" />
+                              <span>{format(new Date(log.timestamp), 'h:mm a')}</span>
+                            </div>
+                            
+                            {log.note && (
+                              <div className="text-sm text-muted-foreground p-3 bg-muted/40 rounded-xl border border-border/50">
+                                {log.note}
+                              </div>
+                            )}
                           </div>
                           
-                          <div className="flex items-start gap-2 sm:gap-3">
+                          <div className="flex items-start gap-3 flex-shrink-0">
                             {/* Weight Display */}
                             <div className="text-right">
-                              <p className="text-lg sm:text-xl font-bold text-foreground">{log.weight}</p>
+                              <p className="text-xl font-bold text-foreground">{log.weight}</p>
                               <p className="text-xs text-muted-foreground">lbs</p>
                             </div>
                             
-                            {/* Action Buttons - Mobile optimized */}
+                            {/* Action Buttons - Vertical alignment */}
                             <div className="flex flex-col gap-2">
                               <Button 
                                 variant="outline" 
                                 size="icon"
-                                className="h-11 w-11 sm:h-10 sm:w-10 rounded-xl border-border hover:bg-muted hover:border-primary/30 transition-colors shadow-sm touch-manipulation" 
+                                className="h-9 w-9 rounded-lg border-border/50 hover:bg-muted hover:border-primary/30 transition-all duration-200 shadow-sm" 
                                 onClick={() => openEditDialog(log)}
                                 aria-label="Edit exercise log"
                               >
-                                <Pencil className="h-4 w-4" />
+                                <Pencil className="h-3.5 w-3.5" />
                               </Button>
                               <Button 
                                 variant="outline" 
                                 size="icon"
-                                className="h-11 w-11 sm:h-10 sm:w-10 rounded-xl border-border text-red-500 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-colors shadow-sm touch-manipulation" 
+                                className="h-9 w-9 rounded-lg border-border/50 text-red-500 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-all duration-200 shadow-sm" 
                                 onClick={() => handleDelete(log.id)}
                                 aria-label="Delete exercise log"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             </div>
                           </div>

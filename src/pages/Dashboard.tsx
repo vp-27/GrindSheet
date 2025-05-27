@@ -221,20 +221,26 @@ const Dashboard = () => {
                   >
                     {/* Main card */}
                     <div className="relative bg-card rounded-2xl border border-border p-5 shadow-sm group-hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1">
-                      {/* Header with category dot */}
+                      {/* Header with exercise name and category pill inline */}
                       <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <h3 className="font-semibold text-foreground truncate">{progress.exercise.name}</h3>
                           <div 
-                            className="w-3 h-3 rounded-full"
+                            className="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium flex-shrink-0"
                             style={{ 
                               // eslint-disable-next-line
-                              backgroundColor: categoryColor 
+                              backgroundColor: `${categoryColor}15`,
+                              // eslint-disable-next-line
+                              color: categoryColor,
+                              // eslint-disable-next-line
+                              border: `1px solid ${categoryColor}25`
                             }}
-                          />
-                          <h3 className="font-semibold text-foreground truncate">{progress.exercise.name}</h3>
+                          >
+                            {categories.find(cat => cat.id === progress.exercise.categoryId)?.name}
+                          </div>
                         </div>
                         {isPersonalRecord && (
-                          <div className="flex items-center gap-1 bg-amber-50 text-amber-700 px-2 py-1 rounded-lg text-xs font-medium">
+                          <div className="flex items-center gap-1 bg-amber-50 text-amber-700 px-2 py-1 rounded-lg text-xs font-medium flex-shrink-0">
                             <Trophy className="w-3 h-3" />
                             PR
                           </div>
@@ -319,25 +325,28 @@ const Dashboard = () => {
                         onClick={() => exercise && handleExerciseClick(exercise.id)}
                       >
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            {/* Category indicator */}
-                            <div 
-                              className="w-3 h-3 rounded-full group-hover:scale-110 transition-transform"
-                              style={{ 
-                                // eslint-disable-next-line
-                                backgroundColor: categoryColor 
-                              }}
-                            />
-                            <div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
                               <h4 className="font-semibold text-foreground group-hover:text-foreground transition-colors">
                                 {exercise?.name || 'Unknown Exercise'}
                               </h4>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <span>{category?.name || 'Uncategorized'}</span>
-                                <span>•</span>
-                                <Clock className="w-3 h-3" />
-                                <span>{format(new Date(log.timestamp), 'MMM d, yyyy')}</span>
+                              <div 
+                                className="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium flex-shrink-0"
+                                style={{ 
+                                  // eslint-disable-next-line
+                                  backgroundColor: `${categoryColor}15`,
+                                  // eslint-disable-next-line
+                                  color: categoryColor,
+                                  // eslint-disable-next-line
+                                  border: `1px solid ${categoryColor}25`
+                                }}
+                              >
+                                {category?.name || 'Uncategorized'}
                               </div>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Clock className="w-3 h-3" />
+                              <span>{format(new Date(log.timestamp), 'MMM d, yyyy')}</span>
                             </div>
                           </div>
                           
