@@ -90,7 +90,7 @@ const Dashboard = () => {
     navigate(`/exercise-detail?exercise=${exerciseId}`);
   };
 
-  // Get selected category color for backdrop tinting
+  // Get selected category color for subtle background tinting
   const selectedCategoryColor = useMemo(() => {
     if (!selectedCategoryId) return null;
     const categoryIndex = categories.findIndex(cat => cat.id === selectedCategoryId);
@@ -100,18 +100,18 @@ const Dashboard = () => {
   return (
     <Layout title="Home">
       <>
-        {/* Dynamic background tint based on selected category */}
-        <div 
-          className="fixed inset-0 transition-all duration-700 ease-out pointer-events-none"
-          style={{
-            // eslint-disable-next-line
-            background: selectedCategoryColor 
-              ? `radial-gradient(ellipse at top, ${selectedCategoryColor}08 0%, transparent 50%)`
-              : 'transparent'
-          }}
-        />
+        {/* Subtle background tint based on selected category - Apple style */}
+        {selectedCategoryColor && (
+          <div 
+            className="fixed inset-0 pointer-events-none transition-all duration-700 ease-out z-0"
+            style={{
+              // eslint-disable-next-line
+              background: `radial-gradient(ellipse 100% 60% at 50% 0%, ${selectedCategoryColor}15 0%, ${selectedCategoryColor}08 40%, transparent 70%)`,
+            }}
+          />
+        )}
         
-        <div className="relative flex flex-col gap-8 pb-6">
+        <div className="relative flex flex-col gap-8 pb-6 z-10">
           {/* Progress Chart Section - Embedded in background */}
           <div className="relative -mx-4 px-4">
             <div className="mb-6">
@@ -159,7 +159,7 @@ const Dashboard = () => {
                 className={`rounded-2xl px-6 py-3 font-medium transition-all duration-300 whitespace-nowrap ${
                   selectedCategoryId === null 
                     ? 'bg-gradient-to-r from-gray-700 to-gray-900 text-white shadow-lg hover:shadow-xl transform hover:scale-105' 
-                    : 'bg-white/80 backdrop-blur-sm border-gray-200 hover:bg-white hover:border-gray-300 hover:shadow-md'
+                    : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:shadow-md'
                 }`}
               >
                 All Categories
@@ -176,7 +176,7 @@ const Dashboard = () => {
                     onClick={() => setSelectedCategoryId(category.id)}                  className={`rounded-2xl px-6 py-3 font-medium whitespace-nowrap transition-all duration-300 transform hover:scale-105 ${
                     isSelected 
                       ? 'text-white border-transparent shadow-lg hover:shadow-xl ring-2 ring-white/20' 
-                      : 'bg-white/80 backdrop-blur-sm border-gray-200 hover:bg-white hover:border-gray-300 hover:shadow-md'
+                      : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:shadow-md'
                   }`}
                   style={{
                     // eslint-disable-next-line
@@ -218,7 +218,7 @@ const Dashboard = () => {
                     onClick={() => handleExerciseClick(progress.exercise.id)}
                   >
                     {/* Main card */}
-                    <div className="relative backdrop-blur-sm bg-white/90 rounded-2xl border border-gray-200/50 p-5 shadow-sm group-hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1">
+                    <div className="relative bg-white rounded-2xl border border-gray-200 p-5 shadow-sm group-hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1">
                       {/* Header with category dot */}
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
@@ -285,7 +285,7 @@ const Dashboard = () => {
               })}
             </div>
           ) : (
-            <div className="backdrop-blur-sm bg-white/90 rounded-2xl border border-gray-200/50 p-12 text-center shadow-sm">
+            <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
               <Activity className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-700 mb-2">No Progress Data Yet</h3>
               <p className="text-gray-500">Start logging your workouts to see amazing progress charts!</p>
@@ -300,7 +300,7 @@ const Dashboard = () => {
             <p className="text-gray-600">Your latest training sessions and achievements</p>
           </div>
           
-          <div className="backdrop-blur-sm bg-white/90 rounded-2xl border border-gray-200/50 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
             {recentLogs.length > 0 ? (
               <div className="divide-y divide-gray-100">
                   {recentLogs.map((log, index) => {
