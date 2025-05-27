@@ -1,11 +1,11 @@
 {
   "name": "GrindSheet",
-  "short_name": "GrindSheet",
+  "short_name": "GrindSheet", 
   "description": "Competitive weight tracker app.",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#f9fafb",
-  "theme_color": "#f9fafb",
+  "background_color": "#1a1a1a",
+  "theme_color": "#10b981",
   "icons": [
     {
       "src": "/favicon.ico",

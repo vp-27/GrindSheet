@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { updateManifestLink } from '@/utils/manifestUtils';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -9,6 +10,15 @@ interface ThemeContextType {
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+// Function to update theme-color meta tag dynamically
+const updateThemeColorMeta = (isDark: boolean) => {
+  const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+  if (metaThemeColor) {
+    const color = isDark ? '#000000' : '#f9fafb';
+    metaThemeColor.setAttribute('content', color);
+  }
+};
 
 export const useTheme = () => {
   const context = useContext(ThemeContext);
@@ -56,6 +66,12 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     } else {
       root.classList.remove('dark');
     }
+
+    // Update theme-color meta tag dynamically
+    updateThemeColorMeta(shouldBeDark);
+    
+    // Update manifest dynamically for PWA
+    updateManifestLink(shouldBeDark);
   }, [theme]);
 
   // Listen for system theme changes when using 'system' theme
@@ -71,6 +87,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       } else {
         root.classList.remove('dark');
       }
+      // Update theme-color meta tag when system theme changes
+      updateThemeColorMeta(mediaQuery.matches);
+      
+      // Update manifest dynamically when system theme changes
+      updateManifestLink(mediaQuery.matches);
     };
 
     mediaQuery.addEventListener('change', handleChange);
