@@ -159,7 +159,7 @@ const Dashboard = () => {
                 className={`rounded-2xl px-6 py-3 font-medium transition-all duration-300 whitespace-nowrap ${
                   selectedCategoryId === null 
                     ? 'bg-gradient-to-r from-primary/70 to-primary text-primary-foreground shadow-lg hover:shadow-xl transform hover:scale-105' 
-                    : 'bg-card border-border hover:bg-accent hover:text-accent-foreground hover:shadow-md'
+                    : 'bg-card border-border hover:shadow-md'
                 }`}
               >
                 All Categories
@@ -169,25 +169,27 @@ const Dashboard = () => {
                 const categoryColor = getCategoryColor(index);
                 const isSelected = selectedCategoryId === category.id;
                 
-                return (                  <Button
+                return (
+                  <Button
                     key={category.id}
                     variant="outline"
                     size="sm"
-                    onClick={() => setSelectedCategoryId(category.id)}                  className={`rounded-2xl px-6 py-3 font-medium whitespace-nowrap transition-all duration-300 transform hover:scale-105 ${
-                    isSelected 
-                      ? 'text-white border-transparent shadow-lg hover:shadow-xl ring-2 ring-white/20' 
-                      : 'bg-card border-border hover:bg-accent hover:text-accent-foreground hover:shadow-md'
-                  }`}
-                  style={{
-                    // eslint-disable-next-line
-                    backgroundColor: isSelected ? categoryColor : undefined,
-                    // eslint-disable-next-line
-                    color: isSelected ? 'white' : categoryColor,
-                    // eslint-disable-next-line
-                    borderColor: isSelected ? categoryColor : undefined,
-                    // eslint-disable-next-line
-                    boxShadow: isSelected ? `0 4px 20px ${categoryColor}40` : undefined
-                  }}
+                    onClick={() => setSelectedCategoryId(category.id)}
+                    className={`rounded-2xl px-6 py-3 font-medium whitespace-nowrap transition-all duration-300 transform hover:scale-105 ${
+                      isSelected 
+                        ? 'text-white border-transparent shadow-lg hover:shadow-xl ring-2 ring-white/20' 
+                        : 'bg-card border-border hover:shadow-md'
+                    }`}
+                    style={{
+                      // eslint-disable-next-line
+                      backgroundColor: isSelected ? categoryColor : 'transparent',
+                      // eslint-disable-next-line
+                      color: isSelected ? 'white' : categoryColor,
+                      // eslint-disable-next-line
+                      borderColor: isSelected ? categoryColor : undefined,
+                      // eslint-disable-next-line
+                      boxShadow: isSelected ? `0 4px 20px ${categoryColor}40` : undefined
+                    }}
                   >
                   {category.name}
                 </Button>
@@ -313,7 +315,7 @@ const Dashboard = () => {
                     return (
                       <div 
                         key={log.id} 
-                        className="p-5 hover:bg-accent/50 cursor-pointer transition-all duration-200 group"
+                        className="p-5 cursor-pointer transition-all duration-200 group"
                         onClick={() => exercise && handleExerciseClick(exercise.id)}
                       >
                         <div className="flex items-center justify-between">
