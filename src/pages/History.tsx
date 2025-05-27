@@ -144,59 +144,16 @@ const History = () => {
         
         {sortedDates.map(date => {
           const dayLogs = logsByDate[date];
-          const totalWorkouts = dayLogs.length;
-          
-          // Get unique categories for this day
-          const dayCategories = useMemo(() => {
-            const uniqueCategories = new Map();
-            dayLogs.forEach(log => {
-              const category = getCategoryForExercise(log.exerciseId);
-              if (category) {
-                uniqueCategories.set(category.id, category);
-              }
-            });
-            return Array.from(uniqueCategories.values());
-          }, [dayLogs]);
           
           return (
             <div key={date} className="relative">
               {/* Date Header */}
-              <div className="flex flex-col gap-3 mb-4">
+              <div className="mb-4">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-primary" />
                   <h2 className="text-lg font-semibold text-foreground">
                     {format(new Date(date), 'EEEE, MMMM d, yyyy')}
                   </h2>
-                </div>
-                
-                {/* Workout count and category badges */}
-                <div className="flex items-center gap-3 flex-wrap">
-                  <span className="text-xs font-medium px-3 py-1.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                    {totalWorkouts} workout{totalWorkouts !== 1 ? 's' : ''}
-                  </span>
-                  
-                  {/* Category indicators */}
-                  {dayCategories.map((category, catIndex) => {
-                    const categoryIndex = categories.findIndex(cat => cat.id === category.id);
-                    const categoryColor = categoryIndex >= 0 ? getCategoryColor(categoryIndex) : '#10b981';
-                    
-                    return (
-                      <span 
-                        key={category.id}
-                        className="text-xs font-medium px-2.5 py-1 rounded-full border"
-                        style={{ 
-                          // eslint-disable-next-line
-                          backgroundColor: `${categoryColor}10`,
-                          // eslint-disable-next-line
-                          color: categoryColor,
-                          // eslint-disable-next-line
-                          borderColor: `${categoryColor}25`
-                        }}
-                      >
-                        {category.name}
-                      </span>
-                    );
-                  })}
                 </div>
               </div>
               
