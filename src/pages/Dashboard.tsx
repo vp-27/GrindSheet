@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAppContext } from '@/context/AppContext';
 import { calculateProgress, getOverallProgressChartData, getExerciseProgressChartData } from '@/utils/progressUtils';
-import { AreaChart, BarChart3, ArrowUpRight } from 'lucide-react';
+import { TrendingUp, Clock, Trophy, ArrowUpRight, Activity, Zap } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
+import { format } from 'date-fns';
 
 const Dashboard = () => {
   const { categories, exercises, exerciseLogs } = useAppContext();
@@ -89,204 +90,279 @@ const Dashboard = () => {
     navigate(`/exercise-detail?exercise=${exerciseId}`);
   };
 
+  // Get selected category color for backdrop tinting
+  const selectedCategoryColor = useMemo(() => {
+    if (!selectedCategoryId) return null;
+    const categoryIndex = categories.findIndex(cat => cat.id === selectedCategoryId);
+    return categoryIndex >= 0 ? getCategoryColor(categoryIndex) : null;
+  }, [selectedCategoryId, categories]);
+
   return (
     <Layout title="Home">
-      <div className="flex flex-col gap-6">
-        {/* Progress Chart - blended into background, no card */}
-        <div className="mb-4">
-          {chartData.length > 0 ? (
-            <ProgressChart 
-              data={chartData} 
-              multiple={true}
-              categoryId={selectedCategoryId || undefined}
-              weightUnit="lbs"
-              showPercentage={!selectedCategoryId} // Show percentage for "all", raw weight for specific categories
-              title={selectedCategoryId ? 
-                `${categories.find(c => c.id === selectedCategoryId)?.name} Progress (Weight in lbs)` : 
-                "Overall Progress (% Growth by Category)"
-              }
-              blendWithBackground={true}
-              customColors={chartColors} // Pass the same colors used in category buttons
-            />
-          ) : (
-            <div className="text-center text-gray-500 py-10">
-              No data available for chart. Start logging exercises to see your progress!
-            </div>
-          )}
-        </div>
+      <>
+        {/* Dynamic background tint based on selected category */}
+        <div 
+          className="fixed inset-0 transition-all duration-700 ease-out pointer-events-none"
+          style={{
+            // eslint-disable-next-line
+            background: selectedCategoryColor 
+              ? `radial-gradient(ellipse at top, ${selectedCategoryColor}08 0%, transparent 50%)`
+              : 'transparent'
+          }}
+        />
         
-        {/* Category Filter - moved below chart */}
-        <div className="flex gap-2 overflow-x-auto pb-2 px-1">
-          <Button
-            variant={selectedCategoryId === null ? "default" : "outline"}
-            size="sm"
-            onClick={() => setSelectedCategoryId(null)}
-            className="rounded-full"
-          >
-            All
-          </Button>
-          
-          {categories.map((category, index) => {
-            const categoryColor = getCategoryColor(index);
-            const isSelected = selectedCategoryId === category.id;
+        <div className="relative flex flex-col gap-8 pb-6">
+          {/* Progress Chart Section - Embedded in background */}
+          <div className="relative -mx-4 px-4">
+            <div className="mb-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-2">
+                {selectedCategoryId ? 
+                  `${categories.find(c => c.id === selectedCategoryId)?.name} Progress` : 
+                  "Overall Progress"
+                }
+              </h2>
+              <p className="text-gray-600">
+                {selectedCategoryId ? 
+                  "Weight progression across exercises in this category" :
+                  "Percentage growth across all categories"
+                }
+              </p>
+            </div>
             
-            return (
+            {chartData.length > 0 ? (
+              <ProgressChart 
+                data={chartData} 
+                multiple={true}
+                categoryId={selectedCategoryId || undefined}
+                weightUnit="lbs"
+                showPercentage={!selectedCategoryId}
+                appleStyle={true}
+                blendWithBackground={true}
+                customColors={chartColors}
+              />
+            ) : (
+              <div className="text-center text-gray-500 py-16">
+                <Activity className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                <p className="text-lg font-medium mb-2">No data available yet</p>
+                <p>Start logging exercises to see your progress!</p>
+              </div>
+            )}
+          </div>
+          
+          {/* Category Filter Buttons */}
+          <div className="relative">
+            <div className="flex gap-3 overflow-x-auto pb-2 px-1 py-2 scrollbar-hide">
               <Button
-                key={category.id}
-                variant="outline"
+                variant={selectedCategoryId === null ? "default" : "outline"}
                 size="sm"
-                onClick={() => setSelectedCategoryId(category.id)}
-                className={`rounded-full whitespace-nowrap border-2 transition-all duration-200 ${
-                  isSelected 
-                    ? 'text-white border-transparent' 
-                    : 'border-gray-200 hover:border-gray-300'
+                onClick={() => setSelectedCategoryId(null)}
+                className={`rounded-2xl px-6 py-3 font-medium transition-all duration-300 whitespace-nowrap ${
+                  selectedCategoryId === null 
+                    ? 'bg-gradient-to-r from-gray-700 to-gray-900 text-white shadow-lg hover:shadow-xl transform hover:scale-105' 
+                    : 'bg-white/80 backdrop-blur-sm border-gray-200 hover:bg-white hover:border-gray-300 hover:shadow-md'
                 }`}
-                style={{
-                  backgroundColor: isSelected ? categoryColor : 'transparent',
-                  color: isSelected ? 'white' : categoryColor,
-                  borderColor: isSelected ? categoryColor : undefined
-                }}
               >
-                {category.name}
+                All Categories
               </Button>
-            );
-          })}
+              
+              {categories.map((category, index) => {
+                const categoryColor = getCategoryColor(index);
+                const isSelected = selectedCategoryId === category.id;
+                
+                return (                  <Button
+                    key={category.id}
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedCategoryId(category.id)}                  className={`rounded-2xl px-6 py-3 font-medium whitespace-nowrap transition-all duration-300 transform hover:scale-105 ${
+                    isSelected 
+                      ? 'text-white border-transparent shadow-lg hover:shadow-xl ring-2 ring-white/20' 
+                      : 'bg-white/80 backdrop-blur-sm border-gray-200 hover:bg-white hover:border-gray-300 hover:shadow-md'
+                  }`}
+                  style={{
+                    // eslint-disable-next-line
+                    backgroundColor: isSelected ? categoryColor : undefined,
+                    // eslint-disable-next-line
+                    color: isSelected ? 'white' : categoryColor,
+                    // eslint-disable-next-line
+                    borderColor: isSelected ? categoryColor : undefined,
+                    // eslint-disable-next-line
+                    boxShadow: isSelected ? `0 4px 20px ${categoryColor}40` : undefined
+                  }}
+                  >
+                  {category.name}
+                </Button>
+              );
+            })}
+          </div>
         </div>
-        
-        {/* Exercise Progress */}
-        <div className="px-1">
-          <div className="flex items-center mb-3">
-            <div className="flex items-center gap-2">
-              <Dumbbell className="text-gray-500 h-5 w-5" />
-              <h2 className="text-lg font-medium text-gray-900">Your Progress</h2>
-            </div>
+
+        {/* Exercise Progress Grid */}
+        <div className="relative">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Your Progress</h2>
+            <p className="text-gray-600">Track your latest achievements and improvements</p>
           </div>
           
           {exerciseProgressItems.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-              {exerciseProgressItems.map((progress) => (
-                <Card 
-                  key={progress.exercise.id}
-                  className="border-gray-100 hover:shadow-md transition-shadow cursor-pointer overflow-hidden"
-                  onClick={() => handleExerciseClick(progress.exercise.id)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-medium text-gray-900">{progress.exercise.name}</h3>
-                      <div className="font-bold text-lg">{progress.currentWeight} lbs</div>
-                    </div>
-
-                    <div className="flex justify-between items-center mt-2 text-sm text-gray-500">
-                      <div>Previous: {progress.previousWeight || '-'} lbs</div>
-                      
-                      {progress.personalRecord === progress.currentWeight && (
-                        <div className="text-amber-500 font-medium">PR!</div>
-                      )}
-                    </div>
-
-                    {progress.percentGainFromPrevious !== undefined && (
-                      <div className={`flex items-center mt-1 text-sm ${
-                        progress.percentGainFromPrevious > 0 
-                          ? "text-green-600" 
-                          : progress.percentGainFromPrevious < 0 
-                            ? "text-red-500" 
-                            : "text-gray-500"
-                      }`}>
-                        {progress.percentGainFromPrevious > 0 ? (
-                          <>
-                            <ArrowUpRight className="h-3 w-3 mr-1" />
-                            +{progress.percentGainFromPrevious.toFixed(1)}%
-                          </>
-                        ) : progress.percentGainFromPrevious < 0 ? (
-                          <>
-                            <ArrowUpRight className="h-3 w-3 mr-1 transform rotate-90" />
-                            {progress.percentGainFromPrevious.toFixed(1)}%
-                          </>
-                        ) : (
-                          'No change'
-                        )}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card className="p-8 text-center border-gray-100">
-              <p className="text-gray-500">No progress data available yet</p>
-            </Card>
-          )}
-        </div>
-        
-        {/* Recent Activity */}
-        <div className="px-1">
-          <div className="flex items-center mb-3">
-            <div className="flex items-center gap-2">
-              <BarChart3 className="text-gray-500 h-5 w-5" />
-              <h2 className="text-lg font-medium text-gray-900">Recent Workouts</h2>
-            </div>
-          </div>
-          <Card className="shadow-sm border border-gray-100 overflow-hidden">
-            <CardContent className="p-0">
-            {recentLogs.length > 0 ? (
-              recentLogs.map(log => {
-                const exercise = exercises.find(e => e.id === log.exerciseId);
-                const category = categories.find(c => c.id === exercise?.categoryId);
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {exerciseProgressItems.map((progress, index) => {
+                const categoryColor = getCategoryColor(
+                  categories.findIndex(cat => cat.id === progress.exercise.categoryId)
+                );
+                const isPersonalRecord = progress.personalRecord === progress.currentWeight;
                 
                 return (
                   <div 
-                    key={log.id} 
-                    className="p-4 border-b last:border-0 hover:bg-gray-50 cursor-pointer transition-colors"
-                    onClick={() => exercise && handleExerciseClick(exercise.id)}
+                    key={progress.exercise.id}
+                    className="group cursor-pointer"
+                    onClick={() => handleExerciseClick(progress.exercise.id)}
                   >
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <div className="font-medium text-gray-900">{exercise?.name || 'Unknown Exercise'}</div>
-                        <div className="text-sm text-gray-500">
-                          {category?.name || 'Uncategorized'} • {new Date(log.timestamp).toLocaleDateString()}
+                    {/* Main card */}
+                    <div className="relative backdrop-blur-sm bg-white/90 rounded-2xl border border-gray-200/50 p-5 shadow-sm group-hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1">
+                      {/* Header with category dot */}
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <div 
+                            className="w-3 h-3 rounded-full"
+                            style={{ 
+                              // eslint-disable-next-line
+                              backgroundColor: categoryColor 
+                            }}
+                          />
+                          <h3 className="font-semibold text-gray-900 truncate">{progress.exercise.name}</h3>
                         </div>
+                        {isPersonalRecord && (
+                          <div className="flex items-center gap-1 bg-amber-50 text-amber-700 px-2 py-1 rounded-lg text-xs font-medium">
+                            <Trophy className="w-3 h-3" />
+                            PR
+                          </div>
+                        )}
                       </div>
-                      <div className="text-right">
-                        <div className="font-medium">{log.weight} lbs</div>
-                        {log.note && <div className="text-xs text-gray-500">{log.note}</div>}
+
+                      {/* Current Weight Display */}
+                      <div className="mb-4">
+                        <p className="text-sm text-gray-500 mb-1">Current Weight</p>
+                        <p className="text-2xl font-bold text-gray-900">{progress.currentWeight} lbs</p>
+                      </div>
+
+                      {/* Progress Stats */}
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500">Previous:</span>
+                          <span className="font-medium">{progress.previousWeight || '-'} lbs</span>
+                        </div>
+                        
+                        {progress.percentGainFromPrevious !== undefined && (
+                          <div className="flex items-center justify-between">
+                            <span className="text-gray-500 text-sm">Progress:</span>
+                            <div className={`flex items-center text-sm font-medium ${
+                              progress.percentGainFromPrevious > 0 
+                                ? "text-emerald-600" 
+                                : progress.percentGainFromPrevious < 0 
+                                  ? "text-red-500" 
+                                  : "text-gray-500"
+                            }`}>
+                              {progress.percentGainFromPrevious > 0 ? (
+                                <>
+                                  <ArrowUpRight className="h-3 w-3 mr-1" />
+                                  +{progress.percentGainFromPrevious.toFixed(1)}%
+                                </>
+                              ) : progress.percentGainFromPrevious < 0 ? (
+                                <>
+                                  <ArrowUpRight className="h-3 w-3 mr-1 transform rotate-90" />
+                                  {progress.percentGainFromPrevious.toFixed(1)}%
+                                </>
+                              ) : (
+                                'No change'
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
                 );
-              })
-            ) : (
-              <div className="p-8 text-center">
-                <p className="text-gray-500">No recent workouts</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              })}
+            </div>
+          ) : (
+            <div className="backdrop-blur-sm bg-white/90 rounded-2xl border border-gray-200/50 p-12 text-center shadow-sm">
+              <Activity className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-700 mb-2">No Progress Data Yet</h3>
+              <p className="text-gray-500">Start logging your workouts to see amazing progress charts!</p>
+            </div>
+          )}
         </div>
-      </div>
+        
+        {/* Recent Activity Section */}
+        <div className="relative">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-gray-900 mb-2">Recent Workouts</h2>
+            <p className="text-gray-600">Your latest training sessions and achievements</p>
+          </div>
+          
+          <div className="backdrop-blur-sm bg-white/90 rounded-2xl border border-gray-200/50 shadow-sm overflow-hidden">
+            {recentLogs.length > 0 ? (
+              <div className="divide-y divide-gray-100">
+                  {recentLogs.map((log, index) => {
+                    const exercise = exercises.find(e => e.id === log.exerciseId);
+                    const category = categories.find(c => c.id === exercise?.categoryId);
+                    const categoryColor = getCategoryColor(
+                      categories.findIndex(cat => cat.id === exercise?.categoryId)
+                    );
+                    
+                    return (
+                      <div 
+                        key={log.id} 
+                        className="p-5 hover:bg-gray-50/50 cursor-pointer transition-all duration-200 group"
+                        onClick={() => exercise && handleExerciseClick(exercise.id)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {/* Category indicator */}
+                            <div 
+                              className="w-3 h-3 rounded-full group-hover:scale-110 transition-transform"
+                              style={{ 
+                                // eslint-disable-next-line
+                                backgroundColor: categoryColor 
+                              }}
+                            />
+                            <div>
+                              <h4 className="font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">
+                                {exercise?.name || 'Unknown Exercise'}
+                              </h4>
+                              <div className="flex items-center gap-2 text-sm text-gray-500">
+                                <span>{category?.name || 'Uncategorized'}</span>
+                                <span>•</span>
+                                <Clock className="w-3 h-3" />
+                                <span>{format(new Date(log.timestamp), 'MMM d, yyyy')}</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div className="text-right">
+                            <p className="font-bold text-lg text-gray-900">{log.weight} lbs</p>
+                            {log.note && (
+                              <p className="text-xs text-gray-500 mt-1 max-w-32 truncate">{log.note}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="p-12 text-center">
+                  <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-gray-700 mb-2">No Recent Workouts</h3>
+                  <p className="text-gray-500">Start your fitness journey by logging your first workout!</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </>
     </Layout>
   );
 };
-
-const Dumbbell = (props) => (
-  <svg
-    {...props}
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M7 5v14" />
-    <path d="M17 5v14" />
-    <path d="M3 7h4" />
-    <path d="M3 17h4" />
-    <path d="M17 7h4" />
-    <path d="M17 17h4" />
-  </svg>
-);
 
 export default Dashboard;
