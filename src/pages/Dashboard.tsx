@@ -115,13 +115,13 @@ const Dashboard = () => {
           {/* Progress Chart Section - Embedded in background */}
           <div className="relative -mx-4 px-4">
             <div className="mb-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-2">
+              <h2 className="text-xl font-bold text-foreground mb-2">
                 {selectedCategoryId ? 
                   `${categories.find(c => c.id === selectedCategoryId)?.name} Progress` : 
                   "Overall Progress"
                 }
               </h2>
-              <p className="text-gray-600">
+              <p className="text-muted-foreground">
                 {selectedCategoryId ? 
                   "Weight progression across exercises in this category" :
                   "Percentage growth across all categories"
@@ -141,8 +141,8 @@ const Dashboard = () => {
                 customColors={chartColors}
               />
             ) : (
-              <div className="text-center text-gray-500 py-16">
-                <Activity className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+              <div className="text-center text-muted-foreground py-16">
+                <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-lg font-medium mb-2">No data available yet</p>
                 <p>Start logging exercises to see your progress!</p>
               </div>
@@ -158,8 +158,8 @@ const Dashboard = () => {
                 onClick={() => setSelectedCategoryId(null)}
                 className={`rounded-2xl px-6 py-3 font-medium transition-all duration-300 whitespace-nowrap ${
                   selectedCategoryId === null 
-                    ? 'bg-gradient-to-r from-gray-700 to-gray-900 text-white shadow-lg hover:shadow-xl transform hover:scale-105' 
-                    : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:shadow-md'
+                    ? 'bg-gradient-to-r from-primary/70 to-primary text-primary-foreground shadow-lg hover:shadow-xl transform hover:scale-105' 
+                    : 'bg-card border-border hover:bg-accent hover:text-accent-foreground hover:shadow-md'
                 }`}
               >
                 All Categories
@@ -176,7 +176,7 @@ const Dashboard = () => {
                     onClick={() => setSelectedCategoryId(category.id)}                  className={`rounded-2xl px-6 py-3 font-medium whitespace-nowrap transition-all duration-300 transform hover:scale-105 ${
                     isSelected 
                       ? 'text-white border-transparent shadow-lg hover:shadow-xl ring-2 ring-white/20' 
-                      : 'bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300 hover:shadow-md'
+                      : 'bg-card border-border hover:bg-accent hover:text-accent-foreground hover:shadow-md'
                   }`}
                   style={{
                     // eslint-disable-next-line
@@ -199,8 +199,8 @@ const Dashboard = () => {
         {/* Exercise Progress Grid */}
         <div className="relative">
           <div className="mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Your Progress</h2>
-            <p className="text-gray-600">Track your latest achievements and improvements</p>
+            <h2 className="text-xl font-bold text-foreground mb-2">Your Progress</h2>
+            <p className="text-muted-foreground">Track your latest achievements and improvements</p>
           </div>
           
           {exerciseProgressItems.length > 0 ? (
@@ -218,7 +218,7 @@ const Dashboard = () => {
                     onClick={() => handleExerciseClick(progress.exercise.id)}
                   >
                     {/* Main card */}
-                    <div className="relative bg-white rounded-2xl border border-gray-200 p-5 shadow-sm group-hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1">
+                    <div className="relative bg-card rounded-2xl border border-border p-5 shadow-sm group-hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1">
                       {/* Header with category dot */}
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
@@ -229,7 +229,7 @@ const Dashboard = () => {
                               backgroundColor: categoryColor 
                             }}
                           />
-                          <h3 className="font-semibold text-gray-900 truncate">{progress.exercise.name}</h3>
+                          <h3 className="font-semibold text-foreground truncate">{progress.exercise.name}</h3>
                         </div>
                         {isPersonalRecord && (
                           <div className="flex items-center gap-1 bg-amber-50 text-amber-700 px-2 py-1 rounded-lg text-xs font-medium">
@@ -241,26 +241,26 @@ const Dashboard = () => {
 
                       {/* Current Weight Display */}
                       <div className="mb-4">
-                        <p className="text-sm text-gray-500 mb-1">Current Weight</p>
-                        <p className="text-2xl font-bold text-gray-900">{progress.currentWeight} lbs</p>
+                        <p className="text-sm text-muted-foreground mb-1">Current Weight</p>
+                        <p className="text-2xl font-bold text-foreground">{progress.currentWeight} lbs</p>
                       </div>
 
                       {/* Progress Stats */}
                       <div className="space-y-2">
                         <div className="flex justify-between text-sm">
-                          <span className="text-gray-500">Previous:</span>
+                          <span className="text-muted-foreground">Previous:</span>
                           <span className="font-medium">{progress.previousWeight || '-'} lbs</span>
                         </div>
                         
                         {progress.percentGainFromPrevious !== undefined && (
                           <div className="flex items-center justify-between">
-                            <span className="text-gray-500 text-sm">Progress:</span>
+                            <span className="text-muted-foreground text-sm">Progress:</span>
                             <div className={`flex items-center text-sm font-medium ${
                               progress.percentGainFromPrevious > 0 
                                 ? "text-emerald-600" 
                                 : progress.percentGainFromPrevious < 0 
                                   ? "text-red-500" 
-                                  : "text-gray-500"
+                                  : "text-muted-foreground"
                             }`}>
                               {progress.percentGainFromPrevious > 0 ? (
                                 <>
@@ -285,10 +285,10 @@ const Dashboard = () => {
               })}
             </div>
           ) : (
-            <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center shadow-sm">
-              <Activity className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-700 mb-2">No Progress Data Yet</h3>
-              <p className="text-gray-500">Start logging your workouts to see amazing progress charts!</p>
+            <div className="bg-card rounded-2xl border border-border p-12 text-center shadow-sm">
+              <Activity className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">No Progress Data Yet</h3>
+              <p className="text-muted-foreground">Start logging your workouts to see amazing progress charts!</p>
             </div>
           )}
         </div>
@@ -296,13 +296,13 @@ const Dashboard = () => {
         {/* Recent Activity Section */}
         <div className="relative">
           <div className="mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-2">Recent Workouts</h2>
-            <p className="text-gray-600">Your latest training sessions and achievements</p>
+            <h2 className="text-xl font-bold text-foreground mb-2">Recent Workouts</h2>
+            <p className="text-muted-foreground">Your latest training sessions and achievements</p>
           </div>
           
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
             {recentLogs.length > 0 ? (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-border">
                   {recentLogs.map((log, index) => {
                     const exercise = exercises.find(e => e.id === log.exerciseId);
                     const category = categories.find(c => c.id === exercise?.categoryId);
@@ -313,7 +313,7 @@ const Dashboard = () => {
                     return (
                       <div 
                         key={log.id} 
-                        className="p-5 hover:bg-gray-50/50 cursor-pointer transition-all duration-200 group"
+                        className="p-5 hover:bg-accent/50 cursor-pointer transition-all duration-200 group"
                         onClick={() => exercise && handleExerciseClick(exercise.id)}
                       >
                         <div className="flex items-center justify-between">
@@ -327,10 +327,10 @@ const Dashboard = () => {
                               }}
                             />
                             <div>
-                              <h4 className="font-semibold text-gray-900 group-hover:text-gray-700 transition-colors">
+                              <h4 className="font-semibold text-foreground group-hover:text-foreground transition-colors">
                                 {exercise?.name || 'Unknown Exercise'}
                               </h4>
-                              <div className="flex items-center gap-2 text-sm text-gray-500">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <span>{category?.name || 'Uncategorized'}</span>
                                 <span>•</span>
                                 <Clock className="w-3 h-3" />
@@ -340,9 +340,9 @@ const Dashboard = () => {
                           </div>
                           
                           <div className="text-right">
-                            <p className="font-bold text-lg text-gray-900">{log.weight} lbs</p>
+                            <p className="font-bold text-lg text-foreground">{log.weight} lbs</p>
                             {log.note && (
-                              <p className="text-xs text-gray-500 mt-1 max-w-32 truncate">{log.note}</p>
+                              <p className="text-xs text-muted-foreground mt-1 max-w-32 truncate">{log.note}</p>
                             )}
                           </div>
                         </div>
@@ -352,9 +352,9 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div className="p-12 text-center">
-                  <Clock className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-700 mb-2">No Recent Workouts</h3>
-                  <p className="text-gray-500">Start your fitness journey by logging your first workout!</p>
+                  <Clock className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-muted-foreground mb-2">No Recent Workouts</h3>
+                  <p className="text-muted-foreground">Start your fitness journey by logging your first workout!</p>
                 </div>
               )}
             </div>

@@ -31,16 +31,16 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Minimal header */}
       <header className="p-4 flex justify-between items-center">
-        <h1 className="text-xl font-semibold text-gray-900">
+        <h1 className="text-xl font-semibold text-foreground">
           {title || "Home"}
         </h1>
         <Button variant="ghost" className="p-0 h-auto" onClick={() => navigate('/profile')}>
           <Avatar className="h-8 w-8">
             <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
-            <AvatarFallback className="bg-gray-200 text-gray-700">{profile?.name?.substring(0, 2).toUpperCase() || 'U'}</AvatarFallback>
+            <AvatarFallback className="bg-muted text-muted-foreground">{profile?.name?.substring(0, 2).toUpperCase() || 'U'}</AvatarFallback>
           </Avatar>
         </Button>
       </header>
@@ -51,7 +51,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
       </main>
       
       {/* Apple-style bottom navigation with glass effect */}
-      <div className="sticky bottom-3 z-10 backdrop-blur-lg bg-white/70 dark:bg-gray-900/70 mb-3 w-full sm:max-w-lg sm:mx-auto rounded-xl px-2 sm:px-0">
+      <div className="sticky bottom-3 z-10 backdrop-blur-lg bg-background/70 mb-3 w-full sm:max-w-lg sm:mx-auto rounded-xl px-2 sm:px-0">
         <nav className="relative flex items-center justify-between p-2">
           <div className="flex-1 flex justify-center items-center">
             <NavLink to="/" icon={<Home />} label="Home" />
@@ -89,7 +89,7 @@ const NavLink: React.FC<{ to: string; icon: React.ReactNode; label: string }> = 
       to={to} 
       className={cn(
         "flex flex-col items-center px-3 py-1 rounded text-xs w-full",
-        isActive ? "text-green-600 font-medium" : "text-gray-500"
+        isActive ? "text-green-600 font-medium" : "text-muted-foreground"
       )}
     >
       <div className="text-lg mb-0.5">{icon}</div>

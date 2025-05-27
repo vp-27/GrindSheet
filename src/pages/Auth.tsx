@@ -90,20 +90,20 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-gray-50 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted px-4 py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-gray-900 mb-2">
+          <h1 className="text-4xl font-bold tracking-tight text-foreground mb-2">
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-green-600">
               GrindSheet
             </span>
           </h1>
-          <p className="text-sm text-gray-500">Track your progress. Achieve your goals.</p>
+          <p className="text-sm text-muted-foreground">Track your progress. Achieve your goals.</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
+        <div className="bg-card rounded-2xl shadow-xl p-6 sm:p-8">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">
+            <h2 className="text-2xl font-bold text-foreground">
               {showSignIn ? 'Welcome back' : 'Create account'}
             </h2>
             <button
@@ -118,7 +118,7 @@ const Auth = () => {
           {showSignIn ? (
             <form onSubmit={handleSignIn} className="space-y-6">
               <div className="relative">
-                <div className="relative border-b-2 border-gray-200 focus-within:border-green-500 transition-colors group">
+                <div className="relative border-b-2 border-border focus-within:border-green-500 transition-colors group">
                   <Input
                     id="signin-email"
                     type="email"
@@ -127,11 +127,11 @@ const Auth = () => {
                     onFocus={() => setFocusedField('signin-email')}
                     onBlur={() => setFocusedField(null)}
                     required
-                    className="block w-full border-0 bg-transparent pt-6 pb-2 px-0 text-gray-800 focus:ring-0 focus:outline-none"
+                    className="block w-full border-0 bg-transparent pt-6 pb-2 px-0 text-foreground focus:ring-0 focus:outline-none"
                   />
                   <Label
                     htmlFor="signin-email"
-                    className={`absolute top-4 left-0 text-gray-500 pointer-events-none transition-all duration-200 ease-in-out ${
+                    className={`absolute top-4 left-0 text-muted-foreground pointer-events-none transition-all duration-200 ease-in-out ${
                       focusedField === 'signin-email' || emailHasValue 
                         ? 'transform -translate-y-4 scale-85 text-green-600'
                         : ''
@@ -143,7 +143,7 @@ const Auth = () => {
               </div>
 
               <div className="relative">
-                <div className="relative border-b-2 border-gray-200 focus-within:border-green-500 transition-colors group">
+                <div className="relative border-b-2 border-border focus-within:border-green-500 transition-colors group">
                   <Input
                     id="signin-password"
                     type="password"
@@ -152,11 +152,11 @@ const Auth = () => {
                     onFocus={() => setFocusedField('signin-password')}
                     onBlur={() => setFocusedField(null)}
                     required
-                    className="block w-full border-0 bg-transparent pt-6 pb-2 px-0 text-gray-800 focus:ring-0 focus:outline-none"
+                    className="block w-full border-0 bg-transparent pt-6 pb-2 px-0 text-foreground focus:ring-0 focus:outline-none"
                   />
                   <Label
                     htmlFor="signin-password"
-                    className={`absolute top-4 left-0 text-gray-500 pointer-events-none transition-all duration-200 ease-in-out ${
+                    className={`absolute top-4 left-0 text-muted-foreground pointer-events-none transition-all duration-200 ease-in-out ${
                       focusedField === 'signin-password' || passwordHasValue 
                         ? 'transform -translate-y-4 scale-85 text-green-600'
                         : ''
@@ -196,7 +196,7 @@ const Auth = () => {
           ) : (
             <form onSubmit={handleSignUp} className="space-y-5">
               <div className="relative">
-                <div className="relative border-b-2 border-gray-200 focus-within:border-green-500 transition-colors group">
+                <div className="relative border-b-2 border-border focus-within:border-green-500 transition-colors group">
                   <Input
                     id="signup-name"
                     type="text"
@@ -205,11 +205,11 @@ const Auth = () => {
                     onFocus={() => setFocusedField('signup-name')}
                     onBlur={() => setFocusedField(null)}
                     required
-                    className="block w-full border-0 bg-transparent pt-6 pb-2 px-0 text-gray-800 focus:ring-0 focus:outline-none"
+                    className="block w-full border-0 bg-transparent pt-6 pb-2 px-0 text-foreground focus:ring-0 focus:outline-none"
                   />
                   <Label
                     htmlFor="signup-name"
-                    className={`absolute top-4 left-0 text-gray-500 pointer-events-none transition-all duration-200 ease-in-out ${
+                    className={`absolute top-4 left-0 text-muted-foreground pointer-events-none transition-all duration-200 ease-in-out ${
                       focusedField === 'signup-name' || nameHasValue 
                         ? 'transform -translate-y-4 scale-85 text-green-600'
                         : ''
@@ -221,7 +221,7 @@ const Auth = () => {
               </div>
 
               <div className="relative">
-                <div className="relative border-b-2 border-gray-200 focus-within:border-green-500 transition-colors group">
+                <div className="relative border-b-2 border-border focus-within:border-green-500 transition-colors group">
                   <Input
                     id="signup-username"
                     type="text"
@@ -230,11 +230,11 @@ const Auth = () => {
                     onFocus={() => setFocusedField('signup-username')}
                     onBlur={() => setFocusedField(null)}
                     required
-                    className="block w-full border-0 bg-transparent pt-6 pb-2 px-0 text-gray-800 focus:ring-0 focus:outline-none"
+                    className="block w-full border-0 bg-transparent pt-6 pb-2 px-0 text-foreground focus:ring-0 focus:outline-none"
                   />
                   <Label
                     htmlFor="signup-username"
-                    className={`absolute top-4 left-0 text-gray-500 pointer-events-none transition-all duration-200 ease-in-out ${
+                    className={`absolute top-4 left-0 text-muted-foreground pointer-events-none transition-all duration-200 ease-in-out ${
                       focusedField === 'signup-username' || usernameHasValue 
                         ? 'transform -translate-y-4 scale-85 text-green-600'
                         : ''
@@ -246,7 +246,7 @@ const Auth = () => {
               </div>
 
               <div className="relative">
-                <div className="relative border-b-2 border-gray-200 focus-within:border-green-500 transition-colors group">
+                <div className="relative border-b-2 border-border focus-within:border-green-500 transition-colors group">
                   <Input
                     id="signup-email"
                     type="email"
@@ -255,11 +255,11 @@ const Auth = () => {
                     onFocus={() => setFocusedField('signup-email')}
                     onBlur={() => setFocusedField(null)}
                     required
-                    className="block w-full border-0 bg-transparent pt-6 pb-2 px-0 text-gray-800 focus:ring-0 focus:outline-none"
+                    className="block w-full border-0 bg-transparent pt-6 pb-2 px-0 text-foreground focus:ring-0 focus:outline-none"
                   />
                   <Label
                     htmlFor="signup-email"
-                    className={`absolute top-4 left-0 text-gray-500 pointer-events-none transition-all duration-200 ease-in-out ${
+                    className={`absolute top-4 left-0 text-muted-foreground pointer-events-none transition-all duration-200 ease-in-out ${
                       focusedField === 'signup-email' || emailHasValue 
                         ? 'transform -translate-y-4 scale-85 text-green-600'
                         : ''
@@ -271,7 +271,7 @@ const Auth = () => {
               </div>
 
               <div className="relative">
-                <div className="relative border-b-2 border-gray-200 focus-within:border-green-500 transition-colors group">
+                <div className="relative border-b-2 border-border focus-within:border-green-500 transition-colors group">
                   <Input
                     id="signup-password"
                     type="password"
@@ -280,11 +280,11 @@ const Auth = () => {
                     onFocus={() => setFocusedField('signup-password')}
                     onBlur={() => setFocusedField(null)}
                     required
-                    className="block w-full border-0 bg-transparent pt-6 pb-2 px-0 text-gray-800 focus:ring-0 focus:outline-none"
+                    className="block w-full border-0 bg-transparent pt-6 pb-2 px-0 text-foreground focus:ring-0 focus:outline-none"
                   />
                   <Label
                     htmlFor="signup-password"
-                    className={`absolute top-4 left-0 text-gray-500 pointer-events-none transition-all duration-200 ease-in-out ${
+                    className={`absolute top-4 left-0 text-muted-foreground pointer-events-none transition-all duration-200 ease-in-out ${
                       focusedField === 'signup-password' || passwordHasValue 
                         ? 'transform -translate-y-4 scale-85 text-green-600'
                         : ''
@@ -323,8 +323,8 @@ const Auth = () => {
             </form>
           )}
           
-          <div className="mt-8 pt-4 border-t border-gray-100">
-            <p className="text-xs text-center text-gray-500">
+          <div className="mt-8 pt-4 border-t border-border">
+            <p className="text-xs text-center text-muted-foreground">
               By using GrindSheet, you agree to our Terms of Service and Privacy Policy.
             </p>
           </div>

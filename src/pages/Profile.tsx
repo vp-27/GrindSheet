@@ -14,6 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
 import { ChevronRight, Edit2, Plus, Settings, Trash2, User, Pencil } from 'lucide-react';
+import ThemeSelector from '@/components/ThemeSelector';
 
 const Profile: React.FC = () => {
   const { user, profile, signOut, updateProfile } = useAuth();
@@ -375,23 +376,23 @@ const Profile: React.FC = () => {
         {/* Profile Tab */}
         <TabsContent value="profile" className="space-y-4">
           {/* Profile Summary */}
-          <Card className="shadow-sm border border-gray-100">
+          <Card className="shadow-sm border border-border">
             <CardContent className="p-4">
               <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16">
                   <AvatarImage src={profile.avatar_url} alt={profile.name} />
-                  <AvatarFallback className="bg-gray-100 text-gray-700">
+                  <AvatarFallback className="bg-muted text-muted-foreground">
                     {profile.name?.substring(0, 2).toUpperCase() || 'U'}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <h2 className="text-xl font-medium">{profile.name}</h2>
-                  <p className="text-sm text-gray-500">@{profile.username}</p>
+                  <h2 className="text-xl font-medium text-foreground">{profile.name}</h2>
+                  <p className="text-sm text-muted-foreground">@{profile.username}</p>
                 </div>
                 <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
                   <DialogTrigger asChild>
                     <Button variant="ghost" size="icon" className="rounded-full">
-                      <Edit2 className="h-5 w-5 text-gray-500" />
+                      <Edit2 className="h-5 w-5 text-muted-foreground" />
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="sm:max-w-[425px]">
@@ -409,7 +410,7 @@ const Profile: React.FC = () => {
                             id="name"
                             value={profileForm.watch('name')}
                             onChange={(e) => profileForm.setValue('name', e.target.value)}
-                            className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
+                            className="border-border focus-visible:ring-0 focus-visible:ring-offset-0"
                           />
                         </div>
                         <div className="space-y-2">
@@ -418,7 +419,7 @@ const Profile: React.FC = () => {
                             id="username"
                             value={profileForm.watch('username')}
                             onChange={(e) => profileForm.setValue('username', e.target.value)}
-                            className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
+                            className="border-border focus-visible:ring-0 focus-visible:ring-offset-0"
                           />
                         </div>
                         <div className="space-y-2">
@@ -427,13 +428,13 @@ const Profile: React.FC = () => {
                             id="avatarUrl"
                             value={profileForm.watch('avatarUrl')}
                             onChange={(e) => profileForm.setValue('avatarUrl', e.target.value)}
-                            className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
+                            className="border-border focus-visible:ring-0 focus-visible:ring-offset-0"
                             placeholder="https://api.dicebear.com/7.x/avataaars/svg?seed=YourName"
                           />
                         </div>
                       </div>
                       <DialogFooter>
-                        <Button type="submit" className="bg-gray-900 hover:bg-gray-800">Save changes</Button>
+                        <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">Save changes</Button>
                       </DialogFooter>
                     </form>
                   </DialogContent>
@@ -442,9 +443,12 @@ const Profile: React.FC = () => {
             </CardContent>
           </Card>
           
+          {/* Theme Settings */}
+          <ThemeSelector />
+          
           {/* Logout Button */}
           <Card 
-            className="shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors"
+            className="shadow-sm border border-border cursor-pointer hover:bg-muted transition-colors"
             onClick={handleLogout}
           >
             <CardContent className="p-4 flex justify-between items-center">
@@ -454,7 +458,7 @@ const Profile: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="font-medium text-red-600">Log Out</h3>
-                  <p className="text-sm text-gray-500">Sign out of your account</p>
+                  <p className="text-sm text-muted-foreground">Sign out of your account</p>
                 </div>
               </div>
             </CardContent>
@@ -464,37 +468,37 @@ const Profile: React.FC = () => {
         {/* Categories Tab */}
         <TabsContent value="categories" className="space-y-4">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">Categories</h2>
+            <h2 className="text-xl font-bold text-foreground">Categories</h2>
             <Button 
               onClick={() => {
                 setEditingCategory(null);
                 categoryForm.reset({ name: '', description: '' });
                 setIsAddCategoryOpen(true);
               }}
-              className="bg-gray-900 hover:bg-gray-800"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <Plus className="h-4 w-4 mr-2" /> Add Category
             </Button>
           </div>
           
           {loading ? (
-            <div className="text-center py-10">Loading categories...</div>
+            <div className="text-center py-10 text-muted-foreground">Loading categories...</div>
           ) : categories.length > 0 ? (
             <div className="space-y-3">
               {categories.map(category => (
-                <Card key={category.id} className="shadow-sm border border-gray-100">
+                <Card key={category.id} className="shadow-sm border border-border">
                   <CardContent className="p-4">
                     <div className="flex justify-between items-center">
                       <div>
-                        <h3 className="font-medium text-lg">{category.name}</h3>
-                        <p className="text-sm text-gray-500">{category.description || 'No description'}</p>
+                        <h3 className="font-medium text-lg text-foreground">{category.name}</h3>
+                        <p className="text-sm text-muted-foreground">{category.description || 'No description'}</p>
                       </div>
                       <div className="flex gap-2">
                         <Button 
                           variant="outline" 
                           size="sm"
                           onClick={() => handleEditCategory(category)}
-                          className="border-gray-200"
+                          className="border-border hover:bg-muted"
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -502,7 +506,7 @@ const Profile: React.FC = () => {
                           variant="outline" 
                           size="sm"
                           onClick={() => handleDeleteCategory(category.id)}
-                          className="border-gray-200 text-red-500 hover:text-red-600"
+                          className="border-border text-red-500 hover:text-red-600 hover:bg-muted"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -513,9 +517,9 @@ const Profile: React.FC = () => {
               ))}
             </div>
           ) : (
-            <Card className="shadow-sm border border-gray-100">
+            <Card className="shadow-sm border border-border">
               <CardContent className="p-6 text-center">
-                <p className="text-gray-500">No categories found. Create your first category!</p>
+                <p className="text-muted-foreground">No categories found. Create your first category!</p>
               </CardContent>
             </Card>
           )}
@@ -524,33 +528,33 @@ const Profile: React.FC = () => {
         {/* Exercises Tab */}
         <TabsContent value="exercises" className="space-y-4">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">Exercises</h2>
+            <h2 className="text-xl font-bold text-foreground">Exercises</h2>
             <Button 
               onClick={() => {
                 setEditingExercise(null);
                 exerciseForm.reset({ name: '', description: '', categoryId: '' });
                 setIsAddExerciseOpen(true);
               }}
-              className="bg-gray-900 hover:bg-gray-800"
+              className="bg-primary hover:bg-primary/90 text-primary-foreground"
             >
               <Plus className="h-4 w-4 mr-2" /> Add Exercise
             </Button>
           </div>
           
           {loading ? (
-            <div className="text-center py-10">Loading exercises...</div>
+            <div className="text-center py-10 text-muted-foreground">Loading exercises...</div>
           ) : exercises.length > 0 ? (
             <div className="space-y-3">
               {exercises.map(exercise => {
                 const category = categories.find(c => c.id === exercise.category_id);
                 return (
-                  <Card key={exercise.id} className="shadow-sm border border-gray-100">
+                  <Card key={exercise.id} className="shadow-sm border border-border">
                     <CardContent className="p-4">
                       <div className="flex justify-between items-center">
                         <div>
-                          <h3 className="font-medium text-lg">{exercise.name}</h3>
-                          <p className="text-sm text-gray-500">{exercise.description || 'No description'}</p>
-                          <div className="mt-1 inline-block bg-gray-100 text-xs text-gray-700 px-2 py-1 rounded-md">
+                          <h3 className="font-medium text-lg text-foreground">{exercise.name}</h3>
+                          <p className="text-sm text-muted-foreground">{exercise.description || 'No description'}</p>
+                          <div className="mt-1 inline-block bg-muted text-xs text-muted-foreground px-2 py-1 rounded-md">
                             {category?.name || 'Uncategorized'}
                           </div>
                         </div>
@@ -559,7 +563,7 @@ const Profile: React.FC = () => {
                             variant="outline" 
                             size="sm"
                             onClick={() => handleEditExercise(exercise)}
-                            className="border-gray-200"
+                            className="border-border hover:bg-muted"
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
@@ -567,7 +571,7 @@ const Profile: React.FC = () => {
                             variant="outline" 
                             size="sm"
                             onClick={() => handleDeleteExercise(exercise.id)}
-                            className="border-gray-200 text-red-500 hover:text-red-600"
+                            className="border-border text-red-500 hover:text-red-600 hover:bg-muted"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -579,9 +583,9 @@ const Profile: React.FC = () => {
               })}
             </div>
           ) : (
-            <Card className="shadow-sm border border-gray-100">
+            <Card className="shadow-sm border border-border">
               <CardContent className="p-6 text-center">
-                <p className="text-gray-500">No exercises found. Create your first exercise!</p>
+                <p className="text-muted-foreground">No exercises found. Create your first exercise!</p>
               </CardContent>
             </Card>
           )}
@@ -607,7 +611,7 @@ const Profile: React.FC = () => {
                   id="name"
                   value={exerciseForm.watch('name')}
                   onChange={(e) => exerciseForm.setValue('name', e.target.value)}
-                  className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="border-border focus-visible:ring-0 focus-visible:ring-offset-0"
                   placeholder="Bench Press"
                   required
                 />
@@ -618,7 +622,7 @@ const Profile: React.FC = () => {
                   id="description"
                   value={exerciseForm.watch('description')}
                   onChange={(e) => exerciseForm.setValue('description', e.target.value)}
-                  className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="border-border focus-visible:ring-0 focus-visible:ring-offset-0"
                   placeholder="Barbell bench press"
                 />
               </div>
@@ -628,7 +632,7 @@ const Profile: React.FC = () => {
                   id="category"
                   value={exerciseForm.watch('categoryId')}
                   onChange={(e) => exerciseForm.setValue('categoryId', e.target.value)}
-                  className="w-full p-2.5 border border-gray-200 rounded-md text-sm focus:outline-none"
+                  className="w-full p-2.5 border border-border rounded-md text-sm focus:outline-none bg-background text-foreground"
                   required
                 >
                   <option value="">Select a category</option>
@@ -641,7 +645,7 @@ const Profile: React.FC = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" className="bg-gray-900 hover:bg-gray-800">
+              <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                 {editingExercise ? 'Update Exercise' : 'Add Exercise'}
               </Button>
             </DialogFooter>
@@ -667,7 +671,7 @@ const Profile: React.FC = () => {
                   id="name"
                   value={categoryForm.watch('name')}
                   onChange={(e) => categoryForm.setValue('name', e.target.value)}
-                  className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="border-border focus-visible:ring-0 focus-visible:ring-offset-0"
                   placeholder="Chest"
                   required
                 />
@@ -678,13 +682,13 @@ const Profile: React.FC = () => {
                   id="description"
                   value={categoryForm.watch('description')}
                   onChange={(e) => categoryForm.setValue('description', e.target.value)}
-                  className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="border-border focus-visible:ring-0 focus-visible:ring-offset-0"
                   placeholder="Chest exercises"
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" className="bg-gray-900 hover:bg-gray-800">
+              <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">
                 {editingCategory ? 'Update Category' : 'Add Category'}
               </Button>
             </DialogFooter>

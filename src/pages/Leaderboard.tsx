@@ -154,15 +154,15 @@ const Leaderboard: React.FC = () => {
         <div 
           key={entry.userId} 
           className={`flex items-center justify-between p-4 ${
-            index !== leaderboardData.length - 1 ? "border-b" : ""
+            index !== leaderboardData.length - 1 ? "border-b border-border" : ""
           }`}
         >
           <div className="flex items-center space-x-3">
             <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-              index === 0 ? "bg-yellow-400" :
-              index === 1 ? "bg-gray-300" :
-              index === 2 ? "bg-amber-600" : "bg-gray-100"
-            } ${index < 3 ? "text-gray-900" : "text-gray-500"} font-bold`}>
+              index === 0 ? "bg-yellow-400 text-yellow-900" :
+              index === 1 ? "bg-gray-300 text-gray-900" :
+              index === 2 ? "bg-amber-600 text-white" : "bg-muted text-muted-foreground"
+            } font-bold`}>
               {index + 1}
             </div>
             <Avatar className="h-8 w-8">
@@ -171,14 +171,14 @@ const Leaderboard: React.FC = () => {
                 {user.name?.substring(0, 2).toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
-            <div>{user.name}</div>
+            <div className="text-foreground">{user.name}</div>
           </div>
-          <div className="font-bold">
+          <div className="font-bold text-foreground">
             {leaderboardType === LeaderboardType.MAX_WEIGHT
               ? `${entry.value.toFixed(1)} lbs`
               : <>
                   {entry.value.toFixed(1)}%{' '}
-                  <span className="text-xs text-gray-400 font-normal">({rawWeight.toFixed(1)} lbs)</span>
+                  <span className="text-xs text-muted-foreground font-normal">({rawWeight.toFixed(1)} lbs)</span>
                 </>
             }
           </div>
@@ -246,7 +246,7 @@ const Leaderboard: React.FC = () => {
     return (
       <Card
         key={categoryId}
-        className="shadow-sm border border-gray-100 cursor-pointer hover:bg-gray-50 transition"
+        className="shadow-sm border border-border cursor-pointer hover:bg-muted transition"
         onClick={() => {
           setSelectedCategoryId(categoryId);
           setSelectedExerciseId('all');
@@ -254,7 +254,7 @@ const Leaderboard: React.FC = () => {
       >
         <CardContent className="p-3 flex items-center gap-3 sm:gap-4">
           <div className="flex flex-col items-center justify-center">
-            <div className="bg-yellow-400 text-gray-900 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-base sm:text-lg">
+            <div className="bg-yellow-400 text-yellow-900 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-base sm:text-lg">
               1
             </div>
           </div>
@@ -265,15 +265,15 @@ const Leaderboard: React.FC = () => {
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <span className="font-medium truncate block text-sm sm:text-base">{user.name}</span>
-            <span className="text-xs text-gray-500 block truncate">{category.name}</span>
+            <span className="font-medium truncate block text-sm sm:text-base text-foreground">{user.name}</span>
+            <span className="text-xs text-muted-foreground block truncate">{category.name}</span>
           </div>
-          <span className="font-bold text-sm sm:text-base whitespace-nowrap">
+          <span className="font-bold text-sm sm:text-base whitespace-nowrap text-foreground">
             {leaderboardType === LeaderboardType.MAX_WEIGHT
               ? `${leader.value.toFixed(1)} lbs`
               : <>
                   {leader.value.toFixed(1)}%{' '}
-                  <span className="text-xs text-gray-400 font-normal">({rawWeight.toFixed(1)} lbs)</span>
+                  <span className="text-xs text-muted-foreground font-normal">({rawWeight.toFixed(1)} lbs)</span>
                 </>
             }
           </span>
@@ -290,27 +290,27 @@ const Leaderboard: React.FC = () => {
     return (
       <div
         key={exerciseId}
-        className="flex items-center justify-between py-2 border-b last:border-b-0 cursor-pointer hover:bg-gray-50 px-2 rounded"
+        className="flex items-center justify-between py-2 border-b border-border last:border-b-0 cursor-pointer hover:bg-muted px-2 rounded"
         onClick={() => setSelectedExerciseId(exerciseId)}
       >
         <div className="flex items-center gap-2">
-          <div className="bg-yellow-400 text-gray-900 w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm">1</div>
+          <div className="bg-yellow-400 text-yellow-900 w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm">1</div>
           <Avatar className="h-6 w-6">
             <AvatarImage src={user.avatarUrl} />
             <AvatarFallback>
               {user.name?.substring(0, 1) || 'U'}
             </AvatarFallback>
           </Avatar>
-          <span className="font-medium text-xs sm:text-sm truncate max-w-[6rem]">{user.name}</span>
+          <span className="font-medium text-xs sm:text-sm truncate max-w-[6rem] text-foreground">{user.name}</span>
         </div>
         <div className="flex flex-col items-end">
-          <span className="text-xs text-gray-500 truncate max-w-[6rem]">{exercise.name}</span>
-          <span className="font-bold text-xs sm:text-sm">
+          <span className="text-xs text-muted-foreground truncate max-w-[6rem]">{exercise.name}</span>
+          <span className="font-bold text-xs sm:text-sm text-foreground">
             {leaderboardType === LeaderboardType.MAX_WEIGHT
               ? `${leader.value.toFixed(1)} lbs`
               : <>
                   {leader.value.toFixed(1)}%{' '}
-                  <span className="text-xs text-gray-400 font-normal">({rawWeight.toFixed(1)} lbs)</span>
+                  <span className="text-xs text-muted-foreground font-normal">({rawWeight.toFixed(1)} lbs)</span>
                 </>
             }
           </span>
@@ -350,7 +350,7 @@ const Leaderboard: React.FC = () => {
                     value={selectedCategoryId}
                     onValueChange={handleCategoryChange}
                   >
-                    <SelectTrigger className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0">
+                    <SelectTrigger className="border-border focus-visible:ring-0 focus-visible:ring-offset-0">
                       <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent>
@@ -369,7 +369,7 @@ const Leaderboard: React.FC = () => {
                     value={selectedExerciseId}
                     onValueChange={setSelectedExerciseId}
                   >
-                    <SelectTrigger className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0">
+                    <SelectTrigger className="border-border focus-visible:ring-0 focus-visible:ring-offset-0">
                       <SelectValue placeholder="Select Exercise" />
                     </SelectTrigger>
                     <SelectContent>
@@ -387,7 +387,7 @@ const Leaderboard: React.FC = () => {
               {/* Category Leaders Section */}
               {selectedCategoryId === 'all' && (
                 <>
-                  <h2 className="text-lg font-medium text-gray-900">Category Leaders</h2>
+                  <h2 className="text-lg font-medium text-foreground">Category Leaders</h2>
                   <div className="grid grid-cols-2 gap-3">
                     {Object.entries(categoryLeaders).map(([categoryId, data]) =>
                       renderCategoryLeaderCard(categoryId, data)
@@ -399,8 +399,8 @@ const Leaderboard: React.FC = () => {
               {/* Exercise Leaders for selected category (if not 'all') */}
               {selectedCategoryId !== 'all' && Object.keys(exerciseLeaders).length > 0 && (
                 <>
-                  <h3 className="text-base font-medium text-gray-900 mt-2 mb-1">Exercise Leaders</h3>
-                  <div className="bg-white rounded shadow-sm border border-gray-100 divide-y">
+                  <h3 className="text-base font-medium text-foreground mt-2 mb-1">Exercise Leaders</h3>
+                  <div className="bg-card rounded shadow-sm border border-border divide-y divide-border">
                     {Object.entries(exerciseLeaders).map(([exerciseId, data]) =>
                       renderExerciseLeaderCard(exerciseId, data as { exercise: any, leader: any })
                     )}
@@ -409,9 +409,9 @@ const Leaderboard: React.FC = () => {
               )}
               
               {/* Overall Leaderboard */}
-              <h2 className="text-lg font-medium text-gray-900">{getLeaderboardTitle()}</h2>
+              <h2 className="text-lg font-medium text-foreground">{getLeaderboardTitle()}</h2>
               
-              <Card className="shadow-sm border border-gray-100">
+              <Card className="shadow-sm border border-border">
                 <CardContent className="p-0">
                   {/* If Max Weight and no exercise selected, show all exercise max leaders */}
                   {leaderboardType === LeaderboardType.MAX_WEIGHT && selectedExerciseId === 'all' ? (

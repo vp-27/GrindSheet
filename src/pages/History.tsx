@@ -85,19 +85,19 @@ const History = () => {
   return (
     <Layout title="History">
       <div className="flex flex-col gap-6">
-        <h1 className="text-2xl font-bold">Workout History</h1>
+        <h1 className="text-2xl font-bold text-foreground">Workout History</h1>
         
         {sortedDates.length === 0 && (
-          <div className="text-center p-8 border rounded">
-            <p>No workout history found. Start logging exercises to see your history!</p>
+          <div className="text-center p-8 border border-border rounded bg-card">
+            <p className="text-muted-foreground">No workout history found. Start logging exercises to see your history!</p>
           </div>
         )}
         
         {sortedDates.map(date => (
           <div key={date} className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              <h2 className="font-semibold">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <h2 className="font-semibold text-foreground">
                 {format(new Date(date), 'EEEE, MMMM d, yyyy')}
               </h2>
             </div>
@@ -116,24 +116,24 @@ const History = () => {
                   >
                     <div className="flex justify-between items-center gap-2">
                       <div>
-                        <div className="font-medium">{exerciseName}</div>
+                        <div className="font-medium text-foreground">{exerciseName}</div>
                         <div className="text-sm text-muted-foreground">
                           {format(new Date(log.timestamp), 'h:mm a')}
                           {log.note && <span> - {log.note}</span>}
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-1">
-                        <div className="font-bold">{log.weight} lb</div>
+                        <div className="font-bold text-foreground">{log.weight} lb</div>
                         {category && (
                           <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${categoryColors ? categoryColors.text : ''}`} style={categoryColors ? { background: categoryColors.light, color: categoryColors.primary } : {}}>
                             {category.name}
                           </span>
                         )}
                         <div className="flex gap-2 mt-2">
-                          <Button variant="outline" size="icon" className="border-gray-200" onClick={() => openEditDialog(log)}>
+                          <Button variant="outline" size="icon" className="border-border hover:bg-muted" onClick={() => openEditDialog(log)}>
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button variant="outline" size="icon" className="border-gray-200 text-red-500 hover:text-red-600" onClick={() => handleDelete(log.id)}>
+                          <Button variant="outline" size="icon" className="border-border text-red-500 hover:text-red-600 hover:bg-muted" onClick={() => handleDelete(log.id)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -183,7 +183,7 @@ const History = () => {
                 </div>
               </div>
               <DialogFooter>
-                <Button type="submit" className="bg-gray-900 hover:bg-gray-800">Update Log</Button>
+                <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">Update Log</Button>
               </DialogFooter>
             </form>
           </DialogContent>

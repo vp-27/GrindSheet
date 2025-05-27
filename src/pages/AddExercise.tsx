@@ -90,24 +90,24 @@ const AddExercise = () => {
           </Button>
         </div>
         
-        <Card className="shadow-sm border border-gray-100 overflow-hidden">
-          <CardHeader className="pb-3 bg-gray-50">
+        <Card className="shadow-sm border overflow-hidden">
+          <CardHeader className="pb-3 bg-muted">
             <div className="flex justify-between items-center">
-              <CardTitle className="text-lg font-medium text-gray-900">
+              <CardTitle className="text-lg font-medium text-foreground">
                 {selectedExercise ? selectedExercise.name : 'Log Exercise'}
               </CardTitle>
-              <Dumbbell className="h-5 w-5 text-gray-400" />
+              <Dumbbell className="h-5 w-5 text-muted-foreground" />
             </div>
           </CardHeader>
           <CardContent className="pt-4">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="category" className="text-gray-700 text-sm">Category</Label>
+                <Label htmlFor="category" className="text-foreground text-sm">Category</Label>
                 <Select
                   value={selectedCategoryId}
                   onValueChange={setSelectedCategoryId}
                 >
-                  <SelectTrigger id="category" className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0">
+                  <SelectTrigger id="category" className="border-border focus-visible:ring-0 focus-visible:ring-offset-0">
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -121,13 +121,13 @@ const AddExercise = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="exercise" className="text-gray-700 text-sm">Exercise</Label>
+                <Label htmlFor="exercise" className="text-foreground text-sm">Exercise</Label>
                 <Select
                   value={selectedExerciseId}
                   onValueChange={setSelectedExerciseId}
                   disabled={!selectedCategoryId}
                 >
-                  <SelectTrigger id="exercise" className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0">
+                  <SelectTrigger id="exercise" className="border-border focus-visible:ring-0 focus-visible:ring-offset-0">
                     <SelectValue placeholder={
                       selectedCategoryId 
                         ? "Select an exercise" 
@@ -151,7 +151,7 @@ const AddExercise = () => {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="weight" className="text-gray-700 text-sm">Weight (lbs)</Label>
+                <Label htmlFor="weight" className="text-foreground text-sm">Weight (lbs)</Label>
                 <Input
                   id="weight"
                   type="number"
@@ -160,25 +160,25 @@ const AddExercise = () => {
                   value={weight}
                   onChange={e => setWeight(e.target.value)}
                   placeholder="Enter weight"
-                  className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="border-border focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="note" className="text-gray-700 text-sm">Note (optional)</Label>
+                <Label htmlFor="note" className="text-foreground text-sm">Note (optional)</Label>
                 <Textarea
                   id="note"
                   value={note}
                   onChange={e => setNote(e.target.value)}
                   placeholder="Add a note about this set"
                   rows={3}
-                  className="border-gray-200 focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="border-border focus-visible:ring-0 focus-visible:ring-offset-0"
                 />
               </div>
               
               <Button 
                 type="submit" 
-                className="w-full bg-gray-900 hover:bg-gray-800 text-white" 
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground" 
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Logging...' : 'Log Exercise'}

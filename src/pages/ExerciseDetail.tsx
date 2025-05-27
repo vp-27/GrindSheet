@@ -137,7 +137,7 @@ const ExerciseDetail = () => {
         <div className="flex items-center justify-between">
           <Button 
             variant="ghost" 
-            className="p-2 h-auto rounded-full hover:bg-gray-100 transition-colors" 
+            className="p-2 h-auto rounded-full hover:bg-muted transition-colors" 
             onClick={() => navigate('/')}
           >
             <ChevronLeft className="h-5 w-5" />
@@ -167,7 +167,7 @@ const ExerciseDetail = () => {
           />
           
           {/* Stats container */}
-          <div className="relative backdrop-blur-sm bg-white/80 rounded-3xl border border-gray-200/50 p-6 shadow-lg">
+          <div className="relative backdrop-blur-sm bg-card/80 rounded-3xl border shadow-lg p-6">
             <div className="grid grid-cols-2 gap-6">
               {/* Current Weight */}
               <div className="text-center">
@@ -176,33 +176,33 @@ const ExerciseDetail = () => {
                     className="w-3 h-3 rounded-full mr-2"
                     style={{ backgroundColor: categoryColors?.primary || '#10b981' }}
                   />
-                  <p className="text-sm font-medium text-gray-600">Current</p>
+                  <p className="text-sm font-medium text-muted-foreground">Current</p>
                 </div>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-foreground">
                   {progress?.currentWeight || 0}
                 </p>
-                <p className="text-sm text-gray-500">lbs</p>
+                <p className="text-sm text-muted-foreground">lbs</p>
               </div>
               
               {/* Personal Record */}
               <div className="text-center">
                 <div className="flex items-center justify-center mb-2">
                   <Trophy className="w-3 h-3 text-amber-500 mr-2" />
-                  <p className="text-sm font-medium text-gray-600">Record</p>
+                  <p className="text-sm font-medium text-muted-foreground">Record</p>
                 </div>
-                <p className="text-3xl font-bold text-gray-900">
+                <p className="text-3xl font-bold text-foreground">
                   {progress?.personalRecord || 0}
                 </p>
-                <p className="text-sm text-gray-500">lbs</p>
+                <p className="text-sm text-muted-foreground">lbs</p>
               </div>
             </div>
             
             {/* Progress indicator */}
             {progress?.percentGainFromStart !== undefined && progress.percentGainFromStart > 0 && (
-              <div className="mt-4 pt-4 border-t border-gray-200/50">
+              <div className="mt-4 pt-4 border-t border-border/50">
                 <div className="flex items-center justify-center gap-2">
                   <TrendingUp className="w-4 h-4 text-green-500" />
-                  <span className="text-sm font-medium text-gray-700">
+                  <span className="text-sm font-medium text-foreground">
                     +{progress.percentGainFromStart.toFixed(1)}% total progress
                   </span>
                 </div>
@@ -213,10 +213,10 @@ const ExerciseDetail = () => {
         
         {/* Progress Chart */}
         <div className="relative">
-          <div className="backdrop-blur-sm bg-white/90 rounded-2xl border border-gray-200/30 p-6 shadow-sm">
+          <div className="backdrop-blur-sm bg-card/90 rounded-2xl border p-6 shadow-sm">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Progress History</h3>
-              <p className="text-sm text-gray-500">Track your weight progression over time</p>
+              <h3 className="text-lg font-semibold text-foreground">Progress History</h3>
+              <p className="text-sm text-muted-foreground">Track your weight progression over time</p>
             </div>
             <ProgressChart
               data={chartData}
