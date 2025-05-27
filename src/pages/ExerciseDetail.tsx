@@ -130,9 +130,25 @@ const ExerciseDetail = () => {
     );
   }
   
+  // Get selected category color for subtle background tinting
+  const selectedCategoryColor = useMemo(() => {
+    if (!category || !categoryColors) return null;
+    return categoryColors.primary;
+  }, [category, categoryColors]);
+
   return (
     <Layout title={exercise.name}>
-      <div className="flex flex-col gap-6 pb-6">
+      {/* Subtle background tint based on selected category - Apple style */}
+      {selectedCategoryColor && (
+        <div 
+          className="fixed inset-0 pointer-events-none transition-all duration-700 ease-out z-0"
+          style={{
+            background: `radial-gradient(ellipse 100% 60% at 50% 0%, ${selectedCategoryColor}15 0%, ${selectedCategoryColor}08 40%, transparent 70%)`,
+          }}
+        />
+      )}
+      
+      <div className="relative flex flex-col gap-8 pb-6 z-10">
         {/* Header with back button and category badge */}
         <div className="flex items-center justify-between">
           <Button 
@@ -158,7 +174,36 @@ const ExerciseDetail = () => {
           )}
         </div>
         
-        {/* Hero Stats Section */}
+        {/* Progress Chart Section - Embedded in background */}
+        <div className="relative -mx-4 px-4">
+          <div className="mb-6">
+            <h2 className="text-xl font-bold text-foreground mb-2">
+              {exercise.name} Progress
+            </h2>
+            <p className="text-muted-foreground">
+              Track your weight progression over time
+            </p>
+          </div>
+          
+          {chartData.length > 0 ? (
+            <ProgressChart
+              data={chartData}
+              exerciseId={exercise.id}
+              weightUnit="lbs"
+              appleStyle={true}
+              blendWithBackground={true}
+              customColors={categoryColors ? [categoryColors.primary] : undefined}
+            />
+          ) : (
+            <div className="text-center text-muted-foreground py-16">
+              <TrendingUp className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-lg font-medium mb-2">No progress data yet</p>
+              <p>Log your first weight to start tracking progress!</p>
+            </div>
+          )}
+        </div>
+        
+        {/* Current Weight and PR Stats Section */}
         <div className="relative">
           {/* Background blur effect */}
           <div 
@@ -210,22 +255,7 @@ const ExerciseDetail = () => {
             )}
           </div>
         </div>
-        
-        {/* Progress Chart */}
-        <div className="relative">
-          <div className="backdrop-blur-sm bg-card/90 rounded-2xl border p-6 shadow-sm">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-foreground">Progress History</h3>
-              <p className="text-sm text-muted-foreground">Track your weight progression over time</p>
-            </div>
-            <ProgressChart
-              data={chartData}
-              exerciseId={exercise.id}
-              weightUnit="lbs"
-            />
-          </div>
-        </div>
-        
+      
         {/* Log New Weight Form */}
         <div className="relative">
           {/* Subtle background glow */}
