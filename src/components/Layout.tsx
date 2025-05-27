@@ -37,7 +37,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
         <h1 className="text-3xl font-bold text-foreground">
           {title || "Home"}
         </h1>
-        <Button variant="ghost" className="p-0 h-auto" onClick={() => navigate('/profile')}>
+        <Button variant="ghost" className="p-0 h-auto" onClick={() => navigate('/settings')}>
           <Avatar className="h-8 w-8">
             <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
             <AvatarFallback className="bg-muted text-muted-foreground">{profile?.name?.substring(0, 2).toUpperCase() || 'U'}</AvatarFallback>
@@ -66,7 +66,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
             <NavLink to="/history" icon={<History />} label="History" />
           </div>
           <div className="flex-1 flex justify-center items-center">
-            <NavLink to="/profile" icon={<Settings />} label="Profile" />
+            <NavLink to="/settings" icon={<Settings />} label="Settings" />
           </div>
           {/* Absolutely positioned AddExerciseButton for precise centering */}
           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">

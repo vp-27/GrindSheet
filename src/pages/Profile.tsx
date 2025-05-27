@@ -13,10 +13,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
-import { ChevronRight, Edit2, Plus, Settings, Trash2, User, Pencil } from 'lucide-react';
+import { ChevronRight, Edit2, Plus, Settings as SettingsIcon, Trash2, User, Pencil, LogOut, Folder, Palette, Dumbbell } from 'lucide-react';
 import ThemeSelector from '@/components/ThemeSelector';
 
-const Profile: React.FC = () => {
+const Settings: React.FC = () => {
   const { user, profile, signOut, updateProfile } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -356,245 +356,284 @@ const Profile: React.FC = () => {
 
   if (!user || !profile) {
     return (
-      <Layout title="Profile">
+      <Layout title="Settings">
         <div className="flex justify-center items-center h-64">
-          <p>Loading profile...</p>
+          <p>Loading settings...</p>
         </div>
       </Layout>
     );
   }
 
   return (
-    <Layout title="Profile">
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-4">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="categories">Categories</TabsTrigger>
-          <TabsTrigger value="exercises">Exercises</TabsTrigger>
-        </TabsList>
-        
-        {/* Profile Tab */}
-        <TabsContent value="profile" className="space-y-4">
-          {/* Profile Summary */}
-          <Card className="shadow-sm border border-border">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16">
-                  <AvatarImage src={profile.avatar_url} alt={profile.name} />
-                  <AvatarFallback className="bg-muted text-muted-foreground">
-                    {profile.name?.substring(0, 2).toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <h2 className="text-xl font-medium text-foreground">{profile.name}</h2>
-                  <p className="text-sm text-muted-foreground">@{profile.username}</p>
-                </div>
-                <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" size="icon" className="rounded-full">
-                      <Edit2 className="h-5 w-5 text-muted-foreground" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)}>
-                      <DialogHeader>
-                        <DialogTitle>Edit Profile</DialogTitle>
-                        <DialogDescription>
-                          Update your profile information
-                        </DialogDescription>
-                      </DialogHeader>
-                      <div className="grid gap-4 py-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="name">Name</Label>
-                          <Input
-                            id="name"
-                            value={profileForm.watch('name')}
-                            onChange={(e) => profileForm.setValue('name', e.target.value)}
-                            className="border-border focus-visible:ring-0 focus-visible:ring-offset-0"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="username">Username</Label>
-                          <Input
-                            id="username"
-                            value={profileForm.watch('username')}
-                            onChange={(e) => profileForm.setValue('username', e.target.value)}
-                            className="border-border focus-visible:ring-0 focus-visible:ring-offset-0"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="avatarUrl">Avatar URL</Label>
-                          <Input
-                            id="avatarUrl"
-                            value={profileForm.watch('avatarUrl')}
-                            onChange={(e) => profileForm.setValue('avatarUrl', e.target.value)}
-                            className="border-border focus-visible:ring-0 focus-visible:ring-offset-0"
-                            placeholder="https://api.dicebear.com/7.x/avataaars/svg?seed=YourName"
-                          />
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">Save changes</Button>
-                      </DialogFooter>
-                    </form>
-                  </DialogContent>
-                </Dialog>
+    <Layout title="Settings">
+      <div className="flex flex-col gap-6 pb-6">
+        {/* Profile Hero Section */}
+        <div className="relative">
+          {/* Background blur effect */}
+          <div className="absolute inset-0 rounded-3xl opacity-20 blur-xl bg-blue-500" />
+          
+          {/* Profile container */}
+          <div className="relative backdrop-blur-sm bg-card/80 rounded-3xl border shadow-lg p-6">
+            <div className="flex items-center gap-4">
+              <Avatar className="h-20 w-20 ring-4 ring-white/20">
+                <AvatarImage src={profile.avatar_url} alt={profile.name} />
+                <AvatarFallback className="bg-blue-100 text-blue-700 text-xl font-semibold">
+                  {profile.name?.substring(0, 2).toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-foreground">{profile.name}</h2>
+                <p className="text-muted-foreground">@{profile.username}</p>
               </div>
-            </CardContent>
-          </Card>
-          
+              <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="rounded-full bg-white/20 hover:bg-white/30 transition-colors backdrop-blur-sm"
+                  >
+                    <Edit2 className="h-5 w-5 text-foreground" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px] rounded-2xl">
+                  <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)}>
+                    <DialogHeader>
+                      <DialogTitle>Edit Profile</DialogTitle>
+                      <DialogDescription>
+                        Update your profile information
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="name" className="text-sm font-medium text-gray-700">Name</Label>
+                        <Input
+                          id="name"
+                          value={profileForm.watch('name')}
+                          onChange={(e) => profileForm.setValue('name', e.target.value)}
+                          className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="username" className="text-sm font-medium text-gray-700">Username</Label>
+                        <Input
+                          id="username"
+                          value={profileForm.watch('username')}
+                          onChange={(e) => profileForm.setValue('username', e.target.value)}
+                          className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="avatarUrl" className="text-sm font-medium text-gray-700">Avatar URL</Label>
+                        <Input
+                          id="avatarUrl"
+                          value={profileForm.watch('avatarUrl')}
+                          onChange={(e) => profileForm.setValue('avatarUrl', e.target.value)}
+                          className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0"
+                          placeholder="https://api.dicebear.com/7.x/avataaars/svg?seed=YourName"
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button 
+                        type="submit" 
+                        className="w-full h-12 rounded-xl font-medium text-white bg-blue-500 hover:bg-blue-600 shadow-lg transition-all duration-200 hover:shadow-xl"
+                      >
+                        Save Changes
+                      </Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
+        </div>
+
+        {/* Settings Sections */}
+        <div className="space-y-4">
           {/* Theme Settings */}
-          <ThemeSelector />
-          
-          {/* Logout Button */}
-          <Card 
-            className="shadow-sm border border-border cursor-pointer hover:bg-muted transition-colors"
-            onClick={handleLogout}
-          >
-            <CardContent className="p-4 flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <div className="bg-red-50 p-2 rounded-full">
-                  <LogOut className="h-5 w-5 text-red-600" />
+          <div className="relative">
+            <div className="absolute inset-0 rounded-2xl opacity-10 blur-lg bg-purple-500" />
+            <div className="relative backdrop-blur-sm bg-white/90 rounded-2xl border border-gray-200/30 p-6 shadow-sm">
+              <div className="flex items-center gap-3 mb-4">
+                <div 
+                  className="w-10 h-10 rounded-full flex items-center justify-center bg-purple-100 text-purple-600"
+                >
+                  <Palette className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="font-medium text-red-600">Log Out</h3>
-                  <p className="text-sm text-muted-foreground">Sign out of your account</p>
+                  <h3 className="text-lg font-semibold text-gray-900">Appearance</h3>
+                  <p className="text-sm text-gray-500">Customize your app theme</p>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* Categories Tab */}
-        <TabsContent value="categories" className="space-y-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-foreground">Categories</h2>
-            <Button 
-              onClick={() => {
-                setEditingCategory(null);
-                categoryForm.reset({ name: '', description: '' });
-                setIsAddCategoryOpen(true);
-              }}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              <Plus className="h-4 w-4 mr-2" /> Add Category
-            </Button>
+              <ThemeSelector />
+            </div>
           </div>
-          
-          {loading ? (
-            <div className="text-center py-10 text-muted-foreground">Loading categories...</div>
-          ) : categories.length > 0 ? (
-            <div className="space-y-3">
-              {categories.map(category => (
-                <Card key={category.id} className="shadow-sm border border-border">
-                  <CardContent className="p-4">
-                    <div className="flex justify-between items-center">
+
+          {/* Categories Management */}
+          <div className="relative">
+            <div className="absolute inset-0 rounded-2xl opacity-10 blur-lg bg-green-500" />
+            <div className="relative backdrop-blur-sm bg-white/90 rounded-2xl border border-gray-200/30 p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div 
+                    className="w-10 h-10 rounded-full flex items-center justify-center bg-green-100 text-green-600"
+                  >
+                    <Folder className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Categories</h3>
+                    <p className="text-sm text-gray-500">Manage exercise categories</p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => {
+                    setEditingCategory(null);
+                    categoryForm.reset({ name: '', description: '' });
+                    setIsAddCategoryOpen(true);
+                  }}
+                  className="h-10 rounded-xl font-medium text-white bg-green-500 hover:bg-green-600 shadow-lg transition-all duration-200 hover:shadow-xl"
+                >
+                  <Plus className="h-4 w-4 mr-2" /> Add
+                </Button>
+              </div>
+              
+              {loading ? (
+                <div className="text-center py-6 text-gray-500">Loading categories...</div>
+              ) : categories.length > 0 ? (
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {categories.map(category => (
+                    <div key={category.id} className="flex items-center justify-between p-3 bg-white/60 rounded-xl border border-gray-200/40">
                       <div>
-                        <h3 className="font-medium text-lg text-foreground">{category.name}</h3>
-                        <p className="text-sm text-muted-foreground">{category.description || 'No description'}</p>
+                        <h4 className="font-medium text-gray-900">{category.name}</h4>
+                        <p className="text-sm text-gray-500">{category.description || 'No description'}</p>
                       </div>
                       <div className="flex gap-2">
                         <Button 
-                          variant="outline" 
+                          variant="ghost" 
                           size="sm"
                           onClick={() => handleEditCategory(category)}
-                          className="border-border hover:bg-muted"
+                          className="h-8 w-8 rounded-lg hover:bg-gray-100"
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
                         <Button 
-                          variant="outline" 
+                          variant="ghost" 
                           size="sm"
                           onClick={() => handleDeleteCategory(category.id)}
-                          className="border-border text-red-500 hover:text-red-600 hover:bg-muted"
+                          className="h-8 w-8 rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6 text-gray-500">
+                  No categories found. Create your first category!
+                </div>
+              )}
             </div>
-          ) : (
-            <Card className="shadow-sm border border-border">
-              <CardContent className="p-6 text-center">
-                <p className="text-muted-foreground">No categories found. Create your first category!</p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-        
-        {/* Exercises Tab */}
-        <TabsContent value="exercises" className="space-y-4">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold text-foreground">Exercises</h2>
-            <Button 
-              onClick={() => {
-                setEditingExercise(null);
-                exerciseForm.reset({ name: '', description: '', categoryId: '' });
-                setIsAddExerciseOpen(true);
-              }}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground"
-            >
-              <Plus className="h-4 w-4 mr-2" /> Add Exercise
-            </Button>
           </div>
-          
-          {loading ? (
-            <div className="text-center py-10 text-muted-foreground">Loading exercises...</div>
-          ) : exercises.length > 0 ? (
-            <div className="space-y-3">
-              {exercises.map(exercise => {
-                const category = categories.find(c => c.id === exercise.category_id);
-                return (
-                  <Card key={exercise.id} className="shadow-sm border border-border">
-                    <CardContent className="p-4">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="font-medium text-lg text-foreground">{exercise.name}</h3>
-                          <p className="text-sm text-muted-foreground">{exercise.description || 'No description'}</p>
-                          <div className="mt-1 inline-block bg-muted text-xs text-muted-foreground px-2 py-1 rounded-md">
+
+          {/* Exercises Management */}
+          <div className="relative">
+            <div className="absolute inset-0 rounded-2xl opacity-10 blur-lg bg-orange-500" />
+            <div className="relative backdrop-blur-sm bg-white/90 rounded-2xl border border-gray-200/30 p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div 
+                    className="w-10 h-10 rounded-full flex items-center justify-center bg-orange-100 text-orange-600"
+                  >
+                    <Dumbbell className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Exercises</h3>
+                    <p className="text-sm text-gray-500">Manage your exercises</p>
+                  </div>
+                </div>
+                <Button 
+                  onClick={() => {
+                    setEditingExercise(null);
+                    exerciseForm.reset({ name: '', description: '', categoryId: '' });
+                    setIsAddExerciseOpen(true);
+                  }}
+                  className="h-10 rounded-xl font-medium text-white bg-orange-500 hover:bg-orange-600 shadow-lg transition-all duration-200 hover:shadow-xl"
+                >
+                  <Plus className="h-4 w-4 mr-2" /> Add
+                </Button>
+              </div>
+              
+              {loading ? (
+                <div className="text-center py-6 text-gray-500">Loading exercises...</div>
+              ) : exercises.length > 0 ? (
+                <div className="space-y-3 max-h-64 overflow-y-auto">
+                  {exercises.map(exercise => {
+                    const category = categories.find(c => c.id === exercise.category_id);
+                    return (
+                      <div key={exercise.id} className="flex items-center justify-between p-3 bg-white/60 rounded-xl border border-gray-200/40">
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900">{exercise.name}</h4>
+                          <p className="text-sm text-gray-500">{exercise.description || 'No description'}</p>
+                          <span className="inline-block mt-1 text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-md">
                             {category?.name || 'Uncategorized'}
-                          </div>
+                          </span>
                         </div>
                         <div className="flex gap-2">
                           <Button 
-                            variant="outline" 
+                            variant="ghost" 
                             size="sm"
                             onClick={() => handleEditExercise(exercise)}
-                            className="border-border hover:bg-muted"
+                            className="h-8 w-8 rounded-lg hover:bg-gray-100"
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button 
-                            variant="outline" 
+                            variant="ghost" 
                             size="sm"
                             onClick={() => handleDeleteExercise(exercise.id)}
-                            className="border-border text-red-500 hover:text-red-600 hover:bg-muted"
+                            className="h-8 w-8 rounded-lg text-red-500 hover:text-red-600 hover:bg-red-50"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="text-center py-6 text-gray-500">
+                  No exercises found. Create your first exercise!
+                </div>
+              )}
             </div>
-          ) : (
-            <Card className="shadow-sm border border-border">
-              <CardContent className="p-6 text-center">
-                <p className="text-muted-foreground">No exercises found. Create your first exercise!</p>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
-      </Tabs>
-      
+          </div>
+
+          {/* Logout Section */}
+          <div className="relative">
+            <div className="absolute inset-0 rounded-2xl opacity-10 blur-lg bg-red-500" />
+            <div 
+              className="relative backdrop-blur-sm bg-white/90 rounded-2xl border border-gray-200/30 p-6 shadow-sm cursor-pointer hover:bg-red-50/50 transition-colors"
+              onClick={handleLogout}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                  <LogOut className="h-5 w-5 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-red-600">Sign Out</h3>
+                  <p className="text-sm text-gray-500">Sign out of your account</p>
+                </div>
+                <ChevronRight className="h-5 w-5 text-gray-400 ml-auto" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Modals for editing exercises and categories */}
       <Dialog open={isAddExerciseOpen} onOpenChange={setIsAddExerciseOpen}>
-        <DialogContent>
+        <DialogContent className="rounded-2xl">
           <form onSubmit={exerciseForm.handleSubmit(handleAddExercise)}>
             <DialogHeader>
               <DialogTitle>{editingExercise ? 'Edit Exercise' : 'Add New Exercise'}</DialogTitle>
@@ -606,33 +645,34 @@ const Profile: React.FC = () => {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name" className="text-sm font-medium text-gray-700">Name</Label>
                 <Input
                   id="name"
                   value={exerciseForm.watch('name')}
                   onChange={(e) => exerciseForm.setValue('name', e.target.value)}
-                  className="border-border focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0"
                   placeholder="Bench Press"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description" className="text-sm font-medium text-gray-700">Description</Label>
                 <Input
                   id="description"
                   value={exerciseForm.watch('description')}
                   onChange={(e) => exerciseForm.setValue('description', e.target.value)}
-                  className="border-border focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0"
                   placeholder="Barbell bench press"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
+                <Label htmlFor="category" className="text-sm font-medium text-gray-700">Category</Label>
                 <select
                   id="category"
+                  title="Select exercise category"
                   value={exerciseForm.watch('categoryId')}
                   onChange={(e) => exerciseForm.setValue('categoryId', e.target.value)}
-                  className="w-full p-2.5 border border-border rounded-md text-sm focus:outline-none bg-background text-foreground"
+                  className="w-full p-2.5 border border-gray-200/60 rounded-xl text-sm focus:outline-none bg-white/80 text-gray-900"
                   required
                 >
                   <option value="">Select a category</option>
@@ -645,7 +685,10 @@ const Profile: React.FC = () => {
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Button 
+                type="submit" 
+                className="w-full h-12 rounded-xl font-medium text-white bg-orange-500 hover:bg-orange-600 shadow-lg transition-all duration-200 hover:shadow-xl"
+              >
                 {editingExercise ? 'Update Exercise' : 'Add Exercise'}
               </Button>
             </DialogFooter>
@@ -654,7 +697,7 @@ const Profile: React.FC = () => {
       </Dialog>
       
       <Dialog open={isAddCategoryOpen} onOpenChange={setIsAddCategoryOpen}>
-        <DialogContent>
+        <DialogContent className="rounded-2xl">
           <form onSubmit={categoryForm.handleSubmit(handleAddCategory)}>
             <DialogHeader>
               <DialogTitle>{editingCategory ? 'Edit Category' : 'Add New Category'}</DialogTitle>
@@ -666,29 +709,32 @@ const Profile: React.FC = () => {
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Name</Label>
+                <Label htmlFor="name" className="text-sm font-medium text-gray-700">Name</Label>
                 <Input
                   id="name"
                   value={categoryForm.watch('name')}
                   onChange={(e) => categoryForm.setValue('name', e.target.value)}
-                  className="border-border focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0"
                   placeholder="Chest"
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description" className="text-sm font-medium text-gray-700">Description</Label>
                 <Input
                   id="description"
                   value={categoryForm.watch('description')}
                   onChange={(e) => categoryForm.setValue('description', e.target.value)}
-                  className="border-border focus-visible:ring-0 focus-visible:ring-offset-0"
+                  className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0"
                   placeholder="Chest exercises"
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+              <Button 
+                type="submit" 
+                className="w-full h-12 rounded-xl font-medium text-white bg-green-500 hover:bg-green-600 shadow-lg transition-all duration-200 hover:shadow-xl"
+              >
                 {editingCategory ? 'Update Category' : 'Add Category'}
               </Button>
             </DialogFooter>
@@ -699,63 +745,4 @@ const Profile: React.FC = () => {
   );
 };
 
-// Define missing icons
-const Dumbbell = (props) => (
-  <svg
-    {...props}
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M7 5v14" />
-    <path d="M17 5v14" />
-    <path d="M3 7h4" />
-    <path d="M3 17h4" />
-    <path d="M17 7h4" />
-    <path d="M17 17h4" />
-  </svg>
-);
-
-const Folder = (props) => (
-  <svg
-    {...props}
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z" />
-  </svg>
-);
-
-const LogOut = (props) => (
-  <svg
-    {...props}
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-    <polyline points="16 17 21 12 16 7" />
-    <line x1="21" y1="12" x2="9" y2="12" />
-  </svg>
-);
-
-export default Profile;
+export default Settings;

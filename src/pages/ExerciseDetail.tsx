@@ -234,15 +234,15 @@ const ExerciseDetail = () => {
             style={{ backgroundColor: categoryColors?.primary || '#10b981' }}
           />
           
-          <div className="relative backdrop-blur-sm bg-white/90 rounded-2xl border border-gray-200/30 p-6 shadow-sm">
+          <div className="relative backdrop-blur-sm bg-card/90 rounded-2xl border border-border/30 p-6 shadow-sm">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Log New Weight</h3>
-              <p className="text-sm text-gray-500">Record your latest workout progress</p>
+              <h3 className="text-lg font-semibold text-foreground">Log New Weight</h3>
+              <p className="text-sm text-muted-foreground">Record your latest workout progress</p>
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="weight" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="weight" className="text-sm font-medium text-foreground">
                   Weight (lbs)
                 </Label>
                 <Input
@@ -253,12 +253,12 @@ const ExerciseDetail = () => {
                   value={weight}
                   onChange={e => setWeight(e.target.value)}
                   placeholder="Enter weight"
-                  className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0 text-lg h-12"
+                  className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 text-lg h-12"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="note" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="note" className="text-sm font-medium text-foreground">
                   Note (optional)
                 </Label>
                 <Textarea
@@ -267,7 +267,7 @@ const ExerciseDetail = () => {
                   onChange={e => setNote(e.target.value)}
                   placeholder="Add a note about this set..."
                   rows={3}
-                  className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0 resize-none"
+                  className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 resize-none"
                 />
               </div>
               
