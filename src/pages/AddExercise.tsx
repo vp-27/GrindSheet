@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, Dumbbell } from 'lucide-react';
+import { Dumbbell } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
@@ -101,31 +101,6 @@ const AddExercise = () => {
   return (
     <Layout title="Log Exercise">
       <div className="flex flex-col gap-6 pb-6">
-        {/* Header with back button */}
-        <div className="flex items-center justify-between">
-          <Button 
-            variant="ghost" 
-            className="p-2 h-auto rounded-full hover:bg-muted transition-colors" 
-            onClick={() => navigate('/')}
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-          {selectedCategory && categoryColors && (
-            <div className="flex items-center gap-2">
-              <span 
-                className="text-xs font-semibold px-3 py-1.5 rounded-full border backdrop-blur-sm"
-                style={{ 
-                  backgroundColor: `${categoryColors.primary}15`,
-                  borderColor: `${categoryColors.primary}30`,
-                  color: categoryColors.primary 
-                }}
-              >
-                {selectedCategory.name}
-              </span>
-            </div>
-          )}
-        </div>
-        
         {/* Exercise Selection Form */}
         <div className="relative">
           {/* Subtle background glow */}
@@ -135,15 +110,29 @@ const AddExercise = () => {
           />
           
           <div className="relative backdrop-blur-sm bg-card/90 rounded-2xl border border-border/30 p-6 shadow-sm">
-            <div className="mb-6">
-              <h3 className="text-lg font-semibold text-foreground">Exercise Details</h3>
-              <p className="text-sm text-muted-foreground">Select your exercise and log your performance</p>
+            <div className="mb-6 flex items-start justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">Exercise Details</h3>
+                <p className="text-sm text-muted-foreground">Select your exercise and log your performance</p>
+              </div>
+              {selectedCategory && categoryColors && (
+                <span 
+                  className="text-xs font-semibold px-3 py-1.5 rounded-full border backdrop-blur-sm"
+                  style={{ 
+                    backgroundColor: `${categoryColors.primary}15`,
+                    borderColor: `${categoryColors.primary}30`,
+                    color: categoryColors.primary 
+                  }}
+                >
+                  {selectedCategory.name}
+                </span>
+              )}
             </div>
             
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <div className="space-y-3">
-                  <Label htmlFor="category" className="text-sm font-medium text-foreground">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="category" className="text-xs sm:text-sm font-medium text-foreground">
                     Category
                   </Label>
                   <Select
@@ -152,9 +141,9 @@ const AddExercise = () => {
                   >
                     <SelectTrigger 
                       id="category" 
-                      className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 h-12"
+                      className="rounded-lg sm:rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 h-10 sm:h-12 text-sm"
                     >
-                      <SelectValue placeholder="Select a category" />
+                      <SelectValue placeholder="Category" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-border/60 bg-card/95 backdrop-blur-md">
                       {categories.map(category => (
@@ -166,8 +155,8 @@ const AddExercise = () => {
                   </Select>
                 </div>
                 
-                <div className="space-y-3">
-                  <Label htmlFor="exercise" className="text-sm font-medium text-foreground">
+                <div className="space-y-2">
+                  <Label htmlFor="exercise" className="text-xs sm:text-sm font-medium text-foreground">
                     Exercise
                   </Label>
                   <Select
@@ -177,12 +166,12 @@ const AddExercise = () => {
                   >
                     <SelectTrigger 
                       id="exercise" 
-                      className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 h-12"
+                      className="rounded-lg sm:rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 h-10 sm:h-12 text-sm"
                     >
                       <SelectValue placeholder={
                         selectedCategoryId 
-                          ? "Select an exercise" 
-                          : "Select a category first"
+                          ? "Exercise" 
+                          : "Category first"
                       } />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-border/60 bg-card/95 backdrop-blur-md">
@@ -202,7 +191,7 @@ const AddExercise = () => {
                 </div>
               </div>
               
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Label htmlFor="weight" className="text-sm font-medium text-foreground">
                   Weight (lbs)
                 </Label>
@@ -231,7 +220,7 @@ const AddExercise = () => {
                 />
               </div>
               
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Label htmlFor="note" className="text-sm font-medium text-foreground">
                   Note (optional)
                 </Label>
