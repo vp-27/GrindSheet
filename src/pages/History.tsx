@@ -77,19 +77,39 @@ const History = () => {
   };
 
   const handleEditChange = (e) => {
-    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    
+    if (name === 'weight') {
+      // Only allow numeric input (including decimals)
+      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+        setEditForm({ ...editForm, [name]: value });
+      }
+    } else {
+      setEditForm({ ...editForm, [name]: value });
+    }
   };
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!editLog) return;
     
+    // Validate weight is a valid positive number
+    const weightValue = parseFloat(editForm.weight);
+    if (!editForm.weight || isNaN(weightValue) || weightValue <= 0) {
+      toast({
+        title: 'Invalid weight',
+        description: 'Please enter a valid weight value.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
       await updateExerciseLog({ 
         ...editLog, 
-        weight: Number(editForm.weight), 
+        weight: weightValue, 
         note: editForm.note 
       });
       
@@ -267,6 +287,13 @@ const History = () => {
                     min="0"
                     value={editForm.weight}
                     onChange={handleEditChange}
+                    onKeyDown={(e) => {
+                      // Prevent non-numeric characters except for allowed keys
+                      if (!/[0-9.]/.test(e.key) && 
+                          !['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
                     className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0 text-lg h-12"
                     required
                   />

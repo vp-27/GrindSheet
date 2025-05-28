@@ -89,13 +89,24 @@ const ExerciseDetail = () => {
       return;
     }
     
+    // Validate weight is a valid positive number
+    const weightValue = parseFloat(weight);
+    if (isNaN(weightValue) || weightValue <= 0) {
+      toast({
+        title: 'Invalid weight',
+        description: 'Please enter a valid weight value.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     setIsSubmitting(true);
     
     try {
       await addExerciseLog({
         userId: profile?.id || '',
         exerciseId: exercise.id,
-        weight: parseFloat(weight),
+        weight: weightValue,
         note: note,
         weightUnit: 'lbs' // Always use lbs now
       });
@@ -176,15 +187,6 @@ const ExerciseDetail = () => {
         
         {/* Progress Chart Section - Embedded in background */}
         <div className="relative -mx-4 px-4">
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-foreground mb-2">
-              {exercise.name} Progress
-            </h2>
-            <p className="text-muted-foreground">
-              Track your weight progression over time
-            </p>
-          </div>
-          
           {chartData.length > 0 ? (
             <ProgressChart
               data={chartData}
@@ -281,7 +283,20 @@ const ExerciseDetail = () => {
                   step="0.5"
                   min="0"
                   value={weight}
-                  onChange={e => setWeight(e.target.value)}
+                  onChange={e => {
+                    const value = e.target.value;
+                    // Only allow numeric input (including decimals)
+                    if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                      setWeight(value);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    // Prevent non-numeric characters except for allowed keys
+                    if (!/[0-9.]/.test(e.key) && 
+                        !['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
                   placeholder="Enter weight"
                   className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 text-lg h-12"
                 />
