@@ -458,7 +458,6 @@ const Settings: React.FC = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-foreground`}>Appearance</h3>
-                <p className="text-sm text-muted-foreground">Choose how the app looks to you</p>
               </div>
             </div>
             
@@ -500,7 +499,6 @@ const Settings: React.FC = () => {
                 </div>
                 <div className="min-w-0">
                   <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-foreground`}>Categories</h3>
-                  <p className="text-sm text-muted-foreground truncate">Manage exercise categories</p>
                 </div>
               </div>
               <Button 
@@ -574,7 +572,6 @@ const Settings: React.FC = () => {
                 </div>
                 <div className="min-w-0">
                   <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-foreground`}>Exercises</h3>
-                  <p className="text-sm text-muted-foreground truncate">Manage your exercises</p>
                 </div>
               </div>
               <Button 
@@ -626,7 +623,6 @@ const Settings: React.FC = () => {
               </div>
               <div className="flex-1">
                 <h3 className="text-lg font-semibold text-red-600 dark:text-red-400">Sign Out</h3>
-                <p className="text-sm text-muted-foreground">Sign out of your account</p>
               </div>
               <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors" />
             </div>
