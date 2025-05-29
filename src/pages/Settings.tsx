@@ -4,6 +4,7 @@ import Layout from '@/components/Layout';
 import ExerciseMiniCard from '@/components/ExerciseMiniCard';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ import '@/components/ui/color-indicator.css';
 const Settings: React.FC = () => {
   const { user, profile, signOut, updateProfile } = useAuth();
   const { theme, setTheme } = useTheme();
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState('profile');
@@ -370,31 +372,31 @@ const Settings: React.FC = () => {
 
   return (
     <Layout title="Settings">
-      <div className="flex flex-col gap-6 pb-6">
+      <div className={`flex flex-col ${isMobile ? 'gap-4' : 'gap-6'} pb-6`}>
         {/* Profile Section - Clean Apple-style blend */}
-        <div className="py-6">
-          <div className="flex items-center gap-6">
-            <Avatar className="h-24 w-24">
+        <div className={`${isMobile ? 'py-4' : 'py-6'}`}>
+          <div className={`flex items-center ${isMobile ? 'gap-4' : 'gap-6'}`}>
+            <Avatar className={`${isMobile ? 'h-16 w-16' : 'h-24 w-24'} ring-2 ring-border/20`}>
               <AvatarImage src={profile.avatar_url} alt={profile.name} />
-              <AvatarFallback className="bg-muted text-muted-foreground text-2xl font-semibold">
+              <AvatarFallback className="bg-muted text-muted-foreground text-xl font-semibold">
                 {profile.name?.substring(0, 2).toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-foreground mb-1">{profile.name}</h1>
-              <p className="text-lg text-muted-foreground">@{profile.username}</p>
+            <div className="flex-1 min-w-0">
+              <h1 className={`${isMobile ? 'text-xl' : 'text-3xl'} font-bold text-foreground mb-1 truncate`}>{profile.name}</h1>
+              <p className={`${isMobile ? 'text-sm' : 'text-lg'} text-muted-foreground truncate`}>@{profile.username}</p>
             </div>
             <Dialog open={isEditProfileOpen} onOpenChange={setIsEditProfileOpen}>
               <DialogTrigger asChild>
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="rounded-full hover:bg-muted transition-colors h-12 w-12"
+                  className={`rounded-full hover:bg-muted transition-colors ${isMobile ? 'h-10 w-10' : 'h-12 w-12'}`}
                 >
-                  <Edit2 className="h-6 w-6 text-muted-foreground" />
+                  <Edit2 className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'} text-muted-foreground`} />
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px] rounded-2xl backdrop-blur-sm bg-card/95 border-border/50">
+              <DialogContent className={`${isMobile ? 'sm:max-w-[90vw] mx-4' : 'sm:max-w-[425px]'} rounded-2xl backdrop-blur-sm bg-card/95 border-border/50`}>
                 <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)}>
                   <DialogHeader>
                     <DialogTitle className="text-foreground">Edit Profile</DialogTitle>
@@ -402,7 +404,7 @@ const Settings: React.FC = () => {
                       Update your profile information
                     </DialogDescription>
                   </DialogHeader>
-                  <div className="grid gap-4 py-4">
+                  <div className={`grid gap-4 ${isMobile ? 'py-3' : 'py-4'}`}>
                     <div className="space-y-2">
                       <Label htmlFor="name" className="text-sm font-medium text-foreground">Name</Label>
                       <Input
@@ -435,7 +437,7 @@ const Settings: React.FC = () => {
                   <DialogFooter>
                     <Button 
                       type="submit" 
-                      className="w-full h-12 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
+                      className={`w-full ${isMobile ? 'h-11' : 'h-12'} rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200`}
                     >
                       Save Changes
                     </Button>
@@ -447,20 +449,20 @@ const Settings: React.FC = () => {
         </div>
 
         {/* Settings Sections */}
-        <div className="space-y-6">
+        <div className={`${isMobile ? 'space-y-4' : 'space-y-6'}`}>
           {/* Theme Settings */}
           <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 p-6 shadow-sm">
-            <div className="flex items-center gap-3 mb-6">
+            <div className={`flex items-center gap-3 ${isMobile ? 'mb-4' : 'mb-6'}`}>
               <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center">
                 <Palette className="h-5 w-5 text-muted-foreground" />
               </div>
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">Appearance</h3>
+              <div className="flex-1 min-w-0">
+                <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-foreground`}>Appearance</h3>
                 <p className="text-sm text-muted-foreground">Choose how the app looks to you</p>
               </div>
             </div>
             
-            <div className="grid grid-cols-3 gap-3">
+            <div className={`grid ${isMobile ? 'grid-cols-3 gap-2' : 'grid-cols-3 gap-3'}`}>
               {[
                 { value: 'light' as const, label: 'Light', icon: 'Sun' },
                 { value: 'dark' as const, label: 'Dark', icon: 'Moon' },
@@ -474,15 +476,15 @@ const Settings: React.FC = () => {
                   <Button
                     key={themeOption.value}
                     variant={isSelected ? "default" : "outline"}
-                    className={`h-20 flex flex-col gap-2 p-3 rounded-xl transition-all duration-200 ${
+                    className={`${isMobile ? 'h-16 p-2' : 'h-20 p-3'} flex flex-col gap-2 rounded-xl transition-all duration-200 ${
                       isSelected 
                         ? 'bg-primary text-primary-foreground shadow-md border-primary' 
                         : 'bg-background/60 border-border/60 hover:bg-background/80 text-foreground hover:border-border'
                     }`}
                     onClick={() => setTheme(themeOption.value)}
                   >
-                    <IconComponent className="h-5 w-5" />
-                    <span className="text-sm font-medium">{themeOption.label}</span>
+                    <IconComponent className={`${isMobile ? 'h-4 w-4' : 'h-5 w-5'}`} />
+                    <span className={`${isMobile ? 'text-xs' : 'text-sm'} font-medium`}>{themeOption.label}</span>
                   </Button>
                 );
               })}
@@ -491,14 +493,14 @@ const Settings: React.FC = () => {
 
           {/* Categories Management */}
           <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center">
+            <div className={`flex items-center justify-between ${isMobile ? 'mb-4' : 'mb-6'}`}>
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center flex-shrink-0">
                   <Folder className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground">Categories</h3>
-                  <p className="text-sm text-muted-foreground">Manage exercise categories</p>
+                <div className="min-w-0">
+                  <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-foreground`}>Categories</h3>
+                  <p className="text-sm text-muted-foreground truncate">Manage exercise categories</p>
                 </div>
               </div>
               <Button 
@@ -507,16 +509,17 @@ const Settings: React.FC = () => {
                   categoryForm.reset({ name: '', description: '' });
                   setIsAddCategoryOpen(true);
                 }}
-                className="h-10 px-4 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
+                className={`${isMobile ? 'h-9 px-3 text-xs' : 'h-10 px-4'} rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200 flex-shrink-0`}
               >
-                <Plus className="h-4 w-4 mr-2" /> Add Category
+                <Plus className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-2'}`} /> 
+                {isMobile ? 'Add' : 'Add Category'}
               </Button>
             </div>
             
             {loading ? (
               <div className="text-center py-8 text-muted-foreground">Loading categories...</div>
             ) : categories.length > 0 ? (
-              <div className="space-y-3 max-h-64 overflow-y-auto">
+              <div className={`space-y-3 ${isMobile ? 'max-h-56' : 'max-h-64'} overflow-y-auto`}>
                 {categories.map(category => {
                   const categoryKey = getCategoryKeyByName(category.name);
                   const colors = getCategoryColors(categoryKey);
@@ -524,21 +527,21 @@ const Settings: React.FC = () => {
                   return (
                     <div 
                       key={category.id} 
-                      className="flex items-center justify-between p-4 rounded-xl bg-background/60 border border-border/60 hover:bg-background/80 transition-colors"
+                      className={`flex items-center justify-between ${isMobile ? 'p-3' : 'p-4'} rounded-xl bg-background/60 border border-border/60 hover:bg-background/80 transition-colors`}
                     >
-                      <div className="flex items-center gap-3">
-                        <div className={`category-indicator category-indicator--${categoryKey}`} />
-                        <div>
-                          <h4 className="font-medium text-foreground">{category.name}</h4>
-                          <p className="text-sm text-muted-foreground">{category.description || 'No description'}</p>
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className={`category-indicator category-indicator--${categoryKey} flex-shrink-0`} />
+                        <div className="min-w-0">
+                          <h4 className={`font-medium text-foreground truncate ${isMobile ? 'text-sm' : ''}`}>{category.name}</h4>
+                          <p className={`text-muted-foreground truncate ${isMobile ? 'text-xs' : 'text-sm'}`}>{category.description || 'No description'}</p>
                         </div>
                       </div>
-                      <div className="flex gap-1">
+                      <div className={`flex ${isMobile ? 'gap-1' : 'gap-1'} flex-shrink-0`}>
                         <Button 
                           variant="ghost" 
                           size="sm"
                           onClick={() => handleEditCategory(category)}
-                          className="h-8 w-8 rounded-lg hover:bg-muted/60 text-muted-foreground hover:text-foreground"
+                          className={`${isMobile ? 'h-9 w-9' : 'h-8 w-8'} rounded-lg hover:bg-muted/60 text-muted-foreground hover:text-foreground`}
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -546,7 +549,7 @@ const Settings: React.FC = () => {
                           variant="ghost" 
                           size="sm"
                           onClick={() => handleDeleteCategory(category.id)}
-                          className="h-8 w-8 rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30"
+                          className={`${isMobile ? 'h-9 w-9' : 'h-8 w-8'} rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30`}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -564,14 +567,14 @@ const Settings: React.FC = () => {
 
           {/* Exercises Management */}
           <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center">
+            <div className={`flex items-center justify-between ${isMobile ? 'mb-4' : 'mb-6'}`}>
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center flex-shrink-0">
                   <Dumbbell className="h-5 w-5 text-muted-foreground" />
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-foreground">Exercises</h3>
-                  <p className="text-sm text-muted-foreground">Manage your exercises</p>
+                <div className="min-w-0">
+                  <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-semibold text-foreground`}>Exercises</h3>
+                  <p className="text-sm text-muted-foreground truncate">Manage your exercises</p>
                 </div>
               </div>
               <Button 
@@ -580,16 +583,17 @@ const Settings: React.FC = () => {
                   exerciseForm.reset({ name: '', description: '', categoryId: '' });
                   setIsAddExerciseOpen(true);
                 }}
-                className="h-10 px-4 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
+                className={`${isMobile ? 'h-9 px-3 text-xs' : 'h-10 px-4'} rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200 flex-shrink-0`}
               >
-                <Plus className="h-4 w-4 mr-2" /> Add Exercise
+                <Plus className={`${isMobile ? 'h-3 w-3 mr-1' : 'h-4 w-4 mr-2'}`} /> 
+                {isMobile ? 'Add' : 'Add Exercise'}
               </Button>
             </div>
             
             {loading ? (
               <div className="text-center py-8 text-muted-foreground">Loading exercises...</div>
             ) : exercises.length > 0 ? (
-              <div className="grid gap-3 max-h-64 overflow-y-auto">
+              <div className={`grid gap-3 ${isMobile ? 'max-h-56' : 'max-h-64'} overflow-y-auto`}>
                 {exercises.map(exercise => {
                   const category = categories.find(c => c.id === exercise.category_id);
                   
@@ -632,7 +636,7 @@ const Settings: React.FC = () => {
 
       {/* Modals for editing exercises and categories */}
       <Dialog open={isAddExerciseOpen} onOpenChange={setIsAddExerciseOpen}>
-        <DialogContent className="rounded-2xl backdrop-blur-sm bg-card/95 border-border/50">
+        <DialogContent className={`${isMobile ? 'sm:max-w-[90vw] mx-4' : 'sm:max-w-[425px]'} rounded-2xl backdrop-blur-sm bg-card/95 border-border/50`}>
           <form onSubmit={exerciseForm.handleSubmit(handleAddExercise)}>
             <DialogHeader>
               <DialogTitle className="text-foreground">{editingExercise ? 'Edit Exercise' : 'Add New Exercise'}</DialogTitle>
@@ -642,7 +646,7 @@ const Settings: React.FC = () => {
                   : 'Add a new exercise to track your progress'}
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
+            <div className={`grid gap-4 ${isMobile ? 'py-3' : 'py-4'}`}>
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm font-medium text-foreground">Name</Label>
                 <Input
@@ -671,7 +675,7 @@ const Settings: React.FC = () => {
                   title="Select exercise category"
                   value={exerciseForm.watch('categoryId')}
                   onChange={(e) => exerciseForm.setValue('categoryId', e.target.value)}
-                  className="w-full p-2.5 border border-border/60 rounded-xl text-sm focus:outline-none bg-background/80 text-foreground"
+                  className={`w-full ${isMobile ? 'p-3' : 'p-2.5'} border border-border/60 rounded-xl text-sm focus:outline-none bg-background/80 text-foreground`}
                   required
                 >
                   <option value="">Select a category</option>
@@ -686,7 +690,7 @@ const Settings: React.FC = () => {
             <DialogFooter>
               <Button 
                 type="submit" 
-                className="w-full h-12 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
+                className={`w-full ${isMobile ? 'h-11' : 'h-12'} rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200`}
               >
                 {editingExercise ? 'Update Exercise' : 'Add Exercise'}
               </Button>
@@ -696,7 +700,7 @@ const Settings: React.FC = () => {
       </Dialog>
       
       <Dialog open={isAddCategoryOpen} onOpenChange={setIsAddCategoryOpen}>
-        <DialogContent className="rounded-2xl backdrop-blur-sm bg-card/95 border-border/50">
+        <DialogContent className={`${isMobile ? 'sm:max-w-[90vw] mx-4' : 'sm:max-w-[425px]'} rounded-2xl backdrop-blur-sm bg-card/95 border-border/50`}>
           <form onSubmit={categoryForm.handleSubmit(handleAddCategory)}>
             <DialogHeader>
               <DialogTitle className="text-foreground">{editingCategory ? 'Edit Category' : 'Add New Category'}</DialogTitle>
@@ -706,7 +710,7 @@ const Settings: React.FC = () => {
                   : 'Create a new category for organizing exercises'}
               </DialogDescription>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
+            <div className={`grid gap-4 ${isMobile ? 'py-3' : 'py-4'}`}>
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm font-medium text-foreground">Name</Label>
                 <Input
@@ -732,7 +736,7 @@ const Settings: React.FC = () => {
             <DialogFooter>
               <Button 
                 type="submit" 
-                className="w-full h-12 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
+                className={`w-full ${isMobile ? 'h-11' : 'h-12'} rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200`}
               >
                 {editingCategory ? 'Update Category' : 'Add Category'}
               </Button>

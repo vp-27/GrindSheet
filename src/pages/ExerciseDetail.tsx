@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import { getProgressChartData, calculateProgress } from '@/utils/progressUtils';
 import { getCategoryColors, getCategoryKeyByName } from '@/utils/categoryColors';
+import '@/components/ui/category-styles.css';
 
 const ExerciseDetail = () => {
   const { exercises, categories, exerciseLogs, addExerciseLog } = useAppContext();
@@ -149,42 +150,17 @@ const ExerciseDetail = () => {
 
   return (
     <Layout title={exercise.name}>
-      {/* Subtle background tint based on selected category - Apple style */}
+      {/* Subtle bottom category tinting */}
       {selectedCategoryColor && (
         <div 
-          className="fixed inset-0 pointer-events-none transition-all duration-700 ease-out z-0"
+          className="fixed inset-0 pointer-events-none z-0"
           style={{
-            background: `radial-gradient(ellipse 100% 60% at 50% 0%, ${selectedCategoryColor}15 0%, ${selectedCategoryColor}08 40%, transparent 70%)`,
+            background: `linear-gradient(to top, ${selectedCategoryColor}15 0%, ${selectedCategoryColor}08 25%, ${selectedCategoryColor}03 50%, ${selectedCategoryColor}01 75%, transparent 100%)`
           }}
         />
       )}
       
       <div className="relative flex flex-col gap-8 pb-6 z-10">
-        {/* Header with back button and category badge */}
-        <div className="flex items-center justify-between">
-          <Button 
-            variant="ghost" 
-            className="p-2 h-auto rounded-full hover:bg-muted transition-colors" 
-            onClick={() => navigate('/')}
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
-          {category && categoryColors && (
-            <div className="flex items-center gap-2">
-              <span 
-                className="text-xs font-semibold px-3 py-1.5 rounded-full border backdrop-blur-sm"
-                style={{ 
-                  backgroundColor: `${categoryColors.primary}15`,
-                  borderColor: `${categoryColors.primary}30`,
-                  color: categoryColors.primary 
-                }}
-              >
-                {category.name}
-              </span>
-            </div>
-          )}
-        </div>
-        
         {/* Progress Chart Section - Embedded in background */}
         <div className="relative -mx-4 px-4">
           {chartData.length > 0 ? (
@@ -209,8 +185,11 @@ const ExerciseDetail = () => {
         <div className="relative">
           {/* Background blur effect */}
           <div 
-            className="absolute inset-0 rounded-3xl opacity-20 blur-xl"
-            style={{ backgroundColor: categoryColors?.primary || '#10b981' }}
+            className="category-background-glow"
+            // eslint-disable-next-line react/forbid-dom-props
+            style={{ 
+              '--category-color': categoryColors?.primary || '#10b981'
+            } as React.CSSProperties}
           />
           
           {/* Stats container */}
@@ -220,8 +199,11 @@ const ExerciseDetail = () => {
               <div className="text-center">
                 <div className="flex items-center justify-center mb-2">
                   <div 
-                    className="w-3 h-3 rounded-full mr-2"
-                    style={{ backgroundColor: categoryColors?.primary || '#10b981' }}
+                    className="category-stats-indicator"
+                    // eslint-disable-next-line react/forbid-dom-props
+                    style={{ 
+                      '--category-color': categoryColors?.primary || '#10b981'
+                    } as React.CSSProperties}
                   />
                   <p className="text-sm font-medium text-muted-foreground">Current</p>
                 </div>
@@ -262,14 +244,31 @@ const ExerciseDetail = () => {
         <div className="relative">
           {/* Subtle background glow */}
           <div 
-            className="absolute inset-0 rounded-2xl opacity-10 blur-lg"
-            style={{ backgroundColor: categoryColors?.primary || '#10b981' }}
+            className="category-form-glow"
+            // eslint-disable-next-line react/forbid-dom-props
+            style={{ 
+              '--category-color': categoryColors?.primary || '#10b981'
+            } as React.CSSProperties}
           />
           
           <div className="relative backdrop-blur-sm bg-card/90 rounded-2xl border border-border/30 p-6 shadow-sm">
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-foreground">Log New Weight</h3>
-              <p className="text-sm text-muted-foreground">Record your latest workout progress</p>
+            <div className="mb-4 flex items-start justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground">Log New Weight</h3>
+                <p className="text-sm text-muted-foreground">Record your latest workout progress</p>
+              </div>
+              {category && categoryColors && (
+                <span 
+                  className="category-header-badge"
+                  // eslint-disable-next-line react/forbid-dom-props
+                  style={{ 
+                    '--category-color': categoryColors.primary,
+                    '--category-color-rgb': (categoryColors.primary || '#10b981').replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
+                  } as React.CSSProperties}
+                >
+                  {category.name}
+                </span>
+              )}
             </div>
             
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -318,11 +317,11 @@ const ExerciseDetail = () => {
               
               <Button 
                 type="submit" 
-                className="w-full h-12 rounded-xl font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl active:scale-[0.98]"
+                className="category-submit-button"
                 style={{ 
-                  backgroundColor: categoryColors?.primary || '#10b981',
-                  boxShadow: `0 4px 20px ${categoryColors?.primary || '#10b981'}30`
-                }}
+                  '--category-color': categoryColors?.primary || '#10b981',
+                  '--category-color-rgb': (categoryColors?.primary || '#10b981').replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
+                } as React.CSSProperties}
                 disabled={isSubmitting}
               >
                 {isSubmitting ? (

@@ -15,7 +15,8 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const updateThemeColorMeta = (isDark: boolean) => {
   const metaThemeColor = document.querySelector('meta[name="theme-color"]');
   if (metaThemeColor) {
-    const color = isDark ? '#000000' : '#f9fafb';
+    // Use colors that match the actual CSS background values
+    const color = isDark ? '#000000' : '#f9fafb'; // Dark: pure black, Light: same as before
     metaThemeColor.setAttribute('content', color);
   }
 };

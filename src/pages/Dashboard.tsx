@@ -10,6 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
 import { format } from 'date-fns';
+import '@/components/ui/category-styles.css';
 
 const Dashboard = () => {
   const { categories, exercises, exerciseLogs } = useAppContext();
@@ -100,13 +101,12 @@ const Dashboard = () => {
   return (
     <Layout title="Home">
       <>
-        {/* Subtle background tint based on selected category - Apple style */}
+        {/* Subtle bottom category tinting */}
         {selectedCategoryColor && (
           <div 
-            className="fixed inset-0 pointer-events-none transition-all duration-700 ease-out z-0"
+            className="fixed inset-0 pointer-events-none z-0"
             style={{
-              // eslint-disable-next-line
-              background: `radial-gradient(ellipse 100% 60% at 50% 0%, ${selectedCategoryColor}15 0%, ${selectedCategoryColor}08 40%, transparent 70%)`,
+              background: `linear-gradient(to top, ${selectedCategoryColor}15 0%, ${selectedCategoryColor}08 25%, ${selectedCategoryColor}03 50%, ${selectedCategoryColor}01 75%, transparent 100%)`
             }}
           />
         )}
@@ -121,12 +121,6 @@ const Dashboard = () => {
                   "Overall Progress"
                 }
               </h2>
-              <p className="text-muted-foreground">
-                {selectedCategoryId ? 
-                  "Weight progression across exercises in this category" :
-                  "Percentage growth across all categories"
-                }
-              </p>
             </div>
             
             {chartData.length > 0 ? (
@@ -162,7 +156,7 @@ const Dashboard = () => {
                     : 'bg-card border-border hover:shadow-md'
                 }`}
               >
-                All Categories
+                All
               </Button>
               
               {categories.map((category, index) => {
@@ -177,19 +171,13 @@ const Dashboard = () => {
                     onClick={() => setSelectedCategoryId(category.id)}
                     className={`rounded-2xl px-6 py-3 font-medium whitespace-nowrap transition-all duration-300 transform hover:scale-105 ${
                       isSelected 
-                        ? 'text-white border-transparent shadow-lg hover:shadow-xl ring-2 ring-white/20' 
-                        : 'bg-card border-border hover:shadow-md'
+                        ? 'category-button-selected' 
+                        : 'category-button-unselected'
                     }`}
                     style={{
-                      // eslint-disable-next-line
-                      backgroundColor: isSelected ? categoryColor : 'transparent',
-                      // eslint-disable-next-line
-                      color: isSelected ? 'white' : categoryColor,
-                      // eslint-disable-next-line
-                      borderColor: isSelected ? categoryColor : undefined,
-                      // eslint-disable-next-line
-                      boxShadow: isSelected ? `0 4px 20px ${categoryColor}40` : undefined
-                    }}
+                      '--category-color': categoryColor,
+                      '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
+                    } as React.CSSProperties}
                   >
                   {category.name}
                 </Button>
@@ -202,7 +190,6 @@ const Dashboard = () => {
         <div className="relative">
           <div className="mb-6">
             <h2 className="text-xl font-bold text-foreground mb-2">Your Progress</h2>
-            <p className="text-muted-foreground">Track your latest achievements and improvements</p>
           </div>
           
           {exerciseProgressItems.length > 0 ? (
@@ -225,16 +212,13 @@ const Dashboard = () => {
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2 flex-1 min-w-0">
                           <h3 className="font-semibold text-foreground truncate">{progress.exercise.name}</h3>
+                          {/* eslint-disable-next-line */}
                           <div 
-                            className="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium flex-shrink-0"
+                            className="category-badge"
                             style={{ 
-                              // eslint-disable-next-line
-                              backgroundColor: `${categoryColor}15`,
-                              // eslint-disable-next-line
-                              color: categoryColor,
-                              // eslint-disable-next-line
-                              border: `1px solid ${categoryColor}25`
-                            }}
+                              '--category-color': categoryColor,
+                              '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
+                            } as React.CSSProperties}
                           >
                             {categories.find(cat => cat.id === progress.exercise.categoryId)?.name}
                           </div>
@@ -305,7 +289,6 @@ const Dashboard = () => {
         <div className="relative">
           <div className="mb-6">
             <h2 className="text-xl font-bold text-foreground mb-2">Recent Workouts</h2>
-            <p className="text-muted-foreground">Your latest training sessions and achievements</p>
           </div>
           
           <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
@@ -330,16 +313,13 @@ const Dashboard = () => {
                               <h4 className="font-semibold text-foreground group-hover:text-foreground transition-colors">
                                 {exercise?.name || 'Unknown Exercise'}
                               </h4>
+                              {/* eslint-disable-next-line */}
                               <div 
-                                className="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium flex-shrink-0"
+                                className="category-badge"
                                 style={{ 
-                                  // eslint-disable-next-line
-                                  backgroundColor: `${categoryColor}15`,
-                                  // eslint-disable-next-line
-                                  color: categoryColor,
-                                  // eslint-disable-next-line
-                                  border: `1px solid ${categoryColor}25`
-                                }}
+                                  '--category-color': categoryColor,
+                                  '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
+                                } as React.CSSProperties}
                               >
                                 {category?.name || 'Uncategorized'}
                               </div>
