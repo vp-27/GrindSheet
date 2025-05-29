@@ -35,6 +35,7 @@ const Settings: React.FC = () => {
   const [isAddExerciseOpen, setIsAddExerciseOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
   const [editingExercise, setEditingExercise] = useState(null);
+  const [deletableItems, setDeletableItems] = useState({ categories: new Set(), exercises: new Set() });
   
   const profileForm = useForm({
     defaultValues: {
@@ -102,6 +103,9 @@ const Settings: React.FC = () => {
           
         if (exercisesError) throw exercisesError;
         setExercises(exercisesData || []);
+        
+        // Check which items can be deleted
+        await checkDeletableItems(categoriesData || [], exercisesData || []);
       } catch (error) {
         console.error('Error fetching data:', error);
         toast({
@@ -116,6 +120,56 @@ const Settings: React.FC = () => {
 
     fetchData();
   }, [user]);
+
+  // Helper function to check which categories and exercises can be deleted
+  const checkDeletableItems = async (categories: any[], exercises: any[]) => {
+    if (!user) return;
+    
+    const deletableCategoryIds = new Set<string>();
+    const deletableExerciseIds = new Set<string>();
+    
+    // Check exercises first
+    for (const exercise of exercises) {
+      const { data: otherUserLogs } = await supabase
+        .from('exercise_logs')
+        .select('user_id')
+        .eq('exercise_id', exercise.id)
+        .neq('user_id', user.id)
+        .limit(1);
+      
+      if (!otherUserLogs || otherUserLogs.length === 0) {
+        deletableExerciseIds.add(exercise.id);
+      }
+    }
+    
+    // Check categories
+    for (const category of categories) {
+      const categoryExercises = exercises.filter(ex => ex.category_id === category.id);
+      const categoryExerciseIds = categoryExercises.map(ex => ex.id);
+      
+      if (categoryExerciseIds.length === 0) {
+        // No exercises in this category, can delete
+        deletableCategoryIds.add(category.id);
+      } else {
+        // Check if any exercise in this category has logs from other users
+        const { data: otherUserLogs } = await supabase
+          .from('exercise_logs')
+          .select('user_id')
+          .in('exercise_id', categoryExerciseIds)
+          .neq('user_id', user.id)
+          .limit(1);
+        
+        if (!otherUserLogs || otherUserLogs.length === 0) {
+          deletableCategoryIds.add(category.id);
+        }
+      }
+    }
+    
+    setDeletableItems({
+      categories: deletableCategoryIds,
+      exercises: deletableExerciseIds
+    });
+  };
 
   const handleProfileSubmit = async (data) => {
     try {
@@ -172,6 +226,15 @@ const Settings: React.FC = () => {
         .order('name');
         
       setCategories(refreshedCategories || []);
+      
+      // Refresh exercises for consistency
+      const { data: refreshedExercises } = await supabase
+        .from('exercises')
+        .select('*')
+        .order('name');
+        
+      // Refresh deletable items
+      await checkDeletableItems(refreshedCategories || [], refreshedExercises || []);
       
       toast({
         title: editingCategory ? 'Category updated' : 'Category added',
@@ -230,6 +293,15 @@ const Settings: React.FC = () => {
         
       setExercises(refreshedExercises || []);
       
+      // Refresh categories for consistency
+      const { data: refreshedCategories } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name');
+        
+      // Refresh deletable items
+      await checkDeletableItems(refreshedCategories || [], refreshedExercises || []);
+      
       toast({
         title: editingExercise ? 'Exercise updated' : 'Exercise added',
         description: editingExercise 
@@ -269,6 +341,16 @@ const Settings: React.FC = () => {
   };
 
   const handleDeleteCategory = async (categoryId) => {
+    // Check if this category can be deleted
+    if (!deletableItems.categories.has(categoryId)) {
+      toast({
+        title: 'Cannot delete category',
+        description: 'Other users have logged exercises in this category. You cannot delete it.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     if (!confirm('Are you sure you want to delete this category? This will also delete all exercises in this category.')) {
       return;
     }
@@ -297,6 +379,9 @@ const Settings: React.FC = () => {
         
       setExercises(refreshedExercises || []);
       
+      // Refresh deletable items
+      await checkDeletableItems(refreshedCategories || [], refreshedExercises || []);
+      
       toast({
         title: 'Category deleted',
         description: 'The category and its exercises have been deleted.',
@@ -311,6 +396,16 @@ const Settings: React.FC = () => {
   };
 
   const handleDeleteExercise = async (exerciseId) => {
+    // Check if this exercise can be deleted
+    if (!deletableItems.exercises.has(exerciseId)) {
+      toast({
+        title: 'Cannot delete exercise',
+        description: 'Other users have logged this exercise. You cannot delete it.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     if (!confirm('Are you sure you want to delete this exercise?')) {
       return;
     }
@@ -330,6 +425,15 @@ const Settings: React.FC = () => {
         .order('name');
         
       setExercises(refreshedExercises || []);
+      
+      // Refresh categories for consistency  
+      const { data: refreshedCategories } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name');
+      
+      // Refresh deletable items
+      await checkDeletableItems(refreshedCategories || [], refreshedExercises || []);
       
       toast({
         title: 'Exercise deleted',
@@ -521,6 +625,7 @@ const Settings: React.FC = () => {
                 {categories.map(category => {
                   const categoryKey = getCategoryKeyByName(category.name);
                   const colors = getCategoryColors(categoryKey);
+                  const canDelete = deletableItems.categories.has(category.id);
                   
                   return (
                     <div 
@@ -530,8 +635,20 @@ const Settings: React.FC = () => {
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className={`category-indicator category-indicator--${categoryKey} flex-shrink-0`} />
                         <div className="min-w-0">
-                          <h4 className={`font-medium text-foreground truncate ${isMobile ? 'text-sm' : ''}`}>{category.name}</h4>
-                          <p className={`text-muted-foreground truncate ${isMobile ? 'text-xs' : 'text-sm'}`}>{category.description || 'No description'}</p>
+                          <div className="flex items-center gap-2">
+                            <h4 className={`font-medium text-foreground truncate ${isMobile ? 'text-sm' : ''}`}>{category.name}</h4>
+                            {!canDelete && (
+                              <span className="text-xs px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full font-medium">
+                                Protected
+                              </span>
+                            )}
+                          </div>
+                          <p className={`text-muted-foreground truncate ${isMobile ? 'text-xs' : 'text-sm'}`}>
+                            {category.description || 'No description'}
+                            {!canDelete && (
+                              <span className="text-orange-600 dark:text-orange-400 ml-2">• Used by others</span>
+                            )}
+                          </p>
                         </div>
                       </div>
                       <div className={`flex ${isMobile ? 'gap-1' : 'gap-1'} flex-shrink-0`}>
@@ -547,7 +664,13 @@ const Settings: React.FC = () => {
                           variant="ghost" 
                           size="sm"
                           onClick={() => handleDeleteCategory(category.id)}
-                          className={`${isMobile ? 'h-9 w-9' : 'h-8 w-8'} rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30`}
+                          disabled={!canDelete}
+                          className={`${isMobile ? 'h-9 w-9' : 'h-8 w-8'} rounded-lg ${
+                            canDelete 
+                              ? 'text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30' 
+                              : 'text-muted-foreground/40 cursor-not-allowed'
+                          }`}
+                          title={canDelete ? 'Delete category' : 'Cannot delete - used by other users'}
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -593,6 +716,7 @@ const Settings: React.FC = () => {
               <div className={`grid gap-3 ${isMobile ? 'max-h-56' : 'max-h-64'} overflow-y-auto`}>
                 {exercises.map(exercise => {
                   const category = categories.find(c => c.id === exercise.category_id);
+                  const canDelete = deletableItems.exercises.has(exercise.id);
                   
                   return (
                     <ExerciseMiniCard
@@ -601,6 +725,7 @@ const Settings: React.FC = () => {
                       category={category}
                       onEdit={() => handleEditExercise(exercise)}
                       onDelete={() => handleDeleteExercise(exercise.id)}
+                      canDelete={canDelete}
                     />
                   );
                 })}
