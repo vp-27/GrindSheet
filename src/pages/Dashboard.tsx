@@ -198,7 +198,13 @@ const Dashboard = () => {
                 const categoryColor = getCategoryColor(
                   categories.findIndex(cat => cat.id === progress.exercise.categoryId)
                 );
-                const isPersonalRecord = progress.personalRecord === progress.currentWeight;
+                // Only show PR if:
+                // 1. Not the first log (has previous weight)
+                // 2. Current weight is actually higher than previous weight
+                // 3. Current weight equals personal record
+                const isPersonalRecord = progress.personalRecord === progress.currentWeight && 
+                                        progress.previousWeight && 
+                                        progress.currentWeight > progress.previousWeight;
                 
                 return (
                   <div 
@@ -207,52 +213,28 @@ const Dashboard = () => {
                     onClick={() => handleExerciseClick(progress.exercise.id)}
                   >
                     {/* Main card */}
-                    <div className="relative bg-card rounded-2xl border border-border p-5 shadow-sm group-hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1">
-                      {/* Header with exercise name and category pill inline */}
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <h3 className="font-semibold text-foreground truncate">{progress.exercise.name}</h3>
-                          {/* eslint-disable-next-line */}
-                          <div 
-                            className="category-badge"
-                            style={{ 
-                              '--category-color': categoryColor,
-                              '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
-                            } as React.CSSProperties}
-                          >
-                            {categories.find(cat => cat.id === progress.exercise.categoryId)?.name}
-                          </div>
+                    <div className="relative bg-card rounded-2xl border border-border p-4 shadow-sm group-hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1">
+                      {/* Top row: Exercise name + Current weight */}
+                      <div className="flex items-start justify-between mb-3">
+                        <h3 className="font-semibold text-foreground text-lg leading-tight flex-1 min-w-0 pr-2">
+                          {progress.exercise.name}
+                        </h3>
+                        <div className="text-right flex-shrink-0">
+                          <p className="text-2xl font-bold text-foreground">{progress.currentWeight} lbs</p>
                         </div>
-                        {isPersonalRecord && (
-                          <div className="flex items-center gap-1 bg-amber-50 text-amber-700 px-2 py-1 rounded-lg text-xs font-medium flex-shrink-0">
-                            <Trophy className="w-3 h-3" />
-                            PR
-                          </div>
-                        )}
                       </div>
 
-                      {/* Current Weight Display */}
-                      <div className="mb-4">
-                        <p className="text-sm text-muted-foreground mb-1">Current Weight</p>
-                        <p className="text-2xl font-bold text-foreground">{progress.currentWeight} lbs</p>
-                      </div>
-
-                      {/* Progress Stats */}
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Previous:</span>
-                          <span className="font-medium">{progress.previousWeight || '-'} lbs</span>
+                      {/* Second row: Previous weight + Progress % and PR */}
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="text-sm text-muted-foreground">
+                          {progress.previousWeight ? `Previous: ${progress.previousWeight} lbs` : 'First log'}
                         </div>
-                        
-                        {progress.percentGainFromPrevious !== undefined && (
-                          <div className="flex items-center justify-between">
-                            <span className="text-muted-foreground text-sm">Progress:</span>
+                        <div className="flex items-center gap-2">
+                          {progress.percentGainFromPrevious !== undefined && (
                             <div className={`flex items-center text-sm font-medium ${
                               progress.percentGainFromPrevious > 0 
                                 ? "text-emerald-600" 
-                                : progress.percentGainFromPrevious < 0 
-                                  ? "text-red-500" 
-                                  : "text-muted-foreground"
+                                : "text-red-500"
                             }`}>
                               {progress.percentGainFromPrevious > 0 ? (
                                 <>
@@ -265,11 +247,31 @@ const Dashboard = () => {
                                   {progress.percentGainFromPrevious.toFixed(1)}%
                                 </>
                               ) : (
-                                'No change'
+                                '0%'
                               )}
                             </div>
-                          </div>
-                        )}
+                          )}
+                          {isPersonalRecord && (
+                            <div className="flex items-center gap-1 bg-amber-50 text-amber-700 px-2 py-1 rounded-lg text-xs font-medium">
+                              <Trophy className="w-3 h-3" />
+                              PR
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Category badge */}
+                      <div className="flex justify-start">
+                        {/* eslint-disable-next-line */}
+                        <div 
+                          className="category-badge text-xs"
+                          style={{ 
+                            '--category-color': categoryColor,
+                            '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
+                          } as React.CSSProperties}
+                        >
+                          {categories.find(cat => cat.id === progress.exercise.categoryId)?.name}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -304,18 +306,29 @@ const Dashboard = () => {
                     return (
                       <div 
                         key={log.id} 
-                        className="p-5 cursor-pointer transition-all duration-200 group"
+                        className="p-4 cursor-pointer transition-all duration-200 group hover:bg-muted/50"
                         onClick={() => exercise && handleExerciseClick(exercise.id)}
                       >
                         <div className="flex items-center justify-between">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h4 className="font-semibold text-foreground group-hover:text-foreground transition-colors">
+                          <div className="flex-1 min-w-0 pr-3">
+                            <div className="flex items-start justify-between mb-2">
+                              <h4 className="font-semibold text-foreground text-base leading-tight">
                                 {exercise?.name || 'Unknown Exercise'}
                               </h4>
+                              <div className="text-right flex-shrink-0">
+                                <p className="font-bold text-lg text-foreground">{log.weight} lbs</p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <Clock className="w-3 h-3" />
+                                <span>{format(new Date(log.timestamp), 'MMM d, yyyy')}</span>
+                              </div>
+                              
                               {/* eslint-disable-next-line */}
                               <div 
-                                className="category-badge"
+                                className="category-badge text-xs"
                                 style={{ 
                                   '--category-color': categoryColor,
                                   '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
@@ -324,16 +337,9 @@ const Dashboard = () => {
                                 {category?.name || 'Uncategorized'}
                               </div>
                             </div>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Clock className="w-3 h-3" />
-                              <span>{format(new Date(log.timestamp), 'MMM d, yyyy')}</span>
-                            </div>
-                          </div>
-                          
-                          <div className="text-right">
-                            <p className="font-bold text-lg text-foreground">{log.weight} lbs</p>
+                            
                             {log.note && (
-                              <p className="text-xs text-muted-foreground mt-1 max-w-32 truncate">{log.note}</p>
+                              <p className="text-xs text-muted-foreground mt-2 line-clamp-1">{log.note}</p>
                             )}
                           </div>
                         </div>
