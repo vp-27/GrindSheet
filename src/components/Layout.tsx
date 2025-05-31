@@ -51,7 +51,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
       </main>
       
       {/* Apple-style bottom navigation with glass effect */}
-      <div className="sticky bottom-3 z-10 backdrop-blur-lg bg-background/70 mb-3 w-full sm:max-w-lg sm:mx-auto rounded-xl px-2 sm:px-0">
+      <div className="sticky bottom-0 z-10 backdrop-blur-lg bg-background/70 pb-3 w-full sm:max-w-lg sm:mx-auto rounded-t-xl px-2 sm:px-0">
         <nav className="relative flex items-center justify-between p-2">
           <div className="flex-1 flex justify-center items-center">
             <NavLink to="/" icon={<Home />} label="Home" />
