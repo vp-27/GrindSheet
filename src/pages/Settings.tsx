@@ -621,7 +621,12 @@ const Settings: React.FC = () => {
             {loading ? (
               <div className="text-center py-8 text-muted-foreground">Loading categories...</div>
             ) : categories.length > 0 ? (
-              <div className={`space-y-3 ${isMobile ? 'max-h-56' : 'max-h-64'} overflow-y-auto`}>
+              <div className={`space-y-3 ${isMobile ? '' : 'max-h-64 overflow-y-auto'} ${!isMobile && categories.length > 3 ? 'relative' : ''}`}>
+                {!isMobile && categories.length > 3 && (
+                  <div className="absolute top-0 right-2 z-10 text-xs text-muted-foreground/60 bg-background/80 px-2 py-1 rounded-full backdrop-blur-sm">
+                    Scroll to see more
+                  </div>
+                )}
                 {categories.map(category => {
                   const categoryKey = getCategoryKeyByName(category.name);
                   const colors = getCategoryColors(categoryKey);
@@ -630,20 +635,20 @@ const Settings: React.FC = () => {
                   return (
                     <div 
                       key={category.id} 
-                      className={`flex items-center justify-between ${isMobile ? 'p-3' : 'p-4'} rounded-xl bg-background/60 border border-border/60 hover:bg-background/80 transition-colors`}
+                      className={`flex items-center justify-between ${isMobile ? 'p-4' : 'p-4'} rounded-xl bg-background/60 border border-border/60 hover:bg-background/80 transition-colors`}
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className={`category-indicator category-indicator--${categoryKey} flex-shrink-0`} />
                         <div className="min-w-0">
                           <div className="flex items-center gap-2">
-                            <h4 className={`font-medium text-foreground truncate ${isMobile ? 'text-sm' : ''}`}>{category.name}</h4>
+                            <h4 className={`font-medium text-foreground truncate ${isMobile ? 'text-base' : 'text-sm'}`}>{category.name}</h4>
                             {!canDelete && (
                               <span className="text-xs px-2 py-0.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-full font-medium">
                                 Protected
                               </span>
                             )}
                           </div>
-                          <p className={`text-muted-foreground truncate ${isMobile ? 'text-xs' : 'text-sm'}`}>
+                          <p className={`text-muted-foreground truncate ${isMobile ? 'text-sm' : 'text-xs'}`}>
                             {category.description || 'No description'}
                             {!canDelete && (
                               <span className="text-orange-600 dark:text-orange-400 ml-2">• Used by others</span>
@@ -651,28 +656,28 @@ const Settings: React.FC = () => {
                           </p>
                         </div>
                       </div>
-                      <div className={`flex ${isMobile ? 'gap-1' : 'gap-1'} flex-shrink-0`}>
+                      <div className={`flex ${isMobile ? 'gap-2' : 'gap-1'} flex-shrink-0`}>
                         <Button 
                           variant="ghost" 
                           size="sm"
                           onClick={() => handleEditCategory(category)}
-                          className={`${isMobile ? 'h-9 w-9' : 'h-8 w-8'} rounded-lg hover:bg-muted/60 text-muted-foreground hover:text-foreground`}
+                          className={`${isMobile ? 'h-11 w-11' : 'h-8 w-8'} rounded-lg hover:bg-muted/60 text-muted-foreground hover:text-foreground`}
                         >
-                          <Pencil className="h-4 w-4" />
+                          <Pencil className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />
                         </Button>
                         <Button 
                           variant="ghost" 
                           size="sm"
                           onClick={() => handleDeleteCategory(category.id)}
                           disabled={!canDelete}
-                          className={`${isMobile ? 'h-9 w-9' : 'h-8 w-8'} rounded-lg ${
+                          className={`${isMobile ? 'h-11 w-11' : 'h-8 w-8'} rounded-lg ${
                             canDelete 
                               ? 'text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30' 
                               : 'text-muted-foreground/40 cursor-not-allowed'
                           }`}
                           title={canDelete ? 'Delete category' : 'Cannot delete - used by other users'}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />
                         </Button>
                       </div>
                     </div>
@@ -713,7 +718,12 @@ const Settings: React.FC = () => {
             {loading ? (
               <div className="text-center py-8 text-muted-foreground">Loading exercises...</div>
             ) : exercises.length > 0 ? (
-              <div className={`grid gap-3 ${isMobile ? 'max-h-56' : 'max-h-64'} overflow-y-auto`}>
+              <div className={`grid gap-3 ${isMobile ? '' : 'max-h-64 overflow-y-auto'} ${!isMobile && exercises.length > 3 ? 'relative' : ''}`}>
+                {!isMobile && exercises.length > 3 && (
+                  <div className="absolute top-0 right-2 z-10 text-xs text-muted-foreground/60 bg-background/80 px-2 py-1 rounded-full backdrop-blur-sm">
+                    Scroll to see more
+                  </div>
+                )}
                 {exercises.map(exercise => {
                   const category = categories.find(c => c.id === exercise.category_id);
                   const canDelete = deletableItems.exercises.has(exercise.id);

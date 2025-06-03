@@ -178,6 +178,13 @@ export const getOverallProgressChartData = (
     allDates.add(date);
   });
   
+  // Ensure all dates have entries for all categories (even if empty)
+  allDates.forEach(date => {
+    if (!chartData.has(date)) {
+      chartData.set(date, { date });
+    }
+  });
+  
   // Second pass: group logs by date and exercise, then calculate per-exercise percentage gains
   sortedLogs.forEach(log => {
     const logDate = new Date(log.timestamp);
@@ -209,10 +216,25 @@ export const getOverallProgressChartData = (
     const startWeight = exerciseStartWeights.get(exerciseId) || log.weight;
     const percentGain = startWeight > 0 ? ((log.weight - startWeight) / startWeight) * 100 : 0;
     
+    // Check if this exercise has established progress (has changed from its starting weight)
+    // OR if this is not the very first log for this exercise
+    const isFirstLogForExercise = exerciseStartWeights.get(exerciseId) === log.weight && 
+      !sortedLogs.some(prevLog => 
+        prevLog.exerciseId === exerciseId && 
+        new Date(prevLog.timestamp) < new Date(log.timestamp)
+      );
+    
     // Track the latest percentage gain for each exercise in this category on this date
     if (!dayData[categoryName].exerciseProgress.has(exerciseId) || 
         new Date(log.timestamp) >= new Date(dayData[categoryName].latestTimestamp)) {
-      dayData[categoryName].exerciseProgress.set(exerciseId, percentGain);
+      
+      // Include in percentage calculation if:
+      // 1. This is NOT the first log for this exercise (has established progress), OR
+      // 2. The weight has changed from starting weight (showing progress)
+      if (!isFirstLogForExercise || log.weight !== startWeight) {
+        dayData[categoryName].exerciseProgress.set(exerciseId, percentGain);
+      }
+      
       if (new Date(log.timestamp) >= new Date(dayData[categoryName].latestTimestamp)) {
         dayData[categoryName].latestTimestamp = log.timestamp;
       }
@@ -223,7 +245,7 @@ export const getOverallProgressChartData = (
   const result = Array.from(chartData.values()).map(dayData => {
     const formattedDay = { date: dayData.date };
     
-    // Ensure all categories are represented with data points for better line continuity
+    // Process ALL categories for each date (not just those with data)
     categories.forEach(category => {
       const categoryName = category.name;
       if (dayData[categoryName]) {
@@ -238,7 +260,7 @@ export const getOverallProgressChartData = (
         
         formattedDay[categoryName] = Math.round(avgPercentGain * 100) / 100; // Round to 2 decimal places
       } else {
-        // Fill missing data with previous value or 0 to maintain line continuity
+        // Initialize with 0 for missing data - will be forward filled if appropriate
         formattedDay[categoryName] = 0;
       }
     });
@@ -246,14 +268,44 @@ export const getOverallProgressChartData = (
     return formattedDay;
   });
   
-  // Sort by date and fill gaps for better line continuity
+  // Sort by date first
   const sortedResult = result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   
-  // Forward fill missing values to ensure continuous lines
+  // Create a map to track logs by date for forward-filling logic
+  const logsOnDate = new Map();
+  sortedLogs.forEach(log => {
+    const logDate = new Date(log.timestamp);
+    const date = `${logDate.getMonth() + 1}/${logDate.getDate()}/${logDate.getFullYear()}`;
+    if (!logsOnDate.has(date)) {
+      logsOnDate.set(date, []);
+    }
+    logsOnDate.get(date).push(log);
+  });
+  
+  // Forward fill missing values to show maintained progress
+  // Only forward fill when there's no new data for a category on a given day
   for (let i = 1; i < sortedResult.length; i++) {
     categories.forEach(category => {
       const categoryName = category.name;
-      if (sortedResult[i][categoryName] === 0 && sortedResult[i-1][categoryName] > 0) {
+      
+      // Get all exercises for this category
+      const categoryExerciseIds = exercises
+        .filter(ex => ex.categoryId === category.id)
+        .map(ex => ex.id);
+      
+      // Check if there are any logs for this category on this day
+      const currentDayLogs = logsOnDate.get(sortedResult[i].date) || [];
+      const hasLogsThisDay = currentDayLogs.some(log => 
+        categoryExerciseIds.includes(log.exerciseId)
+      );
+      
+      // Only forward fill if:
+      // 1. There's no data for this category today (0%)
+      // 2. There was data for this category on a previous day (ANY value, positive or negative)
+      // 3. There are no new logs for this category today (maintained progress)
+      if (sortedResult[i][categoryName] === 0 && 
+          sortedResult[i-1][categoryName] !== 0 && 
+          !hasLogsThisDay) {
         sortedResult[i][categoryName] = sortedResult[i-1][categoryName];
       }
     });
