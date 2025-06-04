@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { History } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { addDays, isBefore, parseISO } from 'date-fns';
+import './ProgressChart.css';
 
 interface ProgressChartProps {
   data: ProgressChartData[] | any[];
@@ -68,8 +69,35 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
 
   const formatUnit = showPercentage ? '%' : weightUnit;
 
+  // Clean, minimal dot at the end of each line
+  const renderEndDot = (lineKey: string) => (props: any) => {
+    const { cx, cy, index, payload, stroke } = props;
+    // Defensive: if cx/cy are not numbers, don't render
+    if (typeof cx !== 'number' || typeof cy !== 'number') return null;
+    // Find the last non-null index for this lineKey
+    let lastIndex = -1;
+    for (let i = data.length - 1; i >= 0; i--) {
+      if (data[i][lineKey] !== null && data[i][lineKey] !== undefined) {
+        lastIndex = i;
+        break;
+      }
+    }
+    if (index === lastIndex) {
+      return (
+        <circle
+          cx={cx}
+          cy={cy}
+          r={3}
+          fill={stroke}
+          className="progresschart-dot-clean"
+        />
+      );
+    }
+    return null;
+  };
+
   return (
-    <div>
+    <div className="progresschart-container">
       {title && (
         <div className="flex justify-between items-center mb-2">
           <h3 className="text-base font-medium">{title}</h3>
@@ -88,10 +116,10 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
           <LineChart
             data={data}
             margin={{
-              top: 5,
-              right: 5, // Reduced right margin
-              left: 10, // Reduced left margin
-              bottom: 5,
+              top: 15, // Increased to prevent dot clipping
+              right: 15, // Increased to prevent dot clipping
+              left: 10,
+              bottom: 15, // Increased to prevent dot clipping
             }}
           >
             <CartesianGrid 
@@ -164,9 +192,11 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
                       dataKey={key}
                       name={key}
                       stroke={colors[index % colors.length]}
-                      strokeWidth={blendWithBackground ? 2 : appleStyle ? 1.5 : 2}
-                      dot={blendWithBackground ? false : appleStyle ? false : { r: 3 }}
-                      activeDot={blendWithBackground ? { r: 4 } : appleStyle ? { r: 4, strokeWidth: 0 } : { r: 5 }}
+                      strokeWidth={blendWithBackground ? 2 : appleStyle ? 1.8 : 2}
+                      dot={renderEndDot(key)}
+                      activeDot={false}
+                      animationDuration={800}
+                      animationBegin={index * 100} // Reduced stagger time
                     />
                   ))}
               </>
@@ -175,9 +205,10 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
                 type="monotone"
                 dataKey={showPercentage ? "percentGain" : "weight"}
                 stroke={appleStyle ? "#34C759" : "#3b82f6"}
-                strokeWidth={blendWithBackground ? 2 : appleStyle ? 1.5 : 2}
-                dot={blendWithBackground ? false : appleStyle ? false : { r: 3 }}
-                activeDot={blendWithBackground ? { r: 4 } : appleStyle ? { r: 4, strokeWidth: 0 } : { r: 5 }}
+                strokeWidth={blendWithBackground ? 2 : appleStyle ? 1.8 : 2}
+                dot={renderEndDot(showPercentage ? "percentGain" : "weight")}
+                activeDot={false}
+                animationDuration={800}
               />
             )}
           </LineChart>
