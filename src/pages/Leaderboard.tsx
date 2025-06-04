@@ -428,6 +428,9 @@ const Leaderboard: React.FC = () => {
     );
   };
 
+  // Determine if we are in PR Overview mode (used for keying and logic)
+  const isOverviewMode = leaderboardType === LeaderboardType.EXERCISE_PR && selectedExerciseId === 'all';
+
   return (
     <Layout title="Leaderboard">
       <div className="space-y-6">
@@ -575,7 +578,9 @@ const Leaderboard: React.FC = () => {
                 <div className="space-y-3">
                   {leaderboardData.map((entry, index) => (
                     <div 
-                      key={entry.userId || index}
+                      key={isOverviewMode 
+                        ? `exercise-${entry.exerciseId || index}` 
+                        : `user-${entry.userId || index}`}
                       className="animate-in slide-in-from-bottom-4 duration-300"
                     >
                       {renderLeaderboardEntry(entry, index)}
