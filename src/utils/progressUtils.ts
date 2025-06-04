@@ -522,8 +522,11 @@ export const calculateMaxWeightLeaderboard = (
   logs
     .filter(log => log.exerciseId === exerciseId)
     .forEach(log => {
-      if (!userMaxWeights.has(log.userId) || log.weight > userMaxWeights.get(log.userId)!) {
-        userMaxWeights.set(log.userId, log.weight);
+      // Convert weight to lbs if needed
+      const weightInLbs = log.weightUnit === 'kg' ? convertWeight(log.weight, 'kg') : log.weight;
+      
+      if (!userMaxWeights.has(log.userId) || weightInLbs > userMaxWeights.get(log.userId)!) {
+        userMaxWeights.set(log.userId, weightInLbs);
       }
     });
   
@@ -545,6 +548,249 @@ export const calculateMaxWeightLeaderboard = (
     .sort((a, b) => b.value - a.value);
 };
 
+// New function to calculate PR overview across all exercises
+export const calculateAllExercisesPROverview = (
+  logs: ExerciseLog[], 
+  users: User[]
+): LeaderboardEntry[] => {
+  // Find exercises with multiple users
+  const exerciseUserCounts = new Map<string, Set<string>>();
+  logs.forEach(log => {
+    if (!exerciseUserCounts.has(log.exerciseId)) {
+      exerciseUserCounts.set(log.exerciseId, new Set());
+    }
+    exerciseUserCounts.get(log.exerciseId)!.add(log.userId);
+  });
+  
+  const multiUserExercises = Array.from(exerciseUserCounts.entries())
+    .filter(([_, userSet]) => userSet.size > 1)
+    .sort((a, b) => b[1].size - a[1].size);
+  
+  const prOverview: LeaderboardEntry[] = [];
+  
+  // For each exercise with multiple users, find the PR holder(s)
+  multiUserExercises.forEach(([exerciseId, _]) => {
+    const exerciseLogs = logs.filter(log => log.exerciseId === exerciseId);
+    
+    // Find the highest weight for this exercise
+    let maxWeight = 0;
+    const prHolders: User[] = [];
+    
+    // First pass: find the max weight
+    exerciseLogs.forEach(log => {
+      const weightInLbs = log.weightUnit === 'kg' ? convertWeight(log.weight, 'kg') : log.weight;
+      if (weightInLbs > maxWeight) {
+        maxWeight = weightInLbs;
+      }
+    });
+    
+    // Second pass: find all users who achieved this max weight (handle ties)
+    exerciseLogs.forEach(log => {
+      const weightInLbs = log.weightUnit === 'kg' ? convertWeight(log.weight, 'kg') : log.weight;
+      if (weightInLbs === maxWeight) {
+        const user = users.find(u => u.id === log.userId);
+        if (user && !prHolders.some(h => h.id === user.id)) {
+          prHolders.push(user);
+        }
+      }
+    });
+    
+    // Add one entry per exercise, with all PR holders grouped together
+    if (maxWeight > 0 && prHolders.length > 0) {
+      prOverview.push({
+        userId: prHolders[0].id, // Use first holder as primary user
+        user: prHolders[0], // Primary user for display
+        users: prHolders, // All tied users
+        value: maxWeight,
+        exerciseId,
+        isTie: prHolders.length > 1
+      });
+    }
+  });
+  
+  // Sort by highest weight, then by exercise name for consistent ordering
+  return prOverview.sort((a, b) => {
+    if (b.value !== a.value) return b.value - a.value;
+    // If weights are equal, sort by exerciseId for consistent ordering
+    return a.exerciseId!.localeCompare(b.exerciseId!);
+  });
+};
+
+// Calculate PR championship summary (who has the most PRs)
+export const calculatePRChampionshipSummary = (
+  logs: ExerciseLog[], 
+  users: User[]
+): { champion: User | null; championCount: number; totalExercises: number; summary: Array<{ user: User; prCount: number }> } => {
+  const prOverview = calculateAllExercisesPROverview(logs, users);
+  
+  // Count PRs per user (accounting for ties)
+  const userPRCounts = new Map<string, number>();
+  users.forEach(user => userPRCounts.set(user.id, 0));
+  
+  prOverview.forEach(entry => {
+    const currentCount = userPRCounts.get(entry.userId) || 0;
+    userPRCounts.set(entry.userId, currentCount + 1);
+  });
+  
+  // Find the champion (user with most PRs)
+  let championId: string | null = null;
+  let maxPRs = 0;
+  
+  userPRCounts.forEach((count, userId) => {
+    if (count > maxPRs) {
+      maxPRs = count;
+      championId = userId;
+    }
+  });
+  
+  const champion = championId ? users.find(u => u.id === championId) || null : null;
+  
+  // Get unique exercises count
+  const uniqueExercises = new Set(prOverview.map(entry => entry.exerciseId));
+  
+  // Create summary array
+  const summary = Array.from(userPRCounts.entries())
+    .map(([userId, prCount]) => ({
+      user: users.find(u => u.id === userId)!,
+      prCount
+    }))
+    .filter(item => item.prCount > 0)
+    .sort((a, b) => b.prCount - a.prCount);
+  
+  return {
+    champion,
+    championCount: maxPRs,
+    totalExercises: uniqueExercises.size,
+    summary
+  };
+};
+
+export const calculateOverallProgressLeaderboard = (
+  logs: ExerciseLog[], 
+  users: User[]
+): LeaderboardEntry[] => {
+  const userStats: Map<string, { totalGain: number; exerciseCount: number }> = new Map();
+  const userExerciseStats: Map<string, { maxWeight: number; startWeight: number }> = new Map();
+  
+  // Process all logs to calculate gains per user per exercise
+  logs.forEach(log => {
+    const userExerciseKey = `${log.userId}-${log.exerciseId}`;
+    
+    if (!userExerciseStats.has(userExerciseKey)) {
+      userExerciseStats.set(userExerciseKey, { maxWeight: log.weight, startWeight: log.weight });
+    } else {
+      const stats = userExerciseStats.get(userExerciseKey)!;
+      stats.maxWeight = Math.max(stats.maxWeight, log.weight);
+      // Keep earliest (lowest timestamp) as start weight
+      if (new Date(log.timestamp) < new Date()) {
+        stats.startWeight = Math.min(stats.startWeight, log.weight);
+      }
+    }
+  });
+  
+  // Calculate average gains per user
+  users.forEach(user => {
+    let totalGainPercent = 0;
+    let exerciseCount = 0;
+    
+    for (const [key, stats] of userExerciseStats.entries()) {
+      if (key.startsWith(user.id + '-')) {
+        if (stats.startWeight > 0 && stats.maxWeight > stats.startWeight) {
+          const gainPercent = ((stats.maxWeight - stats.startWeight) / stats.startWeight) * 100;
+          totalGainPercent += gainPercent;
+          exerciseCount++;
+        }
+      }
+    }
+    
+    const avgGainPercent = exerciseCount > 0 ? totalGainPercent / exerciseCount : 0;
+    userStats.set(user.id, { totalGain: avgGainPercent, exerciseCount });
+  });
+  
+  // Convert to leaderboard entries and sort
+  return Array.from(userStats.entries())
+    .map(([userId, stats]) => ({
+      userId,
+      user: users.find(u => u.id === userId)!,
+      value: stats.totalGain,
+      exerciseCount: stats.exerciseCount
+    }))
+    .filter(entry => entry.exerciseCount > 0) // Only include users with exercises
+    .sort((a, b) => b.value - a.value);
+};
+
+export const calculateRecentAchieversLeaderboard = (
+  logs: ExerciseLog[], 
+  users: User[]
+): LeaderboardEntry[] => {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  
+  const recentLogs = logs.filter(log => new Date(log.timestamp) >= thirtyDaysAgo);
+  const userBestRecent: Map<string, number> = new Map();
+  
+  // Find best recent achievement for each user
+  users.forEach(user => {
+    const userRecentLogs = recentLogs.filter(log => log.userId === user.id);
+    if (userRecentLogs.length > 0) {
+      const maxWeight = Math.max(...userRecentLogs.map(log => log.weight));
+      userBestRecent.set(user.id, maxWeight);
+    } else {
+      userBestRecent.set(user.id, 0);
+    }
+  });
+  
+  return Array.from(userBestRecent.entries())
+    .map(([userId, value]) => ({
+      userId,
+      user: users.find(u => u.id === userId)!,
+      value
+    }))
+    .filter(entry => entry.value > 0) // Only show users with recent activity
+    .sort((a, b) => b.value - a.value);
+};
+
+export const calculateConsistencyLeaderboard = (
+  logs: ExerciseLog[], 
+  users: User[]
+): LeaderboardEntry[] => {
+  const userConsistency: Map<string, number> = new Map();
+  
+  users.forEach(user => {
+    const userLogs = logs.filter(log => log.userId === user.id);
+    if (userLogs.length === 0) {
+      userConsistency.set(user.id, 0);
+      return;
+    }
+    
+    // Sort logs by date
+    const sortedLogs = userLogs.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    
+    // Calculate workout days (unique dates)
+    const workoutDates = new Set(
+      sortedLogs.map(log => new Date(log.timestamp).toDateString())
+    );
+    
+    // Calculate span of activity
+    const firstWorkout = new Date(sortedLogs[0].timestamp);
+    const lastWorkout = new Date(sortedLogs[sortedLogs.length - 1].timestamp);
+    const daySpan = Math.max(1, Math.ceil((lastWorkout.getTime() - firstWorkout.getTime()) / (1000 * 60 * 60 * 24)));
+    
+    // Consistency score: workout days / total days * 100
+    const consistencyScore = (workoutDates.size / daySpan) * 100;
+    userConsistency.set(user.id, Math.min(100, consistencyScore)); // Cap at 100%
+  });
+  
+  return Array.from(userConsistency.entries())
+    .map(([userId, value]) => ({
+      userId,
+      user: users.find(u => u.id === userId)!,
+      value
+    }))
+    .filter(entry => entry.value > 0)
+    .sort((a, b) => b.value - a.value);
+};
+
 export const getLeaderboard = (
   logs: ExerciseLog[],
   users: User[],
@@ -553,19 +799,19 @@ export const getLeaderboard = (
   categoryId?: string
 ): LeaderboardEntry[] => {
   switch (type) {
-    case LeaderboardType.ALLTIME_GAIN:
-      return calculateAllTimeGainLeaderboard(logs, users, exerciseId, categoryId);
-    case LeaderboardType.RECENT_GAIN:
-      // For simplicity, we'll use 30 days as "recent"
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const recentLogs = logs.filter(log => new Date(log.timestamp) >= thirtyDaysAgo);
-      return calculateAllTimeGainLeaderboard(recentLogs, users, exerciseId, categoryId);
-    case LeaderboardType.MAX_WEIGHT:
-      // This only makes sense for a specific exercise
-      if (!exerciseId) return [];
+    case LeaderboardType.OVERALL_PROGRESS:
+      return calculateOverallProgressLeaderboard(logs, users);
+    case LeaderboardType.RECENT_ACHIEVERS:
+      return calculateRecentAchieversLeaderboard(logs, users);
+    case LeaderboardType.CONSISTENCY:
+      return calculateConsistencyLeaderboard(logs, users);
+    case LeaderboardType.EXERCISE_PR:
+      // If no specific exercise selected, show PR overview across all exercises
+      if (!exerciseId) {
+        return calculateAllExercisesPROverview(logs, users);
+      }
       return calculateMaxWeightLeaderboard(logs, users, exerciseId);
     default:
-      return [];
+      return calculateOverallProgressLeaderboard(logs, users);
   }
 };

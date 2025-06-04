@@ -42,15 +42,18 @@ export interface Progress {
 export interface LeaderboardEntry {
   userId: string;
   user: User;
+  users?: User[]; // For ties - multiple users with same value
   value: number; // Could be weight, % gain, etc.
   exerciseId?: string;
   categoryId?: string;
+  isTie?: boolean; // Flag to indicate if this entry represents a tie
 }
 
 export enum LeaderboardType {
-  ALLTIME_GAIN = 'All-time % Gain',
-  RECENT_GAIN = 'Recent % Gain',
-  MAX_WEIGHT = 'Max Weight'
+  OVERALL_PROGRESS = 'Overall Progress',
+  RECENT_ACHIEVERS = 'Recent Achievers',
+  EXERCISE_PR = 'Exercise PR',
+  CONSISTENCY = 'Consistency'
 }
 
 export interface ProgressChartData {

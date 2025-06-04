@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import { useAppContext } from '@/context/AppContext';
 import { LeaderboardType } from '@/types';
-import { getLeaderboard } from '@/utils/progressUtils';
+import { getLeaderboard, calculatePRChampionshipSummary } from '@/utils/progressUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -42,7 +42,7 @@ const Leaderboard: React.FC = () => {
   const { profile } = useAuth();
   const { categories, exercises, exerciseLogs } = useAppContext();
   
-  const [leaderboardType, setLeaderboardType] = useState<LeaderboardType>(LeaderboardType.MAX_WEIGHT);
+  const [leaderboardType, setLeaderboardType] = useState<LeaderboardType>(LeaderboardType.OVERALL_PROGRESS);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>('all');
   const [users, setUsers] = useState<any[]>([]);
@@ -104,6 +104,22 @@ const Leaderboard: React.FC = () => {
     ? exercises
     : exercises.filter(e => e.categoryId === selectedCategoryId);
   
+  // Get exercises that have multiple users (for PR leaderboard)
+  const getMultiUserExercises = () => {
+    const exerciseUserCounts = new Map<string, Set<string>>();
+    allExerciseLogs.forEach(log => {
+      if (!exerciseUserCounts.has(log.exerciseId)) {
+        exerciseUserCounts.set(log.exerciseId, new Set());
+      }
+      exerciseUserCounts.get(log.exerciseId)!.add(log.userId);
+    });
+    
+    return filteredExercises.filter(exercise => {
+      const userSet = exerciseUserCounts.get(exercise.id);
+      return userSet && userSet.size > 1;
+    });
+  };
+
   // Get leaderboard data
   const leaderboardData = getLeaderboard(
     allExerciseLogs,
@@ -112,7 +128,12 @@ const Leaderboard: React.FC = () => {
     selectedExerciseId === 'all' ? undefined : selectedExerciseId,
     selectedCategoryId === 'all' ? undefined : selectedCategoryId
   );
-  
+
+  // Get PR championship summary for overview mode
+  const prChampionshipSummary = (leaderboardType === LeaderboardType.EXERCISE_PR && selectedExerciseId === 'all') 
+    ? calculatePRChampionshipSummary(allExerciseLogs, users)
+    : null;
+
   // Handle category change
   const handleCategoryChange = (value: string) => {
     setSelectedCategoryId(value);
@@ -133,32 +154,50 @@ const Leaderboard: React.FC = () => {
       : 'All Exercises';
       
     switch(leaderboardType) {
-      case LeaderboardType.MAX_WEIGHT:
+      case LeaderboardType.OVERALL_PROGRESS:
+        return 'Overall Progress Leaders';
+      case LeaderboardType.RECENT_ACHIEVERS:
+        return 'Recent Achievers (30 days)';
+      case LeaderboardType.EXERCISE_PR:
         return selectedExerciseId === 'all' 
-          ? 'Personal Records' 
+          ? 'Exercise PR Champions' 
           : `${exerciseName} - Personal Records`;
-      case LeaderboardType.ALLTIME_GAIN:
-        return selectedExerciseId === 'all'
-          ? 'All-Time Gains' 
-          : `${exerciseName} - All-Time Gains`;
-      case LeaderboardType.RECENT_GAIN:
-        return selectedExerciseId === 'all'
-          ? 'Recent Gains (30 days)' 
-          : `${exerciseName} - Recent Gains`;
+      case LeaderboardType.CONSISTENCY:
+        return 'Most Consistent Members';
       default:
         return 'Leaderboard';
+    }
+  };
+
+  // Get description for the current leaderboard
+  const getLeaderboardDescription = () => {
+    switch(leaderboardType) {
+      case LeaderboardType.OVERALL_PROGRESS:
+        return 'Average percentage gain across all exercises';
+      case LeaderboardType.RECENT_ACHIEVERS:
+        return 'Highest recent achievements in the last 30 days';
+      case LeaderboardType.EXERCISE_PR:
+        return selectedExerciseId === 'all' 
+          ? 'Top personal record holder for each exercise with multiple participants'
+          : 'Highest personal records for selected exercise';
+      case LeaderboardType.CONSISTENCY:
+        return 'Workout frequency percentage over time';
+      default:
+        return '';
     }
   };
 
   // Get icon for leaderboard type
   const getLeaderboardIcon = () => {
     switch(leaderboardType) {
-      case LeaderboardType.MAX_WEIGHT:
-        return <Trophy className="h-5 w-5 text-yellow-500" />;
-      case LeaderboardType.ALLTIME_GAIN:
+      case LeaderboardType.OVERALL_PROGRESS:
         return <TrendingUp className="h-5 w-5 text-green-500" />;
-      case LeaderboardType.RECENT_GAIN:
+      case LeaderboardType.RECENT_ACHIEVERS:
         return <Zap className="h-5 w-5 text-blue-500" />;
+      case LeaderboardType.EXERCISE_PR:
+        return <Trophy className="h-5 w-5 text-yellow-500" />;
+      case LeaderboardType.CONSISTENCY:
+        return <Target className="h-5 w-5 text-orange-500" />;
       default:
         return <Award className="h-5 w-5" />;
     }
@@ -198,7 +237,118 @@ const Leaderboard: React.FC = () => {
     const position = index + 1;
     const user = entry.user || { name: 'Unknown', avatarUrl: undefined };
     const isCurrentUser = user.id === profile?.id;
+    const isOverviewMode = leaderboardType === LeaderboardType.EXERCISE_PR && selectedExerciseId === 'all';
     
+    // Get exercise name and category for PR overview mode
+    const exercise = (isOverviewMode && entry.exerciseId) 
+      ? exercises.find(e => e.id === entry.exerciseId)
+      : null;
+    const exerciseName = exercise?.name;
+    const exerciseCategory = exercise?.categoryId ? categories.find(c => c.id === exercise.categoryId) : null;
+    
+    // Get category color for exercise
+    const categoryIndex = exerciseCategory ? categories.findIndex(c => c.id === exerciseCategory.id) : 0;
+    const categoryColor = getCategoryColor(categoryIndex);
+    
+    // Render exercise badge for overview mode
+    const renderExerciseBadge = () => {
+      if (!isOverviewMode || !exerciseName) {
+        return renderPositionBadge(position);
+      }
+      
+      // Show colored exercise badge with trophy
+      return (
+        <div className="relative">
+          <div className="pr-exercise-badge">
+            <Trophy className="h-5 w-5 pr-exercise-badge-icon" />
+          </div>
+          {entry.isTie && (
+            <div className="pr-tie-badge">
+              <span className="text-xs text-white font-bold">T</span>
+            </div>
+          )}
+        </div>
+      );
+    };
+    
+    if (isOverviewMode) {
+      // Clean PR overview mode - mobile-friendly design
+      const tiedUsers = entry.users || [user];
+      const showMultipleAvatars = tiedUsers.length > 1;
+      
+      // Get category key for proper color mapping
+      const categoryKey = exerciseCategory ? getCategoryKeyByName(exerciseCategory.name) : 'arms';
+      
+      return (
+        <div 
+          key={entry.exerciseId || index}
+          className="pr-overview-entry-clean bg-card hover:bg-muted/50"
+        >
+          {/* Exercise Name at the Top */}
+          <div className="mb-3">
+            <div className="flex items-center gap-3 mb-1">
+              <h3 className="font-bold text-lg text-foreground flex-1">
+                {exerciseName}
+              </h3>
+              {entry.isTie && (
+                <span className="pr-tie-indicator">Tie</span>
+              )}
+            </div>
+            {exerciseCategory && (
+              <div>
+                <span className={`pr-category-badge-${categoryKey}`}>
+                  {exerciseCategory.name}
+                </span>
+              </div>
+            )}
+          </div>
+          
+          {/* User Info and PR Value */}
+          <div className="flex items-center justify-between">
+            {/* User Avatars */}
+            <div className="flex items-center">
+              {showMultipleAvatars ? (
+                <div className="pr-avatars-overlap-clean">
+                  {tiedUsers.map((tiedUser, idx) => (
+                    <Avatar key={tiedUser.id} className="pr-avatar-clean h-8 w-8">
+                      <AvatarImage src={tiedUser.avatarUrl} alt={tiedUser.name} />
+                      <AvatarFallback className="bg-gray-100 text-gray-700 text-sm font-medium">
+                        {tiedUser.name?.substring(0, 2).toUpperCase() || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex items-center gap-3">
+                  <Avatar className="h-8 w-8 border-2 border-white shadow-sm">
+                    <AvatarImage src={user.avatarUrl} alt={user.name} />
+                    <AvatarFallback className="bg-gray-100 text-gray-700 text-sm font-medium">
+                      {user.name?.substring(0, 2).toUpperCase() || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="font-semibold text-foreground">
+                    {user.name}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* PR Value */}
+            <div className="text-right">
+              <div className="font-bold text-xl text-foreground">
+                {entry.value.toFixed(1)}
+                <span className="text-sm font-medium text-muted-foreground ml-1">lbs</span>
+              </div>
+              <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
+                Personal Record
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // Regular leaderboard entry styling
     return (
       <div 
         key={entry.userId || index}
@@ -208,7 +358,7 @@ const Leaderboard: React.FC = () => {
       >
         <div className="flex items-center gap-4">
           {/* Position Badge */}
-          <div className="flex-shrink-0">
+          <div className="flex-shrink-0 relative">
             {renderPositionBadge(position)}
           </div>
 
@@ -240,14 +390,33 @@ const Leaderboard: React.FC = () => {
           {/* Value */}
           <div className="text-right flex-shrink-0">
             <div className="font-bold text-lg text-foreground">
-              {leaderboardType === LeaderboardType.MAX_WEIGHT
+              {leaderboardType === LeaderboardType.EXERCISE_PR
                 ? `${entry.value.toFixed(1)} lbs`
+                : leaderboardType === LeaderboardType.RECENT_ACHIEVERS
+                ? `${entry.value.toFixed(1)} lbs`
+                : leaderboardType === LeaderboardType.CONSISTENCY
+                ? `${entry.value.toFixed(1)}%`
                 : `${entry.value.toFixed(1)}%`
               }
             </div>
-            {leaderboardType !== LeaderboardType.MAX_WEIGHT && (
+            {leaderboardType === LeaderboardType.OVERALL_PROGRESS && (
               <div className="text-xs text-muted-foreground">
-                ({entry.value.toFixed(1)} lbs gain)
+                avg gain
+              </div>
+            )}
+            {leaderboardType === LeaderboardType.RECENT_ACHIEVERS && (
+              <div className="text-xs text-muted-foreground">
+                recent best
+              </div>
+            )}
+            {leaderboardType === LeaderboardType.CONSISTENCY && (
+              <div className="text-xs text-muted-foreground">
+                workout rate
+              </div>
+            )}
+            {leaderboardType === LeaderboardType.EXERCISE_PR && (
+              <div className="text-xs text-muted-foreground">
+                exercise PR
               </div>
             )}
           </div>
@@ -267,31 +436,40 @@ const Leaderboard: React.FC = () => {
           {/* Leaderboard Type Selector */}
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             <Button
-              variant={leaderboardType === LeaderboardType.MAX_WEIGHT ? "default" : "outline"}
+              variant={leaderboardType === LeaderboardType.OVERALL_PROGRESS ? "default" : "outline"}
               size="sm"
-              onClick={() => setLeaderboardType(LeaderboardType.MAX_WEIGHT)}
-              className="rounded-2xl px-4 py-2 font-medium whitespace-nowrap transition-all duration-300"
-            >
-              <Trophy className="h-4 w-4 mr-2" />
-              PR Leaders
-            </Button>
-            <Button
-              variant={leaderboardType === LeaderboardType.ALLTIME_GAIN ? "default" : "outline"}
-              size="sm"
-              onClick={() => setLeaderboardType(LeaderboardType.ALLTIME_GAIN)}
+              onClick={() => setLeaderboardType(LeaderboardType.OVERALL_PROGRESS)}
               className="rounded-2xl px-4 py-2 font-medium whitespace-nowrap transition-all duration-300"
             >
               <TrendingUp className="h-4 w-4 mr-2" />
-              All-Time
+              Overall
             </Button>
             <Button
-              variant={leaderboardType === LeaderboardType.RECENT_GAIN ? "default" : "outline"}
+              variant={leaderboardType === LeaderboardType.RECENT_ACHIEVERS ? "default" : "outline"}
               size="sm"
-              onClick={() => setLeaderboardType(LeaderboardType.RECENT_GAIN)}
+              onClick={() => setLeaderboardType(LeaderboardType.RECENT_ACHIEVERS)}
               className="rounded-2xl px-4 py-2 font-medium whitespace-nowrap transition-all duration-300"
             >
               <Zap className="h-4 w-4 mr-2" />
               Recent
+            </Button>
+            <Button
+              variant={leaderboardType === LeaderboardType.EXERCISE_PR ? "default" : "outline"}
+              size="sm"
+              onClick={() => setLeaderboardType(LeaderboardType.EXERCISE_PR)}
+              className="rounded-2xl px-4 py-2 font-medium whitespace-nowrap transition-all duration-300"
+            >
+              <Trophy className="h-4 w-4 mr-2" />
+              PRs
+            </Button>
+            <Button
+              variant={leaderboardType === LeaderboardType.CONSISTENCY ? "default" : "outline"}
+              size="sm"
+              onClick={() => setLeaderboardType(LeaderboardType.CONSISTENCY)}
+              className="rounded-2xl px-4 py-2 font-medium whitespace-nowrap transition-all duration-300"
+            >
+              <Target className="h-4 w-4 mr-2" />
+              Consistency
             </Button>
           </div>
 
@@ -311,19 +489,26 @@ const Leaderboard: React.FC = () => {
               </SelectContent>
             </Select>
             
-            <Select value={selectedExerciseId} onValueChange={setSelectedExerciseId}>
-              <SelectTrigger className="rounded-2xl border-border">
-                <SelectValue placeholder="All Exercises" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Exercises</SelectItem>
-                {filteredExercises.map(exercise => (
-                  <SelectItem key={exercise.id} value={exercise.id}>
-                    {exercise.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Only show exercise filter for Exercise PR leaderboard */}
+            {leaderboardType === LeaderboardType.EXERCISE_PR ? (
+              <Select value={selectedExerciseId} onValueChange={setSelectedExerciseId}>
+                <SelectTrigger className="rounded-2xl border-border">
+                  <SelectValue placeholder="All Exercises" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Exercises</SelectItem>
+                  {getMultiUserExercises().map(exercise => (
+                    <SelectItem key={exercise.id} value={exercise.id}>
+                      {exercise.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <div className="flex items-center justify-center rounded-2xl border border-dashed border-border text-muted-foreground text-sm">
+                No exercise filter needed
+              </div>
+            )}
           </div>
         </div>
 
@@ -334,6 +519,9 @@ const Leaderboard: React.FC = () => {
               {getLeaderboardIcon()}
               {getLeaderboardTitle()}
             </CardTitle>
+            <p className="text-sm text-muted-foreground mt-2">
+              {getLeaderboardDescription()}
+            </p>
           </CardHeader>
           <CardContent className="p-6 pt-0">
             {loadingUsers || loadingLogs ? (
@@ -351,16 +539,49 @@ const Leaderboard: React.FC = () => {
                 ))}
               </div>
             ) : leaderboardData.length > 0 ? (
-              <div className="space-y-3">
-                {leaderboardData.map((entry, index) => (
-                  <div 
-                    key={entry.userId || index}
-                    className="animate-in slide-in-from-bottom-4 duration-300"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    {renderLeaderboardEntry(entry, index)}
+              <div className="space-y-4">
+                {/* PR Championship Summary Card (only in overview mode) */}
+                {prChampionshipSummary && prChampionshipSummary.champion && (
+                  <div className="bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border border-yellow-200 dark:border-yellow-800 rounded-2xl p-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-lg">
+                        <Crown className="h-6 w-6 text-yellow-900" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                          Overall PR Champion
+                          <span className="text-xs bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 px-2 py-1 rounded-full font-medium">
+                            {prChampionshipSummary.championCount} PRs
+                          </span>
+                        </h3>
+                        <div className="flex items-center gap-3 mt-1">
+                          <Avatar className="h-8 w-8">
+                            <AvatarImage src={prChampionshipSummary.champion.avatarUrl} alt={prChampionshipSummary.champion.name} />
+                            <AvatarFallback className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 text-sm">
+                              {prChampionshipSummary.champion.name?.substring(0, 2).toUpperCase() || 'U'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="font-semibold text-foreground">{prChampionshipSummary.champion.name}</span>
+                          <span className="text-sm text-muted-foreground">
+                            holds {prChampionshipSummary.championCount} of {prChampionshipSummary.totalExercises} exercise records
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                ))}
+                )}
+                
+                {/* Leaderboard Entries */}
+                <div className="space-y-3">
+                  {leaderboardData.map((entry, index) => (
+                    <div 
+                      key={entry.userId || index}
+                      className="animate-in slide-in-from-bottom-4 duration-300"
+                    >
+                      {renderLeaderboardEntry(entry, index)}
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="text-center py-16">
@@ -370,27 +591,8 @@ const Leaderboard: React.FC = () => {
                 </div>
                 <h3 className="text-xl font-semibold text-foreground mb-3">No Results Found</h3>
                 <p className="text-muted-foreground max-w-sm mx-auto leading-relaxed">
-                  {leaderboardType === LeaderboardType.MAX_WEIGHT && selectedExerciseId === 'all'
-                    ? "Select an exercise above to view personal record leaders and start competing!"
-                    : "No data available for this selection. Try adjusting your filters or check back later as more users log their workouts."
-                  }
+                  No data available for this selection. Try adjusting your filters or check back later as more users log their workouts.
                 </p>
-                {leaderboardType === LeaderboardType.MAX_WEIGHT && selectedExerciseId === 'all' && (
-                  <div className="mt-6">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      className="rounded-2xl"
-                      onClick={() => {
-                        if (filteredExercises.length > 0) {
-                          setSelectedExerciseId(filteredExercises[0].id);
-                        }
-                      }}
-                    >
-                      View {filteredExercises[0]?.name || 'Exercise'} Leaders
-                    </Button>
-                  </div>
-                )}
               </div>
             )}
           </CardContent>
