@@ -101,7 +101,7 @@ const NavLink: React.FC<{ to: string; icon: React.ReactNode; label: string }> = 
 const AddExerciseButton: React.FC = () => {
   return (
     <Link to="/add-exercise">
-      <Button className="rounded-full h-14 w-14 flex items-center justify-center shadow-lg bg-green-600 hover:bg-green-700 text-white">
+      <Button className="rounded-full h-14 w-14 flex items-center justify-center shadow-xl bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-300 hover:scale-105 hover:shadow-2xl border-2 border-white/20 backdrop-blur-sm">
         <Plus className="h-6 w-6" />
       </Button>
     </Link>

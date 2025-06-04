@@ -500,7 +500,7 @@ const Settings: React.FC = () => {
                   <Edit2 className={`${isMobile ? 'h-4 w-4' : 'h-6 w-6'} text-muted-foreground`} />
                 </Button>
               </DialogTrigger>
-              <DialogContent className={`${isMobile ? 'sm:max-w-[90vw] mx-4' : 'sm:max-w-[425px]'} rounded-2xl backdrop-blur-sm bg-card/95 border-border/50`}>
+              <DialogContent className={`${isMobile ? 'max-w-[90vw]' : 'sm:max-w-[425px]'} rounded-2xl backdrop-blur-sm bg-card/95 border-border/50`}>
                 <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)}>
                   <DialogHeader>
                     <DialogTitle className="text-foreground">Edit Profile</DialogTitle>
@@ -767,7 +767,7 @@ const Settings: React.FC = () => {
 
       {/* Modals for editing exercises and categories */}
       <Dialog open={isAddExerciseOpen} onOpenChange={setIsAddExerciseOpen}>
-        <DialogContent className={`${isMobile ? 'sm:max-w-[90vw] mx-4' : 'sm:max-w-[425px]'} rounded-2xl backdrop-blur-sm bg-card/95 border-border/50`}>
+        <DialogContent className={`${isMobile ? 'max-w-[90vw]' : 'sm:max-w-[425px]'} rounded-2xl backdrop-blur-sm bg-card/95 border-border/50`}>
           <form onSubmit={exerciseForm.handleSubmit(handleAddExercise)}>
             <DialogHeader>
               <DialogTitle className="text-foreground">{editingExercise ? 'Edit Exercise' : 'Add New Exercise'}</DialogTitle>
@@ -831,7 +831,7 @@ const Settings: React.FC = () => {
       </Dialog>
       
       <Dialog open={isAddCategoryOpen} onOpenChange={setIsAddCategoryOpen}>
-        <DialogContent className={`${isMobile ? 'sm:max-w-[90vw] mx-4' : 'sm:max-w-[425px]'} rounded-2xl backdrop-blur-sm bg-card/95 border-border/50`}>
+        <DialogContent className={`${isMobile ? 'max-w-[90vw]' : 'sm:max-w-[425px]'} rounded-2xl backdrop-blur-sm bg-card/95 border-border/50`}>
           <form onSubmit={categoryForm.handleSubmit(handleAddCategory)}>
             <DialogHeader>
               <DialogTitle className="text-foreground">{editingCategory ? 'Edit Category' : 'Add New Category'}</DialogTitle>
