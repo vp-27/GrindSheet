@@ -124,44 +124,41 @@ const Settings: React.FC = () => {
   // Helper function to check which categories and exercises can be deleted
   const checkDeletableItems = async (categories: any[], exercises: any[]) => {
     if (!user) return;
-    
+
     const deletableCategoryIds = new Set<string>();
     const deletableExerciseIds = new Set<string>();
-    
-    // Check exercises first
+
+    // Fetch all exercise logs not belonging to the current user
+    const { data: otherUserLogsData, error: otherUserLogsError } = await supabase
+      .from('exercise_logs')
+      .select('exercise_id')
+      .neq('user_id', user.id);
+
+    if (otherUserLogsError) {
+      console.error('Error fetching other user logs:', otherUserLogsError);
+      // Fallback: assume nothing is deletable to be safe
+      setDeletableItems({ categories: new Set(), exercises: new Set() });
+      return;
+    }
+
+    const protectedExerciseIds = new Set(otherUserLogsData?.map(log => log.exercise_id) || []);
+
+    // Determine deletable exercises
     for (const exercise of exercises) {
-      const { data: otherUserLogs } = await supabase
-        .from('exercise_logs')
-        .select('user_id')
-        .eq('exercise_id', exercise.id)
-        .neq('user_id', user.id)
-        .limit(1);
-      
-      if (!otherUserLogs || otherUserLogs.length === 0) {
+      if (!protectedExerciseIds.has(exercise.id)) {
         deletableExerciseIds.add(exercise.id);
       }
     }
-    
-    // Check categories
+
+    // Determine deletable categories
     for (const category of categories) {
-      const categoryExercises = exercises.filter(ex => ex.category_id === category.id);
-      const categoryExerciseIds = categoryExercises.map(ex => ex.id);
+      const exercisesInCategory = exercises.filter(ex => ex.category_id === category.id);
+      // A category is deletable if all its exercises are deletable
+      // (or if it has no exercises)
+      const isCategoryDeletable = exercisesInCategory.every(ex => deletableExerciseIds.has(ex.id));
       
-      if (categoryExerciseIds.length === 0) {
-        // No exercises in this category, can delete
+      if (isCategoryDeletable) {
         deletableCategoryIds.add(category.id);
-      } else {
-        // Check if any exercise in this category has logs from other users
-        const { data: otherUserLogs } = await supabase
-          .from('exercise_logs')
-          .select('user_id')
-          .in('exercise_id', categoryExerciseIds)
-          .neq('user_id', user.id)
-          .limit(1);
-        
-        if (!otherUserLogs || otherUserLogs.length === 0) {
-          deletableCategoryIds.add(category.id);
-        }
       }
     }
     
