@@ -47,8 +47,12 @@ const Dashboard = () => {
       // Overall progress chart (by category) - show percentage growth
       return getOverallProgressChartData(exerciseLogs, exercises, categories);
     } else {
+      // Only include exercises in this category that have logs
+      const categoryExercisesWithLogs = exercises.filter(
+        e => e.categoryId === selectedCategoryId && exerciseLogs.some(log => log.exerciseId === e.id)
+      );
       // Category-specific chart (by exercise) - show percentage growth
-      return getExerciseProgressChartData(exerciseLogs, exercises, selectedCategoryId);
+      return getExerciseProgressChartData(exerciseLogs, categoryExercisesWithLogs, selectedCategoryId);
     }
   }, [exerciseLogs, exercises, categories, selectedCategoryId]);
 
