@@ -3,13 +3,8 @@ import Layout from '@/components/Layout';
 import { useAppContext } from '@/context/AppContext';
 import { LeaderboardType } from '@/types';
 import { getLeaderboard } from '@/utils/progressUtils';
-import { Card, CardContent } from '@/components/ui/card';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -20,7 +15,28 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Medal, Trophy, TrendingUp } from 'lucide-react';
+import { Trophy, TrendingUp, Crown, Medal, Zap, Target, Award } from 'lucide-react';
+import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
+import '@/components/ui/category-styles.css';
+
+// Custom CSS for scrollbar hiding consistency
+const scrollbarHideStyle = `
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+`;
+
+// Inject styles if not already present
+if (typeof document !== 'undefined' && !document.getElementById('leaderboard-styles')) {
+  const style = document.createElement('style');
+  style.id = 'leaderboard-styles';
+  style.textContent = scrollbarHideStyle;
+  document.head.appendChild(style);
+}
 
 const Leaderboard: React.FC = () => {
   const { profile } = useAuth();
@@ -29,10 +45,16 @@ const Leaderboard: React.FC = () => {
   const [leaderboardType, setLeaderboardType] = useState<LeaderboardType>(LeaderboardType.MAX_WEIGHT);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>('all');
-  const [users, setUsers] = useState<any[]>([]); // Use correct User type if imported
+  const [users, setUsers] = useState<any[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [allExerciseLogs, setAllExerciseLogs] = useState<any[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(true);
+
+  // Get chart colors for consistent theming
+  const chartColors = getCategoryChartColors();
+  const getCategoryColor = (categoryIndex: number) => {
+    return chartColors[categoryIndex % chartColors.length];
+  };
 
   // Fetch all users (profiles) on mount
   useEffect(() => {
@@ -69,7 +91,7 @@ const Leaderboard: React.FC = () => {
           weight: log.weight,
           timestamp: log.timestamp,
           note: log.note,
-          weightUnit: log.weight_unit // if you have this field
+          weightUnit: log.weight_unit
         })));
       }
       setLoadingLogs(false);
@@ -104,336 +126,275 @@ const Leaderboard: React.FC = () => {
     }
   };
 
-  // Get descriptive stats for the current view
-  const getStatsDescription = () => {
+  // Get the title for the current leaderboard
+  const getLeaderboardTitle = () => {
     const exerciseName = selectedExerciseId !== 'all' 
       ? exercises.find(e => e.id === selectedExerciseId)?.name
       : 'All Exercises';
       
-    const categoryName = selectedCategoryId !== 'all'
-      ? categories.find(c => c.id === selectedCategoryId)?.name
-      : 'All Categories';
-      
-    return { exerciseName, categoryName };
-  };
-
-  const { exerciseName, categoryName } = getStatsDescription();
-  
-  // Get title based on leaderboard type
-  const getLeaderboardTitle = () => {
     switch(leaderboardType) {
       case LeaderboardType.MAX_WEIGHT:
         return selectedExerciseId === 'all' 
-          ? 'Select an exercise to view PR Leaders' 
-          : `PR Leaders for ${exerciseName}`;
+          ? 'Personal Records' 
+          : `${exerciseName} - Personal Records`;
       case LeaderboardType.ALLTIME_GAIN:
-        return `All-time Gains${exerciseName !== 'All Exercises' ? ` - ${exerciseName}` : ''}`;
+        return selectedExerciseId === 'all'
+          ? 'All-Time Gains' 
+          : `${exerciseName} - All-Time Gains`;
       case LeaderboardType.RECENT_GAIN:
-        return `Recent Gains (30 days)${exerciseName !== 'All Exercises' ? ` - ${exerciseName}` : ''}`;
+        return selectedExerciseId === 'all'
+          ? 'Recent Gains (30 days)' 
+          : `${exerciseName} - Recent Gains`;
       default:
-        return '';
+        return 'Leaderboard';
     }
   };
 
-  // Render leaderboard entries
-  const renderLeaderboardEntries = () => {
-    if ((leaderboardType === LeaderboardType.MAX_WEIGHT && selectedExerciseId === 'all') || leaderboardData.length === 0) {
+  // Get icon for leaderboard type
+  const getLeaderboardIcon = () => {
+    switch(leaderboardType) {
+      case LeaderboardType.MAX_WEIGHT:
+        return <Trophy className="h-5 w-5 text-yellow-500" />;
+      case LeaderboardType.ALLTIME_GAIN:
+        return <TrendingUp className="h-5 w-5 text-green-500" />;
+      case LeaderboardType.RECENT_GAIN:
+        return <Zap className="h-5 w-5 text-blue-500" />;
+      default:
+        return <Award className="h-5 w-5" />;
+    }
+  };
+
+  // Render position badge with appropriate styling
+  const renderPositionBadge = (position: number) => {
+    if (position === 1) {
       return (
-        <div className="text-center py-8 text-muted-foreground">
-          {leaderboardType === LeaderboardType.MAX_WEIGHT && selectedExerciseId === 'all'
-            ? "Please select an exercise to view PR Leaders"
-            : "No data available for this selection"}
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-md">
+          <Crown className="h-4 w-4 text-yellow-900" />
+        </div>
+      );
+    } else if (position === 2) {
+      return (
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shadow-md">
+          <Medal className="h-4 w-4 text-gray-700" />
+        </div>
+      );
+    } else if (position === 3) {
+      return (
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center shadow-md">
+          <Award className="h-4 w-4 text-amber-100" />
+        </div>
+      );
+    } else {
+      return (
+        <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-bold text-sm">
+          {position}
         </div>
       );
     }
+  };
 
-    return leaderboardData.map((entry, index) => {
-      const rawWeight = entry.value;
-      const user = entry.user || { name: 'Unknown', avatarUrl: undefined };
-      return (
-        <div 
-          key={entry.userId} 
-          className={`flex items-center justify-between p-4 ${
-            index !== leaderboardData.length - 1 ? "border-b border-border" : ""
-          }`}
-        >
-          <div className="flex items-center space-x-3">
-            <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
-              index === 0 ? "bg-yellow-400 text-yellow-900" :
-              index === 1 ? "bg-gray-300 text-gray-900" :
-              index === 2 ? "bg-amber-600 text-white" : "bg-muted text-muted-foreground"
-            } font-bold`}>
-              {index + 1}
-            </div>
-            <Avatar className="h-8 w-8">
+  // Render individual leaderboard entry
+  const renderLeaderboardEntry = (entry: any, index: number) => {
+    const position = index + 1;
+    const user = entry.user || { name: 'Unknown', avatarUrl: undefined };
+    const isCurrentUser = user.id === profile?.id;
+    
+    return (
+      <div 
+        key={entry.userId || index}
+        className={`group relative p-4 border border-border rounded-2xl transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 ${
+          isCurrentUser ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800' : 'bg-card hover:bg-muted/50'
+        }`}
+      >
+        <div className="flex items-center gap-4">
+          {/* Position Badge */}
+          <div className="flex-shrink-0">
+            {renderPositionBadge(position)}
+          </div>
+
+          {/* User Info */}
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <Avatar className="h-10 w-10">
               <AvatarImage src={user.avatarUrl} alt={user.name} />
-              <AvatarFallback>
+              <AvatarFallback className="bg-muted text-muted-foreground">
                 {user.name?.substring(0, 2).toUpperCase() || 'U'}
               </AvatarFallback>
             </Avatar>
-            <div className="text-foreground">{user.name}</div>
-          </div>
-          <div className="font-bold text-foreground">
-            {leaderboardType === LeaderboardType.MAX_WEIGHT
-              ? `${entry.value.toFixed(1)} lbs`
-              : <>
-                  {entry.value.toFixed(1)}%{' '}
-                  <span className="text-xs text-muted-foreground font-normal">({rawWeight.toFixed(1)} lbs)</span>
-                </>
-            }
-          </div>
-        </div>
-      );
-    });
-  };
-  
-  // Generate category leaderboards
-  const getCategoryLeaders = () => {
-    const categoryLeaders = {};
-    
-    categories.forEach(category => {
-      const leaderData = getLeaderboard(
-        allExerciseLogs,
-        users,
-        leaderboardType,
-        undefined,
-        category.id
-      );
-      
-      if (leaderData.length > 0) {
-        categoryLeaders[category.id] = {
-          category,
-          leader: leaderData[0]
-        };
-      }
-    });
-    
-    return categoryLeaders;
-  };
-  
-  // Generate exercise leaderboards for the selected category
-  const getExerciseLeaders = () => {
-    const exerciseLeaders = {};
-    const relevantExercises = selectedCategoryId === 'all' ? exercises : filteredExercises;
-    
-    relevantExercises.forEach(exercise => {
-      const leaderData = getLeaderboard(
-        allExerciseLogs,
-        users,
-        leaderboardType,
-        exercise.id
-      );
-      
-      if (leaderData.length > 0 && leaderData[0].value > 0) {
-        exerciseLeaders[exercise.id] = {
-          exercise,
-          leader: leaderData[0]
-        };
-      }
-    });
-    
-    return exerciseLeaders;
-  };
-  
-  const categoryLeaders = getCategoryLeaders();
-  const exerciseLeaders = getExerciseLeaders();
-
-  // Render a compact category leader card, clickable
-  const renderCategoryLeaderCard = (categoryId, data) => {
-    const { category, leader } = data;
-    const rawWeight = leader.value;
-    const user = leader.user || { name: 'Unknown', avatarUrl: undefined };
-    return (
-      <Card
-        key={categoryId}
-        className="shadow-sm border border-border cursor-pointer hover:bg-muted transition"
-        onClick={() => {
-          setSelectedCategoryId(categoryId);
-          setSelectedExerciseId('all');
-        }}
-      >
-        <CardContent className="p-3 flex items-center gap-3 sm:gap-4">
-          <div className="flex flex-col items-center justify-center">
-            <div className="bg-yellow-400 text-yellow-900 w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-base sm:text-lg">
-              1
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-foreground truncate">
+                  {user.name}
+                </h3>
+                {isCurrentUser && (
+                  <span className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 px-2 py-0.5 rounded-full font-medium">
+                    You
+                  </span>
+                )}
+              </div>
+              {user.username && (
+                <p className="text-sm text-muted-foreground truncate">@{user.username}</p>
+              )}
             </div>
           </div>
-          <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
-            <AvatarImage src={user.avatarUrl} alt={user.name} />
-            <AvatarFallback>
-              {user.name?.substring(0, 2).toUpperCase() || 'U'}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <span className="font-medium truncate block text-sm sm:text-base text-foreground">{user.name}</span>
-            <span className="text-xs text-muted-foreground block truncate">{category.name}</span>
-          </div>
-          <span className="font-bold text-sm sm:text-base whitespace-nowrap text-foreground">
-            {leaderboardType === LeaderboardType.MAX_WEIGHT
-              ? `${leader.value.toFixed(1)} lbs`
-              : <>
-                  {leader.value.toFixed(1)}%{' '}
-                  <span className="text-xs text-muted-foreground font-normal">({rawWeight.toFixed(1)} lbs)</span>
-                </>
-            }
-          </span>
-        </CardContent>
-      </Card>
-    );
-  };
 
-  // Render a compact exercise leader card, clickable
-  const renderExerciseLeaderCard = (exerciseId, data) => {
-    const { exercise, leader } = data as { exercise: any, leader: any };
-    const rawWeight = leader.value;
-    const user = leader.user || { name: 'Unknown', avatarUrl: undefined };
-    return (
-      <div
-        key={exerciseId}
-        className="flex items-center justify-between py-2 border-b border-border last:border-b-0 cursor-pointer hover:bg-muted px-2 rounded"
-        onClick={() => setSelectedExerciseId(exerciseId)}
-      >
-        <div className="flex items-center gap-2">
-          <div className="bg-yellow-400 text-yellow-900 w-6 h-6 rounded-full flex items-center justify-center font-bold text-sm">1</div>
-          <Avatar className="h-6 w-6">
-            <AvatarImage src={user.avatarUrl} />
-            <AvatarFallback>
-              {user.name?.substring(0, 1) || 'U'}
-            </AvatarFallback>
-          </Avatar>
-          <span className="font-medium text-xs sm:text-sm truncate max-w-[6rem] text-foreground">{user.name}</span>
+          {/* Value */}
+          <div className="text-right flex-shrink-0">
+            <div className="font-bold text-lg text-foreground">
+              {leaderboardType === LeaderboardType.MAX_WEIGHT
+                ? `${entry.value.toFixed(1)} lbs`
+                : `${entry.value.toFixed(1)}%`
+              }
+            </div>
+            {leaderboardType !== LeaderboardType.MAX_WEIGHT && (
+              <div className="text-xs text-muted-foreground">
+                ({entry.value.toFixed(1)} lbs gain)
+              </div>
+            )}
+          </div>
         </div>
-        <div className="flex flex-col items-end">
-          <span className="text-xs text-muted-foreground truncate max-w-[6rem]">{exercise.name}</span>
-          <span className="font-bold text-xs sm:text-sm text-foreground">
-            {leaderboardType === LeaderboardType.MAX_WEIGHT
-              ? `${leader.value.toFixed(1)} lbs`
-              : <>
-                  {leader.value.toFixed(1)}%{' '}
-                  <span className="text-xs text-muted-foreground font-normal">({rawWeight.toFixed(1)} lbs)</span>
-                </>
-            }
-          </span>
-        </div>
+
+        {/* Subtle hover effect */}
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/5 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
       </div>
     );
   };
 
   return (
-    <Layout title="Rankings">
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-4">
-          <Tabs defaultValue="maxWeight" onValueChange={(value) => {
-            switch(value) {
-              case "maxWeight":
-                setLeaderboardType(LeaderboardType.MAX_WEIGHT);
-                break;
-              case "allTimeGain":
-                setLeaderboardType(LeaderboardType.ALLTIME_GAIN);
-                break;
-              case "recentGain":
-                setLeaderboardType(LeaderboardType.RECENT_GAIN);
-                break;
-            }
-          }}>
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="maxWeight">PR Leaders</TabsTrigger>
-              <TabsTrigger value="allTimeGain">All-time Gain</TabsTrigger>
-              <TabsTrigger value="recentGain">Recent Gain</TabsTrigger>
-            </TabsList>
+    <Layout title="Leaderboard">
+      <div className="space-y-6">
+        {/* Header Section */}
+        <div className="space-y-4">
+          {/* Leaderboard Type Selector */}
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <Button
+              variant={leaderboardType === LeaderboardType.MAX_WEIGHT ? "default" : "outline"}
+              size="sm"
+              onClick={() => setLeaderboardType(LeaderboardType.MAX_WEIGHT)}
+              className="rounded-2xl px-4 py-2 font-medium whitespace-nowrap transition-all duration-300"
+            >
+              <Trophy className="h-4 w-4 mr-2" />
+              PR Leaders
+            </Button>
+            <Button
+              variant={leaderboardType === LeaderboardType.ALLTIME_GAIN ? "default" : "outline"}
+              size="sm"
+              onClick={() => setLeaderboardType(LeaderboardType.ALLTIME_GAIN)}
+              className="rounded-2xl px-4 py-2 font-medium whitespace-nowrap transition-all duration-300"
+            >
+              <TrendingUp className="h-4 w-4 mr-2" />
+              All-Time
+            </Button>
+            <Button
+              variant={leaderboardType === LeaderboardType.RECENT_GAIN ? "default" : "outline"}
+              size="sm"
+              onClick={() => setLeaderboardType(LeaderboardType.RECENT_GAIN)}
+              className="rounded-2xl px-4 py-2 font-medium whitespace-nowrap transition-all duration-300"
+            >
+              <Zap className="h-4 w-4 mr-2" />
+              Recent
+            </Button>
+          </div>
+
+          {/* Filters */}
+          <div className="grid grid-cols-2 gap-3">
+            <Select value={selectedCategoryId} onValueChange={handleCategoryChange}>
+              <SelectTrigger className="rounded-2xl border-border">
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map(category => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             
-            <div className="mt-4 space-y-4">
-              {/* Filters */}
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Select
-                    value={selectedCategoryId}
-                    onValueChange={handleCategoryChange}
-                  >
-                    <SelectTrigger className="border-border focus-visible:ring-0 focus-visible:ring-offset-0">
-                      <SelectValue placeholder="All Categories" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Categories</SelectItem>
-                      {categories.map(category => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div>
-                  <Select
-                    value={selectedExerciseId}
-                    onValueChange={setSelectedExerciseId}
-                  >
-                    <SelectTrigger className="border-border focus-visible:ring-0 focus-visible:ring-offset-0">
-                      <SelectValue placeholder="Select Exercise" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Exercises</SelectItem>
-                      {filteredExercises.map(exercise => (
-                        <SelectItem key={exercise.id} value={exercise.id}>
-                          {exercise.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              {/* Category Leaders Section */}
-              {selectedCategoryId === 'all' && (
-                <>
-                  <h2 className="text-lg font-medium text-foreground">Category Leaders</h2>
-                  <div className="grid grid-cols-2 gap-3">
-                    {Object.entries(categoryLeaders).map(([categoryId, data]) =>
-                      renderCategoryLeaderCard(categoryId, data)
-                    )}
-                  </div>
-                </>
-              )}
-              
-              {/* Exercise Leaders for selected category (if not 'all') */}
-              {selectedCategoryId !== 'all' && Object.keys(exerciseLeaders).length > 0 && (
-                <>
-                  <h3 className="text-base font-medium text-foreground mt-2 mb-1">Exercise Leaders</h3>
-                  <div className="bg-card rounded shadow-sm border border-border divide-y divide-border">
-                    {Object.entries(exerciseLeaders).map(([exerciseId, data]) =>
-                      renderExerciseLeaderCard(exerciseId, data as { exercise: any, leader: any })
-                    )}
-                  </div>
-                </>
-              )}
-              
-              {/* Overall Leaderboard */}
-              <h2 className="text-lg font-medium text-foreground">{getLeaderboardTitle()}</h2>
-              
-              <Card className="shadow-sm border border-border">
-                <CardContent className="p-0">
-                  {/* If Max Weight and no exercise selected, show all exercise max leaders */}
-                  {leaderboardType === LeaderboardType.MAX_WEIGHT && selectedExerciseId === 'all' ? (
-                    Object.keys(exerciseLeaders).length > 0 ? (
-                      <div className="divide-y">
-                        {Object.entries(exerciseLeaders).map(([exerciseId, data]) =>
-                          renderExerciseLeaderCard(exerciseId, data as { exercise: any, leader: any })
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8 text-muted-foreground">
-                        No data available for this selection
-                      </div>
-                    )
-                  ) : (
-                    renderLeaderboardEntries()
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </Tabs>
+            <Select value={selectedExerciseId} onValueChange={setSelectedExerciseId}>
+              <SelectTrigger className="rounded-2xl border-border">
+                <SelectValue placeholder="All Exercises" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Exercises</SelectItem>
+                {filteredExercises.map(exercise => (
+                  <SelectItem key={exercise.id} value={exercise.id}>
+                    {exercise.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
+
+        {/* Main Leaderboard */}
+        <Card className="rounded-2xl border-border shadow-sm">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center gap-3 text-xl">
+              {getLeaderboardIcon()}
+              {getLeaderboardTitle()}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-6 pt-0">
+            {loadingUsers || loadingLogs ? (
+              <div className="space-y-4">
+                {[1, 2, 3, 4, 5].map(i => (
+                  <div key={i} className="flex items-center gap-4 p-4 border border-border rounded-2xl animate-pulse">
+                    <div className="w-8 h-8 bg-muted rounded-full flex-shrink-0" />
+                    <div className="w-10 h-10 bg-muted rounded-full flex-shrink-0" />
+                    <div className="flex-1 space-y-2 min-w-0">
+                      <div className="h-4 bg-muted rounded-full w-1/3" />
+                      <div className="h-3 bg-muted rounded-full w-1/4" />
+                    </div>
+                    <div className="h-6 bg-muted rounded-full w-20 flex-shrink-0" />
+                  </div>
+                ))}
+              </div>
+            ) : leaderboardData.length > 0 ? (
+              <div className="space-y-3">
+                {leaderboardData.map((entry, index) => (
+                  <div 
+                    key={entry.userId || index}
+                    className="animate-in slide-in-from-bottom-4 duration-300"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    {renderLeaderboardEntry(entry, index)}
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <div className="relative mb-6">
+                  <div className="absolute inset-0 bg-gradient-to-r from-muted via-muted/50 to-muted rounded-full blur-2xl"></div>
+                  <Target className="relative w-20 h-20 text-muted-foreground mx-auto" />
+                </div>
+                <h3 className="text-xl font-semibold text-foreground mb-3">No Results Found</h3>
+                <p className="text-muted-foreground max-w-sm mx-auto leading-relaxed">
+                  {leaderboardType === LeaderboardType.MAX_WEIGHT && selectedExerciseId === 'all'
+                    ? "Select an exercise above to view personal record leaders and start competing!"
+                    : "No data available for this selection. Try adjusting your filters or check back later as more users log their workouts."
+                  }
+                </p>
+                {leaderboardType === LeaderboardType.MAX_WEIGHT && selectedExerciseId === 'all' && (
+                  <div className="mt-6">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="rounded-2xl"
+                      onClick={() => {
+                        if (filteredExercises.length > 0) {
+                          setSelectedExerciseId(filteredExercises[0].id);
+                        }
+                      }}
+                    >
+                      View {filteredExercises[0]?.name || 'Exercise'} Leaders
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </Layout>
   );
