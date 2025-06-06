@@ -367,7 +367,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
         )}
 
         {/* Chart Controls Section - Compact floating controls */}
-        <div className="absolute -top-12 right-4 flex items-center gap-2">
+        <div className={`absolute ${exerciseId ? '-top-4' : '-top-12'} right-4 flex items-center gap-2`}>
           {/* Compact percentage gain indicator */}
           {timeframeGain !== null && !exerciseId && (
             <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium backdrop-blur-sm ${
