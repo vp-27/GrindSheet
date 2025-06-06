@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useAppContext } from '@/context/AppContext';
+import { useAppContext } from '@/context/useAppContext';
 import { useAuth } from '@/context/AuthContext';
 import { getCategoryColors, getCategoryKeyByName } from '@/utils/categoryColors';
 

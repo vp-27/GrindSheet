@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useAppContext } from '@/context/AppContext';
+import { useAppContext } from '@/context/useAppContext';
 import { useAuth } from '@/context/AuthContext';
 import { ChevronLeft, Trophy, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';

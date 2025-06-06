@@ -4,7 +4,7 @@ import { User, Category, Exercise, ExerciseLog } from '../types';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
 
-interface AppContextType {
+export interface AppContextType { // Added export
   categories: Category[];
   exercises: Exercise[];
   exerciseLogs: ExerciseLog[];
@@ -17,7 +17,7 @@ interface AppContextType {
   setSelectedExercise: (exercise: Exercise | null) => void;
 }
 
-const AppContext = createContext<AppContextType | undefined>(undefined);
+export const AppContext = createContext<AppContextType | undefined>(undefined); // Added export
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const { user, profile } = useAuth();
@@ -44,27 +44,19 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   // Fetch categories, exercises, and exercise logs from Supabase
   useEffect(() => {
     const fetchData = async () => {
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-      
+      // Always fetch categories and exercises, even if no user
       try {
         // Fetch categories (global for all users)
         const { data: categoriesData, error: categoriesError } = await supabase
           .from('categories')
           .select('*')
           .order('name');
-          
         if (categoriesError) throw categoriesError;
-        
-        // Map to our Category type
         const mappedCategories: Category[] = (categoriesData || []).map(cat => ({
           id: cat.id,
           name: cat.name,
           description: cat.description,
         }));
-        
         setCategories(mappedCategories);
 
         // Fetch exercises (global for all users)
@@ -72,51 +64,78 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           .from('exercises')
           .select('*')
           .order('name');
-          
         if (exercisesError) throw exercisesError;
-        
-        // Map to our Exercise type
         const mappedExercises: Exercise[] = (exercisesData || []).map(ex => ({
           id: ex.id,
           name: ex.name,
           categoryId: ex.category_id,
           description: ex.description,
         }));
-        
         setExercises(mappedExercises);
-
-        // Fetch exercise logs
-        const { data: logsData, error: logsError } = await supabase
-          .from('exercise_logs')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('timestamp', { ascending: false });
-          
-        if (logsError) throw logsError;
-        
-        // Map to our ExerciseLog type
-        const mappedLogs: ExerciseLog[] = (logsData || []).map(log => ({
-          id: log.id,
-          userId: log.user_id,
-          exerciseId: log.exercise_id,
-          weight: log.weight,
-          timestamp: log.timestamp,
-          note: log.note,
-        }));
-        
-        setExerciseLogs(mappedLogs);
       } catch (error) {
         console.error('Error fetching data from Supabase:', error);
-      } finally {
-        setLoading(false);
       }
+      // Only fetch logs if user exists
+      if (user) {
+        try {
+          const { data: logsData, error: logsError } = await supabase
+            .from('exercise_logs')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('timestamp', { ascending: false });
+          if (logsError) throw logsError;
+          const mappedLogs: ExerciseLog[] = (logsData || []).map(log => ({
+            id: log.id,
+            userId: log.user_id,
+            exerciseId: log.exercise_id,
+            weight: log.weight,
+            timestamp: log.timestamp,
+            note: log.note,
+          }));
+          setExerciseLogs(mappedLogs);
+        } catch (error) {
+          console.error('Error fetching exercise logs:', error);
+        }
+      }
+      setLoading(false);
     };
 
     fetchData();
-    
-    // Set up real-time subscriptions
+
+    // Set up real-time subscriptions for categories and exercises (global)
+    const exercisesSubscription = supabase
+      .channel('public:exercises')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'exercises',
+        },
+        () => {
+          fetchExercises();
+        }
+      )
+      .subscribe();
+    const categoriesSubscription = supabase
+      .channel('public:categories')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'categories',
+        },
+        () => {
+          fetchCategories();
+        }
+      )
+      .subscribe();
+
+    // Only subscribe to exercise logs if user exists
+    let exerciseLogsSubscription: any = null;
     if (user) {
-      const exerciseLogsSubscription = supabase
+      exerciseLogsSubscription = supabase
         .channel('public:exercise_logs')
         .on(
           'postgres_changes',
@@ -127,67 +146,28 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
             filter: `user_id=eq.${user.id}`,
           },
           () => {
-            // Refetch exercise logs when there's a change
             fetchExerciseLogs();
           }
         )
         .subscribe();
-        
-      const exercisesSubscription = supabase
-        .channel('public:exercises')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'exercises',
-            filter: `user_id=eq.${user.id}`,
-          },
-          () => {
-            // Refetch exercises when there's a change
-            fetchExercises();
-          }
-        )
-        .subscribe();
-        
-      const categoriesSubscription = supabase
-        .channel('public:categories')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'categories',
-            filter: `user_id=eq.${user.id}`,
-          },
-          () => {
-            // Refetch categories when there's a change
-            fetchCategories();
-          }
-        )
-        .subscribe();
-        
-      return () => {
-        supabase.removeChannel(exerciseLogsSubscription);
-        supabase.removeChannel(exercisesSubscription);
-        supabase.removeChannel(categoriesSubscription);
-      };
     }
+    return () => {
+      supabase.removeChannel(exercisesSubscription);
+      supabase.removeChannel(categoriesSubscription);
+      if (exerciseLogsSubscription) supabase.removeChannel(exerciseLogsSubscription);
+    };
   }, [user]);
 
+  // Remove user check from fetchExercises and fetchCategories
   const fetchExerciseLogs = async () => {
     if (!user) return;
-    
     try {
       const { data, error } = await supabase
         .from('exercise_logs')
         .select('*')
         .eq('user_id', user.id)
         .order('timestamp', { ascending: false });
-        
       if (error) throw error;
-      
-      // Map to our ExerciseLog type
       const mappedLogs: ExerciseLog[] = (data || []).map(log => ({
         id: log.id,
         userId: log.user_id,
@@ -196,7 +176,6 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         timestamp: log.timestamp,
         note: log.note,
       }));
-      
       setExerciseLogs(mappedLogs);
     } catch (error) {
       console.error('Error fetching exercise logs:', error);
@@ -204,24 +183,18 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const fetchExercises = async () => {
-    if (!user) return;
-    
     try {
       const { data, error } = await supabase
         .from('exercises')
         .select('*')
         .order('name');
-        
       if (error) throw error;
-      
-      // Map to our Exercise type
       const mappedExercises: Exercise[] = (data || []).map(ex => ({
         id: ex.id,
         name: ex.name,
         categoryId: ex.category_id,
         description: ex.description,
       }));
-      
       setExercises(mappedExercises);
     } catch (error) {
       console.error('Error fetching exercises:', error);
@@ -229,23 +202,17 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   };
 
   const fetchCategories = async () => {
-    if (!user) return;
-    
     try {
       const { data, error } = await supabase
         .from('categories')
         .select('*')
         .order('name');
-        
       if (error) throw error;
-      
-      // Map to our Category type
       const mappedCategories: Category[] = (data || []).map(cat => ({
         id: cat.id,
         name: cat.name,
         description: cat.description,
       }));
-      
       setCategories(mappedCategories);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -329,12 +296,4 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   );
 };
 
-export const useAppContext = (): AppContextType => {
-  const context = useContext(AppContext);
-  
-  if (context === undefined) {
-    throw new Error('useAppContext must be used within an AppProvider');
-  }
-  
-  return context;
-};
+// useAppContext hook has been removed from this file and moved to useAppContext.ts

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
-import { useAppContext } from '@/context/AppContext';
+import { useAppContext } from '@/context/useAppContext';
 import { LeaderboardType } from '@/types';
 import { getLeaderboard, calculatePRChampionshipSummary } from '@/utils/progressUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
