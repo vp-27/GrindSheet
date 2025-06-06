@@ -221,13 +221,13 @@ const Dashboard = () => {
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-xl font-bold text-foreground">Your Progress</h2>
             
-            {/* Sort Controls - visually distinct from category filters */}
-            <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
+            {/* Compact Sort Controls - smaller and more integrated */}
+            <div className="flex items-center gap-0.5 bg-background/80 backdrop-blur-sm rounded-lg p-0.5 shadow-sm border border-border/50">
               <button
                 onClick={() => setSortBy('recent')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                className={`px-2 py-1 text-xs font-medium rounded-md transition-all ${
                   sortBy === 'recent' 
-                    ? 'bg-background text-foreground shadow-sm' 
+                    ? 'bg-foreground text-background shadow-sm' 
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -235,9 +235,9 @@ const Dashboard = () => {
               </button>
               <button
                 onClick={() => setSortBy('pr')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                className={`px-2 py-1 text-xs font-medium rounded-md transition-all ${
                   sortBy === 'pr' 
-                    ? 'bg-background text-foreground shadow-sm' 
+                    ? 'bg-foreground text-background shadow-sm' 
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
@@ -245,9 +245,9 @@ const Dashboard = () => {
               </button>
               <button
                 onClick={() => setSortBy('progress')}
-                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                className={`px-2 py-1 text-xs font-medium rounded-md transition-all ${
                   sortBy === 'progress' 
-                    ? 'bg-background text-foreground shadow-sm' 
+                    ? 'bg-foreground text-background shadow-sm' 
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >

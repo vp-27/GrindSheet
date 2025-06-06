@@ -251,7 +251,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
         </div>
       )}
 
-      <div className={`${blendWithBackground ? 'px-0' : 'p-0'}`}>
+      <div className={`relative ${blendWithBackground ? 'px-0' : 'p-0'}`}>
         <ResponsiveContainer width="100%" height={240}>
           <LineChart
             data={filteredData}
@@ -366,43 +366,36 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
           })()
         )}
 
-        {/* Chart Controls Section - Below chart */}
-        <div className="chart-controls">
-          <div className="flex items-center justify-between mt-4">
-            {/* Compact percentage gain indicator - left side, only show if not on ExerciseDetail page */}
-            {timeframeGain !== null && !exerciseId ? (
-              <div className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all ${
-                timeframeGain >= 0 
-                  ? 'text-emerald-700 bg-emerald-100/80 dark:text-emerald-400 dark:bg-emerald-900/30' 
-                  : 'text-red-700 bg-red-100/80 dark:text-red-400 dark:bg-red-900/30'
-              }`}>
-                <div className={`w-1.5 h-1.5 rounded-full ${
-                  timeframeGain >= 0 ? 'bg-emerald-500' : 'bg-red-500'
-                }`} />
-                <span className="font-semibold">
-                  {timeframeGain >= 0 ? '+' : ''}{timeframeGain.toFixed(1)}%
-                </span>
-              </div>
-            ) : (
-              <div />
-            )}
-            
-            {/* Timeframe Controls - right side, matching Dashboard sort controls exactly */}
-            <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
-              {(['1M', 'ALL'] as TimeframeOption[]).map((period) => (
-                <button
-                  key={period}
-                  onClick={() => setTimeframe(period)}
-                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
-                    timeframe === period
-                      ? 'bg-background text-foreground shadow-sm' 
-                      : 'text-muted-foreground hover:text-foreground'
-                  }`}
-                >
-                  {period}
-                </button>
-              ))}
+        {/* Chart Controls Section - Compact floating controls */}
+        <div className="absolute -top-12 right-4 flex items-center gap-2">
+          {/* Compact percentage gain indicator */}
+          {timeframeGain !== null && !exerciseId && (
+            <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium backdrop-blur-sm ${
+              timeframeGain >= 0 
+                ? 'text-emerald-700 bg-emerald-50/90 dark:text-emerald-400 dark:bg-emerald-900/40' 
+                : 'text-red-700 bg-red-50/90 dark:text-red-400 dark:bg-red-900/40'
+            }`}>
+              <span className="font-semibold">
+                {timeframeGain >= 0 ? '+' : ''}{timeframeGain.toFixed(1)}%
+              </span>
             </div>
+          )}
+          
+          {/* Compact Timeframe Controls */}
+          <div className="flex items-center gap-0.5 bg-background/80 backdrop-blur-sm rounded-lg p-0.5 shadow-sm border border-border/50">
+            {(['1M', 'ALL'] as TimeframeOption[]).map((period) => (
+              <button
+                key={period}
+                onClick={() => setTimeframe(period)}
+                className={`px-2 py-1 text-xs font-medium rounded-md transition-all ${
+                  timeframe === period
+                    ? 'bg-foreground text-background shadow-sm' 
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                {period}
+              </button>
+            ))}
           </div>
         </div>
       </div>
