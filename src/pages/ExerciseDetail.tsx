@@ -31,6 +31,10 @@ const ExerciseDetail = () => {
   const [note, setNote] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // Chart timeframe state
+  const [currentTimeframe, setCurrentTimeframe] = useState<'1M' | 'ALL'>('1M');
+  const [timeframeGain, setTimeframeGain] = useState<number | null>(null);
+  
   // Get the exercise details
   const exercise = useMemo(() => {
     return exercises.find(ex => ex.id === exerciseId);
@@ -71,6 +75,12 @@ const ExerciseDetail = () => {
     const categoryKey = getCategoryKeyByName(category.name);
     return getCategoryColors(categoryKey);
   }, [category]);
+  
+  // Handle timeframe changes from chart
+  const handleTimeframeChange = (timeframe: '1M' | 'ALL', gain: number | null) => {
+    setCurrentTimeframe(timeframe);
+    setTimeframeGain(gain);
+  };
   
   // Redirect if no exercise ID or invalid ID
   useEffect(() => {
@@ -173,6 +183,7 @@ const ExerciseDetail = () => {
               appleStyle={true}
               blendWithBackground={true}
               customColors={categoryColors ? [categoryColors.primary] : undefined}
+              onTimeframeChange={handleTimeframeChange}
             />
           ) : (
             <div className="text-center text-muted-foreground py-16">
@@ -229,12 +240,16 @@ const ExerciseDetail = () => {
             </div>
             
             {/* Progress indicator */}
-            {progress?.percentGainFromStart !== undefined && progress.percentGainFromStart > 0 && (
+            {((timeframeGain !== null && timeframeGain !== 0) || (progress?.percentGainFromStart !== undefined && progress.percentGainFromStart > 0)) && (
               <div className="mt-4 pt-4 border-t border-border/50">
                 <div className="flex items-center justify-center gap-2">
                   <TrendingUp className="w-4 h-4 text-green-500" />
                   <span className="text-sm font-medium text-foreground">
-                    +{progress.percentGainFromStart.toFixed(1)}% total progress
+                    {timeframeGain !== null && timeframeGain !== 0 ? (
+                      `${timeframeGain >= 0 ? '+' : ''}${timeframeGain.toFixed(1)}% ${currentTimeframe} progress`
+                    ) : (
+                      `+${progress?.percentGainFromStart?.toFixed(1)}% total progress`
+                    )}
                   </span>
                 </div>
               </div>

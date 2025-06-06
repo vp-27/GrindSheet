@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Area } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProgressChartData } from '@/types';
 import { addDays, isBefore, parseISO } from 'date-fns';
@@ -46,10 +46,11 @@ interface ProgressChartProps {
   appleStyle?: boolean; // Added to support Apple iOS styling
   blendWithBackground?: boolean; // New prop for Robinhood-style charts
   customColors?: string[]; // Allow custom colors to be passed in
+  onTimeframeChange?: (timeframe: TimeframeOption, gain: number | null) => void; // Callback for timeframe changes
 }
 
 // Define timeframe options
-type TimeframeOption = '1W' | '1M' | '3M' | 'ALL';
+type TimeframeOption = '1M' | 'ALL';
 
 // Helper function to filter data based on timeframe
 const filterDataByTimeframe = (data: any[], timeframe: TimeframeOption) => {
@@ -59,14 +60,8 @@ const filterDataByTimeframe = (data: any[], timeframe: TimeframeOption) => {
   const cutoffDate = new Date();
   
   switch (timeframe) {
-    case '1W':
-      cutoffDate.setDate(now.getDate() - 7);
-      break;
     case '1M':
       cutoffDate.setMonth(now.getMonth() - 1);
-      break;
-    case '3M':
-      cutoffDate.setMonth(now.getMonth() - 3);
       break;
   }
   
@@ -152,9 +147,10 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
   weightUnit = 'lb',
   appleStyle = false,
   blendWithBackground = false,
-  customColors
+  customColors,
+  onTimeframeChange
 }) => {
-  const [timeframe, setTimeframe] = useState<TimeframeOption>('ALL');
+  const [timeframe, setTimeframe] = useState<TimeframeOption>('1M');
   const [dotVisible, setDotVisible] = useState(false);
 
   // Filter data based on selected timeframe
@@ -177,6 +173,13 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
     // We don't reset to false here to avoid potential flickers if data changes
     // while an animation has already completed and set it to true.
   }, [filteredData]);
+
+  // Notify parent component when timeframe or gain changes
+  useEffect(() => {
+    if (onTimeframeChange) {
+      onTimeframeChange(timeframe, timeframeGain);
+    }
+  }, [timeframe, timeframeGain, onTimeframeChange]);
 
   if (!data || data.length === 0) {
     return (
@@ -262,15 +265,6 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
             onMouseMove={undefined}
             onMouseLeave={undefined}
           >
-            <defs>
-              {/* Gradient definitions for each line */}
-              {colors.map((color, index) => (
-                <linearGradient key={`gradient-${index}`} id={`gradient-${index}`} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor={color} stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor={color} stopOpacity={0.05}/>
-                </linearGradient>
-              ))}
-            </defs>
             <CartesianGrid 
               strokeDasharray={blendWithBackground ? "0 0" : appleStyle ? "0 0" : "3 3"} 
               stroke={blendWithBackground ? "transparent" : appleStyle ? "#f5f5f7" : "#eee"} 
@@ -300,13 +294,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
                 const displayName = multiple ? name : (showPercentage ? 'Progress' : 'Weight');
                 return [`${value}${formatUnit}`, displayName];
               }}
-              labelFormatter={(value) => {
-                // Show date instead of "current" on exercise detail pages
-                if (exerciseId && !multiple) {
-                  return `Date: ${value}`;
-                }
-                return `Date: ${value}`;
-              }}
+              labelFormatter={(value) => `Date: ${value}`}
               contentStyle={appleStyle || blendWithBackground ? { 
                 backgroundColor: 'rgba(255, 255, 255, 0.98)',
                 borderRadius: '12px',
@@ -316,7 +304,6 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
                 fontSize: '14px',
                 fontWeight: '500'
               } : undefined}
-              // Solid line for cleaner look
               cursor={{ 
                 stroke: appleStyle ? '#8E8E93' : '#94A3B8', 
                 strokeWidth: 1.5,
@@ -324,8 +311,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
               }}
               animationDuration={0}
               allowEscapeViewBox={{ x: false, y: false }}
-              // Smart positioning: cover legend on dashboard, avoid chart on exercise detail
-              position={multiple && !exerciseId ? { x: undefined, y: 180 } : { x: undefined, y: 20 }}
+              position={{ x: undefined, y: 20 }}
               offset={10}
             />
             {multiple ? (
@@ -379,6 +365,46 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
             return null;
           })()
         )}
+
+        {/* Chart Controls Section - Below chart */}
+        <div className="chart-controls">
+          <div className="flex items-center justify-between mt-4">
+            {/* Compact percentage gain indicator - left side, only show if not on ExerciseDetail page */}
+            {timeframeGain !== null && !exerciseId ? (
+              <div className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-medium transition-all ${
+                timeframeGain >= 0 
+                  ? 'text-emerald-700 bg-emerald-100/80 dark:text-emerald-400 dark:bg-emerald-900/30' 
+                  : 'text-red-700 bg-red-100/80 dark:text-red-400 dark:bg-red-900/30'
+              }`}>
+                <div className={`w-1.5 h-1.5 rounded-full ${
+                  timeframeGain >= 0 ? 'bg-emerald-500' : 'bg-red-500'
+                }`} />
+                <span className="font-semibold">
+                  {timeframeGain >= 0 ? '+' : ''}{timeframeGain.toFixed(1)}%
+                </span>
+              </div>
+            ) : (
+              <div />
+            )}
+            
+            {/* Timeframe Controls - right side, matching Dashboard sort controls exactly */}
+            <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
+              {(['1M', 'ALL'] as TimeframeOption[]).map((period) => (
+                <button
+                  key={period}
+                  onClick={() => setTimeframe(period)}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                    timeframe === period
+                      ? 'bg-background text-foreground shadow-sm' 
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {period}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
