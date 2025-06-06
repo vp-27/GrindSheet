@@ -89,6 +89,11 @@ const ExerciseDetail = () => {
     }
   }, [exerciseId, exercise, exercises, navigate]);
   
+  // Scroll to top when component mounts or exercise changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [exerciseId]);
+  
   // Handle form submission to log weight
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

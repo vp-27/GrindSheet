@@ -120,6 +120,8 @@ const Dashboard = () => {
   // Handle exercise card click to view detailed progress
   const handleExerciseClick = (exerciseId) => {
     navigate(`/exercise-detail?exercise=${exerciseId}`);
+    // Scroll to top after navigation
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Get selected category color for subtle background tinting
