@@ -815,3 +815,98 @@ export const getLeaderboard = (
       return calculateOverallProgressLeaderboard(logs, users);
   }
 };
+
+// New function to calculate category-specific progress leaders for the redesigned overall section
+export const calculateCategoryProgressLeaders = (
+  logs: ExerciseLog[], 
+  users: User[], 
+  exercises: Exercise[],
+  categories: Category[]
+): { categoryId: string, categoryName: string, leader: LeaderboardEntry }[] => {
+  const categoryLeaders: { categoryId: string, categoryName: string, leader: LeaderboardEntry }[] = [];
+  
+  // Group exercises by category
+  const categoriesMap = new Map<string, { id: string, name: string, exercises: Exercise[] }>();
+  exercises.forEach(exercise => {
+    if (!categoriesMap.has(exercise.categoryId)) {
+      // Get category name from the categories array
+      const category = categories.find(cat => cat.id === exercise.categoryId);
+      const categoryName = category?.name || exercise.categoryId;
+      categoriesMap.set(exercise.categoryId, { 
+        id: exercise.categoryId, 
+        name: categoryName, 
+        exercises: [] 
+      });
+    }
+    categoriesMap.get(exercise.categoryId)!.exercises.push(exercise);
+  });
+  
+  categoriesMap.forEach(({ id: categoryId, name: categoryName, exercises: categoryExercises }) => {
+    const userStats: Map<string, { totalGain: number; exerciseCount: number }> = new Map();
+    const userExerciseStats: Map<string, { maxWeight: number; startWeight: number }> = new Map();
+    
+    // Filter logs for exercises in this category
+    const categoryExerciseIds = new Set(categoryExercises.map(ex => ex.id));
+    const categoryLogs = logs.filter(log => categoryExerciseIds.has(log.exerciseId));
+    
+    // Calculate stats for each user-exercise combination in this category
+    categoryLogs.forEach(log => {
+      const userExerciseKey = `${log.userId}-${log.exerciseId}`;
+      
+      if (!userExerciseStats.has(userExerciseKey)) {
+        userExerciseStats.set(userExerciseKey, { maxWeight: log.weight, startWeight: log.weight });
+      } else {
+        const stats = userExerciseStats.get(userExerciseKey)!;
+        stats.maxWeight = Math.max(stats.maxWeight, log.weight);
+        stats.startWeight = Math.min(stats.startWeight, log.weight);
+      }
+    });
+    
+    // Calculate average gains per user for this category
+    users.forEach(user => {
+      let totalGainPercent = 0;
+      let exerciseCount = 0;
+      
+      for (const [key, stats] of userExerciseStats.entries()) {
+        if (key.startsWith(user.id + '-')) {
+          if (stats.startWeight > 0 && stats.maxWeight > stats.startWeight) {
+            const gainPercent = ((stats.maxWeight - stats.startWeight) / stats.startWeight) * 100;
+            totalGainPercent += gainPercent;
+            exerciseCount++;
+          }
+        }
+      }
+      
+      const avgGainPercent = exerciseCount > 0 ? totalGainPercent / exerciseCount : 0;
+      if (avgGainPercent > 0) {
+        userStats.set(user.id, { totalGain: avgGainPercent, exerciseCount });
+      }
+    });
+    
+    // Find the leader for this category
+    let bestUser: User | null = null;
+    let bestValue = 0;
+    
+    for (const [userId, stats] of userStats.entries()) {
+      if (stats.totalGain > bestValue) {
+        bestValue = stats.totalGain;
+        bestUser = users.find(u => u.id === userId) || null;
+      }
+    }
+    
+    if (bestUser && bestValue > 0) {
+      categoryLeaders.push({
+        categoryId,
+        categoryName,
+        leader: {
+          userId: bestUser.id,
+          user: bestUser,
+          value: bestValue,
+          categoryId
+        }
+      });
+    }
+  });
+  
+  return categoryLeaders;
+};

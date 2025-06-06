@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import { useAppContext } from '@/context/useAppContext';
 import { LeaderboardType } from '@/types';
-import { getLeaderboard, calculatePRChampionshipSummary } from '@/utils/progressUtils';
+import { getLeaderboard, calculatePRChampionshipSummary, calculateCategoryProgressLeaders } from '@/utils/progressUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -18,6 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Trophy, TrendingUp, Crown, Medal, Zap, Target, Award } from 'lucide-react';
 import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
 import '@/components/ui/category-styles.css';
+import '@/components/ui/color-indicator.css';
 
 // Custom CSS for scrollbar hiding consistency
 const scrollbarHideStyle = `
@@ -132,6 +133,11 @@ const Leaderboard: React.FC = () => {
   // Get PR championship summary for overview mode
   const prChampionshipSummary = (leaderboardType === LeaderboardType.EXERCISE_PR && selectedExerciseId === 'all') 
     ? calculatePRChampionshipSummary(allExerciseLogs, users)
+    : null;
+
+  // Get category progress leaders for overall progress view
+  const categoryProgressLeaders = (leaderboardType === LeaderboardType.OVERALL_PROGRESS) 
+    ? calculateCategoryProgressLeaders(allExerciseLogs, users, exercises, categories)
     : null;
 
   // Handle category change
@@ -428,6 +434,61 @@ const Leaderboard: React.FC = () => {
     );
   };
 
+  // Render category progress card for overall view
+  const renderCategoryProgressCard = (categoryLeader: any, index: number) => {
+    const { categoryId, categoryName, leader } = categoryLeader;
+    const user = leader.user;
+    
+    // Get category color
+    const categoryKey = getCategoryKeyByName(categoryName);
+    const categoryColors = getCategoryColors(categoryKey);
+    
+    return (
+      <div 
+        key={categoryId}
+        className="relative group p-5 border border-border rounded-2xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card hover:bg-card/80 backdrop-blur-sm"
+      >
+        {/* Category Header */}
+        <div className="flex items-center justify-between mb-3">
+          <div className={`category-badge--${categoryKey}`}>
+            {categoryName}
+          </div>
+        </div>
+        
+        {/* Leader Info */}
+        <div className="flex items-center gap-3 mb-4">
+          <Avatar className="h-10 w-10 border-2 border-white shadow-sm">
+            <AvatarImage src={user.avatarUrl} alt={user.name} />
+            <AvatarFallback className="bg-muted text-muted-foreground text-sm">
+              {user.name?.substring(0, 2).toUpperCase() || 'U'}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 min-w-0">
+            <div className="font-medium text-sm text-foreground truncate">
+              {user.name}
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Category Leader
+            </div>
+          </div>
+        </div>
+        
+        {/* Progress Value */}
+        <div className="text-center p-3 bg-muted/30 rounded-xl">
+          <div className="font-bold text-2xl text-foreground">
+            {leader.value.toFixed(1)}%
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">
+            avg progress
+          </div>
+        </div>
+        
+        {/* Subtle hover effect */}
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/5 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+      </div>
+    );
+  };
+
   // Determine if we are in PR Overview mode (used for keying and logic)
   const isOverviewMode = leaderboardType === LeaderboardType.EXERCISE_PR && selectedExerciseId === 'all';
 
@@ -474,45 +535,45 @@ const Leaderboard: React.FC = () => {
               <Target className="h-4 w-4 mr-2" />
               Consistency
             </Button>
-          </div>
-
-          {/* Filters */}
-          <div className="grid grid-cols-2 gap-3">
-            <Select value={selectedCategoryId} onValueChange={handleCategoryChange}>
-              <SelectTrigger className="rounded-2xl border-border">
-                <SelectValue placeholder="All Categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                {categories.map(category => (
-                  <SelectItem key={category.id} value={category.id}>
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            
-            {/* Only show exercise filter for Exercise PR leaderboard */}
-            {leaderboardType === LeaderboardType.EXERCISE_PR ? (
-              <Select value={selectedExerciseId} onValueChange={setSelectedExerciseId}>
+          </div>          {/* Filters */}
+          {leaderboardType !== LeaderboardType.OVERALL_PROGRESS && (
+            <div className="grid grid-cols-2 gap-3">
+              <Select value={selectedCategoryId} onValueChange={handleCategoryChange}>
                 <SelectTrigger className="rounded-2xl border-border">
-                  <SelectValue placeholder="All Exercises" />
+                  <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Exercises</SelectItem>
-                  {getMultiUserExercises().map(exercise => (
-                    <SelectItem key={exercise.id} value={exercise.id}>
-                      {exercise.name}
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.map(category => (
+                    <SelectItem key={category.id} value={category.id}>
+                      {category.name}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
-            ) : (
-              <div className="flex items-center justify-center rounded-2xl border border-dashed border-border text-muted-foreground text-sm">
-                No exercise filter needed
-              </div>
-            )}
-          </div>
+              
+              {/* Only show exercise filter for Exercise PR leaderboard */}
+              {leaderboardType === LeaderboardType.EXERCISE_PR ? (
+                <Select value={selectedExerciseId} onValueChange={setSelectedExerciseId}>
+                  <SelectTrigger className="rounded-2xl border-border">
+                    <SelectValue placeholder="All Exercises" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Exercises</SelectItem>
+                    {getMultiUserExercises().map(exercise => (
+                      <SelectItem key={exercise.id} value={exercise.id}>
+                        {exercise.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <div className="flex items-center justify-center rounded-2xl border border-dashed border-border text-muted-foreground text-sm">
+                  No exercise filter needed
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Main Leaderboard */}
@@ -541,7 +602,7 @@ const Leaderboard: React.FC = () => {
                   </div>
                 ))}
               </div>
-            ) : leaderboardData.length > 0 ? (
+            ) : leaderboardData.length > 0 || (leaderboardType === LeaderboardType.OVERALL_PROGRESS && categoryProgressLeaders && categoryProgressLeaders.length > 0) ? (
               <div className="space-y-4">
                 {/* PR Championship Summary Card (only in overview mode) */}
                 {prChampionshipSummary && prChampionshipSummary.champion && (
@@ -574,19 +635,67 @@ const Leaderboard: React.FC = () => {
                   </div>
                 )}
                 
-                {/* Leaderboard Entries */}
-                <div className="space-y-3">
-                  {leaderboardData.map((entry, index) => (
-                    <div 
-                      key={isOverviewMode 
-                        ? `exercise-${entry.exerciseId || index}` 
-                        : `user-${entry.userId || index}`}
-                      className="animate-in slide-in-from-bottom-4 duration-300"
-                    >
-                      {renderLeaderboardEntry(entry, index)}
-                    </div>
-                  ))}
-                </div>
+                {/* Overall Progress Special Layout */}
+                {leaderboardType === LeaderboardType.OVERALL_PROGRESS ? (
+                  <div className="space-y-6">
+                    {/* Main Overall Progress Card */}
+                    {leaderboardData.length > 0 && (
+                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-lg">
+                            <TrendingUp className="h-6 w-6 text-green-900" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                              Overall Progress Leader
+                              <span className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 px-2 py-1 rounded-full font-medium">
+                                {leaderboardData[0].value.toFixed(1)}% avg gain
+                              </span>
+                            </h3>
+                            <div className="flex items-center gap-3 mt-1">
+                              <Avatar className="h-8 w-8">
+                                <AvatarImage src={leaderboardData[0].user.avatarUrl} alt={leaderboardData[0].user.name} />
+                                <AvatarFallback className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 text-sm">
+                                  {leaderboardData[0].user.name?.substring(0, 2).toUpperCase() || 'U'}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span className="font-semibold text-foreground">{leaderboardData[0].user.name}</span>
+                              <span className="text-sm text-muted-foreground">
+                                leading overall progress across all exercises
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Category Progress Leaders Grid */}
+                    {categoryProgressLeaders && categoryProgressLeaders.length > 0 && (
+                      <div>
+                        <h3 className="text-lg font-semibold text-foreground mb-4">Category Leaders</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                          {categoryProgressLeaders.map((categoryLeader, index) => 
+                            renderCategoryProgressCard(categoryLeader, index)
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  /* Regular Leaderboard Entries */
+                  <div className="space-y-3">
+                    {leaderboardData.map((entry, index) => (
+                      <div 
+                        key={isOverviewMode 
+                          ? `exercise-${entry.exerciseId || index}` 
+                          : `user-${entry.userId || index}`}
+                        className="animate-in slide-in-from-bottom-4 duration-300"
+                      >
+                        {renderLeaderboardEntry(entry, index)}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-center py-16">
