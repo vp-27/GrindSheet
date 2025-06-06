@@ -60,7 +60,9 @@ const ExerciseDetail = () => {
   // Get chart data
   const chartData = useMemo(() => {
     if (!exerciseId) return [];
-    return getProgressChartData(exerciseLogs, exerciseId);
+    const data = getProgressChartData(exerciseLogs, exerciseId);
+    console.log('ExerciseDetail chart data:', data);
+    return data;
   }, [exerciseLogs, exerciseId]);
 
   // Get category colors

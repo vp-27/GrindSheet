@@ -1,26 +1,156 @@
-/* Clean, minimal chart styling */
+/* Clean, minimal chart styling with Apple-inspired design */
 .progresschart-container {
   position: relative;
 }
 
-/* Simple, clean dot style with fade-in */
+/* Enhanced tooltip positioning to avoid chart coverage */
+.recharts-tooltip-wrapper {
+  pointer-events: none;
+}
+
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 8px 16px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  padding: 12px 16px;
+  max-width: 200px;
+  z-index: 1000;
+}
+
+/* Simple, clean dot style with fade-in animation */
 .progresschart-dot-clean {
-  animation: fade-in 1s ease-out;
-  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.08));
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+  transition: all 0.2s ease;
+  opacity: 0;
 }
 
-/* Simple fade-in animation */
-@keyframes fade-in {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
+.progresschart-dot-clean.visible {
+  opacity: 1;
+  transition: opacity 0.5s ease;
 }
 
-/* Ensure smooth line rendering */
+.progresschart-dot-clean:hover {
+  transform: scale(1.2);
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+}
+
+/* Smooth line rendering with Apple-style curves */
 .recharts-line-curve {
   stroke-linecap: round;
   stroke-linejoin: round;
+  filter: drop-shadow(0 1px 2px rgba(0,0,0,0.05));
+}
+
+/* Custom Legend Styling - Apple-inspired and Mobile-Friendly */
+.custom-legend-container {
+  width: 100%;
+  padding-top: 20px;
+  padding-bottom: 8px;
+  margin-top: 12px;
+}
+
+.custom-legend-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+  max-width: 100%;
+}
+
+/* Mobile-first responsive design */
+@media (max-width: 640px) {
+  .custom-legend-wrapper {
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+.custom-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  background: transparent;
+  border-radius: 6px;
+  transition: background-color 0.15s ease;
+  cursor: default;
+  flex-shrink: 0;
+}
+
+.custom-legend-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+/* Mobile optimization - make items more compact */
+@media (max-width: 640px) {
+  .custom-legend-item {
+    padding: 2px 6px;
+    gap: 4px;
+    /* Ensure items wrap nicely instead of forcing horizontal scroll */
+    min-width: auto;
+  }
+}
+
+.custom-legend-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Mobile optimization */
+@media (max-width: 640px) {
+  .custom-legend-indicator {
+    width: 6px;
+    height: 6px;
+  }
+}
+
+/* Dynamic color classes for legend indicators */
+.custom-legend-indicator[data-color="#34C759"] { background-color: #34C759; }
+.custom-legend-indicator[data-color="#5AC8FA"] { background-color: #5AC8FA; }
+.custom-legend-indicator[data-color="#FF9500"] { background-color: #FF9500; }
+.custom-legend-indicator[data-color="#FF2D55"] { background-color: #FF2D55; }
+.custom-legend-indicator[data-color="#AF52DE"] { background-color: #AF52DE; }
+.custom-legend-indicator[data-color="#000000"] { background-color: #000000; }
+.custom-legend-indicator[data-color="#3b82f6"] { background-color: #3b82f6; }
+.custom-legend-indicator[data-color="#10b981"] { background-color: #10b981; }
+.custom-legend-indicator[data-color="#f59e0b"] { background-color: #f59e0b; }
+.custom-legend-indicator[data-color="#ef4444"] { background-color: #ef4444; }
+.custom-legend-indicator[data-color="#8b5cf6"] { background-color: #8b5cf6; }
+.custom-legend-indicator[data-color="#ec4899"] { background-color: #ec4899; }
+
+.custom-legend-text {
+  font-size: 11px;
+  font-weight: 400;
+  color: #64748b;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+/* Mobile optimization */
+@media (max-width: 640px) {
+  .custom-legend-text {
+    font-size: 10px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .custom-legend-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+  
+  .custom-legend-text {
+    color: #94a3b8;
+  }
+}
+
+/* Apple-style variant - simplified */
+.custom-legend-item.apple-style .custom-legend-text {
+  color: #8e8e93;
+  font-weight: 400;
 }

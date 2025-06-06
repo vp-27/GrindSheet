@@ -17,6 +17,7 @@ const Dashboard = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'recent' | 'pr' | 'progress'>('recent');
 
   // Use the same color system as the rest of the app
   const chartColors = getCategoryChartColors();
@@ -56,7 +57,7 @@ const Dashboard = () => {
     }
   }, [exerciseLogs, exercises, categories, selectedCategoryId]);
 
-  // Calculate progress for each exercise
+  // Calculate progress for each exercise with sorting
   const exerciseProgressItems = useMemo(() => {
     const items = [];
     
@@ -71,24 +72,50 @@ const Dashboard = () => {
       
       // Only include exercises with data
       if (progress.currentWeight > 0) {
-        items.push(progress);
+        // Add the most recent log timestamp for sorting
+        const exerciseLogsForThis = exerciseLogs.filter(log => log.exerciseId === exercise.id);
+        const mostRecentLog = exerciseLogsForThis.reduce((latest, log) => 
+          new Date(log.timestamp) > new Date(latest.timestamp) ? log : latest
+        );
+        
+        items.push({
+          ...progress,
+          lastLogTimestamp: mostRecentLog.timestamp
+        });
       }
     });
     
-    // Sort by highest percentage gain
+    // Sort based on selected sort method
     return items.sort((a, b) => {
-      const gainA = a.percentGainFromStart || 0;
-      const gainB = b.percentGainFromStart || 0;
-      return gainB - gainA;
+      switch (sortBy) {
+        case 'recent':
+          // Sort by most recent activity
+          return new Date(b.lastLogTimestamp).getTime() - new Date(a.lastLogTimestamp).getTime();
+        case 'pr':
+          // Sort by exercises with recent PRs first, then by highest current weight
+          const aHasPR = a.personalRecord === a.currentWeight && a.previousWeight && a.currentWeight > a.previousWeight;
+          const bHasPR = b.personalRecord === b.currentWeight && b.previousWeight && b.currentWeight > b.previousWeight;
+          
+          if (aHasPR && !bHasPR) return -1;
+          if (!aHasPR && bHasPR) return 1;
+          if (aHasPR && bHasPR) {
+            // Both have PRs, sort by highest current weight
+            return b.currentWeight - a.currentWeight;
+          }
+          // Neither has PR, sort by highest current weight
+          return b.currentWeight - a.currentWeight;
+        case 'progress':
+          // Sort by highest percentage gain from start
+          const gainA = a.percentGainFromStart || 0;
+          const gainB = b.percentGainFromStart || 0;
+          return gainB - gainA;
+        default:
+          return 0;
+      }
     });
-  }, [exercises, exerciseLogs, selectedCategoryId]);
+  }, [exercises, exerciseLogs, selectedCategoryId, sortBy]);
 
-  // Get recent logs (last 5)
-  const recentLogs = useMemo(() => {
-    return [...filteredLogs]
-      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
-      .slice(0, 5);
-  }, [filteredLogs]);
+  // Remove the recentLogs useMemo as we're integrating it into the main progress section
 
   // Handle exercise card click to view detailed progress
   const handleExerciseClick = (exerciseId) => {
@@ -104,7 +131,7 @@ const Dashboard = () => {
 
   return (
     <Layout title="Home">
-      <>
+      <div className="relative">
         {/* Subtle bottom category tinting */}
         {selectedCategoryColor && (
           <div 
@@ -185,15 +212,48 @@ const Dashboard = () => {
                   >
                   {category.name}
                 </Button>
-              );
-            })}
+              );              })}
+            </div>
           </div>
-        </div>
 
-        {/* Exercise Progress Grid */}
+          {/* Exercise Progress Grid */}
         <div className="relative">
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-foreground mb-2">Your Progress</h2>
+          <div className="mb-6 flex items-center justify-between">
+            <h2 className="text-xl font-bold text-foreground">Your Progress</h2>
+            
+            {/* Sort Controls - visually distinct from category filters */}
+            <div className="flex items-center gap-1 bg-muted/50 rounded-lg p-1">
+              <button
+                onClick={() => setSortBy('recent')}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                  sortBy === 'recent' 
+                    ? 'bg-background text-foreground shadow-sm' 
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Recent
+              </button>
+              <button
+                onClick={() => setSortBy('pr')}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                  sortBy === 'pr' 
+                    ? 'bg-background text-foreground shadow-sm' 
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                PRs
+              </button>
+              <button
+                onClick={() => setSortBy('progress')}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all ${
+                  sortBy === 'progress' 
+                    ? 'bg-background text-foreground shadow-sm' 
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                Progress
+              </button>
+            </div>
           </div>
           
           {exerciseProgressItems.length > 0 ? (
@@ -291,77 +351,8 @@ const Dashboard = () => {
           )}
         </div>
         
-        {/* Recent Activity Section */}
-        <div className="relative">
-          <div className="mb-6">
-            <h2 className="text-xl font-bold text-foreground mb-2">Recent Workouts</h2>
-          </div>
-          
-          <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
-            {recentLogs.length > 0 ? (
-              <div className="divide-y divide-border">
-                  {recentLogs.map((log, index) => {
-                    const exercise = exercises.find(e => e.id === log.exerciseId);
-                    const category = categories.find(c => c.id === exercise?.categoryId);
-                    const categoryColor = getCategoryColor(
-                      categories.findIndex(cat => cat.id === exercise?.categoryId)
-                    );
-                    
-                    return (
-                      <div 
-                        key={log.id} 
-                        className="p-4 cursor-pointer transition-all duration-200 group hover:bg-muted/50"
-                        onClick={() => exercise && handleExerciseClick(exercise.id)}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1 min-w-0 pr-3">
-                            <div className="flex items-start justify-between mb-2">
-                              <h4 className="font-semibold text-foreground text-base leading-tight">
-                                {exercise?.name || 'Unknown Exercise'}
-                              </h4>
-                              <div className="text-right flex-shrink-0">
-                                <p className="font-bold text-lg text-foreground">{log.weight} lbs</p>
-                              </div>
-                            </div>
-                            
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Clock className="w-3 h-3" />
-                                <span>{format(new Date(log.timestamp), 'MMM d, yyyy')}</span>
-                              </div>
-                              
-                              {/* eslint-disable-next-line */}
-                              <div 
-                                className="category-badge text-xs"
-                                style={{ 
-                                  '--category-color': categoryColor,
-                                  '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
-                                } as React.CSSProperties}
-                              >
-                                {category?.name || 'Uncategorized'}
-                              </div>
-                            </div>
-                            
-                            {log.note && (
-                              <p className="text-xs text-muted-foreground mt-2 line-clamp-1">{log.note}</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="p-12 text-center">
-                  <Clock className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-muted-foreground mb-2">No Recent Workouts</h3>
-                  <p className="text-muted-foreground">Start your fitness journey by logging your first workout!</p>
-                </div>
-              )}
-            </div>
-          </div>
         </div>
-      </>
+      </div>
     </Layout>
   );
 };

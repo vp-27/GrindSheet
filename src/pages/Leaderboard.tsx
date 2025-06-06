@@ -42,7 +42,7 @@ const Leaderboard: React.FC = () => {
   const { profile } = useAuth();
   const { categories, exercises, exerciseLogs } = useAppContext();
   
-  const [leaderboardType, setLeaderboardType] = useState<LeaderboardType>(LeaderboardType.OVERALL_PROGRESS);
+  const [leaderboardType, setLeaderboardType] = useState<LeaderboardType>(LeaderboardType.EXERCISE_PR);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [selectedExerciseId, setSelectedExerciseId] = useState<string>('all');
   const [users, setUsers] = useState<any[]>([]);
@@ -439,6 +439,15 @@ const Leaderboard: React.FC = () => {
           {/* Leaderboard Type Selector */}
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             <Button
+              variant={leaderboardType === LeaderboardType.EXERCISE_PR ? "default" : "outline"}
+              size="sm"
+              onClick={() => setLeaderboardType(LeaderboardType.EXERCISE_PR)}
+              className="rounded-2xl px-4 py-2 font-medium whitespace-nowrap transition-all duration-300"
+            >
+              <Trophy className="h-4 w-4 mr-2" />
+              PRs
+            </Button>
+            <Button
               variant={leaderboardType === LeaderboardType.OVERALL_PROGRESS ? "default" : "outline"}
               size="sm"
               onClick={() => setLeaderboardType(LeaderboardType.OVERALL_PROGRESS)}
@@ -455,15 +464,6 @@ const Leaderboard: React.FC = () => {
             >
               <Zap className="h-4 w-4 mr-2" />
               Recent
-            </Button>
-            <Button
-              variant={leaderboardType === LeaderboardType.EXERCISE_PR ? "default" : "outline"}
-              size="sm"
-              onClick={() => setLeaderboardType(LeaderboardType.EXERCISE_PR)}
-              className="rounded-2xl px-4 py-2 font-medium whitespace-nowrap transition-all duration-300"
-            >
-              <Trophy className="h-4 w-4 mr-2" />
-              PRs
             </Button>
             <Button
               variant={leaderboardType === LeaderboardType.CONSISTENCY ? "default" : "outline"}
