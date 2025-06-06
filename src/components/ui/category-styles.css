@@ -49,6 +49,30 @@
   box-shadow: 0 4px 12px rgba(var(--category-color-rgb), 0.3);
 }
 
+/* Styles for the "All" filter button */
+.all-button-selected {
+  color: white !important;
+  background-color: hsl(var(--foreground)) !important; /* Using a neutral color from theme */
+  border-color: transparent !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.all-button-selected:hover {
+  background-color: hsl(var(--foreground) / 0.9) !important; /* Slightly lighter on hover */
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.all-button-unselected {
+  background-color: hsl(var(--card)) !important; /* Using card background for unselected */
+  color: hsl(var(--foreground)) !important;
+  border-color: hsl(var(--border)) !important;
+}
+
+.all-button-unselected:hover {
+  background-color: hsl(var(--muted)) !important; /* Muted background on hover */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
 /* Category header badge styles */
 .category-header-badge {
   font-size: 0.75rem;

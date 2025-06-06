@@ -151,13 +151,13 @@ const Dashboard = () => {
           <div className="relative">
             <div className="flex gap-3 overflow-x-auto pb-2 px-1 py-2 scrollbar-hide">
               <Button
-                variant={selectedCategoryId === null ? "default" : "outline"}
+                variant="outline"
                 size="sm"
                 onClick={() => setSelectedCategoryId(null)}
-                className={`rounded-2xl px-6 py-3 font-medium transition-all duration-300 whitespace-nowrap ${
+                className={`rounded-2xl px-6 py-3 font-medium transition-all duration-300 whitespace-nowrap transform hover:scale-105 ${
                   selectedCategoryId === null 
-                    ? 'bg-black text-white shadow-lg hover:shadow-xl transform hover:scale-105 hover:bg-gray-800' 
-                    : 'bg-card border-border hover:shadow-md'
+                    ? 'all-button-selected' 
+                    : 'all-button-unselected'
                 }`}
               >
                 All
