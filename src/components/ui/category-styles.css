@@ -447,3 +447,8 @@
   font-weight: 700;
   margin-bottom: 1rem;
 }
+
+/* Category-colored chart title */
+.category-title {
+  color: var(--category-color) !important;
+}

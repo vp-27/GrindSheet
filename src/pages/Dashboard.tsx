@@ -149,7 +149,13 @@ const Dashboard = () => {
           {/* Progress Chart Section - Embedded in background */}
           <div className="relative -mx-4 px-4">
             <div className="mb-6">
-              <h2 className="text-xl font-bold text-foreground mb-2">
+              <h2 
+                className={`text-xl font-bold mb-2 ${selectedCategoryId ? 'category-title' : 'text-foreground'}`}
+                style={selectedCategoryColor ? {
+                  '--category-color': selectedCategoryColor,
+                  color: 'var(--category-color)'
+                } as React.CSSProperties : undefined}
+              >
                 {selectedCategoryId ? 
                   `${categories.find(c => c.id === selectedCategoryId)?.name} Progress` : 
                   "Overall Progress"
