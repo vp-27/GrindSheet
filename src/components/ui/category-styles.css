@@ -302,3 +302,114 @@
   border: 2px solid white;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
+
+/* Apple Health-style progress cards */
+.apple-health-card {
+  position: relative;
+  background-color: hsl(var(--card));
+  border-radius: 1rem;
+  border: 1px solid hsl(var(--border));
+  padding: 1rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.apple-health-card:hover {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
+}
+
+.apple-health-card-title {
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  color: var(--category-color);
+  flex: 1;
+  min-width: 0;
+  padding-right: 0.5rem;
+}
+
+.apple-health-card-time {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.apple-health-card-time-text {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.apple-health-card-arrow {
+  width: 0.75rem;
+  height: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.apple-health-mini-chart {
+  margin-bottom: 1rem;
+  height: 3rem;
+  position: relative;
+  width: 100%;
+}
+
+.apple-health-mini-chart-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.apple-health-weight-display {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+
+.apple-health-weight-unit {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.apple-health-progress-badge {
+  display: flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.apple-health-progress-badge.positive {
+  color: rgb(5 150 105);
+  background-color: rgb(236 253 245);
+}
+
+.apple-health-progress-badge.negative {
+  color: rgb(239 68 68);
+  background-color: rgb(254 242 242);
+}
+
+.apple-health-pr-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background-color: rgb(254 243 199);
+  color: rgb(180 83 9);
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.apple-health-pr-badge-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+}

@@ -136,6 +136,7 @@ const Dashboard = () => {
       <div className="relative">
         {/* Subtle bottom category tinting */}
         {selectedCategoryColor && (
+          // eslint-disable-next-line
           <div 
             className="fixed inset-0 pointer-events-none z-0"
             style={{
@@ -272,71 +273,138 @@ const Dashboard = () => {
                                         progress.previousWeight && 
                                         progress.currentWeight > progress.previousWeight;
                 
+                // Format last activity time
+                const lastLogDate = new Date(progress.lastLogTimestamp);
+                const now = new Date();
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+                const logDate = new Date(lastLogDate.getFullYear(), lastLogDate.getMonth(), lastLogDate.getDate());
+                
+                let timeDisplay = '';
+                if (logDate.getTime() === today.getTime()) {
+                  timeDisplay = format(lastLogDate, 'h:mm a');
+                } else if (logDate.getTime() === yesterday.getTime()) {
+                  timeDisplay = 'Yesterday';
+                } else {
+                  timeDisplay = format(lastLogDate, 'MMM d');
+                }
+                
+                // Create mini chart data (last 5 data points)
+                const exerciseLogsForThis = exerciseLogs
+                  .filter(log => log.exerciseId === progress.exercise.id)
+                  .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+                  .slice(-5);
+                
+                const miniChartData = exerciseLogsForThis.map(log => ({
+                  weight: log.weight,
+                  timestamp: log.timestamp
+                }));
+                
                 return (
                   <div 
                     key={progress.exercise.id}
                     className="group cursor-pointer"
                     onClick={() => handleExerciseClick(progress.exercise.id)}
                   >
-                    {/* Main card */}
-                    <div className="relative bg-card rounded-2xl border border-border p-4 shadow-sm group-hover:shadow-lg transition-all duration-300 group-hover:-translate-y-1">
-                      {/* Top row: Exercise name + Current weight */}
-                      <div className="flex items-start justify-between mb-3">
-                        <h3 className="font-semibold text-foreground text-lg leading-tight flex-1 min-w-0 pr-2">
+                    {/* Apple Health Style Card */}
+                    {/* eslint-disable-next-line */}
+                    <div 
+                      className="apple-health-card"
+                      style={{
+                        '--category-color': categoryColor,
+                        '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
+                      } as React.CSSProperties}
+                    >
+                      {/* Top row: Category-colored exercise name + Time with arrow */}
+                      <div className="flex items-start justify-between mb-4">
+                        <h3 className="apple-health-card-title">
                           {progress.exercise.name}
                         </h3>
-                        <div className="text-right flex-shrink-0">
-                          <p className="text-2xl font-bold text-foreground">{progress.currentWeight} lbs</p>
+                        <div className="apple-health-card-time">
+                          <span className="apple-health-card-time-text">{timeDisplay}</span>
+                          <ArrowUpRight className="apple-health-card-arrow" />
                         </div>
                       </div>
 
-                      {/* Second row: Previous weight + Progress % and PR */}
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="text-sm text-muted-foreground">
-                          {progress.previousWeight ? `Previous: ${progress.previousWeight} lbs` : 'First log'}
+                      {/* Mini Progress Chart */}
+                      <div className="apple-health-mini-chart">
+                        {miniChartData.length > 1 ? (
+                          <div className="w-full h-full relative">
+                            <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+                              <defs>
+                                <linearGradient id={`gradient-${progress.exercise.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
+                                  {/* eslint-disable-next-line */}
+                                  <stop offset="0%" style={{ stopColor: categoryColor, stopOpacity: 0.3 }} />
+                                  {/* eslint-disable-next-line */}
+                                  <stop offset="100%" style={{ stopColor: categoryColor, stopOpacity: 0.05 }} />
+                                </linearGradient>
+                              </defs>
+                              {/* Create path for the mini chart */}
+                              {(() => {
+                                const maxWeight = Math.max(...miniChartData.map(d => d.weight));
+                                const minWeight = Math.min(...miniChartData.map(d => d.weight));
+                                const weightRange = maxWeight - minWeight || 1;
+                                
+                                const points = miniChartData.map((data, i) => {
+                                  const x = (i / (miniChartData.length - 1)) * 100;
+                                  const y = 35 - ((data.weight - minWeight) / weightRange) * 30;
+                                  return `${x},${y}`;
+                                }).join(' ');
+                                
+                                const pathD = `M ${points.split(' ').map((point, i) => 
+                                  i === 0 ? `M ${point}` : `L ${point}`
+                                ).join(' ')}`;
+                                
+                                const fillPath = `${pathD} L 100,35 L 0,35 Z`;
+                                
+                                return (
+                                  <>
+                                    <path
+                                      d={fillPath}
+                                      fill={`url(#gradient-${progress.exercise.id})`}
+                                    />
+                                    {/* eslint-disable-next-line */}
+                                    <path
+                                      d={pathD}
+                                      fill="none"
+                                      stroke={categoryColor}
+                                      strokeWidth="1.5"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </>
+                                );
+                              })()}
+                            </svg>
+                          </div>
+                        ) : (
+                          <div className="apple-health-mini-chart-placeholder">
+                            No trend data
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Bottom row: Current weight and stats */}
+                      <div className="flex items-end justify-between">
+                        <div>
+                          <p className="apple-health-weight-display">{progress.currentWeight}</p>
+                          <p className="apple-health-weight-unit">lbs</p>
                         </div>
+                        
                         <div className="flex items-center gap-2">
-                          {progress.percentGainFromPrevious !== undefined && (
-                            <div className={`flex items-center text-sm font-medium ${
-                              progress.percentGainFromPrevious > 0 
-                                ? "text-emerald-600" 
-                                : "text-red-500"
+                          {progress.percentGainFromPrevious !== undefined && progress.percentGainFromPrevious !== 0 && (
+                            <div className={`apple-health-progress-badge ${
+                              progress.percentGainFromPrevious > 0 ? 'positive' : 'negative'
                             }`}>
-                              {progress.percentGainFromPrevious > 0 ? (
-                                <>
-                                  <ArrowUpRight className="h-3 w-3 mr-1" />
-                                  +{progress.percentGainFromPrevious.toFixed(1)}%
-                                </>
-                              ) : progress.percentGainFromPrevious < 0 ? (
-                                <>
-                                  <ArrowUpRight className="h-3 w-3 mr-1 transform rotate-90" />
-                                  {progress.percentGainFromPrevious.toFixed(1)}%
-                                </>
-                              ) : (
-                                '0%'
-                              )}
+                              {progress.percentGainFromPrevious > 0 ? '+' : ''}{progress.percentGainFromPrevious.toFixed(1)}%
                             </div>
                           )}
                           {isPersonalRecord && (
-                            <div className="flex items-center gap-1 bg-amber-50 text-amber-700 px-2 py-1 rounded-lg text-xs font-medium">
-                              <Trophy className="w-3 h-3" />
+                            <div className="apple-health-pr-badge">
+                              <Trophy className="apple-health-pr-badge-icon" />
                               PR
                             </div>
                           )}
-                        </div>
-                      </div>
-
-                      {/* Category badge */}
-                      <div className="flex justify-start">
-                        {/* eslint-disable-next-line */}
-                        <div 
-                          className="category-badge text-xs"
-                          style={{ 
-                            '--category-color': categoryColor,
-                            '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
-                          } as React.CSSProperties}
-                        >
-                          {categories.find(cat => cat.id === progress.exercise.categoryId)?.name}
                         </div>
                       </div>
                     </div>
