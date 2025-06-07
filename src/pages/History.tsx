@@ -1,9 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { format } from 'date-fns';
 import Layout from '@/components/Layout';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, Pencil, Trash2, Activity, Clock } from 'lucide-react';
+import ExerciseLogCard from '@/components/ExerciseLogCard';
+import { Calendar, Activity, Pencil, Trash2, Clock } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,6 +12,7 @@ import { useAppContext } from '@/context/useAppContext';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
+import '@/components/ui/category-styles.css';
 
 const History = () => {
   const { exerciseLogs, exercises, categories, updateExerciseLog, deleteExerciseLog } = useAppContext();
@@ -176,88 +176,28 @@ const History = () => {
                   </h2>
                 </div>
               </div>
-              
-              {/* Day's Workouts Container */}
-              <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
-                <div className="divide-y divide-border">
-                  {dayLogs.map((log, index) => {
-                    const exerciseName = getExerciseName(log.exerciseId);
-                    const category = getCategoryForExercise(log.exerciseId);
-                    const categoryIndex = categories.findIndex(cat => cat.id === category?.id);
-                    const categoryColor = categoryIndex >= 0 ? getCategoryColor(categoryIndex) : '#10b981';
-                    
-                    return (
-                      <div 
-                        key={log.id} 
-                        className="p-5 group transition-all duration-200 hover:bg-muted/20 active:bg-muted/30"
-                      >
-                        <div className="flex justify-between items-start gap-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h3 className="font-semibold text-foreground truncate">{exerciseName}</h3>
-                              {category && (
-                                <div 
-                                  className="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs font-medium flex-shrink-0"
-                                  style={{ 
-                                    // eslint-disable-next-line
-                                    backgroundColor: `${categoryColor}15`,
-                                    // eslint-disable-next-line
-                                    color: categoryColor,
-                                    // eslint-disable-next-line
-                                    border: `1px solid ${categoryColor}25`
-                                  }}
-                                >
-                                  {category.name}
-                                </div>
-                              )}
-                            </div>
-                            
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                              <Clock className="w-3 h-3 flex-shrink-0" />
-                              <span>{format(new Date(log.timestamp), 'h:mm a')}</span>
-                            </div>
-                            
-                            {log.note && (
-                              <div className="text-sm text-muted-foreground p-3 bg-muted/40 rounded-xl border border-border/50">
-                                {log.note}
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="flex items-start gap-3 flex-shrink-0">
-                            {/* Weight Display */}
-                            <div className="text-right">
-                              <p className="text-xl font-bold text-foreground">{log.weight}</p>
-                              <p className="text-xs text-muted-foreground">lbs</p>
-                            </div>
-                            
-                            {/* Action Buttons - Vertical alignment */}
-                            <div className="flex flex-col gap-2">
-                              <Button 
-                                variant="outline" 
-                                size="icon"
-                                className="h-9 w-9 rounded-lg border-border/50 hover:bg-muted hover:border-primary/30 transition-all duration-200 shadow-sm" 
-                                onClick={() => openEditDialog(log)}
-                                aria-label="Edit exercise log"
-                              >
-                                <Pencil className="h-3.5 w-3.5" />
-                              </Button>
-                              <Button 
-                                variant="outline" 
-                                size="icon"
-                                className="h-9 w-9 rounded-lg border-border/50 text-red-500 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-all duration-200 shadow-sm" 
-                                onClick={() => handleDelete(log.id)}
-                                aria-label="Delete exercise log"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
+               {/* Day's Workouts Container */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {dayLogs.map((log, index) => {
+                  const exerciseName = getExerciseName(log.exerciseId);
+                  const category = getCategoryForExercise(log.exerciseId);
+                  const categoryIndex = categories.findIndex(cat => cat.id === category?.id);
+                  const categoryColor = categoryIndex >= 0 ? getCategoryColor(categoryIndex) : '#10b981';
+                  
+                  return (
+                    <ExerciseLogCard
+                      key={log.id}
+                      log={log}
+                      exerciseName={exerciseName}
+                      category={category}
+                      categoryColor={categoryColor}
+                      showExerciseName={true}
+                      showDate={true}
+                      onEdit={openEditDialog}
+                      onDelete={handleDelete}
+                    />
+                  );
+                })}
               </div>
             </div>
           );

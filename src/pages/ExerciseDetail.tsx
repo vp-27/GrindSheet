@@ -1,20 +1,20 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import ExerciseLogCard from '@/components/ExerciseLogCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useAppContext } from '@/context/useAppContext';
 import { useAuth } from '@/context/AuthContext';
-import { ChevronLeft, Trophy, TrendingUp, Clock, Activity, Pencil, Trash2 } from 'lucide-react';
+import { Trophy, TrendingUp, Clock, Activity, Pencil, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import { getProgressChartData, calculateProgress } from '@/utils/progressUtils';
-import { getCategoryColors, getCategoryKeyByName } from '@/utils/categoryColors';
+import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
 import '@/components/ui/category-styles.css';
 
 const ExerciseDetail = () => {
@@ -453,62 +453,24 @@ const ExerciseDetail = () => {
           </div>
           
           {filteredLogs.length > 0 ? (
-            <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
-              <div className="divide-y divide-border">
-                {filteredLogs.slice(0, 5).map(log => {
-                  return (
-                    <div 
-                      key={log.id} 
-                      className="p-5 group transition-all duration-200 hover:bg-muted/20 active:bg-muted/30"
-                    >
-                      <div className="flex justify-between items-start gap-4">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
-                            <Clock className="w-3 h-3 flex-shrink-0" />
-                            <span>{format(new Date(log.timestamp), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}</span>
-                          </div>
-                          
-                          {log.note && (
-                            <div className="text-sm text-muted-foreground p-3 bg-muted/40 rounded-xl border border-border/50">
-                              {log.note}
-                            </div>
-                          )}
-                        </div>
-                        
-                        <div className="flex items-start gap-3 flex-shrink-0">
-                          {/* Weight Display */}
-                          <div className="text-right">
-                            <p className="text-xl font-bold text-foreground">{log.weight}</p>
-                            <p className="text-xs text-muted-foreground">lbs</p>
-                          </div>
-                          
-                          {/* Action Buttons - Vertical alignment */}
-                          <div className="flex flex-col gap-2">
-                            <Button 
-                              variant="outline" 
-                              size="icon"
-                              className="h-9 w-9 rounded-lg border-border/50 hover:bg-muted hover:border-primary/30 transition-all duration-200 shadow-sm" 
-                              onClick={() => openEditDialog(log)}
-                              aria-label="Edit exercise log"
-                            >
-                              <Pencil className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="icon"
-                              className="h-9 w-9 rounded-lg border-border/50 text-red-500 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-all duration-200 shadow-sm" 
-                              onClick={() => handleDelete(log.id)}
-                              aria-label="Delete exercise log"
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {filteredLogs.slice(0, 6).map(log => {
+                const categoryIndex = categories.findIndex(cat => cat.id === category?.id);
+                const categoryColor = categoryIndex >= 0 ? getCategoryChartColors()[categoryIndex % getCategoryChartColors().length] : '#10b981';
+                
+                return (
+                  <ExerciseLogCard
+                    key={log.id}
+                    log={log}
+                    category={category}
+                    categoryColor={categoryColor}
+                    showExerciseName={false}
+                    showDate={true}
+                    onEdit={openEditDialog}
+                    onDelete={handleDelete}
+                  />
+                );
+              })}
             </div>
           ) : (
             <div className="backdrop-blur-sm bg-card/90 rounded-2xl border p-12 text-center shadow-sm">
