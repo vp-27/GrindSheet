@@ -253,7 +253,7 @@ const ExerciseDetail = () => {
   }, [category, categoryColors]);
 
   return (
-    <Layout title={exercise.name}>
+    <Layout title={exercise.name} categoryColor={categoryColors?.primary}>
       {/* Subtle bottom category tinting */}
       {selectedCategoryColor && (
         <div 

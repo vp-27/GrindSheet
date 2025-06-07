@@ -439,3 +439,11 @@
 .apple-health-card.compact .apple-health-card-title {
   margin-bottom: 0.5rem;
 }
+
+/* Category-colored exercise title */
+.category-exercise-title {
+  color: var(--category-color) !important;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}

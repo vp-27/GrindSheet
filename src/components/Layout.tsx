@@ -15,13 +15,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import '@/components/ui/category-styles.css';
 
 interface LayoutProps {
   children: React.ReactNode;
   title?: string;
+  categoryColor?: string;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children, title }) => {
+const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor }) => {
   const { profile, signOut } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const navigate = useNavigate();
@@ -34,7 +36,12 @@ const Layout: React.FC<LayoutProps> = ({ children, title }) => {
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Minimal header */}
       <header className="p-4 flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-foreground">
+        <h1 
+          className={categoryColor ? "category-exercise-title" : "text-3xl font-bold text-foreground"}
+          style={categoryColor ? {
+            '--category-color': categoryColor
+          } as React.CSSProperties : undefined}
+        >
           {title || "Home"}
         </h1>
         <Button variant="ghost" className="p-0 h-auto" onClick={() => navigate('/settings')}>
