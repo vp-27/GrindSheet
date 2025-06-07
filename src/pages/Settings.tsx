@@ -11,8 +11,10 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
+
 import { ChevronRight, Edit2, Plus, Trash2, Pencil, LogOut, Folder, Palette, Dumbbell, Sun, Moon, Monitor } from 'lucide-react';
 import { getCategoryColors, getCategoryKeyByName } from '@/utils/categoryColors';
+import { CategoryDialog, ExerciseDialog } from '@/components/ui/shared-dialogs';
 import '@/components/ui/color-indicator.css';
 
 const Settings: React.FC = () => {
@@ -42,21 +44,6 @@ const Settings: React.FC = () => {
       name: '',
       username: '',
       avatarUrl: '',
-    }
-  });
-
-  const categoryForm = useForm({
-    defaultValues: {
-      name: '',
-      description: '',
-    }
-  });
-  
-  const exerciseForm = useForm({
-    defaultValues: {
-      name: '',
-      description: '',
-      categoryId: '',
     }
   });
 
@@ -189,151 +176,17 @@ const Settings: React.FC = () => {
     }
   };
 
-  const handleAddCategory = async (data) => {
-    try {
-      let response;
-      
-      if (editingCategory) {
-        // Update existing category
-        response = await supabase
-          .from('categories')
-          .update({
-            name: data.name,
-            description: data.description,
-          })
-          .eq('id', editingCategory.id)
-          .select();
-      } else {
-        // Insert new category (global for all users)
-        response = await supabase
-          .from('categories')
-          .insert({
-            name: data.name,
-            description: data.description,
-          })
-          .select();
-      }
-      
-      if (response.error) throw response.error;
-      
-      // Refresh categories - get all categories
-      const { data: refreshedCategories } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name');
-        
-      setCategories(refreshedCategories || []);
-      
-      // Refresh exercises for consistency
-      const { data: refreshedExercises } = await supabase
-        .from('exercises')
-        .select('*')
-        .order('name');
-        
-      // Refresh deletable items
-      await checkDeletableItems(refreshedCategories || [], refreshedExercises || []);
-      
-      toast({
-        title: editingCategory ? 'Category updated' : 'Category added',
-        description: editingCategory 
-          ? 'Your category has been updated successfully.' 
-          : 'Your new category has been added successfully.',
-      });
-      
-      categoryForm.reset({ name: '', description: '' });
-      setIsAddCategoryOpen(false);
-      setEditingCategory(null);
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error.message || 'An error occurred.',
-        variant: 'destructive',
-      });
-    }
-  };
 
-  const handleAddExercise = async (data) => {
-    try {
-      let response;
-      
-      if (editingExercise) {
-        // Update existing exercise
-        response = await supabase
-          .from('exercises')
-          .update({
-            name: data.name,
-            description: data.description,
-            category_id: data.categoryId,
-          })
-          .eq('id', editingExercise.id)
-          .select();
-      } else {
-        // Insert new exercise
-        response = await supabase
-          .from('exercises')
-          .insert({
-            user_id: user?.id,
-            name: data.name,
-            description: data.description,
-            category_id: data.categoryId,
-          })
-          .select();
-      }
-      
-      if (response.error) throw response.error;
-      
-      // Refresh exercises - get all exercises
-      const { data: refreshedExercises } = await supabase
-        .from('exercises')
-        .select('*')
-        .order('name');
-        
-      setExercises(refreshedExercises || []);
-      
-      // Refresh categories for consistency
-      const { data: refreshedCategories } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name');
-        
-      // Refresh deletable items
-      await checkDeletableItems(refreshedCategories || [], refreshedExercises || []);
-      
-      toast({
-        title: editingExercise ? 'Exercise updated' : 'Exercise added',
-        description: editingExercise 
-          ? 'Your exercise has been updated successfully.' 
-          : 'Your new exercise has been added successfully.',
-      });
-      
-      exerciseForm.reset({ name: '', description: '', categoryId: '' });
-      setIsAddExerciseOpen(false);
-      setEditingExercise(null);
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: error.message || 'An error occurred.',
-        variant: 'destructive',
-      });
-    }
-  };
+
+
 
   const handleEditCategory = (category) => {
     setEditingCategory(category);
-    categoryForm.reset({
-      name: category.name,
-      description: category.description || '',
-    });
     setIsAddCategoryOpen(true);
   };
 
   const handleEditExercise = (exercise) => {
     setEditingExercise(exercise);
-    exerciseForm.reset({
-      name: exercise.name,
-      description: exercise.description || '',
-      categoryId: exercise.category_id,
-    });
     setIsAddExerciseOpen(true);
   };
 
@@ -605,7 +458,6 @@ const Settings: React.FC = () => {
               <Button 
                 onClick={() => {
                   setEditingCategory(null);
-                  categoryForm.reset({ name: '', description: '' });
                   setIsAddCategoryOpen(true);
                 }}
                 className="h-10 px-4 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200 flex-shrink-0"
@@ -711,7 +563,6 @@ const Settings: React.FC = () => {
               <Button 
                 onClick={() => {
                   setEditingExercise(null);
-                  exerciseForm.reset({ name: '', description: '', categoryId: '' });
                   setIsAddExerciseOpen(true);
                 }}
                 className="h-10 px-4 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200 flex-shrink-0"
@@ -823,116 +674,56 @@ const Settings: React.FC = () => {
         </div>
       </div>
 
-      {/* Modals for editing exercises and categories */}
-      <Dialog open={isAddExerciseOpen} onOpenChange={setIsAddExerciseOpen}>
-        <DialogContent className="sm:max-w-[425px] rounded-2xl backdrop-blur-sm bg-card/95 border-border/50">
-          <form onSubmit={exerciseForm.handleSubmit(handleAddExercise)}>
-            <DialogHeader>
-              <DialogTitle className="text-foreground">{editingExercise ? 'Edit Exercise' : 'Add New Exercise'}</DialogTitle>
-              <DialogDescription className="text-muted-foreground">
-                {editingExercise 
-                  ? 'Update the exercise details below' 
-                  : 'Add a new exercise to track your progress'}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium text-foreground">Name</Label>
-                <Input
-                  id="name"
-                  value={exerciseForm.watch('name')}
-                  onChange={(e) => exerciseForm.setValue('name', e.target.value)}
-                  className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0"
-                  placeholder="Bench Press"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description" className="text-sm font-medium text-foreground">Description (Optional)</Label>
-                <Input
-                  id="description"
-                  value={exerciseForm.watch('description')}
-                  onChange={(e) => exerciseForm.setValue('description', e.target.value)}
-                  className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0"
-                  placeholder="Barbell bench press"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="category" className="text-sm font-medium text-foreground">Category</Label>
-                <select
-                  id="category"
-                  title="Select exercise category"
-                  value={exerciseForm.watch('categoryId')}
-                  onChange={(e) => exerciseForm.setValue('categoryId', e.target.value)}
-                  className="w-full p-2.5 border border-border/60 rounded-xl text-sm focus:outline-none bg-background/80 text-foreground focus:border-primary"
-                  required
-                >
-                  <option value="">Select a category</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button 
-                type="submit" 
-                className="w-full h-11 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
-              >
-                {editingExercise ? 'Update Exercise' : 'Add Exercise'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      {/* Use shared dialog components */}
+      <ExerciseDialog
+        isOpen={isAddExerciseOpen}
+        onOpenChange={setIsAddExerciseOpen}
+        editingExercise={editingExercise}
+        categories={categories}
+        onSuccess={(exercise) => {
+          // Refresh exercises
+          const fetchExercises = async () => {
+            const { data: refreshedExercises } = await supabase
+              .from('exercises')
+              .select('*')
+              .order('name');
+            setExercises(refreshedExercises || []);
+            
+            const { data: refreshedCategories } = await supabase
+              .from('categories')
+              .select('*')
+              .order('name');
+            await checkDeletableItems(refreshedCategories || [], refreshedExercises || []);
+          };
+          fetchExercises();
+          setEditingExercise(null);
+        }}
+      />
       
-      <Dialog open={isAddCategoryOpen} onOpenChange={setIsAddCategoryOpen}>
-        <DialogContent className="sm:max-w-[425px] rounded-2xl backdrop-blur-sm bg-card/95 border-border/50">
-          <form onSubmit={categoryForm.handleSubmit(handleAddCategory)}>
-            <DialogHeader>
-              <DialogTitle className="text-foreground">{editingCategory ? 'Edit Category' : 'Add New Category'}</DialogTitle>
-              <DialogDescription className="text-muted-foreground">
-                {editingCategory 
-                  ? 'Update the category details below' 
-                  : 'Create a new category for organizing exercises'}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm font-medium text-foreground">Name</Label>
-                <Input
-                  id="name"
-                  value={categoryForm.watch('name')}
-                  onChange={(e) => categoryForm.setValue('name', e.target.value)}
-                  className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0"
-                  placeholder="Chest"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="description" className="text-sm font-medium text-foreground">Description (Optional)</Label>
-                <Input
-                  id="description"
-                  value={categoryForm.watch('description')}
-                  onChange={(e) => categoryForm.setValue('description', e.target.value)}
-                  className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0"
-                  placeholder="Chest exercises"
-                />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button 
-                type="submit" 
-                className="w-full h-11 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
-              >
-                {editingCategory ? 'Update Category' : 'Add Category'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <CategoryDialog
+        isOpen={isAddCategoryOpen}
+        onOpenChange={setIsAddCategoryOpen}
+        editingCategory={editingCategory}
+        categories={categories}
+        onSuccess={(category) => {
+          // Refresh categories
+          const fetchCategories = async () => {
+            const { data: refreshedCategories } = await supabase
+              .from('categories')
+              .select('*')
+              .order('name');
+            setCategories(refreshedCategories || []);
+            
+            const { data: refreshedExercises } = await supabase
+              .from('exercises')
+              .select('*')
+              .order('name');
+            await checkDeletableItems(refreshedCategories || [], refreshedExercises || []);
+          };
+          fetchCategories();
+          setEditingCategory(null);
+        }}
+      />
     </Layout>
   );
 };
