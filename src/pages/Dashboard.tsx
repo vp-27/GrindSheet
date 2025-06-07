@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAppContext } from '@/context/useAppContext';
 import { calculateProgress, getOverallProgressChartData, getExerciseProgressChartData } from '@/utils/progressUtils';
-import { TrendingUp, Clock, Trophy, ArrowUpRight, Activity, Zap } from 'lucide-react';
+import { TrendingUp, Clock, Trophy, ChevronRight, Activity, Zap } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
@@ -328,7 +328,7 @@ const Dashboard = () => {
                         </h3>
                         <div className="apple-health-card-time">
                           <span className="apple-health-card-time-text">{timeDisplay}</span>
-                          <ArrowUpRight className="apple-health-card-arrow" />
+                          <ChevronRight className="apple-health-card-arrow" />
                         </div>
                       </div>
 
