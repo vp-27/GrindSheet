@@ -309,14 +309,14 @@ const Dashboard = () => {
                     {/* Apple Health Style Card */}
                     {/* eslint-disable-next-line */}
                     <div 
-                      className="apple-health-card"
+                      className={`apple-health-card ${miniChartData.length <= 1 ? 'compact' : ''}`}
                       style={{
                         '--category-color': categoryColor,
                         '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
                       } as React.CSSProperties}
                     >
                       {/* Top row: Category-colored exercise name + Time with arrow */}
-                      <div className="flex items-start justify-between mb-4">
+                      <div className={`flex items-start justify-between ${miniChartData.length <= 1 ? 'mb-6' : 'mb-4'}`}>
                         <h3 className="apple-health-card-title">
                           {progress.exercise.name}
                         </h3>
@@ -326,11 +326,11 @@ const Dashboard = () => {
                         </div>
                       </div>
 
-                      {/* Mini Progress Chart */}
-                      <div className="apple-health-mini-chart">
-                        {miniChartData.length > 1 ? (
+                      {/* Mini Progress Chart - Only show if we have trend data */}
+                      {miniChartData.length > 1 && (
+                        <div className="apple-health-mini-chart">
                           <div className="w-full h-full relative">
-                            <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+                            <svg className="w-full h-full" viewBox="0 0 100 24" preserveAspectRatio="none">
                               <defs>
                                 <linearGradient id={`gradient-${progress.exercise.id}`} x1="0%" y1="0%" x2="0%" y2="100%">
                                   {/* eslint-disable-next-line */}
@@ -347,7 +347,7 @@ const Dashboard = () => {
                                 
                                 const points = miniChartData.map((data, i) => {
                                   const x = (i / (miniChartData.length - 1)) * 100;
-                                  const y = 35 - ((data.weight - minWeight) / weightRange) * 30;
+                                  const y = 20 - ((data.weight - minWeight) / weightRange) * 16;
                                   return `${x},${y}`;
                                 }).join(' ');
                                 
@@ -355,7 +355,7 @@ const Dashboard = () => {
                                   i === 0 ? `M ${point}` : `L ${point}`
                                 ).join(' ')}`;
                                 
-                                const fillPath = `${pathD} L 100,35 L 0,35 Z`;
+                                const fillPath = `${pathD} L 100,20 L 0,20 Z`;
                                 
                                 return (
                                   <>
@@ -377,12 +377,8 @@ const Dashboard = () => {
                               })()}
                             </svg>
                           </div>
-                        ) : (
-                          <div className="apple-health-mini-chart-placeholder">
-                            No trend data
-                          </div>
-                        )}
-                      </div>
+                        </div>
+                      )}
 
                       {/* Bottom row: Current weight and stats */}
                       <div className="flex items-end justify-between">
@@ -403,6 +399,12 @@ const Dashboard = () => {
                             <div className="apple-health-pr-badge">
                               <Trophy className="apple-health-pr-badge-icon" />
                               PR
+                            </div>
+                          )}
+                          {miniChartData.length === 1 && (
+                            <div className="apple-health-first-log-badge">
+                              <Clock className="apple-health-first-log-badge-icon" />
+                              First log
                             </div>
                           )}
                         </div>
