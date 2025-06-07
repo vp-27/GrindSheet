@@ -1,12 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Dumbbell } from 'lucide-react';
+import { Dumbbell, Plus } from 'lucide-react';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { 
   Select,
@@ -17,11 +18,13 @@ import {
 } from '@/components/ui/select';
 import { useAppContext } from '@/context/useAppContext';
 import { useAuth } from '@/context/AuthContext';
+import { useForm } from 'react-hook-form';
+import { supabase } from '@/integrations/supabase/client';
 import { getCategoryColors, getCategoryKeyByName } from '@/utils/categoryColors';
 
 const AddExercise = () => {
   const { categories, exercises, addExerciseLog } = useAppContext();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -31,14 +34,45 @@ const AddExercise = () => {
   const [note, setNote] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // New modal states
+  const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
+  const [isAddExerciseOpen, setIsAddExerciseOpen] = useState(false);
+  const [localCategories, setLocalCategories] = useState(categories);
+  const [localExercises, setLocalExercises] = useState(exercises);
+
+  // Forms for new category and exercise
+  const categoryForm = useForm({
+    defaultValues: {
+      name: '',
+      description: '',
+    }
+  });
+  
+  const exerciseForm = useForm({
+    defaultValues: {
+      name: '',
+      description: '',
+      categoryId: '',
+    }
+  });
+
+  // Update local state when context changes
+  useEffect(() => {
+    setLocalCategories(categories);
+  }, [categories]);
+
+  useEffect(() => {
+    setLocalExercises(exercises);
+  }, [exercises]);
+
   // Filter exercises based on selected category
-  const filteredExercises = exercises.filter(exercise => 
+  const filteredExercises = localExercises.filter(exercise => 
     exercise.categoryId === selectedCategoryId
   );
 
   // Get selected category and exercise for styling
-  const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
-  const selectedExercise = exercises.find(ex => ex.id === selectedExerciseId);
+  const selectedCategory = localCategories.find(cat => cat.id === selectedCategoryId);
+  const selectedExercise = localExercises.find(ex => ex.id === selectedExerciseId);
   
   // Get category colors for styling
   const categoryColors = useMemo(() => {
@@ -46,6 +80,75 @@ const AddExercise = () => {
     const categoryKey = getCategoryKeyByName(selectedCategory.name);
     return getCategoryColors(categoryKey);
   }, [selectedCategory]);
+
+  // Handler for adding new category
+  const handleAddCategory = async (data) => {
+    try {
+      const response = await supabase
+        .from('categories')
+        .insert({
+          name: data.name,
+          description: data.description,
+        })
+        .select();
+      
+      if (response.error) throw response.error;
+      
+      const newCategory = response.data[0];
+      setLocalCategories(prev => [...prev, newCategory]);
+      setSelectedCategoryId(newCategory.id); // Auto-select the new category
+      
+      toast({
+        title: 'Category added',
+        description: 'Your new category has been added successfully.',
+      });
+      
+      categoryForm.reset({ name: '', description: '' });
+      setIsAddCategoryOpen(false);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error.message || 'An error occurred.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Handler for adding new exercise
+  const handleAddExercise = async (data) => {
+    try {
+      const response = await supabase
+        .from('exercises')
+        .insert({
+          user_id: user?.id,
+          name: data.name,
+          description: data.description,
+          category_id: selectedCategoryId, // Use the selected category
+        })
+        .select();
+      
+      if (response.error) throw response.error;
+      
+      const newExercise = response.data[0];
+      const exerciseWithCategoryId = { ...newExercise, categoryId: newExercise.category_id };
+      setLocalExercises(prev => [...prev, exerciseWithCategoryId]);
+      setSelectedExerciseId(newExercise.id); // Auto-select the new exercise
+      
+      toast({
+        title: 'Exercise added',
+        description: 'Your new exercise has been added successfully.',
+      });
+      
+      exerciseForm.reset({ name: '', description: '', categoryId: '' });
+      setIsAddExerciseOpen(false);
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: error.message || 'An error occurred.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -146,11 +249,25 @@ const AddExercise = () => {
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-border/60 bg-card/95 backdrop-blur-md">
-                      {categories.map(category => (
+                      {localCategories.map(category => (
                         <SelectItem key={category.id} value={category.id} className="rounded-lg">
                           {category.name}
                         </SelectItem>
                       ))}
+                      <div className="border-t border-border/60 mt-2 pt-2">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className="w-full justify-start text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                          onClick={() => {
+                            categoryForm.reset({ name: '', description: '' });
+                            setIsAddCategoryOpen(true);
+                          }}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add New Category
+                        </Button>
+                      </div>
                     </SelectContent>
                   </Select>
                 </div>
@@ -176,15 +293,57 @@ const AddExercise = () => {
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-border/60 bg-card/95 backdrop-blur-md">
                       {filteredExercises.length > 0 ? (
-                        filteredExercises.map(exercise => (
-                          <SelectItem key={exercise.id} value={exercise.id} className="rounded-lg">
-                            {exercise.name}
-                          </SelectItem>
-                        ))
+                        <>
+                          {filteredExercises.map(exercise => (
+                            <SelectItem key={exercise.id} value={exercise.id} className="rounded-lg">
+                              {exercise.name}
+                            </SelectItem>
+                          ))}
+                          <div className="border-t border-border/60 mt-2 pt-2">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="w-full justify-start text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                              onClick={() => {
+                                exerciseForm.reset({ 
+                                  name: '', 
+                                  description: '', 
+                                  categoryId: selectedCategoryId 
+                                });
+                                setIsAddExerciseOpen(true);
+                              }}
+                            >
+                              <Plus className="h-4 w-4 mr-2" />
+                              Add New Exercise
+                            </Button>
+                          </div>
+                        </>
                       ) : (
-                        <SelectItem value="none" disabled className="rounded-lg">
-                          No exercises found
-                        </SelectItem>
+                        <>
+                          <SelectItem value="none" disabled className="rounded-lg">
+                            No exercises found
+                          </SelectItem>
+                          {selectedCategoryId && (
+                            <div className="border-t border-border/60 mt-2 pt-2">
+                              <Button
+                                type="button"
+                                variant="ghost"
+                                className="w-full justify-start text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                                onClick={() => {
+                                  exerciseForm.reset({ 
+                                    name: '', 
+                                    description: '', 
+                                    categoryId: selectedCategoryId 
+                                  });
+                                  setIsAddExerciseOpen(true);
+                                }}
+                              >
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add New Exercise
+                              </Button>
+                            </div>
+                          )}
+                        </>
                       )}
                     </SelectContent>
                   </Select>
@@ -256,6 +415,102 @@ const AddExercise = () => {
           </div>
         </div>
       </div>
+
+      {/* Add New Category Dialog */}
+      <Dialog open={isAddCategoryOpen} onOpenChange={setIsAddCategoryOpen}>
+        <DialogContent className="sm:max-w-[425px] rounded-2xl backdrop-blur-sm bg-card/95 border-border/50">
+          <form onSubmit={categoryForm.handleSubmit(handleAddCategory)}>
+            <DialogHeader>
+              <DialogTitle className="text-foreground">Add New Category</DialogTitle>
+              <DialogDescription className="text-muted-foreground">
+                Create a new category for organizing exercises
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="category-name" className="text-sm font-medium text-foreground">Name</Label>
+                <Input
+                  id="category-name"
+                  value={categoryForm.watch('name')}
+                  onChange={(e) => categoryForm.setValue('name', e.target.value)}
+                  className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0"
+                  placeholder="Chest"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="category-description" className="text-sm font-medium text-foreground">Description</Label>
+                <Input
+                  id="category-description"
+                  value={categoryForm.watch('description')}
+                  onChange={(e) => categoryForm.setValue('description', e.target.value)}
+                  className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0"
+                  placeholder="Chest exercises"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                type="submit" 
+                className="w-full h-12 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
+              >
+                Add Category
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add New Exercise Dialog */}
+      <Dialog open={isAddExerciseOpen} onOpenChange={setIsAddExerciseOpen}>
+        <DialogContent className="sm:max-w-[425px] rounded-2xl backdrop-blur-sm bg-card/95 border-border/50">
+          <form onSubmit={exerciseForm.handleSubmit(handleAddExercise)}>
+            <DialogHeader>
+              <DialogTitle className="text-foreground">Add New Exercise</DialogTitle>
+              <DialogDescription className="text-muted-foreground">
+                Add a new exercise to track your progress
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="exercise-name" className="text-sm font-medium text-foreground">Name</Label>
+                <Input
+                  id="exercise-name"
+                  value={exerciseForm.watch('name')}
+                  onChange={(e) => exerciseForm.setValue('name', e.target.value)}
+                  className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0"
+                  placeholder="Bench Press"
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="exercise-description" className="text-sm font-medium text-foreground">Description</Label>
+                <Input
+                  id="exercise-description"
+                  value={exerciseForm.watch('description')}
+                  onChange={(e) => exerciseForm.setValue('description', e.target.value)}
+                  className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0"
+                  placeholder="Barbell bench press"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-foreground">Category</Label>
+                <div className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-xl">
+                  {selectedCategory?.name || 'No category selected'}
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button 
+                type="submit" 
+                className="w-full h-12 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
+              >
+                Add Exercise
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
