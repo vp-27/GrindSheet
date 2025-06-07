@@ -16,11 +16,21 @@
   color: var(--category-color) !important;
 }
 
-.category-badge:hover {
-  /* Prevent default hover colors from showing */
-  background-color: rgba(var(--category-color-rgb), 0.15) !important;
-  border-color: rgba(var(--category-color-rgb), 0.25) !important;
-  color: var(--category-color) !important;
+/* Mobile: Use active state instead of hover for touch feedback */
+@media (hover: hover) and (pointer: fine) {
+  .category-badge:hover {
+    /* Prevent default hover colors from showing */
+    background-color: rgba(var(--category-color-rgb), 0.15) !important;
+    border-color: rgba(var(--category-color-rgb), 0.25) !important;
+    color: var(--category-color) !important;
+  }
+}
+
+.category-badge:active {
+  background-color: rgba(var(--category-color-rgb), 0.25) !important;
+  border-color: rgba(var(--category-color-rgb), 0.35) !important;
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
 }
 
 /* Category button styles for selection */
@@ -31,10 +41,25 @@
   background-color: var(--category-color) !important;
 }
 
-.category-button-selected:hover {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  background-color: var(--category-color) !important;
-  color: white !important;
+/* Desktop-only hover effects for category buttons */
+@media (hover: hover) and (pointer: fine) {
+  .category-button-selected:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    background-color: var(--category-color) !important;
+    color: white !important;
+  }
+
+  .category-button-unselected:hover {
+    background-color: var(--category-color) !important;
+    color: white !important;
+    box-shadow: 0 4px 12px rgba(var(--category-color-rgb), 0.3);
+  }
+}
+
+/* Mobile active states for category buttons */
+.category-button-selected:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
 }
 
 .category-button-unselected {
@@ -43,10 +68,10 @@
   border-color: var(--category-color) !important;
 }
 
-.category-button-unselected:hover {
-  background-color: var(--category-color) !important;
-  color: white !important;
-  box-shadow: 0 4px 12px rgba(var(--category-color-rgb), 0.3);
+.category-button-unselected:active {
+  background-color: rgba(var(--category-color-rgb), 0.2) !important;
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
 }
 
 /* Styles for the "All" filter button */
@@ -57,9 +82,17 @@
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-.all-button-selected:hover {
-  background-color: hsl(var(--foreground) / 0.9) !important; /* Slightly lighter on hover */
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+/* Desktop-only hover effects for "All" button */
+@media (hover: hover) and (pointer: fine) {
+  .all-button-selected:hover {
+    background-color: hsl(var(--foreground) / 0.9) !important; /* Slightly lighter on hover */
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+
+  .all-button-unselected:hover {
+    background-color: hsl(var(--muted)) !important; /* Muted background on hover */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
 }
 
 .all-button-unselected {
@@ -68,9 +101,28 @@
   border-color: hsl(var(--border)) !important;
 }
 
-.all-button-unselected:hover {
-  background-color: hsl(var(--muted)) !important; /* Muted background on hover */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+/* Mobile active states for "All" button */
+.all-button-selected:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+.all-button-unselected:active {
+  background-color: hsl(var(--muted)) !important;
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* Mobile active states for "All" button */
+.all-button-selected:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+.all-button-unselected:active {
+  background-color: hsl(var(--muted)) !important;
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
 }
 
 /* Category header badge styles */
@@ -134,9 +186,12 @@
   background-color: var(--category-color) !important;
 }
 
-.category-submit-button:hover {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  background-color: var(--category-color) !important;
+/* Desktop-only hover effects for category submit button */
+@media (hover: hover) and (pointer: fine) {
+  .category-submit-button:hover {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    background-color: var(--category-color) !important;
+  }
 }
 
 .category-submit-button:active {
@@ -157,8 +212,18 @@
   box-shadow: 0 4px 20px rgba(var(--category-color-rgb), 0.3);
 }
 
-.category-shadow-hover:hover {
+/* Desktop-only hover effects for category shadow */
+@media (hover: hover) and (pointer: fine) {
+  .category-shadow-hover:hover {
+    box-shadow: 0 4px 20px rgba(var(--category-color-rgb), 0.4);
+  }
+}
+
+/* Mobile active state for category shadow */
+.category-shadow-hover:active {
   box-shadow: 0 4px 20px rgba(var(--category-color-rgb), 0.4);
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
 }
 
 /* PR Overview Leaderboard Styles */
@@ -171,9 +236,26 @@
   backdrop-filter: blur(12px);
 }
 
-.pr-overview-entry:hover {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  transform: translateY(-4px);
+/* Desktop-only hover effects for PR overview entry */
+@media (hover: hover) and (pointer: fine) {
+  .pr-overview-entry:hover {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transform: translateY(-4px);
+  }
+
+  .pr-overview-entry.regular:hover {
+    background: rgba(255, 255, 255, 1);
+  }
+
+  .dark .pr-overview-entry.regular:hover {
+    background: rgba(17, 24, 39, 1);
+  }
+}
+
+/* Mobile active states for PR overview entry */
+.pr-overview-entry:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
 }
 
 .pr-overview-entry.current-user {
@@ -184,10 +266,6 @@
 .pr-overview-entry.regular {
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(229, 231, 235, 0.5);
-}
-
-.pr-overview-entry.regular:hover {
-  background: rgba(255, 255, 255, 1);
 }
 
 .dark .pr-overview-entry.regular {
@@ -213,9 +291,18 @@
   transition: all 0.3s;
 }
 
-.pr-overview-entry-clean:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transform: translateY(-2px);
+/* Desktop-only hover effects for clean entry */
+@media (hover: hover) and (pointer: fine) {
+  .pr-overview-entry-clean:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+  }
+}
+
+/* Mobile active state for clean entry */
+.pr-overview-entry-clean:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
 }
 
 /* Category badges using proper category-based colors */
@@ -316,9 +403,18 @@
   cursor: pointer;
 }
 
-.apple-health-card:hover {
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -5px rgba(0, 0, 0, 0.04);
-  transform: translateY(-2px);
+/* Desktop-only hover effects for apple health cards */
+@media (hover: hover) and (pointer: fine) {
+  .apple-health-card:hover {
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -5px rgba(0, 0, 0, 0.04);
+    transform: translateY(-2px);
+  }
+}
+
+/* Mobile active state for apple health cards */
+.apple-health-card:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
 }
 
 .apple-health-card-title {

@@ -52,7 +52,7 @@ const ThemeSelector: React.FC = () => {
                   className={`h-auto flex flex-col gap-2 p-3 ${
                     isSelected 
                       ? 'bg-primary text-primary-foreground' 
-                      : 'bg-background border-border hover:bg-muted text-foreground'
+                      : 'bg-background border-border active:bg-muted text-foreground transition-colors'
                   }`}
                   onClick={() => setTheme(themeOption.value)}
                 >

@@ -190,7 +190,7 @@ const Dashboard = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setSelectedCategoryId(null)}
-                className={`rounded-2xl px-6 py-3 font-medium transition-all duration-300 whitespace-nowrap transform hover:scale-105 ${
+                className={`rounded-2xl px-6 py-3 font-medium transition-all duration-300 whitespace-nowrap transform active:scale-95 ${
                   selectedCategoryId === null 
                     ? 'all-button-selected' 
                     : 'all-button-unselected'
@@ -209,7 +209,7 @@ const Dashboard = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => setSelectedCategoryId(category.id)}
-                    className={`rounded-2xl px-6 py-3 font-medium whitespace-nowrap transition-all duration-300 transform hover:scale-105 ${
+                    className={`rounded-2xl px-6 py-3 font-medium whitespace-nowrap transition-all duration-300 transform active:scale-95 ${
                       isSelected 
                         ? 'category-button-selected' 
                         : 'category-button-unselected'
@@ -234,30 +234,30 @@ const Dashboard = () => {
             <div className="flex items-center gap-0.5 bg-background/80 backdrop-blur-sm rounded-lg p-0.5 shadow-sm border border-border/50">
               <button
                 onClick={() => setSortBy('recent')}
-                className={`px-2 py-1 text-xs font-medium rounded-md transition-all ${
+                className={`px-2 py-1 text-xs font-medium rounded-md transition-all active:scale-95 ${
                   sortBy === 'recent' 
                     ? 'bg-foreground text-background shadow-sm' 
-                    : 'text-muted-foreground hover:text-foreground'
+                    : 'text-muted-foreground'
                 }`}
               >
                 Recent
               </button>
               <button
                 onClick={() => setSortBy('pr')}
-                className={`px-2 py-1 text-xs font-medium rounded-md transition-all ${
+                className={`px-2 py-1 text-xs font-medium rounded-md transition-all active:scale-95 ${
                   sortBy === 'pr' 
                     ? 'bg-foreground text-background shadow-sm' 
-                    : 'text-muted-foreground hover:text-foreground'
+                    : 'text-muted-foreground'
                 }`}
               >
                 PRs
               </button>
               <button
                 onClick={() => setSortBy('progress')}
-                className={`px-2 py-1 text-xs font-medium rounded-md transition-all ${
+                className={`px-2 py-1 text-xs font-medium rounded-md transition-all active:scale-95 ${
                   sortBy === 'progress' 
                     ? 'bg-foreground text-background shadow-sm' 
-                    : 'text-muted-foreground hover:text-foreground'
+                    : 'text-muted-foreground'
                 }`}
               >
                 Progress

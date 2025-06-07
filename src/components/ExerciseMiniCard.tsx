@@ -32,7 +32,7 @@ const ExerciseMiniCard: React.FC<ExerciseMiniCardProps> = ({
   const categoryKey = category ? getCategoryKeyByName(category.name) : 'default';
 
   return (
-    <Card className={`exercise-card exercise-card--${categoryKey} hover:shadow-md transition-all duration-200 border-border/60 hover:border-border`}>
+    <Card className={`exercise-card exercise-card--${categoryKey} transition-all duration-200 border-border/60 active:shadow-md active:border-border active:scale-98`}>
       <CardContent className={`${isMobile ? 'p-4' : 'p-4'}`}>
         <div className="flex items-center justify-between">
           <div className="flex-1">
@@ -62,7 +62,7 @@ const ExerciseMiniCard: React.FC<ExerciseMiniCardProps> = ({
               variant="ghost" 
               size="sm"
               onClick={onEdit}
-              className={`${isMobile ? 'h-11 w-11' : 'h-7 w-7'} rounded-lg hover:bg-muted/60 text-muted-foreground hover:text-foreground`}
+              className={`${isMobile ? 'h-11 w-11' : 'h-7 w-7'} rounded-lg active:bg-muted/60 text-muted-foreground active:text-foreground transition-colors`}
             >
               <Pencil className={`${isMobile ? 'h-5 w-5' : 'h-3.5 w-3.5'}`} />
             </Button>
@@ -73,7 +73,7 @@ const ExerciseMiniCard: React.FC<ExerciseMiniCardProps> = ({
               disabled={!canDelete}
               className={`${isMobile ? 'h-11 w-11' : 'h-7 w-7'} rounded-lg ${
                 canDelete 
-                  ? 'text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30' 
+                  ? 'text-muted-foreground active:text-red-600 active:bg-red-50 dark:active:bg-red-950/30 transition-colors' 
                   : 'text-muted-foreground/40 cursor-not-allowed'
               }`}
               title={canDelete ? 'Delete exercise' : 'Cannot delete - used by other users'}

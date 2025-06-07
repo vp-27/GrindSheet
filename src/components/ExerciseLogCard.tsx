@@ -43,7 +43,7 @@ const ExerciseLogCard: React.FC<ExerciseLogCardProps> = ({
   };
 
   return (
-    <div className={`apple-health-card transition-all duration-200 hover:shadow-lg ${getCategoryClass(categoryColor)}`}>
+    <div className={`apple-health-card transition-all duration-200 active:shadow-lg active:scale-98 ${getCategoryClass(categoryColor)}`}>
       {/* Top row: Exercise name + Time + Action buttons */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1 min-w-0">
@@ -64,7 +64,7 @@ const ExerciseLogCard: React.FC<ExerciseLogCardProps> = ({
           <Button 
             variant="outline" 
             size="icon"
-            className="h-8 w-8 rounded-lg border-border/50 hover:bg-muted hover:border-primary/30 transition-all duration-200 shadow-sm" 
+            className="h-8 w-8 rounded-lg border-border/50 active:bg-muted active:border-primary/30 transition-all duration-200 shadow-sm" 
             onClick={() => onEdit(log)}
             aria-label="Edit exercise log"
           >
@@ -73,7 +73,7 @@ const ExerciseLogCard: React.FC<ExerciseLogCardProps> = ({
           <Button 
             variant="outline" 
             size="icon"
-            className="h-8 w-8 rounded-lg border-border/50 text-red-500 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-all duration-200 shadow-sm" 
+            className="h-8 w-8 rounded-lg border-border/50 text-red-500 active:text-red-600 active:bg-red-50 active:border-red-200 transition-all duration-200 shadow-sm" 
             onClick={() => onDelete(log.id)}
             aria-label="Delete exercise log"
           >

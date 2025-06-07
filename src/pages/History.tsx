@@ -272,7 +272,7 @@ const History = () => {
                 </Button>
                 <Button 
                   type="submit" 
-                  className="rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg transition-all duration-200 hover:shadow-xl"
+                  className="rounded-xl bg-primary active:bg-primary/90 text-primary-foreground shadow-lg transition-all duration-200 active:shadow-xl"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (

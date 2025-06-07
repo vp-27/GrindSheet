@@ -109,7 +109,7 @@ const Auth = () => {
             <button
               type="button"
               onClick={() => setShowSignIn(!showSignIn)}
-              className="text-sm font-medium text-green-600 hover:text-green-700 transition-colors"
+              className="text-sm font-medium text-green-600 active:text-green-700 transition-colors"
             >
               {showSignIn ? 'Sign up' : 'Sign in'}
             </button>
@@ -170,7 +170,7 @@ const Auth = () => {
               <div className="pt-4">
                 <Button
                   type="submit"
-                  className="w-full rounded-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 shadow-md hover:shadow-lg transition-all duration-200 ease-in-out hover:translate-y-[-1px]"
+                  className="w-full rounded-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 shadow-md active:shadow-lg transition-all duration-200 ease-in-out active:translate-y-[-1px]"
                   disabled={isLoading}
                   aria-label="Sign In"
                 >
@@ -298,7 +298,7 @@ const Auth = () => {
               <div className="pt-4">
                 <Button
                   type="submit"
-                  className="w-full rounded-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 shadow-md hover:shadow-lg transition-all duration-200 ease-in-out hover:translate-y-[-1px]"
+                  className="w-full rounded-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 shadow-md active:shadow-lg transition-all duration-200 ease-in-out active:translate-y-[-1px]"
                   disabled={isLoading}
                   aria-label="Sign Up"
                 >

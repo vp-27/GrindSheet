@@ -184,7 +184,7 @@ const AddExercise = () => {
                         <Button
                           type="button"
                           variant="ghost"
-                          className="w-full justify-start text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                          className="w-full justify-start text-sm text-muted-foreground active:text-foreground active:bg-muted/60 transition-colors"
                           onClick={() => {
                             setIsAddCategoryOpen(true);
                           }}
@@ -228,7 +228,7 @@ const AddExercise = () => {
                             <Button
                               type="button"
                               variant="ghost"
-                              className="w-full justify-start text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                              className="w-full justify-start text-sm text-muted-foreground active:text-foreground active:bg-muted/60 transition-colors"
                               onClick={() => {
                                 setIsAddExerciseOpen(true);
                               }}
@@ -248,7 +248,7 @@ const AddExercise = () => {
                               <Button
                                 type="button"
                                 variant="ghost"
-                                className="w-full justify-start text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60"
+                                className="w-full justify-start text-sm text-muted-foreground active:text-foreground active:bg-muted/60 transition-colors"
                                 onClick={() => {
                                   setIsAddExerciseOpen(true);
                                 }}
@@ -310,7 +310,7 @@ const AddExercise = () => {
               
               <Button 
                 type="submit" 
-                className="w-full h-12 rounded-xl font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl active:scale-[0.98] bg-primary hover:bg-primary/90 text-primary-foreground"
+                className="w-full h-12 rounded-xl font-medium text-white shadow-lg transition-all duration-200 active:shadow-xl active:scale-[0.98] bg-primary active:bg-primary/90 text-primary-foreground"
                 disabled={isSubmitting || !selectedExerciseId || !weight}
               >
                 {isSubmitting ? (

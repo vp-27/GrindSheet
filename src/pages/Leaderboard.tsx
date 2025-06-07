@@ -288,7 +288,7 @@ const Leaderboard: React.FC = () => {
       return (
         <div 
           key={entry.exerciseId || index}
-          className="pr-overview-entry-clean bg-card hover:bg-muted/50"
+          className="pr-overview-entry-clean bg-card active:bg-muted/50"
         >
           {/* Exercise Name at the Top */}
           <div className="mb-3">
@@ -358,8 +358,8 @@ const Leaderboard: React.FC = () => {
     return (
       <div 
         key={entry.userId || index}
-        className={`group relative p-4 border border-border rounded-2xl transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 ${
-          isCurrentUser ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800' : 'bg-card hover:bg-muted/50'
+        className={`group relative p-4 border border-border rounded-2xl transition-all duration-300 active:shadow-lg active:-translate-y-0.5 ${
+          isCurrentUser ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800' : 'bg-card active:bg-muted/50'
         }`}
       >
         <div className="flex items-center gap-4">
@@ -429,7 +429,7 @@ const Leaderboard: React.FC = () => {
         </div>
 
         {/* Subtle hover effect */}
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/5 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/5 to-white/10 opacity-0 group-active:opacity-100 transition-opacity duration-300 pointer-events-none" />
       </div>
     );
   };
@@ -446,7 +446,7 @@ const Leaderboard: React.FC = () => {
     return (
       <div 
         key={categoryId}
-        className="relative group p-5 border border-border rounded-2xl transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card hover:bg-card/80 backdrop-blur-sm"
+        className="relative group p-5 border border-border rounded-2xl transition-all duration-300 active:shadow-lg active:-translate-y-1 bg-card active:bg-card/80 backdrop-blur-sm"
       >
         {/* Category Header */}
         <div className="flex items-center justify-between mb-3">
@@ -484,7 +484,7 @@ const Leaderboard: React.FC = () => {
         </div>
         
         {/* Subtle hover effect */}
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/5 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-white/5 to-white/10 opacity-0 group-active:opacity-100 transition-opacity duration-300 pointer-events-none" />
       </div>
     );
   };
@@ -500,7 +500,7 @@ const Leaderboard: React.FC = () => {
           {/* Leaderboard Type Selector */}
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
             <Button
-              variant={leaderboardType === LeaderboardType.EXERCISE_PR ? "default" : "outline"}
+              variant={"default"}
               size="sm"
               onClick={() => setLeaderboardType(LeaderboardType.EXERCISE_PR)}
               className="rounded-2xl px-4 py-2 font-medium whitespace-nowrap transition-all duration-300"
@@ -508,72 +508,36 @@ const Leaderboard: React.FC = () => {
               <Trophy className="h-4 w-4 mr-2" />
               PRs
             </Button>
-            <Button
-              variant={leaderboardType === LeaderboardType.OVERALL_PROGRESS ? "default" : "outline"}
-              size="sm"
-              onClick={() => setLeaderboardType(LeaderboardType.OVERALL_PROGRESS)}
-              className="rounded-2xl px-4 py-2 font-medium whitespace-nowrap transition-all duration-300"
-            >
-              <TrendingUp className="h-4 w-4 mr-2" />
-              Overall
-            </Button>
-            <Button
-              variant={leaderboardType === LeaderboardType.RECENT_ACHIEVERS ? "default" : "outline"}
-              size="sm"
-              onClick={() => setLeaderboardType(LeaderboardType.RECENT_ACHIEVERS)}
-              className="rounded-2xl px-4 py-2 font-medium whitespace-nowrap transition-all duration-300"
-            >
-              <Zap className="h-4 w-4 mr-2" />
-              Recent
-            </Button>
-            <Button
-              variant={leaderboardType === LeaderboardType.CONSISTENCY ? "default" : "outline"}
-              size="sm"
-              onClick={() => setLeaderboardType(LeaderboardType.CONSISTENCY)}
-              className="rounded-2xl px-4 py-2 font-medium whitespace-nowrap transition-all duration-300"
-            >
-              <Target className="h-4 w-4 mr-2" />
-              Consistency
-            </Button>
-          </div>          {/* Filters */}
-          {leaderboardType !== LeaderboardType.OVERALL_PROGRESS && (
-            <div className="grid grid-cols-2 gap-3">
-              <Select value={selectedCategoryId} onValueChange={handleCategoryChange}>
-                <SelectTrigger className="rounded-2xl border-border">
-                  <SelectValue placeholder="All Categories" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {categories.map(category => (
-                    <SelectItem key={category.id} value={category.id}>
-                      {category.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              
-              {/* Only show exercise filter for Exercise PR leaderboard */}
-              {leaderboardType === LeaderboardType.EXERCISE_PR ? (
-                <Select value={selectedExerciseId} onValueChange={setSelectedExerciseId}>
-                  <SelectTrigger className="rounded-2xl border-border">
-                    <SelectValue placeholder="All Exercises" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Exercises</SelectItem>
-                    {getMultiUserExercises().map(exercise => (
-                      <SelectItem key={exercise.id} value={exercise.id}>
-                        {exercise.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <div className="flex items-center justify-center rounded-2xl border border-dashed border-border text-muted-foreground text-sm">
-                  No exercise filter needed
-                </div>
-              )}
-            </div>
-          )}
+          </div>
+          {/* Filters */}
+          <div className="grid grid-cols-2 gap-3">
+            <Select value={selectedCategoryId} onValueChange={handleCategoryChange}>
+              <SelectTrigger className="rounded-2xl border-border">
+                <SelectValue placeholder="All Categories" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map(category => (
+                  <SelectItem key={category.id} value={category.id}>
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={selectedExerciseId} onValueChange={setSelectedExerciseId}>
+              <SelectTrigger className="rounded-2xl border-border">
+                <SelectValue placeholder="All Exercises" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Exercises</SelectItem>
+                {getMultiUserExercises().map(exercise => (
+                  <SelectItem key={exercise.id} value={exercise.id}>
+                    {exercise.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {/* Main Leaderboard */}
@@ -602,7 +566,7 @@ const Leaderboard: React.FC = () => {
                   </div>
                 ))}
               </div>
-            ) : leaderboardData.length > 0 || (leaderboardType === LeaderboardType.OVERALL_PROGRESS && categoryProgressLeaders && categoryProgressLeaders.length > 0) ? (
+            ) : leaderboardData.length > 0 ? (
               <div className="space-y-4">
                 {/* PR Championship Summary Card (only in overview mode) */}
                 {prChampionshipSummary && prChampionshipSummary.champion && (
@@ -634,68 +598,19 @@ const Leaderboard: React.FC = () => {
                     </div>
                   </div>
                 )}
-                
-                {/* Overall Progress Special Layout */}
-                {leaderboardType === LeaderboardType.OVERALL_PROGRESS ? (
-                  <div className="space-y-6">
-                    {/* Main Overall Progress Card */}
-                    {leaderboardData.length > 0 && (
-                      <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-2xl p-6">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center shadow-lg">
-                            <TrendingUp className="h-6 w-6 text-green-900" />
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                              Overall Progress Leader
-                              <span className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 px-2 py-1 rounded-full font-medium">
-                                {leaderboardData[0].value.toFixed(1)}% avg gain
-                              </span>
-                            </h3>
-                            <div className="flex items-center gap-3 mt-1">
-                              <Avatar className="h-8 w-8">
-                                <AvatarImage src={leaderboardData[0].user.avatarUrl} alt={leaderboardData[0].user.name} />
-                                <AvatarFallback className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 text-sm">
-                                  {leaderboardData[0].user.name?.substring(0, 2).toUpperCase() || 'U'}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span className="font-semibold text-foreground">{leaderboardData[0].user.name}</span>
-                              <span className="text-sm text-muted-foreground">
-                                leading overall progress across all exercises
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    
-                    {/* Category Progress Leaders Grid */}
-                    {categoryProgressLeaders && categoryProgressLeaders.length > 0 && (
-                      <div>
-                        <h3 className="text-lg font-semibold text-foreground mb-4">Category Leaders</h3>
-                        <div className="grid grid-cols-2 gap-4">
-                          {categoryProgressLeaders.map((categoryLeader, index) => 
-                            renderCategoryProgressCard(categoryLeader, index)
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  /* Regular Leaderboard Entries */
-                  <div className="space-y-3">
-                    {leaderboardData.map((entry, index) => (
-                      <div 
-                        key={isOverviewMode 
-                          ? `exercise-${entry.exerciseId || index}` 
-                          : `user-${entry.userId || index}`}
-                        className="animate-in slide-in-from-bottom-4 duration-300"
-                      >
-                        {renderLeaderboardEntry(entry, index)}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                {/* Regular Leaderboard Entries */}
+                <div className="space-y-3">
+                  {leaderboardData.map((entry, index) => (
+                    <div 
+                      key={isOverviewMode 
+                        ? `exercise-${entry.exerciseId || index}` 
+                        : `user-${entry.userId || index}`}
+                      className="animate-in slide-in-from-bottom-4 duration-300"
+                    >
+                      {renderLeaderboardEntry(entry, index)}
+                    </div>
+                  ))}
+                </div>
               </div>
             ) : (
               <div className="text-center py-16">

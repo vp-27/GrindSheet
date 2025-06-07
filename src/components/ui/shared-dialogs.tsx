@@ -161,7 +161,7 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
             </Button>
             <Button 
               type="submit" 
-              className="rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200 mobile-button-primary"
+              className="rounded-xl font-medium bg-primary active:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200 mobile-button-primary"
             >
               {editingCategory ? 'Update Category' : 'Add Category'}
             </Button>
@@ -325,7 +325,7 @@ export const ExerciseDialog: React.FC<ExerciseDialogProps> = ({
             </Button>
             <Button 
               type="submit" 
-              className="rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200 mobile-button-primary"
+              className="rounded-xl font-medium bg-primary active:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200 mobile-button-primary"
             >
               {editingExercise ? 'Update Exercise' : 'Add Exercise'}
             </Button>

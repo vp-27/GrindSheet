@@ -390,7 +390,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
                 className={`px-2 py-1 text-xs font-medium rounded-md transition-all ${
                   timeframe === period
                     ? 'bg-foreground text-background shadow-sm' 
-                    : 'text-muted-foreground hover:text-foreground'
+                    : 'text-muted-foreground active:text-foreground transition-colors'
                 }`}
               >
                 {period}

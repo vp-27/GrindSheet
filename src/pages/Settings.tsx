@@ -345,7 +345,7 @@ const Settings: React.FC = () => {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="rounded-full hover:bg-muted transition-colors h-11 w-11"
+                  className="rounded-full active:bg-muted transition-colors h-11 w-11"
                 >
                   <Edit2 className="h-5 w-5 text-muted-foreground" />
                 </Button>
@@ -391,7 +391,7 @@ const Settings: React.FC = () => {
                   <DialogFooter>
                     <Button 
                       type="submit" 
-                      className="w-full h-11 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
+                      className="w-full h-11 rounded-xl font-medium bg-primary active:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
                     >
                       Save Changes
                     </Button>
@@ -432,7 +432,7 @@ const Settings: React.FC = () => {
                     className={`h-20 p-3 flex flex-col gap-2 rounded-xl transition-all duration-200 ${
                       isSelected 
                         ? 'bg-primary text-primary-foreground shadow-md border-primary' 
-                        : 'bg-background/60 border-border/60 hover:bg-background/80 text-foreground hover:border-border'
+                        : 'bg-background/60 border-border/60 active:bg-background/80 text-foreground active:border-border'
                     }`}
                     onClick={() => setTheme(themeOption.value)}
                   >
@@ -460,7 +460,7 @@ const Settings: React.FC = () => {
                   setEditingCategory(null);
                   setIsAddCategoryOpen(true);
                 }}
-                className="h-10 px-4 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200 flex-shrink-0"
+                className="h-10 px-4 rounded-xl font-medium bg-primary active:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200 flex-shrink-0"
               >
                 <Plus className="h-4 w-4 mr-2" /> 
                 Add Category
@@ -491,7 +491,7 @@ const Settings: React.FC = () => {
                             variant="ghost" 
                             size="sm"
                             onClick={() => handleEditCategory(category)}
-                            className="h-8 w-8 rounded-lg hover:bg-muted/60 text-muted-foreground hover:text-foreground"
+                            className="h-8 w-8 rounded-lg active:bg-muted/60 text-muted-foreground active:text-foreground transition-colors"
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
@@ -502,7 +502,7 @@ const Settings: React.FC = () => {
                             disabled={!canDelete}
                             className={`h-8 w-8 rounded-lg ${
                               canDelete 
-                                ? 'text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30' 
+                                ? 'text-muted-foreground active:text-red-600 active:bg-red-50 dark:active:bg-red-950/30' 
                                 : 'text-muted-foreground/40 cursor-not-allowed'
                             }`}
                             title={canDelete ? 'Delete category' : 'Cannot delete - used by other users'}
@@ -565,7 +565,7 @@ const Settings: React.FC = () => {
                   setEditingExercise(null);
                   setIsAddExerciseOpen(true);
                 }}
-                className="h-10 px-4 rounded-xl font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200 flex-shrink-0"
+                className="h-10 px-4 rounded-xl font-medium bg-primary active:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200 flex-shrink-0"
               >
                 <Plus className="h-4 w-4 mr-2" /> 
                 Add Exercise
@@ -597,7 +597,7 @@ const Settings: React.FC = () => {
                             variant="ghost" 
                             size="sm"
                             onClick={() => handleEditExercise(exercise)}
-                            className="h-8 w-8 rounded-lg hover:bg-muted/60 text-muted-foreground hover:text-foreground"
+                            className="h-8 w-8 rounded-lg active:bg-muted/60 text-muted-foreground active:text-foreground transition-colors"
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
@@ -608,7 +608,7 @@ const Settings: React.FC = () => {
                             disabled={!canDelete}
                             className={`h-8 w-8 rounded-lg ${
                               canDelete 
-                                ? 'text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30' 
+                                ? 'text-muted-foreground active:text-red-600 active:bg-red-50 dark:active:bg-red-950/30' 
                                 : 'text-muted-foreground/40 cursor-not-allowed'
                             }`}
                             title={canDelete ? 'Delete exercise' : 'Cannot delete - used by other users'}
@@ -657,7 +657,7 @@ const Settings: React.FC = () => {
 
           {/* Logout Section */}
           <div 
-            className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 p-6 shadow-sm cursor-pointer hover:bg-red-50/20 dark:hover:bg-red-950/10 transition-colors group"
+            className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 p-6 shadow-sm cursor-pointer active:bg-red-50/20 dark:active:bg-red-950/10 transition-colors group"
             onClick={handleLogout}
           >
             <div className="flex items-center gap-3">
@@ -668,7 +668,7 @@ const Settings: React.FC = () => {
                 <h3 className="text-lg font-semibold text-red-600 dark:text-red-400">Sign Out</h3>
                 <p className="text-sm text-muted-foreground">Sign out of your account</p>
               </div>
-              <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors" />
+              <ChevronRight className="h-5 w-5 text-muted-foreground group-active:text-red-600 dark:group-active:text-red-400 transition-colors" />
             </div>
           </div>
         </div>

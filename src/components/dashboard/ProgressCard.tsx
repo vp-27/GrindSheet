@@ -26,10 +26,10 @@ const ProgressCard: React.FC<ProgressCardProps> = ({ progress, onClick }) => {
   return (
     <Card 
       className={cn(
-        "cursor-pointer hover:border-primary/50 transition-all duration-200",
-        isGain && "hover:border-green-500",
-        isLoss && "hover:border-red-500",
-        isPR && "hover:border-yellow-500"
+        "cursor-pointer active:border-primary/50 transition-all duration-200",
+        isGain && "active:border-green-500",
+        isLoss && "active:border-red-500",
+        isPR && "active:border-yellow-500"
       )}
       onClick={onClick}
     >
