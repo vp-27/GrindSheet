@@ -48,6 +48,9 @@
     /* Glass effect variables for light mode */
     --glass-card: 255 255 255 / 0.7;
     --glass-border: 255 255 255 / 0.2;
+
+    --icon: 152 100% 40%; /* Main accent green for icons */
+    --icon-muted: 215.4 16.3% 46.9%; /* Muted icon color */
   }
 
   .dark {
@@ -87,6 +90,9 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 210 40% 98%;
+
+    --icon: 152 100% 40%; /* Main accent green for icons in dark mode */
+    --icon-muted: 215 20.2% 65.1%; /* Muted icon color in dark mode */
   }
 }
 
@@ -113,5 +119,12 @@
   }
   .scrollbar-hide::-webkit-scrollbar { 
     display: none;  /* Safari and Chrome */
+  }
+
+  .text-icon {
+    color: hsl(var(--icon));
+  }
+  .text-icon-muted {
+    color: hsl(var(--icon-muted));
   }
 }

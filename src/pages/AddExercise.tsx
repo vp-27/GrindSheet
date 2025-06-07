@@ -189,7 +189,7 @@ const AddExercise = () => {
                             setIsAddCategoryOpen(true);
                           }}
                         >
-                          <Plus className="h-4 w-4 mr-2" />
+                          <Plus className="h-4 w-4 mr-2 text-icon" />
                           Add New Category
                         </Button>
                       </div>
@@ -233,7 +233,7 @@ const AddExercise = () => {
                                 setIsAddExerciseOpen(true);
                               }}
                             >
-                              <Plus className="h-4 w-4 mr-2" />
+                              <Plus className="h-4 w-4 mr-2 text-icon" />
                               Add New Exercise
                             </Button>
                           </div>
@@ -253,7 +253,7 @@ const AddExercise = () => {
                                   setIsAddExerciseOpen(true);
                                 }}
                               >
-                                <Plus className="h-4 w-4 mr-2" />
+                                <Plus className="h-4 w-4 mr-2 text-icon" />
                                 Add New Exercise
                               </Button>
                             </div>
@@ -310,11 +310,7 @@ const AddExercise = () => {
               
               <Button 
                 type="submit" 
-                className="w-full h-12 rounded-xl font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl active:scale-[0.98]"
-                style={{ 
-                  backgroundColor: categoryColors?.primary || '#10b981',
-                  boxShadow: `0 4px 20px ${categoryColors?.primary || '#10b981'}30`
-                }}
+                className="w-full h-12 rounded-xl font-medium text-white shadow-lg transition-all duration-200 hover:shadow-xl active:scale-[0.98] bg-primary hover:bg-primary/90 text-primary-foreground"
                 disabled={isSubmitting || !selectedExerciseId || !weight}
               >
                 {isSubmitting ? (

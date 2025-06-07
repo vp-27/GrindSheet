@@ -96,10 +96,10 @@ const NavLink: React.FC<{ to: string; icon: React.ReactNode; label: string }> = 
       to={to} 
       className={cn(
         "flex flex-col items-center px-3 py-1 rounded text-xs w-full",
-        isActive ? "text-green-600 font-medium" : "text-muted-foreground"
+        isActive ? "text-primary font-medium" : "text-muted-foreground"
       )}
     >
-      <div className="text-lg mb-0.5">{icon}</div>
+      <div className={cn("text-lg mb-0.5 text-icon", isActive ? "text-primary" : "text-icon-muted")}>{icon}</div>
       <span className="text-center truncate w-full">{label}</span>
     </Link>
   );
