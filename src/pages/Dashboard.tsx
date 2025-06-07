@@ -409,7 +409,6 @@ const Dashboard = () => {
                           )}
                           {miniChartData.length === 1 && (
                             <div className="apple-health-first-log-badge">
-                              <Clock className="apple-health-first-log-badge-icon" />
                               First log
                             </div>
                           )}
