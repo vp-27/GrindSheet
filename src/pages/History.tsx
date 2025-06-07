@@ -189,7 +189,6 @@ const History = () => {
                       key={log.id}
                       log={log}
                       exerciseName={exerciseName}
-                      category={category}
                       categoryColor={categoryColor}
                       showExerciseName={true}
                       showDate={true}

@@ -12,14 +12,10 @@ interface ExerciseLogCardProps {
     note?: string;
   };
   exerciseName?: string;
-  category?: {
-    id: string;
-    name: string;
-  };
   categoryColor?: string;
   showExerciseName?: boolean;
   showDate?: boolean;
-  showCategoryBadge?: boolean;
+
   onEdit: (log: any) => void;
   onDelete: (logId: string) => void;
 }
@@ -27,44 +23,32 @@ interface ExerciseLogCardProps {
 const ExerciseLogCard: React.FC<ExerciseLogCardProps> = ({
   log,
   exerciseName,
-  category,
   categoryColor = '#10b981',
   showExerciseName = true,
   showDate = true,
-  showCategoryBadge = false,
   onEdit,
   onDelete
 }) => {
-  // Calculate RGB values from hex color for CSS custom properties
-  const categoryColorRgb = categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129';
+  // Convert hex color to category class name
+  const getCategoryClass = (color: string) => {
+    const colorMap: Record<string, string> = {
+      '#3b82f6': 'category-arms',
+      '#10b981': 'category-back', 
+      '#f59e0b': 'category-chest',
+      '#ef4444': 'category-core',
+      '#8b5cf6': 'category-legs',
+      '#ec4899': 'category-shoulders'
+    };
+    return colorMap[color] || 'category-default';
+  };
 
   return (
-    <div 
-      className="apple-health-card transition-all duration-200 hover:shadow-lg"
-      style={{
-        '--category-color': categoryColor,
-        '--category-color-rgb': categoryColorRgb
-      } as React.CSSProperties}
-    >
+    <div className={`apple-health-card transition-all duration-200 hover:shadow-lg ${getCategoryClass(categoryColor)}`}>
       {/* Top row: Exercise name + Time + Action buttons */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex-1 min-w-0">
           {showExerciseName && exerciseName && (
-            <div className="mb-2">
-              <h3 className="apple-health-card-title truncate">{exerciseName}</h3>
-              {/* Category badge moved below exercise name */}
-              {category && (
-                <div 
-                  className="category-badge mt-1 inline-block"
-                  style={{
-                    '--category-color': categoryColor,
-                    '--category-color-rgb': categoryColorRgb
-                  } as React.CSSProperties}
-                >
-                  {category.name}
-                </div>
-              )}
-            </div>
+            <h3 className="apple-health-card-title truncate mb-2">{exerciseName}</h3>
           )}
           
           {showDate && (

@@ -462,7 +462,6 @@ const ExerciseDetail = () => {
                   <ExerciseLogCard
                     key={log.id}
                     log={log}
-                    category={category}
                     categoryColor={categoryColor}
                     showExerciseName={false}
                     showDate={true}
