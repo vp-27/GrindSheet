@@ -36,7 +36,9 @@ const History = () => {
     const grouped = {};
     
     exerciseLogs.forEach(log => {
-      const date = format(new Date(log.timestamp), 'yyyy-MM-dd');
+      // Use local timezone for date grouping to avoid timezone shifts
+      const logDate = new Date(log.timestamp);
+      const date = format(logDate, 'yyyy-MM-dd');
       
       if (!grouped[date]) {
         grouped[date] = [];
@@ -164,6 +166,8 @@ const History = () => {
         
         {sortedDates.map(date => {
           const dayLogs = logsByDate[date];
+          // Use the first log's timestamp to get the correct date with timezone
+          const firstLogDate = new Date(dayLogs[0].timestamp);
           
           return (
             <div key={date} className="relative">
@@ -172,7 +176,7 @@ const History = () => {
                 <div className="flex items-center gap-2">
                   <Calendar className="h-5 w-5 text-primary" />
                   <h2 className="text-lg font-semibold text-foreground">
-                    {format(new Date(date), 'EEEE, MMMM d, yyyy')}
+                    {format(firstLogDate, 'EEEE, MMMM d, yyyy')}
                   </h2>
                 </div>
               </div>
