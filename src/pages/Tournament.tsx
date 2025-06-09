@@ -551,7 +551,10 @@ const TournamentPage: React.FC = () => {
               >
                 Current
               </Button>
-              {tournamentHistory.map(tournament => (
+              {tournamentHistory
+                .slice()
+                .reverse()
+                .map(tournament => (
                 <Button
                   key={tournament.id}
                   variant={selectedTournament?.id === tournament.id ? "default" : "outline"}
@@ -621,39 +624,45 @@ const TournamentPage: React.FC = () => {
           {/* PR Records Section with Apple-esque Design */}
           {activeTab === 'records' && (
             <div className="space-y-4">
-              {/* Filter Controls */}
-              <div className="grid grid-cols-2 gap-3">
-                <Select value={selectedCategoryId} onValueChange={handleCategoryChange}>
-                  <SelectTrigger className="rounded-2xl border-border bg-card/50 backdrop-blur-sm">
-                    <SelectValue placeholder="All Categories" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Categories</SelectItem>
-                    {categories.map(category => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              {/* Category Filter Buttons */}
+              <div className="flex gap-3 overflow-x-auto pb-2 px-1 py-2 scrollbar-hide">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedCategoryId('all')}
+                  className={`rounded-2xl px-6 py-3 font-medium transition-all duration-300 whitespace-nowrap transform active:scale-95 ${
+                    selectedCategoryId === 'all' 
+                      ? 'all-button-selected' 
+                      : 'all-button-unselected'
+                  }`}
+                >
+                  All
+                </Button>
                 
-                <Select value={selectedExerciseId} onValueChange={setSelectedExerciseId}>
-                  <SelectTrigger className="rounded-2xl border-border bg-card/50 backdrop-blur-sm">
-                    <SelectValue placeholder="All Exercises" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Exercises</SelectItem>
-                    {exercises
-                      .filter(exercise => 
-                        selectedCategoryId === 'all' || exercise.categoryId === selectedCategoryId
-                      )
-                      .map(exercise => (
-                        <SelectItem key={exercise.id} value={exercise.id}>
-                          {exercise.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
+                {categories.map((category, index) => {
+                  const categoryColor = getCategoryChartColors()[index % getCategoryChartColors().length];
+                  const isSelected = selectedCategoryId === category.id;
+                  
+                  return (
+                    <Button
+                      key={category.id}
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedCategoryId(category.id)}
+                      className={`rounded-2xl px-6 py-3 font-medium whitespace-nowrap transition-all duration-300 transform active:scale-95 ${
+                        isSelected 
+                          ? 'category-button-selected' 
+                          : 'category-button-unselected'
+                      }`}
+                      style={{
+                        '--category-color': categoryColor,
+                        '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
+                      } as React.CSSProperties}
+                    >
+                      {category.name}
+                    </Button>
+                  );
+                })}
               </div>
 
               {/* PR Records Content */}
