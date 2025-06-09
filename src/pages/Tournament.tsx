@@ -49,10 +49,17 @@ import {
 } from '@/components/ui/select';
 import { getCategoryChartColors, getCategoryKeyByName, getCategoryColors } from '@/utils/categoryColors';
 import { supabase } from '@/integrations/supabase/client';
+import '@/components/ui/category-styles.css';
 
 const TournamentPage: React.FC = () => {
   const { profile } = useAuth();
   const { categories, exercises } = useAppContext();
+
+  // Get category color helper function like Dashboard
+  const getCategoryColor = (categoryIndex: number) => {
+    const colors = getCategoryChartColors();
+    return colors[categoryIndex % colors.length];
+  };
   
   const [currentTournament, setCurrentTournament] = useState<Tournament | null>(null);
   const [tournamentHistory, setTournamentHistory] = useState<Tournament[]>([]);
@@ -568,26 +575,26 @@ const TournamentPage: React.FC = () => {
           <div className="bg-muted/20 p-1 rounded-2xl">
             <div className="grid grid-cols-2 gap-1">
               <Button
-                variant={activeTab === 'tournament' ? 'default' : 'ghost'}
+                variant="ghost"
                 size="sm"
                 onClick={() => setActiveTab('tournament')}
                 className={`rounded-xl transition-all duration-200 ${
                   activeTab === 'tournament'
-                    ? 'bg-background shadow-sm'
-                    : 'hover:bg-background/50'
+                    ? 'bg-foreground text-background shadow-sm hover:bg-foreground/90'
+                    : 'text-foreground hover:bg-background/50'
                 }`}
               >
                 <Trophy className="h-4 w-4 mr-2" />
                 Tournament
               </Button>
               <Button
-                variant={activeTab === 'records' ? 'default' : 'ghost'}
+                variant="ghost"
                 size="sm"
                 onClick={() => setActiveTab('records')}
                 className={`rounded-xl transition-all duration-200 ${
                   activeTab === 'records'
-                    ? 'bg-background shadow-sm'
-                    : 'hover:bg-background/50'
+                    ? 'bg-foreground text-background shadow-sm hover:bg-foreground/90'
+                    : 'text-foreground hover:bg-background/50'
                 }`}
               >
                 <Medal className="h-4 w-4 mr-2" />
@@ -732,74 +739,72 @@ const TournamentPage: React.FC = () => {
                       const exerciseCategory = exercise?.categoryId ? categories.find(c => c.id === exercise.categoryId) : null;
                       
                       if (isOverviewMode) {
-                        // Apple Health style overview cards
+                        // Dashboard-style overview cards with category-colored titles
                         const tiedUsers = entry.users || [user];
                         const showMultipleAvatars = tiedUsers.length > 1;
+                        const categoryIndex = exerciseCategory ? categories.findIndex(cat => cat.id === exerciseCategory.id) : -1;
+                        const categoryColor = categoryIndex >= 0 ? getCategoryColor(categoryIndex) : getCategoryColor(0);
                         
                         return (
-                          <Card 
+                          <div
                             key={entry.exerciseId || index}
-                            className="rounded-2xl bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90 transition-colors"
+                            className="apple-health-card"
+                            style={{
+                              '--category-color': categoryColor,
+                              '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
+                            } as React.CSSProperties}
                           >
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between mb-3">
-                                <div>
-                                  <h3 className="font-bold text-lg text-foreground">
-                                    {exerciseName}
-                                  </h3>
-                                  {exerciseCategory && (
-                                    <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
-                                      {exerciseCategory.name}
-                                    </span>
-                                  )}
-                                </div>
-                                {entry.isTie && (
-                                  <span className="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 px-2 py-1 rounded-full font-medium">
-                                    Tie
-                                  </span>
-                                )}
-                              </div>
-                              
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  {showMultipleAvatars ? (
-                                    <div className="flex -space-x-2">
-                                      {tiedUsers.map((tiedUser, idx) => (
-                                        <Avatar key={tiedUser.id} className="h-8 w-8 border-2 border-white shadow-sm">
-                                          <AvatarImage src={tiedUser.avatarUrl} alt={tiedUser.name} />
-                                          <AvatarFallback className="bg-gray-100 text-gray-700 text-sm font-medium">
-                                            {tiedUser.name?.substring(0, 2).toUpperCase() || 'U'}
-                                          </AvatarFallback>
-                                        </Avatar>
-                                      ))}
-                                    </div>
-                                  ) : (
-                                    <div className="flex items-center gap-3">
-                                      <Avatar className="h-8 w-8">
-                                        <AvatarImage src={user.avatarUrl} alt={user.name} />
-                                        <AvatarFallback className="bg-muted text-muted-foreground text-sm font-medium">
-                                          {user.name?.substring(0, 2).toUpperCase() || 'U'}
+                            {/* Exercise name with category color like Dashboard */}
+                            <div className="flex items-start justify-between mb-3">
+                              <h3 className="apple-health-card-title">
+                                {exerciseName}
+                              </h3>
+                              {entry.isTie && (
+                                <span className="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 px-2 py-1 rounded-full font-medium">
+                                  Tie
+                                </span>
+                              )}
+                            </div>
+                            
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                {showMultipleAvatars ? (
+                                  <div className="flex -space-x-2">
+                                    {tiedUsers.map((tiedUser, idx) => (
+                                      <Avatar key={tiedUser.id} className="h-8 w-8 border-2 border-white shadow-sm">
+                                        <AvatarImage src={tiedUser.avatarUrl} alt={tiedUser.name} />
+                                        <AvatarFallback className="bg-gray-100 text-gray-700 text-sm font-medium">
+                                          {tiedUser.name?.substring(0, 2).toUpperCase() || 'U'}
                                         </AvatarFallback>
                                       </Avatar>
-                                      <span className="font-semibold text-foreground">
-                                        {user.name}
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
+                                    ))}
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center gap-3">
+                                    <Avatar className="h-8 w-8">
+                                      <AvatarImage src={user.avatarUrl} alt={user.name} />
+                                      <AvatarFallback className="bg-muted text-muted-foreground text-sm font-medium">
+                                        {user.name?.substring(0, 2).toUpperCase() || 'U'}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <span className="font-semibold text-foreground">
+                                      {user.name}
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
 
-                                <div className="text-right">
-                                  <div className="font-bold text-xl text-foreground">
-                                    {entry.value.toFixed(1)}
-                                    <span className="text-sm font-medium text-muted-foreground ml-1">lbs</span>
-                                  </div>
-                                  <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-                                    Personal Record
-                                  </div>
+                              <div className="text-right">
+                                <div className="apple-health-weight-display">
+                                  {entry.value.toFixed(1)}
+                                  <span className="apple-health-weight-unit ml-1">lbs</span>
+                                </div>
+                                <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
+                                  Personal Record
                                 </div>
                               </div>
-                            </CardContent>
-                          </Card>
+                            </div>
+                          </div>
                         );
                       }
                       
