@@ -474,99 +474,98 @@ const TournamentPage: React.FC = () => {
   }
 
   return (
-    <Layout title="Tournament">
-      {/* Enhanced tournament theme background with competitive purple-gold gradient */}
-      <div className="fixed inset-0 bg-gradient-to-br from-purple-100 via-blue-50 via-indigo-50 to-amber-50 dark:from-purple-950/40 dark:via-blue-950/30 dark:via-indigo-950/30 dark:to-amber-950/20 -z-10" />
-      
-      <div className="space-y-6 relative">
-        {/* Enhanced Header with tournament branding */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {currentTournament && (
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg">
-                <Trophy className="h-6 w-6 text-white" />
-              </div>
-            )}
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400 bg-clip-text text-transparent">
-                {currentTournament ? currentTournament.name : 'Tournament'}
-              </h1>
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-blue-50 via-indigo-50 to-amber-50 dark:from-purple-950/40 dark:via-blue-950/30 dark:via-indigo-950/30 dark:to-amber-950/20">
+      <Layout title="Tournament">
+        <div className="space-y-6 relative">
+          {/* Enhanced Header with tournament branding */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
               {currentTournament && (
-                <p className="text-sm text-muted-foreground">
-                  {currentTournament.participants.length} competitors • {currentTournament.status}
-                </p>
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-lg">
+                  <Trophy className="h-6 w-6 text-white" />
+                </div>
               )}
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 dark:from-purple-400 dark:to-blue-400 bg-clip-text text-transparent">
+                  {currentTournament ? currentTournament.name : 'Tournament'}
+                </h1>
+                {currentTournament && (
+                  <p className="text-sm text-muted-foreground">
+                    {currentTournament.participants.length} competitors • {currentTournament.status}
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setShowPointsGuide(!showPointsGuide)}
-            className="rounded-xl border-purple-200 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-950/50"
-          >
-            <Target className="h-4 w-4 mr-2" />
-            Points Guide
-          </Button>
-        </div>
-
-        {/* Points Guide */}
-        {showPointsGuide && <PointsGuide />}
-
-        {/* Tournament Selection with enhanced styling */}
-        {tournamentHistory.length > 0 && (
-          <div className="flex gap-2 overflow-x-auto pb-2">
-            <Button
-              variant={selectedTournament?.id === currentTournament?.id ? "default" : "outline"}
+            <Button 
+              variant="outline" 
               size="sm"
-              onClick={() => setSelectedTournament(currentTournament)}
-              className={`rounded-xl whitespace-nowrap ${
-                selectedTournament?.id === currentTournament?.id 
-                  ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white' 
-                  : 'border-purple-200 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-950/50'
-              }`}
+              onClick={() => setShowPointsGuide(!showPointsGuide)}
+              className="rounded-xl border-purple-200 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-950/50"
             >
-              Current Week
+              <Target className="h-4 w-4 mr-2" />
+              Points Guide
             </Button>
-            {tournamentHistory.map(tournament => (
+          </div>
+
+          {/* Points Guide */}
+          {showPointsGuide && <PointsGuide />}
+
+          {/* Tournament Selection with enhanced styling */}
+          {tournamentHistory.length > 0 && (
+            <div className="flex gap-2 overflow-x-auto pb-2">
               <Button
-                key={tournament.id}
-                variant={selectedTournament?.id === tournament.id ? "default" : "outline"}
+                variant={selectedTournament?.id === currentTournament?.id ? "default" : "outline"}
                 size="sm"
-                onClick={() => setSelectedTournament(tournament)}
+                onClick={() => setSelectedTournament(currentTournament)}
                 className={`rounded-xl whitespace-nowrap ${
-                  selectedTournament?.id === tournament.id
-                    ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
+                  selectedTournament?.id === currentTournament?.id 
+                    ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white' 
                     : 'border-purple-200 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-950/50'
                 }`}
               >
-                Week of {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                Current Week
               </Button>
-            ))}
-          </div>
-        )}
+              {tournamentHistory.map(tournament => (
+                <Button
+                  key={tournament.id}
+                  variant={selectedTournament?.id === tournament.id ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedTournament(tournament)}
+                  className={`rounded-xl whitespace-nowrap ${
+                    selectedTournament?.id === tournament.id
+                      ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
+                      : 'border-purple-200 dark:border-purple-800 hover:bg-purple-50 dark:hover:bg-purple-950/50'
+                  }`}
+                >
+                  Week of {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                </Button>
+              ))}
+            </div>
+          )}
 
-        {/* Tournament Leaderboard with enhanced card design */}
-        {selectedTournament && (
-          <div className="space-y-3">
-            {selectedTournament.participants.length > 0 ? (
-              selectedTournament.participants.map((participant, index) => 
-                renderParticipant(participant, index)
-              )
-            ) : (
-              <Card className="rounded-xl border-border/50 bg-card/50 backdrop-blur-sm">
-                <CardContent className="p-12 text-center">
-                  <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-foreground mb-2">No Participants Yet</h3>
-                  <p className="text-muted-foreground text-sm">
-                    Log a workout to join the tournament!
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        )}
-      </div>
-    </Layout>
+          {/* Tournament Leaderboard with enhanced card design */}
+          {selectedTournament && (
+            <div className="space-y-3">
+              {selectedTournament.participants.length > 0 ? (
+                selectedTournament.participants.map((participant, index) => 
+                  renderParticipant(participant, index)
+                )
+              ) : (
+                <Card className="rounded-xl border-border/50 bg-card/50 backdrop-blur-sm">
+                  <CardContent className="p-12 text-center">
+                    <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-foreground mb-2">No Participants Yet</h3>
+                    <p className="text-muted-foreground text-sm">
+                      Log a workout to join the tournament!
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+        </div>
+      </Layout>
+    </div>
   );
 };
 
