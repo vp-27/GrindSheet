@@ -89,6 +89,16 @@ export interface TournamentParticipant {
   rank: number;
   badges: TournamentBadge[];
   workoutDays: string[]; // ISO date strings of days they worked out
+  prDetails: PRDetail[]; // Detailed PR achievements
+}
+
+export interface PRDetail {
+  exerciseId: string;
+  exerciseName: string;
+  weight: number;
+  previousBest: number;
+  achievedAt: string; // ISO date string
+  improvementPercent: number;
 }
 
 export interface TournamentBadge {

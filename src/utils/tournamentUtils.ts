@@ -8,7 +8,8 @@ import {
   ExerciseLog, 
   User, 
   Exercise, 
-  Category 
+  Category,
+  PRDetail
 } from '../types';
 import { calculateProgress } from './progressUtils';
 
@@ -197,6 +198,7 @@ export const calculateTournamentPoints = (
 
   // 4. PR points and improvement points
   const exerciseProgress = new Map<string, { hadPR: boolean; improvementPercent: number }>();
+  const prDetails: PRDetail[] = [];
   
   exercises.forEach(exercise => {
     const exerciseLogs = logs.filter(log => log.exerciseId === exercise.id);
@@ -225,15 +227,37 @@ export const calculateTournamentPoints = (
         // PR achieved if tournament weight exceeds previous best
         if (maxTournamentWeight > previousBest) {
           pointsBreakdown.prPoints += POINTS_CONFIG.PR_ACHIEVEMENT.points;
+          const improvementPercent = ((maxTournamentWeight - previousBest) / previousBest) * 100;
           exerciseProgress.set(exercise.id, { 
             hadPR: true, 
-            improvementPercent: ((maxTournamentWeight - previousBest) / previousBest) * 100 
+            improvementPercent 
+          });
+          
+          // Find the exact log where the PR was achieved
+          const prLog = tournamentExerciseLogs.find(log => log.weight === maxTournamentWeight);
+          prDetails.push({
+            exerciseId: exercise.id,
+            exerciseName: exercise.name,
+            weight: maxTournamentWeight,
+            previousBest,
+            achievedAt: prLog?.timestamp || tournamentExerciseLogs[0].timestamp,
+            improvementPercent
           });
         }
       } else {
         // First time doing this exercise counts as PR
         pointsBreakdown.prPoints += POINTS_CONFIG.PR_ACHIEVEMENT.points;
         exerciseProgress.set(exercise.id, { hadPR: true, improvementPercent: 0 });
+        
+        const firstLog = tournamentExerciseLogs[0];
+        prDetails.push({
+          exerciseId: exercise.id,
+          exerciseName: exercise.name,
+          weight: maxTournamentWeight,
+          previousBest: 0,
+          achievedAt: firstLog.timestamp,
+          improvementPercent: 0
+        });
       }
     }
   });
@@ -270,7 +294,8 @@ export const calculateTournamentPoints = (
     pointsBreakdown,
     rank: 0, // Will be calculated when sorting all participants
     badges,
-    workoutDays
+    workoutDays,
+    prDetails
   };
 };
 

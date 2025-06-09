@@ -57,7 +57,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
   if (!currentParticipant) {
     return (
       <Card 
-        className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200/50 dark:border-blue-800/50 cursor-pointer hover:shadow-lg transition-all duration-300 active:scale-95"
+        className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200/50 dark:border-blue-800/50 cursor-pointer active:scale-95"
         onClick={() => navigate('/tournament')}
       >
         <CardContent className="p-6 text-center">
@@ -72,26 +72,31 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return <Crown className="w-6 h-6 text-yellow-500" />;
+        return <Crown className="w-7 h-7 text-yellow-600 dark:text-yellow-400" />;
       case 2:
-        return <Medal className="w-6 h-6 text-gray-400" />;
+        return <Medal className="w-7 h-7 text-slate-500 dark:text-slate-400" />;
       case 3:
-        return <Award className="w-6 h-6 text-amber-600" />;
+        return <Award className="w-7 h-7 text-orange-600 dark:text-orange-400" />;
       default:
-        return <Trophy className="w-6 h-6 text-blue-500" />;
+        return <Trophy className="w-6 h-6 text-blue-600 dark:text-blue-400" />;
     }
   };
 
   const getRankColor = (rank: number) => {
     switch (rank) {
       case 1:
-        return 'from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border-yellow-200/50 dark:border-yellow-800/50';
+        return 'from-yellow-50 to-amber-100 dark:from-yellow-900/20 dark:to-amber-900/20 border-yellow-200/50 dark:border-yellow-800/50';
       case 2:
-        return 'from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 border-gray-200/50 dark:border-gray-800/50';
+        return 'from-slate-50 to-gray-100 dark:from-slate-900/20 dark:to-gray-900/20 border-slate-200/50 dark:border-slate-800/50';
       case 3:
-        return 'from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200/50 dark:border-amber-800/50';
+        return 'from-orange-50 to-amber-100 dark:from-orange-900/20 dark:to-amber-900/20 border-orange-200/50 dark:border-orange-800/50';
+      case 4:
+      case 5:
+        return 'from-emerald-50 to-green-100 dark:from-emerald-900/20 dark:to-green-900/20 border-emerald-200/50 dark:border-emerald-800/50';
       default:
-        return 'from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200/50 dark:border-blue-800/50';
+        return rank <= 10 
+          ? 'from-blue-50 to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200/50 dark:border-blue-800/50'
+          : 'from-gray-50 to-slate-100 dark:from-gray-900/20 dark:to-slate-900/20 border-gray-200/50 dark:border-gray-800/50';
     }
   };
 
@@ -112,82 +117,98 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
 
   return (
     <Card 
-      className={`bg-gradient-to-br ${getRankColor(currentParticipant.rank)} cursor-pointer hover:shadow-lg transition-all duration-300 active:scale-95 hover:scale-105`}
-      onClick={() => navigate('/tournament')}
+      className={`bg-gradient-to-br ${getRankColor(currentParticipant.rank)} cursor-pointer hover:shadow-lg transition-all duration-200`}
     >
-      <CardContent className="p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3">
-            {getRankIcon(currentParticipant.rank)}
-            <div>
-              <h3 className="text-lg font-bold text-foreground">Tournament</h3>
-              <p className="text-sm text-muted-foreground">{tournament.name}</p>
+      <CardContent className="p-4">
+        <div onClick={() => navigate('/tournament')}>
+          {/* Enhanced Header with better visual hierarchy */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                {getRankIcon(currentParticipant.rank)}
+                {currentParticipant.rank === 1 && (
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse" />
+                )}
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-foreground">Weekly Tournament</h3>
+                <p className="text-xs text-muted-foreground font-medium">{getRankText(currentParticipant.rank)}</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-2xl font-bold text-foreground tracking-tight">{currentParticipant.totalPoints}</p>
+              <p className="text-xs text-muted-foreground font-medium">points</p>
             </div>
           </div>
-          <div className="text-right">
-            <p className="text-2xl font-bold text-foreground">{currentParticipant.totalPoints}</p>
-            <p className="text-xs text-muted-foreground">points</p>
-          </div>
-        </div>
 
-        {/* Status Grid */}
-        <div className="grid grid-cols-3 gap-3">
-          {/* Rank */}
-          <div className="text-center">
-            <p className="text-base md:text-lg font-bold text-foreground">{getRankText(currentParticipant.rank, true)}</p>
-            <p className="text-xs text-muted-foreground">of {totalParticipants}</p>
-          </div>
+          {/* Enhanced Status Grid with better visual indicators */}
+          <div className="grid grid-cols-3 gap-2 text-center">
+            {/* Rank with enhanced styling */}
+            <div className="p-2 bg-white/20 dark:bg-black/10 rounded-lg backdrop-blur-sm">
+              <p className="text-sm font-bold text-foreground">#{currentParticipant.rank}</p>
+              <p className="text-xs text-muted-foreground">of {totalParticipants}</p>
+            </div>
 
-          {/* Badges */}
-          <div className="text-center">
-            <p className="text-base md:text-lg font-bold text-foreground">{currentParticipant.badges.length}</p>
-            <p className="text-xs text-muted-foreground">badge{currentParticipant.badges.length !== 1 ? 's' : ''}</p>
-          </div>
+            {/* Badges with enhanced styling */}
+            <div className="p-2 bg-white/20 dark:bg-black/10 rounded-lg backdrop-blur-sm">
+              <p className="text-sm font-bold text-foreground">{currentParticipant.badges.length}</p>
+              <p className="text-xs text-muted-foreground">badge{currentParticipant.badges.length !== 1 ? 's' : ''}</p>
+            </div>
 
-          {/* Points from leader or lead status */}
-          <div className="text-center">
-            {isTopPerformer ? (
-              <>
-                <p className="text-base md:text-lg font-bold text-yellow-600 dark:text-yellow-400">Leading!</p>
-                <p className="text-xs text-muted-foreground">🏆</p>
-              </>
-            ) : (
-              <>
-                <p className="text-base md:text-lg font-bold text-foreground">-{pointsFromLeader}</p>
-                <p className="text-xs text-muted-foreground">behind</p>
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Quick stats or recent badges */}
-        {currentParticipant.badges.length > 0 ? (
-          <div className="mt-4 pt-3 border-t border-border/30">
-            <div className="flex items-center gap-2 overflow-x-auto">
+            {/* Points from leader or lead status with enhanced styling */}
+            <div className="p-2 bg-white/20 dark:bg-black/10 rounded-lg backdrop-blur-sm">
+              {isTopPerformer ? (
+                <>
+                  <p className="text-sm font-bold text-yellow-700 dark:text-yellow-300">Leading</p>
+                  <p className="text-xs text-muted-foreground">👑</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-sm font-bold text-foreground">-{pointsFromLeader}</p>
+                  <p className="text-xs text-muted-foreground">behind</p>
+                </>
+              )}
+            </div>
+          </div>        {/* Enhanced badge showcase */}
+        {currentParticipant.badges.length > 0 && (
+          <div className="mt-3 pt-3 border-t border-white/20 dark:border-black/20">
+            <div className="flex items-center gap-1 overflow-x-auto">
               <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">Latest:</span>
               {currentParticipant.badges.slice(-2).map((badge, index) => (
                 <div 
                   key={badge.id}
-                  className="flex items-center gap-1 bg-background/50 backdrop-blur-sm rounded-full px-2 py-1 whitespace-nowrap"
+                  className="flex items-center gap-1 bg-white/30 dark:bg-black/20 rounded-full px-2 py-1 whitespace-nowrap backdrop-blur-sm"
                 >
-                  <Trophy className="w-3 h-3 text-amber-500" />
+                  <Trophy className="w-3 h-3 text-amber-600 dark:text-amber-400" />
                   <span className="text-xs font-medium text-foreground">{badge.name}</span>
                 </div>
               ))}
             </div>
           </div>
-        ) : totalParticipants > 1 ? (
-          <div className="mt-4 pt-3 border-t border-border/30">
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-muted-foreground">Competing with {totalParticipants - 1} other{totalParticipants > 2 ? 's' : ''}</span>
-              <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 font-medium">
-                <span>View details</span>
-                <Target className="w-3 h-3" />
-              </div>
+        )}
+
+        {/* Points Breakdown (always visible) */}
+        <div className="mt-3 pt-3 border-t border-white/20 dark:border-black/20">
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">PRs:</span>
+              <span className="font-medium">{currentParticipant.pointsBreakdown?.prPoints || 0}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Consistency:</span>
+              <span className="font-medium">{currentParticipant.pointsBreakdown?.consistencyPoints || 0}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Participation:</span>
+              <span className="font-medium">{currentParticipant.pointsBreakdown?.participationPoints || 0}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Bonuses:</span>
+              <span className="font-medium">{currentParticipant.pointsBreakdown?.bonusPoints || 0}</span>
             </div>
           </div>
-        ) : null}
+        </div>
+        </div>
       </CardContent>
     </Card>
   );
