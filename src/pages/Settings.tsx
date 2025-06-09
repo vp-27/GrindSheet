@@ -43,7 +43,7 @@ const Settings: React.FC = () => {
     defaultValues: {
       name: '',
       username: '',
-      avatarUrl: '',
+      avatar_url: '',
     }
   });
 
@@ -60,7 +60,7 @@ const Settings: React.FC = () => {
       profileForm.reset({
         name: profile.name || '',
         username: profile.username || '',
-        avatarUrl: profile.avatar_url || '',
+        avatar_url: profile.avatar_url || '',
       });
     }
   }, [profile]);
@@ -378,11 +378,11 @@ const Settings: React.FC = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="avatarUrl" className="text-sm font-medium text-foreground">Avatar URL</Label>
+                      <Label htmlFor="avatar_url" className="text-sm font-medium text-foreground">Avatar URL</Label>
                       <Input
-                        id="avatarUrl"
-                        value={profileForm.watch('avatarUrl')}
-                        onChange={(e) => profileForm.setValue('avatarUrl', e.target.value)}
+                        id="avatar_url"
+                        value={profileForm.watch('avatar_url')}
+                        onChange={(e) => profileForm.setValue('avatar_url', e.target.value)}
                         className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0"
                         placeholder="https://api.dicebear.com/7.x/avataaars/svg?seed=YourName"
                       />
