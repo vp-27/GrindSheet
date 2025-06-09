@@ -8,31 +8,30 @@ interface TournamentStatusCardProps {
   tournament: Tournament | null;
   currentUserId: string;
   loading?: boolean;
+  initialized?: boolean;
 }
 
 const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({ 
   tournament, 
   currentUserId, 
-  loading 
+  loading,
+  initialized = false
 }) => {
   const navigate = useNavigate();
   
-  if (loading) {
+  // Show loader only if not initialized and loading
+  if (!initialized && loading) {
     return (
-      <Card className="bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border-amber-200/50 dark:border-amber-800/50">
-        <CardContent className="p-6">
+      <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200/50 dark:border-blue-800/50">
+        <CardContent className="p-3">
           <div className="animate-pulse">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-amber-200 dark:bg-amber-800 rounded-full"></div>
-              <div>
-                <div className="w-32 h-5 bg-amber-200 dark:bg-amber-800 rounded mb-2"></div>
-                <div className="w-20 h-4 bg-amber-200 dark:bg-amber-800 rounded"></div>
-              </div>
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-6 h-6 bg-blue-200 dark:bg-blue-800 rounded-full"></div>
+              <div className="w-24 h-3 bg-blue-200 dark:bg-blue-800 rounded"></div>
             </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="w-full h-12 bg-amber-200 dark:bg-amber-800 rounded"></div>
-              <div className="w-full h-12 bg-amber-200 dark:bg-amber-800 rounded"></div>
-              <div className="w-full h-12 bg-amber-200 dark:bg-amber-800 rounded"></div>
+            <div className="flex items-center justify-between">
+              <div className="w-32 h-3 bg-blue-200 dark:bg-blue-800 rounded"></div>
+              <div className="w-12 h-4 bg-blue-200 dark:bg-blue-800 rounded"></div>
             </div>
           </div>
         </CardContent>
@@ -40,7 +39,8 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
     );
   }
 
-  if (!tournament) {
+  // Only show "no tournament" state if initialized and actually no tournament
+  if (initialized && !tournament) {
     return (
       <Card className="bg-gradient-to-br from-gray-50 to-slate-50 dark:from-gray-900/20 dark:to-slate-900/20 border-gray-200/50 dark:border-gray-800/50">
         <CardContent className="p-6 text-center">
@@ -50,6 +50,11 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
         </CardContent>
       </Card>
     );
+  }
+
+  // Don't render anything if not initialized yet
+  if (!initialized) {
+    return null;
   }
 
   const currentParticipant = tournament.participants.find(p => p.userId === currentUserId);

@@ -24,20 +24,29 @@ const Dashboard = () => {
   const [sortBy, setSortBy] = useState<'recent' | 'pr' | 'progress'>('recent');
   const [currentTournament, setCurrentTournament] = useState<Tournament | null>(null);
   const [tournamentLoading, setTournamentLoading] = useState(true);
+  const [tournamentInitialized, setTournamentInitialized] = useState(false);
 
   // Use the same color system as the rest of the app
   const chartColors = getCategoryChartColors();
 
-  // Generate current tournament data
+  // Generate tournament data with better state management
   useEffect(() => {
     const generateTournament = async () => {
+      // Don't start loading until we have all necessary data
+      if (!exercises.length || !categories.length || !exerciseLogs.length) {
+        return;
+      }
+
       setTournamentLoading(true);
+      
       try {
         // Fetch users from Supabase
         const { data: usersData, error: usersError } = await supabase.from('profiles').select('id, name, username, avatar_url');
         
         if (usersError || !usersData) {
+          setCurrentTournament(null);
           setTournamentLoading(false);
+          setTournamentInitialized(true);
           return;
         }
 
@@ -48,37 +57,23 @@ const Dashboard = () => {
           avatarUrl: u.avatar_url
         }));
 
-        // Fetch all exercise logs
-        const { data: logsData, error: logsError } = await supabase.from('exercise_logs').select('*');
-        
-        if (logsError || !logsData) {
-          setTournamentLoading(false);
-          return;
-        }
-
-        const allExerciseLogs = logsData.map((log: any) => ({
-          id: log.id,
-          userId: log.user_id,
-          exerciseId: log.exercise_id,
-          weight: log.weight,
-          timestamp: log.timestamp,
-          note: log.note,
-          weightUnit: log.weight_unit
-        }));
-
-        if (users.length > 0 && exercises.length > 0 && categories.length > 0) {
-          const tournament = generateCurrentTournament(users, allExerciseLogs, exercises, categories);
-          setCurrentTournament(tournament);
-        }
+        const tournament = generateCurrentTournament(users, exerciseLogs, exercises, categories);
+        setCurrentTournament(tournament);
+        setTournamentLoading(false);
+        setTournamentInitialized(true);
       } catch (error) {
         console.error('Error generating tournament:', error);
-      } finally {
+        setCurrentTournament(null);
         setTournamentLoading(false);
+        setTournamentInitialized(true);
       }
     };
 
-    generateTournament();
-  }, [exercises, categories]); // Remove exerciseLogs dependency to avoid infinite loop
+    // Only generate when we have all data and haven't initialized yet
+    if (exercises.length > 0 && categories.length > 0 && exerciseLogs.length > 0 && !tournamentInitialized) {
+      generateTournament();
+    }
+  }, [exercises, categories, exerciseLogs, tournamentInitialized]);
   
   // Get color for a category based on its index
   const getCategoryColor = (categoryIndex: number) => {
@@ -246,6 +241,7 @@ const Dashboard = () => {
             tournament={currentTournament}
             currentUserId={profile?.id || ''}
             loading={tournamentLoading}
+            initialized={tournamentInitialized}
           />
           
           {/* Category Filter Buttons */}
