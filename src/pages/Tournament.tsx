@@ -67,20 +67,6 @@ const TournamentPage: React.FC = () => {
   // PR Leaderboard state
   const [activeTab, setActiveTab] = useState<'tournament' | 'records'>('tournament');
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
-  const [selectedExerciseId, setSelectedExerciseId] = useState<string>('all');
-
-  // Handle category change and reset exercise selection if needed
-  const handleCategoryChange = (value: string) => {
-    setSelectedCategoryId(value);
-    
-    // If we have an exercise selected but it's not in the new category, clear it
-    if (selectedExerciseId !== 'all') {
-      const exercise = exercises.find(e => e.id === selectedExerciseId);
-      if (exercise && exercise.categoryId !== value && value !== 'all') {
-        setSelectedExerciseId('all');
-      }
-    }
-  };
 
   // Fetch data on mount
   useEffect(() => {
@@ -495,46 +481,77 @@ const TournamentPage: React.FC = () => {
               <CardHeader className="pb-4">
                 <CardTitle className="flex items-center gap-2 text-lg">
                   <Target className="h-4 w-4" />
-                  Points System
+                  How Points Are Earned
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Trophy className="h-3 w-3 text-yellow-500" />
-                      <span className="text-sm font-medium">Personal Record</span>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Trophy className="h-4 w-4 text-yellow-500" />
+                      <span className="text-sm font-semibold">Personal Record</span>
                     </div>
-                    <span className="text-lg font-bold text-yellow-600">{POINTS_CONFIG.PR_ACHIEVEMENT.points}</span>
-                    <span className="text-xs text-muted-foreground ml-1">pts</span>
+                    <div className="mb-2">
+                      <span className="text-2xl font-bold text-yellow-600">{POINTS_CONFIG.PR_ACHIEVEMENT.points}</span>
+                      <span className="text-sm text-muted-foreground ml-1">points</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Beat your previous best weight on any exercise
+                    </p>
                   </div>
                   
-                  <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <CheckCircle className="h-3 w-3 text-green-500" />
-                      <span className="text-sm font-medium">Daily Workout</span>
+                  <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle className="h-4 w-4 text-green-500" />
+                      <span className="text-sm font-semibold">Daily Workout</span>
                     </div>
-                    <span className="text-lg font-bold text-green-600">{POINTS_CONFIG.DAILY_WORKOUT.points}</span>
-                    <span className="text-xs text-muted-foreground ml-1">pts</span>
+                    <div className="mb-2">
+                      <span className="text-2xl font-bold text-green-600">{POINTS_CONFIG.DAILY_WORKOUT.points}</span>
+                      <span className="text-sm text-muted-foreground ml-1">points</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Log at least one exercise on any day
+                    </p>
                   </div>
                   
-                  <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Flame className="h-3 w-3 text-red-500" />
-                      <span className="text-sm font-medium">Consistency (5+ days)</span>
+                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Flame className="h-4 w-4 text-blue-500" />
+                      <span className="text-sm font-semibold">Consistency Bonus</span>
                     </div>
-                    <span className="text-lg font-bold text-red-600">{POINTS_CONFIG.CONSISTENCY_BONUS.points}</span>
-                    <span className="text-xs text-muted-foreground ml-1">pts</span>
+                    <div className="mb-2">
+                      <span className="text-2xl font-bold text-blue-600">{POINTS_CONFIG.CONSISTENCY_BONUS.points}</span>
+                      <span className="text-sm text-muted-foreground ml-1">points</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Work out 5 or more days in the week
+                    </p>
                   </div>
                   
-                  <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-3">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Star className="h-3 w-3 text-purple-500" />
-                      <span className="text-sm font-medium">Special Badges</span>
+                  <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Star className="h-4 w-4 text-purple-500" />
+                      <span className="text-sm font-semibold">Special Badges</span>
                     </div>
-                    <span className="text-lg font-bold text-purple-600">+15</span>
-                    <span className="text-xs text-muted-foreground ml-1">bonus</span>
+                    <div className="mb-2">
+                      <span className="text-2xl font-bold text-purple-600">5-25</span>
+                      <span className="text-sm text-muted-foreground ml-1">points</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Weekend Warrior, First PR, Perfect Week, etc.
+                    </p>
                   </div>
+                </div>
+                
+                <div className="border-t border-border/50 pt-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Crown className="h-4 w-4 text-amber-500" />
+                    <span className="text-sm font-semibold text-foreground">Weekly Tournament</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Compete with friends every week (Monday-Sunday). Most points wins! 
+                    Tournament resets automatically each Monday.
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -671,7 +688,7 @@ const TournamentPage: React.FC = () => {
                   allExerciseLogs,
                   users,
                   LeaderboardType.EXERCISE_PR,
-                  selectedExerciseId === 'all' ? undefined : selectedExerciseId,
+                  undefined, // Always show all exercises
                   selectedCategoryId === 'all' ? undefined : selectedCategoryId
                 );
 
@@ -691,8 +708,8 @@ const TournamentPage: React.FC = () => {
 
                 return (
                   <div className="space-y-3">
-                    {/* PR Championship Summary for overview mode */}
-                    {selectedExerciseId === 'all' && (() => {
+                    {/* PR Championship Summary - always show when no specific category selected */}
+                    {selectedCategoryId === 'all' && (() => {
                       const prChampionshipSummary = calculatePRChampionshipSummary(allExerciseLogs, users);
                       return prChampionshipSummary && prChampionshipSummary.champion ? (
                         <Card className="rounded-2xl bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border border-yellow-200 dark:border-yellow-800">
@@ -732,7 +749,7 @@ const TournamentPage: React.FC = () => {
                       const position = index + 1;
                       const user = entry.user || { id: '', name: 'Unknown', username: '', avatarUrl: undefined };
                       const isCurrentUser = user.id === profile?.id;
-                      const isOverviewMode = selectedExerciseId === 'all';
+                      const isOverviewMode = true; // Always show overview mode since we removed exercise filtering
                       
                       // Get exercise details for overview mode
                       const exercise = (isOverviewMode && entry.exerciseId) 
@@ -819,54 +836,6 @@ const TournamentPage: React.FC = () => {
                           </Card>
                         );
                       }
-                      
-                      // Regular leaderboard entry for specific exercise
-                      return (
-                        <Card 
-                          key={entry.userId || index}
-                          className={`rounded-2xl transition-colors ${
-                            isCurrentUser ? 'bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 border-green-200 dark:border-green-800' : 'bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90'
-                          }`}
-                        >
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-4">
-                              <div className="flex-shrink-0">
-                                {renderPositionBadge(position)}
-                              </div>
-
-                              <div className="flex items-center gap-3 flex-1 min-w-0">
-                                <Avatar className="h-10 w-10">
-                                  <AvatarImage src={user.avatarUrl} alt={user.name} />
-                                  <AvatarFallback className="bg-muted text-muted-foreground">
-                                    {user.name?.substring(0, 2).toUpperCase() || 'U'}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <h3 className="font-semibold text-foreground truncate">
-                                      {user.name}
-                                    </h3>
-                                    {isCurrentUser && (
-                                      <span className="text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 px-2 py-0.5 rounded-full font-medium">
-                                        You
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="text-right flex-shrink-0">
-                                <div className="font-bold text-lg text-foreground">
-                                  {entry.value.toFixed(1)} lbs
-                                </div>
-                                <div className="text-xs text-muted-foreground">
-                                  personal record
-                                </div>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
                     })}
                   </div>
                 );
