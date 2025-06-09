@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import Layout from '@/components/Layout';
 import ExerciseLogCard from '@/components/ExerciseLogCard';
@@ -18,6 +19,7 @@ const History = () => {
   const { exerciseLogs, exercises, categories, updateExerciseLog, deleteExerciseLog } = useAppContext();
   const { profile } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [editLog, setEditLog] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editForm, setEditForm] = useState({ weight: '', note: '' });
@@ -69,6 +71,13 @@ const History = () => {
     
     const category = categories.find(c => c.id === exercise.categoryId);
     return category;
+  };
+
+  // Handle exercise card click to view detailed progress
+  const handleExerciseClick = (exerciseId) => {
+    navigate(`/exercise-detail?exercise=${exerciseId}`);
+    // Scroll to top after navigation
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Edit dialog handlers
@@ -189,16 +198,21 @@ const History = () => {
                   const categoryColor = categoryIndex >= 0 ? getCategoryColor(categoryIndex) : '#10b981';
                   
                   return (
-                    <ExerciseLogCard
+                    <div 
                       key={log.id}
-                      log={log}
-                      exerciseName={exerciseName}
-                      categoryColor={categoryColor}
-                      showExerciseName={true}
-                      showDate={true}
-                      onEdit={openEditDialog}
-                      onDelete={handleDelete}
-                    />
+                      className="group cursor-pointer"
+                      onClick={() => handleExerciseClick(log.exerciseId)}
+                    >
+                      <ExerciseLogCard
+                        log={log}
+                        exerciseName={exerciseName}
+                        categoryColor={categoryColor}
+                        showExerciseName={true}
+                        showDate={true}
+                        onEdit={openEditDialog}
+                        onDelete={handleDelete}
+                      />
+                    </div>
                   );
                 })}
               </div>

@@ -65,7 +65,10 @@ const ExerciseLogCard: React.FC<ExerciseLogCardProps> = ({
             variant="outline" 
             size="icon"
             className="h-8 w-8 rounded-lg border-border/50 active:bg-muted active:border-primary/30 transition-all duration-200 shadow-sm" 
-            onClick={() => onEdit(log)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(log);
+            }}
             aria-label="Edit exercise log"
           >
             <Pencil className="h-3 w-3" />
@@ -74,7 +77,10 @@ const ExerciseLogCard: React.FC<ExerciseLogCardProps> = ({
             variant="outline" 
             size="icon"
             className="h-8 w-8 rounded-lg border-border/50 text-red-500 active:text-red-600 active:bg-red-50 active:border-red-200 transition-all duration-200 shadow-sm" 
-            onClick={() => onDelete(log.id)}
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(log.id);
+            }}
             aria-label="Delete exercise log"
           >
             <Trash2 className="h-3 w-3" />
