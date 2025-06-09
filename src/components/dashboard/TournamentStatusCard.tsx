@@ -22,16 +22,16 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
   // Show loader only if not initialized and loading
   if (!initialized && loading) {
     return (
-      <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-blue-200/50 dark:border-blue-800/50">
+      <Card className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 dark:from-purple-900/20 dark:via-blue-900/20 dark:to-indigo-900/20 border-purple-200/50 dark:border-purple-800/50">
         <CardContent className="p-3">
           <div className="animate-pulse">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-6 h-6 bg-blue-200 dark:bg-blue-800 rounded-full"></div>
-              <div className="w-24 h-3 bg-blue-200 dark:bg-blue-800 rounded"></div>
+              <div className="w-6 h-6 bg-gradient-to-br from-purple-200 to-blue-200 dark:from-purple-800 dark:to-blue-800 rounded-full"></div>
+              <div className="w-24 h-3 bg-gradient-to-r from-purple-200 to-blue-200 dark:from-purple-800 dark:to-blue-800 rounded"></div>
             </div>
             <div className="flex items-center justify-between">
-              <div className="w-32 h-3 bg-blue-200 dark:bg-blue-800 rounded"></div>
-              <div className="w-12 h-4 bg-blue-200 dark:bg-blue-800 rounded"></div>
+              <div className="w-32 h-3 bg-gradient-to-r from-purple-200 to-blue-200 dark:from-purple-800 dark:to-blue-800 rounded"></div>
+              <div className="w-12 h-4 bg-gradient-to-r from-purple-200 to-blue-200 dark:from-purple-800 dark:to-blue-800 rounded"></div>
             </div>
           </div>
         </CardContent>
