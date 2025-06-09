@@ -61,19 +61,19 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor }) => {
       <div className="sticky bottom-0 z-10 backdrop-blur-lg bg-background/70 pb-3 w-full sm:max-w-lg sm:mx-auto rounded-t-xl px-2 sm:px-0">
         <nav className="relative flex items-center justify-between p-2">
           <div className="flex-1 flex justify-center items-center">
-            <NavLink to="/" icon={<Home />} label="Home" />
+            <NavLink to="/" icon={<Home />} />
           </div>
           <div className="flex-1 flex justify-center items-center">
-            <NavLink to="/tournament" icon={<Target />} label="Tournament" />
+            <NavLink to="/tournament" icon={<Trophy />} />
           </div>
           <div className="flex-1 flex justify-center items-center">
             <div className="w-16 h-14 flex-shrink-0" />
           </div>
           <div className="flex-1 flex justify-center items-center">
-            <NavLink to="/history" icon={<History />} label="History" />
+            <NavLink to="/history" icon={<History />} />
           </div>
           <div className="flex-1 flex justify-center items-center">
-            <NavLink to="/settings" icon={<Settings />} label="Settings" />
+            <NavLink to="/settings" icon={<Settings />} />
           </div>
           {/* Absolutely positioned AddExerciseButton for precise centering */}
           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -85,7 +85,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor }) => {
   );
 };
 
-const NavLink: React.FC<{ to: string; icon: React.ReactNode; label: string }> = ({ to, icon, label }) => {
+const NavLink: React.FC<{ to: string; icon: React.ReactNode; label?: string }> = ({ to, icon, label }) => {
   // Get current path
   const currentPath = window.location.pathname;
   const isActive = currentPath === to || 
@@ -100,7 +100,7 @@ const NavLink: React.FC<{ to: string; icon: React.ReactNode; label: string }> = 
       )}
     >
       <div className={cn("text-lg mb-0.5 text-icon", isActive ? "text-primary" : "text-icon-muted")}>{icon}</div>
-      <span className="text-center truncate w-full">{label}</span>
+      {label && <span className="text-center truncate w-full">{label}</span>}
     </Link>
   );
 };

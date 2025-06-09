@@ -436,186 +436,212 @@ const TournamentPage: React.FC = () => {
   }
 
   return (
-    <Layout title="Tournament">
+    <Layout title={activeTab === 'records' ? 'PR Records' : 'Tournament'}>
       <div className="space-y-6 relative">
-        {/* Clean Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-sm">
-              <Trophy className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">
-                {currentTournament ? currentTournament.name : 'Tournament'}
-              </h1>
-              {currentTournament && (
-                <p className="text-sm text-muted-foreground">
-                  {currentTournament.participants.length} competitors
-                </p>
-              )}
-            </div>
+        {/* Clean Tab System - moved to top */}
+        <div className="bg-muted/20 p-1 rounded-2xl">
+          <div className="grid grid-cols-2 gap-1">
+            <Button
+              variant={activeTab === 'tournament' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveTab('tournament')}
+              className={`rounded-xl transition-all duration-200 ${
+                activeTab === 'tournament'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'hover:bg-background/50'
+              }`}
+            >
+              <Trophy className="h-4 w-4 mr-2" />
+              Tournament
+            </Button>
+            <Button
+              variant={activeTab === 'records' ? 'default' : 'ghost'}
+              size="sm"
+              onClick={() => setActiveTab('records')}
+              className={`rounded-xl transition-all duration-200 ${
+                activeTab === 'records'
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'hover:bg-background/50'
+              }`}
+            >
+              <Medal className="h-4 w-4 mr-2" />
+              PR Records
+            </Button>
           </div>
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={() => setShowPointsGuide(!showPointsGuide)}
-            className="rounded-2xl transition-all duration-200"
-          >
-            {showPointsGuide ? (
-              <div className="flex items-center gap-2">
-                <span className="text-xs">×</span>
-                <span>Close</span>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Target className="h-4 w-4" />
-                <span>Guide</span>
-              </div>
-            )}
-          </Button>
         </div>
 
-          {/* Streamlined Points Guide */}
-          {showPointsGuide && (
-            <Card className="rounded-2xl bg-card/80 backdrop-blur-sm border-border/50">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Target className="h-4 w-4" />
-                  How Points Are Earned
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Trophy className="h-4 w-4 text-yellow-500" />
-                      <span className="text-sm font-semibold">Personal Record</span>
-                    </div>
-                    <div className="mb-2">
-                      <span className="text-2xl font-bold text-yellow-600">{POINTS_CONFIG.PR_ACHIEVEMENT.points}</span>
-                      <span className="text-sm text-muted-foreground ml-1">points</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Beat your previous best weight on any exercise
-                    </p>
-                  </div>
-                  
-                  <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CheckCircle className="h-4 w-4 text-green-500" />
-                      <span className="text-sm font-semibold">Daily Workout</span>
-                    </div>
-                    <div className="mb-2">
-                      <span className="text-2xl font-bold text-green-600">{POINTS_CONFIG.DAILY_WORKOUT.points}</span>
-                      <span className="text-sm text-muted-foreground ml-1">points</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Log at least one exercise on any day
-                    </p>
-                  </div>
-                  
-                  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Flame className="h-4 w-4 text-blue-500" />
-                      <span className="text-sm font-semibold">Consistency Bonus</span>
-                    </div>
-                    <div className="mb-2">
-                      <span className="text-2xl font-bold text-blue-600">{POINTS_CONFIG.CONSISTENCY_BONUS.points}</span>
-                      <span className="text-sm text-muted-foreground ml-1">points</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Work out 5 or more days in the week
-                    </p>
-                  </div>
-                  
-                  <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Star className="h-4 w-4 text-purple-500" />
-                      <span className="text-sm font-semibold">Special Badges</span>
-                    </div>
-                    <div className="mb-2">
-                      <span className="text-2xl font-bold text-purple-600">5-25</span>
-                      <span className="text-sm text-muted-foreground ml-1">points</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      Weekend Warrior, First PR, Perfect Week, etc.
-                    </p>
-                  </div>
+        {/* Tournament-specific header and controls */}
+        {activeTab === 'tournament' && (
+          <>
+            {/* Clean Header */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-sm">
+                  <Trophy className="h-5 w-5 text-white" />
                 </div>
-                
-                <div className="border-t border-border/50 pt-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Crown className="h-4 w-4 text-amber-500" />
-                    <span className="text-sm font-semibold text-foreground">Weekly Tournament</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Compete with friends every week (Monday-Sunday). Most points wins! 
-                    Tournament resets automatically each Monday.
-                  </p>
+                <div>
+                  <h1 className="text-xl font-bold text-foreground">
+                    {currentTournament ? currentTournament.name : 'Tournament'}
+                  </h1>
+                  {currentTournament && (
+                    <p className="text-sm text-muted-foreground">
+                      {currentTournament.participants.length} competitors
+                    </p>
+                  )}
                 </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Simplified Tournament Selection */}
-          {tournamentHistory.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              <Button
-                variant={selectedTournament?.id === currentTournament?.id ? "default" : "outline"}
+              </div>
+              <Button 
+                variant="outline" 
                 size="sm"
-                onClick={() => setSelectedTournament(currentTournament)}
-                className="rounded-2xl whitespace-nowrap"
+                onClick={() => setShowPointsGuide(!showPointsGuide)}
+                className="rounded-2xl transition-all duration-200"
               >
-                Current
+                {showPointsGuide ? (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs">×</span>
+                    <span>Close</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Target className="h-4 w-4" />
+                    <span>Guide</span>
+                  </div>
+                )}
               </Button>
-              {tournamentHistory
-                .slice()
-                .reverse()
-                .map(tournament => (
-                <Button
-                  key={tournament.id}
-                  variant={selectedTournament?.id === tournament.id ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedTournament(tournament)}
-                  className="rounded-2xl whitespace-nowrap"
-                >
-                  {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                </Button>
-              ))}
             </div>
-          )}
 
-          {/* Clean Tab System */}
-          <div className="bg-muted/20 p-1 rounded-2xl">
-            <div className="grid grid-cols-2 gap-1">
-              <Button
-                variant={activeTab === 'tournament' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setActiveTab('tournament')}
-                className={`rounded-xl transition-all duration-200 ${
-                  activeTab === 'tournament'
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'hover:bg-background/50'
-                }`}
-              >
-                <Trophy className="h-4 w-4 mr-2" />
-                Tournament
-              </Button>
-              <Button
-                variant={activeTab === 'records' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setActiveTab('records')}
-                className={`rounded-xl transition-all duration-200 ${
-                  activeTab === 'records'
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'hover:bg-background/50'
-                }`}
-              >
-                <Medal className="h-4 w-4 mr-2" />
-                PR Records
-              </Button>
+            {/* Streamlined Points Guide */}
+            {showPointsGuide && (
+              <Card className="rounded-2xl bg-card/80 backdrop-blur-sm border-border/50">
+                <CardHeader className="pb-4">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Target className="h-4 w-4" />
+                    How Points Are Earned
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Trophy className="h-4 w-4 text-yellow-500" />
+                        <span className="text-sm font-semibold">Personal Record</span>
+                      </div>
+                      <div className="mb-2">
+                        <span className="text-2xl font-bold text-yellow-600">{POINTS_CONFIG.PR_ACHIEVEMENT.points}</span>
+                        <span className="text-sm text-muted-foreground ml-1">points</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Beat your previous best weight on any exercise
+                      </p>
+                    </div>
+                    
+                    <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span className="text-sm font-semibold">Daily Workout</span>
+                      </div>
+                      <div className="mb-2">
+                        <span className="text-2xl font-bold text-green-600">{POINTS_CONFIG.DAILY_WORKOUT.points}</span>
+                        <span className="text-sm text-muted-foreground ml-1">points</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Log at least one exercise on any day
+                      </p>
+                    </div>
+                    
+                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Flame className="h-4 w-4 text-blue-500" />
+                        <span className="text-sm font-semibold">Consistency Bonus</span>
+                      </div>
+                      <div className="mb-2">
+                        <span className="text-2xl font-bold text-blue-600">{POINTS_CONFIG.CONSISTENCY_BONUS.points}</span>
+                        <span className="text-sm text-muted-foreground ml-1">points</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Work out 5 or more days in the week
+                      </p>
+                    </div>
+                    
+                    <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Star className="h-4 w-4 text-purple-500" />
+                        <span className="text-sm font-semibold">Special Badges</span>
+                      </div>
+                      <div className="mb-2">
+                        <span className="text-2xl font-bold text-purple-600">5-25</span>
+                        <span className="text-sm text-muted-foreground ml-1">points</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Weekend Warrior, First PR, Perfect Week, etc.
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <div className="border-t border-border/50 pt-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Crown className="h-4 w-4 text-amber-500" />
+                      <span className="text-sm font-semibold text-foreground">Weekly Tournament</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Compete with friends every week (Monday-Sunday). Most points wins! 
+                      Tournament resets automatically each Monday.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Tournament Week Selection with blue-purple design */}
+            {tournamentHistory.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto pb-2">
+                <Button
+                  variant={selectedTournament?.id === currentTournament?.id ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setSelectedTournament(currentTournament)}
+                  className={`rounded-2xl whitespace-nowrap transition-all duration-200 font-medium ${
+                    selectedTournament?.id === currentTournament?.id
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-md hover:from-blue-600 hover:to-purple-700'
+                      : 'border-2 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                  }`}
+                >
+                  Current
+                </Button>
+                {tournamentHistory
+                  .slice()
+                  .reverse()
+                  .map(tournament => (
+                  <Button
+                    key={tournament.id}
+                    variant={selectedTournament?.id === tournament.id ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedTournament(tournament)}
+                    className={`rounded-2xl whitespace-nowrap transition-all duration-200 font-medium ${
+                      selectedTournament?.id === tournament.id
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-md hover:from-blue-600 hover:to-purple-700'
+                        : 'border-2 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                    }`}
+                  >
+                    {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  </Button>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* PR Records-specific header */}
+        {activeTab === 'records' && (
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-sm">
+              <Medal className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-foreground">Personal Records</h1>
+              <p className="text-sm text-muted-foreground">Best lifts across all exercises</p>
             </div>
           </div>
+        )}
 
           {/* Tournament Leaderboard */}
           {activeTab === 'tournament' && selectedTournament && (
