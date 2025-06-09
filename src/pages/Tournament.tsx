@@ -49,6 +49,7 @@ import {
 } from '@/components/ui/select';
 import { getCategoryChartColors, getCategoryKeyByName, getCategoryColors } from '@/utils/categoryColors';
 import { supabase } from '@/integrations/supabase/client';
+import '@/components/ui/category-styles.css';
 
 const TournamentPage: React.FC = () => {
   const { profile } = useAuth();
@@ -573,7 +574,7 @@ const TournamentPage: React.FC = () => {
                 onClick={() => setActiveTab('tournament')}
                 className={`rounded-xl transition-all duration-200 ${
                   activeTab === 'tournament'
-                    ? 'bg-background shadow-sm'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'hover:bg-background/50'
                 }`}
               >
@@ -586,7 +587,7 @@ const TournamentPage: React.FC = () => {
                 onClick={() => setActiveTab('records')}
                 className={`rounded-xl transition-all duration-200 ${
                   activeTab === 'records'
-                    ? 'bg-background shadow-sm'
+                    ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'hover:bg-background/50'
                 }`}
               >
@@ -736,19 +737,26 @@ const TournamentPage: React.FC = () => {
                         const tiedUsers = entry.users || [user];
                         const showMultipleAvatars = tiedUsers.length > 1;
                         
+                        // Get category color for the exercise title
+                        const categoryKey = exerciseCategory ? getCategoryKeyByName(exerciseCategory.name) : 'default';
+                        const categoryColors = getCategoryColors(categoryKey);
+                        
                         return (
                           <Card 
                             key={entry.exerciseId || index}
                             className="rounded-2xl bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90 transition-colors"
+                            style={{
+                              '--category-color': categoryColors.primary
+                            } as React.CSSProperties}
                           >
                             <CardContent className="p-4">
                               <div className="flex items-center justify-between mb-3">
                                 <div>
-                                  <h3 className="font-bold text-lg text-foreground">
+                                  <h3 className="font-bold text-lg apple-health-card-title">
                                     {exerciseName}
                                   </h3>
                                   {exerciseCategory && (
-                                    <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded-full">
+                                    <span className="text-xs text-muted-foreground font-medium">
                                       {exerciseCategory.name}
                                     </span>
                                   )}
