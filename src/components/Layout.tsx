@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Home, Trophy, History, User, Plus, Settings, LogOut } from 'lucide-react';
+import { Home, Trophy, History, User, Plus, Settings, LogOut, Target } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
@@ -64,7 +64,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor }) => {
             <NavLink to="/" icon={<Home />} label="Home" />
           </div>
           <div className="flex-1 flex justify-center items-center">
-            <NavLink to="/leaderboard" icon={<Trophy />} label="Leaderboard" />
+            <NavLink to="/tournament" icon={<Target />} label="Tournament" />
           </div>
           <div className="flex-1 flex justify-center items-center">
             <div className="w-16 h-14 flex-shrink-0" />

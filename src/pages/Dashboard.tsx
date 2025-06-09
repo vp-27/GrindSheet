@@ -1,15 +1,19 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAppContext } from '@/context/useAppContext';
 import { calculateProgress, getOverallProgressChartData, getExerciseProgressChartData } from '@/utils/progressUtils';
+import { generateCurrentTournament } from '@/utils/tournamentUtils';
 import { TrendingUp, Clock, Trophy, ChevronRight, Activity, Zap } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
+import TournamentStatusCard from '@/components/dashboard/TournamentStatusCard';
 import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
 import { format } from 'date-fns';
+import { Tournament } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
 import '@/components/ui/category-styles.css';
 
 const Dashboard = () => {
@@ -18,9 +22,63 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'recent' | 'pr' | 'progress'>('recent');
+  const [currentTournament, setCurrentTournament] = useState<Tournament | null>(null);
+  const [tournamentLoading, setTournamentLoading] = useState(true);
 
   // Use the same color system as the rest of the app
   const chartColors = getCategoryChartColors();
+
+  // Generate current tournament data
+  useEffect(() => {
+    const generateTournament = async () => {
+      setTournamentLoading(true);
+      try {
+        // Fetch users from Supabase
+        const { data: usersData, error: usersError } = await supabase.from('profiles').select('id, name, username, avatar_url');
+        
+        if (usersError || !usersData) {
+          setTournamentLoading(false);
+          return;
+        }
+
+        const users = usersData.map((u: any) => ({
+          id: u.id,
+          name: u.name,
+          username: u.username,
+          avatarUrl: u.avatar_url
+        }));
+
+        // Fetch all exercise logs
+        const { data: logsData, error: logsError } = await supabase.from('exercise_logs').select('*');
+        
+        if (logsError || !logsData) {
+          setTournamentLoading(false);
+          return;
+        }
+
+        const allExerciseLogs = logsData.map((log: any) => ({
+          id: log.id,
+          userId: log.user_id,
+          exerciseId: log.exercise_id,
+          weight: log.weight,
+          timestamp: log.timestamp,
+          note: log.note,
+          weightUnit: log.weight_unit
+        }));
+
+        if (users.length > 0 && exercises.length > 0 && categories.length > 0) {
+          const tournament = generateCurrentTournament(users, allExerciseLogs, exercises, categories);
+          setCurrentTournament(tournament);
+        }
+      } catch (error) {
+        console.error('Error generating tournament:', error);
+      } finally {
+        setTournamentLoading(false);
+      }
+    };
+
+    generateTournament();
+  }, [exercises, categories]); // Remove exerciseLogs dependency to avoid infinite loop
   
   // Get color for a category based on its index
   const getCategoryColor = (categoryIndex: number) => {
@@ -182,6 +240,13 @@ const Dashboard = () => {
               </div>
             )}
           </div>
+
+          {/* Tournament Status Card */}
+          <TournamentStatusCard 
+            tournament={currentTournament}
+            currentUserId={profile?.id || ''}
+            loading={tournamentLoading}
+          />
           
           {/* Category Filter Buttons */}
           <div className="relative">
