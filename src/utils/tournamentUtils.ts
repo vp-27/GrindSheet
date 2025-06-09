@@ -244,21 +244,8 @@ export const calculateTournamentPoints = (
             improvementPercent
           });
         }
-      } else {
-        // First time doing this exercise counts as PR
-        pointsBreakdown.prPoints += POINTS_CONFIG.PR_ACHIEVEMENT.points;
-        exerciseProgress.set(exercise.id, { hadPR: true, improvementPercent: 0 });
-        
-        const firstLog = tournamentExerciseLogs[0];
-        prDetails.push({
-          exerciseId: exercise.id,
-          exerciseName: exercise.name,
-          weight: maxTournamentWeight,
-          previousBest: 0,
-          achievedAt: firstLog.timestamp,
-          improvementPercent: 0
-        });
       }
+      // Note: First time doing an exercise during tournament no longer counts as a PR
     }
   });
 

@@ -118,96 +118,41 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
   return (
     <Card 
       className={`bg-gradient-to-br ${getRankColor(currentParticipant.rank)} cursor-pointer hover:shadow-lg transition-all duration-200`}
+      onClick={() => navigate('/tournament')}
     >
-      <CardContent className="p-4">
-        <div onClick={() => navigate('/tournament')}>
-          {/* Enhanced Header with better visual hierarchy */}
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                {getRankIcon(currentParticipant.rank)}
-                {currentParticipant.rank === 1 && (
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-400 rounded-full animate-pulse" />
-                )}
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-foreground">Weekly Tournament</h3>
-                <p className="text-xs text-muted-foreground font-medium">{getRankText(currentParticipant.rank)}</p>
-              </div>
+      <CardContent className="p-3">
+        {/* Single Line Tournament Status */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              {getRankIcon(currentParticipant.rank)}
+              {currentParticipant.rank === 1 && (
+                <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+              )}
             </div>
-            <div className="text-right">
-              <p className="text-2xl font-bold text-foreground tracking-tight">{currentParticipant.totalPoints}</p>
-              <p className="text-xs text-muted-foreground font-medium">points</p>
-            </div>
-          </div>
-
-          {/* Enhanced Status Grid with better visual indicators */}
-          <div className="grid grid-cols-3 gap-2 text-center">
-            {/* Rank with enhanced styling */}
-            <div className="p-2 bg-white/20 dark:bg-black/10 rounded-lg backdrop-blur-sm">
-              <p className="text-sm font-bold text-foreground">#{currentParticipant.rank}</p>
-              <p className="text-xs text-muted-foreground">of {totalParticipants}</p>
-            </div>
-
-            {/* Badges with enhanced styling */}
-            <div className="p-2 bg-white/20 dark:bg-black/10 rounded-lg backdrop-blur-sm">
-              <p className="text-sm font-bold text-foreground">{currentParticipant.badges.length}</p>
-              <p className="text-xs text-muted-foreground">badge{currentParticipant.badges.length !== 1 ? 's' : ''}</p>
-            </div>
-
-            {/* Points from leader or lead status with enhanced styling */}
-            <div className="p-2 bg-white/20 dark:bg-black/10 rounded-lg backdrop-blur-sm">
-              {isTopPerformer ? (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="font-bold text-foreground">Weekly Tournament</span>
+              <span className="text-muted-foreground">•</span>
+              <span className="font-semibold text-foreground">{getRankText(currentParticipant.rank)}</span>
+              {!isTopPerformer && (
                 <>
-                  <p className="text-sm font-bold text-yellow-700 dark:text-yellow-300">Leading</p>
-                  <p className="text-xs text-muted-foreground">👑</p>
-                </>
-              ) : (
-                <>
-                  <p className="text-sm font-bold text-foreground">-{pointsFromLeader}</p>
-                  <p className="text-xs text-muted-foreground">behind</p>
+                  <span className="text-muted-foreground">•</span>
+                  <span className="text-muted-foreground">{pointsFromLeader} pts behind</span>
                 </>
               )}
             </div>
-          </div>        {/* Enhanced badge showcase */}
-        {currentParticipant.badges.length > 0 && (
-          <div className="mt-3 pt-3 border-t border-white/20 dark:border-black/20">
-            <div className="flex items-center gap-1 overflow-x-auto">
-              <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">Latest:</span>
-              {currentParticipant.badges.slice(-2).map((badge, index) => (
-                <div 
-                  key={badge.id}
-                  className="flex items-center gap-1 bg-white/30 dark:bg-black/20 rounded-full px-2 py-1 whitespace-nowrap backdrop-blur-sm"
-                >
-                  <Trophy className="w-3 h-3 text-amber-600 dark:text-amber-400" />
-                  <span className="text-xs font-medium text-foreground">{badge.name}</span>
-                </div>
-              ))}
+          </div>
+          <div className="flex items-center gap-3">
+            {currentParticipant.badges.length > 0 && (
+              <span className="text-xs text-muted-foreground">
+                {currentParticipant.badges.length} badge{currentParticipant.badges.length !== 1 ? 's' : ''}
+              </span>
+            )}
+            <div className="text-right">
+              <span className="text-lg font-bold text-foreground">{currentParticipant.totalPoints}</span>
+              <span className="text-xs text-muted-foreground ml-1">pts</span>
             </div>
           </div>
-        )}
-
-        {/* Points Breakdown (always visible) */}
-        <div className="mt-3 pt-3 border-t border-white/20 dark:border-black/20">
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">PRs:</span>
-              <span className="font-medium">{currentParticipant.pointsBreakdown?.prPoints || 0}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Consistency:</span>
-              <span className="font-medium">{currentParticipant.pointsBreakdown?.consistencyPoints || 0}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Participation:</span>
-              <span className="font-medium">{currentParticipant.pointsBreakdown?.participationPoints || 0}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Bonuses:</span>
-              <span className="font-medium">{currentParticipant.pointsBreakdown?.bonusPoints || 0}</span>
-            </div>
-          </div>
-        </div>
         </div>
       </CardContent>
     </Card>

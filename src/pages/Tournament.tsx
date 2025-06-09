@@ -316,11 +316,16 @@ const TournamentPage: React.FC = () => {
                                 {pr.weight}lbs
                               </span>
                             </div>
-                            {pr.improvementPercent > 0 && (
-                              <span className="text-green-600 dark:text-green-400 font-medium">
-                                +{pr.improvementPercent.toFixed(1)}%
+                            <div className="flex items-center gap-2">
+                              {pr.improvementPercent > 0 && (
+                                <span className="text-green-600 dark:text-green-400 font-medium">
+                                  +{pr.improvementPercent.toFixed(1)}%
+                                </span>
+                              )}
+                              <span className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 px-2 py-0.5 rounded font-medium">
+                                +75 pts
                               </span>
-                            )}
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -332,13 +337,21 @@ const TournamentPage: React.FC = () => {
                 {participant.badges.length > 0 && (
                   <div className="bg-white/20 dark:bg-black/10 rounded p-3">
                     <h4 className="font-medium text-foreground mb-2">Badges Earned</h4>
-                    <div className="space-y-1">
+                    <div className="space-y-2">
                       {participant.badges.map(badge => (
-                        <div key={badge.id} className="flex items-center justify-between">
-                          <span className="text-muted-foreground">{badge.name}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(badge.earnedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                          </span>
+                        <div key={badge.id} className="bg-white/10 dark:bg-black/5 rounded p-2">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="font-medium text-sm text-foreground">{badge.name}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(badge.earnedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">{badge.description}</span>
+                            <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded text-xs font-medium">
+                              +{badge.points} pts
+                            </span>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -346,11 +359,30 @@ const TournamentPage: React.FC = () => {
                 )}
 
                 {/* Consistency Details */}
-                {participant.pointsBreakdown.consistencyPoints > 0 && (
+                {(participant.pointsBreakdown.consistencyPoints > 0 || participant.pointsBreakdown.participationPoints > 0) && (
                   <div className="bg-white/20 dark:bg-black/10 rounded p-3">
-                    <h4 className="font-medium text-foreground mb-2">Consistency Bonuses</h4>
-                    <div className="text-xs text-muted-foreground">
-                      Earned for working out {participant.workoutDays.length} days this week
+                    <h4 className="font-medium text-foreground mb-2">Activity Points</h4>
+                    <div className="space-y-2">
+                      {participant.pointsBreakdown.participationPoints > 0 && (
+                        <div className="bg-white/10 dark:bg-black/5 rounded p-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-foreground">Daily Workouts ({participant.workoutDays.length} days)</span>
+                            <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded text-xs font-medium">
+                              +{participant.pointsBreakdown.participationPoints} pts
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                      {participant.pointsBreakdown.consistencyPoints > 0 && (
+                        <div className="bg-white/10 dark:bg-black/5 rounded p-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-foreground">Consistency Bonus (5+ days)</span>
+                            <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs font-medium">
+                              +{participant.pointsBreakdown.consistencyPoints} pts
+                            </span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
