@@ -304,11 +304,16 @@ const TournamentPage: React.FC = () => {
                   <div className="bg-white/20 dark:bg-black/10 rounded p-3">
                     <h4 className="font-medium text-foreground mb-2">Workout Days ({participant.workoutDays.length})</h4>
                     <div className="flex flex-wrap gap-1">
-                      {participant.workoutDays.map((date, idx) => (
-                        <span key={idx} className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded text-xs">
-                          {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </span>
-                      ))}
+                      {participant.workoutDays.map((date, idx) => {
+                        // Parse YYYY-MM-DD format to avoid timezone shifts
+                        const [year, month, day] = date.split('-').map(Number);
+                        const localDate = new Date(year, month - 1, day); // month is 0-indexed
+                        return (
+                          <span key={idx} className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded text-xs">
+                            {localDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </span>
+                        );
+                      })}
                     </div>
                   </div>
                 )}

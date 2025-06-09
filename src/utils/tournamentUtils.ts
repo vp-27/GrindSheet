@@ -172,10 +172,14 @@ export const calculateTournamentPoints = (
   let badges: TournamentBadge[] = [];
   let workoutDays: string[] = [];
 
-  // Track workout days
-  const workoutDates = new Set(userLogs.map(log => 
-    new Date(log.timestamp).toISOString().split('T')[0]
-  ));
+  // Track workout days (use local timezone to avoid date shifts)
+  const workoutDates = new Set(userLogs.map(log => {
+    const logDate = new Date(log.timestamp);
+    const year = logDate.getFullYear();
+    const month = String(logDate.getMonth() + 1).padStart(2, '0');
+    const day = String(logDate.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }));
   workoutDays = Array.from(workoutDates);
 
   // 1. Daily workout points
@@ -325,7 +329,9 @@ const calculateBadges = (
 
   // Weekend Warrior
   const weekendDays = Array.from(workoutDates).filter(dateStr => {
-    const date = new Date(dateStr);
+    // Parse the YYYY-MM-DD format date string to avoid timezone shifts
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day); // month is 0-indexed
     return isWeekend(date);
   });
   if (weekendDays.length >= 2) {
