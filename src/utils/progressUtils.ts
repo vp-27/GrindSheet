@@ -551,11 +551,22 @@ export const calculateMaxWeightLeaderboard = (
 // New function to calculate PR overview across all exercises
 export const calculateAllExercisesPROverview = (
   logs: ExerciseLog[], 
-  users: User[]
+  users: User[],
+  exercises?: Exercise[],
+  categoryId?: string
 ): LeaderboardEntry[] => {
+  // Filter logs by category if specified
+  let filteredLogs = logs;
+  if (categoryId && exercises) {
+    const categoryExerciseIds = exercises
+      .filter(exercise => exercise.categoryId === categoryId)
+      .map(exercise => exercise.id);
+    filteredLogs = logs.filter(log => categoryExerciseIds.includes(log.exerciseId));
+  }
+  
   // Find exercises with multiple users
   const exerciseUserCounts = new Map<string, Set<string>>();
-  logs.forEach(log => {
+  filteredLogs.forEach(log => {
     if (!exerciseUserCounts.has(log.exerciseId)) {
       exerciseUserCounts.set(log.exerciseId, new Set());
     }
@@ -570,7 +581,7 @@ export const calculateAllExercisesPROverview = (
   
   // For each exercise with multiple users, find the PR holder(s)
   multiUserExercises.forEach(([exerciseId, _]) => {
-    const exerciseLogs = logs.filter(log => log.exerciseId === exerciseId);
+    const exerciseLogs = filteredLogs.filter(log => log.exerciseId === exerciseId);
     
     // Find the highest weight for this exercise
     let maxWeight = 0;
@@ -619,9 +630,11 @@ export const calculateAllExercisesPROverview = (
 // Calculate PR championship summary (who has the most PRs)
 export const calculatePRChampionshipSummary = (
   logs: ExerciseLog[], 
-  users: User[]
+  users: User[],
+  exercises?: Exercise[],
+  categoryId?: string
 ): { champion: User | null; championCount: number; totalExercises: number; summary: Array<{ user: User; prCount: number }> } => {
-  const prOverview = calculateAllExercisesPROverview(logs, users);
+  const prOverview = calculateAllExercisesPROverview(logs, users, exercises, categoryId);
   
   // Count PRs per user (accounting for ties)
   const userPRCounts = new Map<string, number>();
@@ -796,7 +809,8 @@ export const getLeaderboard = (
   users: User[],
   type: LeaderboardType,
   exerciseId?: string,
-  categoryId?: string
+  categoryId?: string,
+  exercises?: Exercise[]
 ): LeaderboardEntry[] => {
   switch (type) {
     case LeaderboardType.OVERALL_PROGRESS:
@@ -808,7 +822,7 @@ export const getLeaderboard = (
     case LeaderboardType.EXERCISE_PR:
       // If no specific exercise selected, show PR overview across all exercises
       if (!exerciseId) {
-        return calculateAllExercisesPROverview(logs, users);
+        return calculateAllExercisesPROverview(logs, users, exercises, categoryId);
       }
       return calculateMaxWeightLeaderboard(logs, users, exerciseId);
     default:

@@ -689,7 +689,8 @@ const TournamentPage: React.FC = () => {
                   users,
                   LeaderboardType.EXERCISE_PR,
                   undefined, // Always show all exercises
-                  selectedCategoryId === 'all' ? undefined : selectedCategoryId
+                  selectedCategoryId === 'all' ? undefined : selectedCategoryId,
+                  exercises
                 );
 
                 if (leaderboardData.length === 0) {
@@ -710,7 +711,7 @@ const TournamentPage: React.FC = () => {
                   <div className="space-y-3">
                     {/* PR Championship Summary - always show when no specific category selected */}
                     {selectedCategoryId === 'all' && (() => {
-                      const prChampionshipSummary = calculatePRChampionshipSummary(allExerciseLogs, users);
+                      const prChampionshipSummary = calculatePRChampionshipSummary(allExerciseLogs, users, exercises);
                       return prChampionshipSummary && prChampionshipSummary.champion ? (
                         <Card className="rounded-2xl bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border border-yellow-200 dark:border-yellow-800">
                           <CardContent className="p-4">
