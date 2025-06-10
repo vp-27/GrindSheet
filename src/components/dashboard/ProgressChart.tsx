@@ -373,23 +373,6 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
           </LineChart>
         </ResponsiveContainer>
         
-        {/* Custom Legend rendered outside the chart */}
-        {multiple && !showPercentage && (
-          (() => {
-            const dataKeys = Object.keys(filteredData[0] || {}).filter(key => key !== 'date');
-            if (dataKeys.length >= 2 && dataKeys.length <= 6) {
-              return (
-                <CustomLegend 
-                  payload={dataKeys.map(key => ({ value: key }))}
-                  colors={colors}
-                  appleStyle={appleStyle}
-                />
-              );
-            }
-            return null;
-          })()
-        )}
-
         {/* Chart Controls Section - Compact floating controls */}
         <div className={`absolute ${exerciseId ? '-top-4' : '-top-12'} right-4 flex items-center gap-2`}>
           {/* Compact percentage gain indicator */}
