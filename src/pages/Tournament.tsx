@@ -740,40 +740,98 @@ const TournamentPage: React.FC = () => {
 
                 return (
                   <div className="space-y-3">
-                    {/* PR Championship Summary - always show when no specific category selected */}
-                    {selectedCategoryId === 'all' && (() => {
-                      const prChampionshipSummary = calculatePRChampionshipSummary(allExerciseLogs, users, exercises);
-                      return prChampionshipSummary && prChampionshipSummary.champion ? (
-                        <Card className="rounded-2xl bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border border-yellow-200 dark:border-yellow-800">
-                          <CardContent className="p-4">
-                            <div className="flex items-center gap-4">
-                              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-sm">
-                                <Crown className="h-6 w-6 text-yellow-900" />
-                              </div>
-                              <div className="flex-1">
-                                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                                  Overall PR Champion
-                                  <span className="text-xs bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 px-2 py-1 rounded-full font-medium">
-                                    {prChampionshipSummary.championCount} PRs
-                                  </span>
-                                </h3>
-                                <div className="flex items-center gap-3 mt-1">
-                                  <Avatar className="h-8 w-8">
-                                    <AvatarImage src={prChampionshipSummary.champion.avatarUrl} alt={prChampionshipSummary.champion.name} />
-                                    <AvatarFallback className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 text-sm">
-                                      {prChampionshipSummary.champion.name?.substring(0, 2).toUpperCase() || 'U'}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <span className="font-semibold text-foreground">{prChampionshipSummary.champion.name}</span>
-                                  <span className="text-sm text-muted-foreground">
-                                    holds {prChampionshipSummary.championCount} of {prChampionshipSummary.totalExercises} exercise records
-                                  </span>
+                    {/* PR Championship Summary - Overall or Category-specific */}
+                    {(() => {
+                      if (selectedCategoryId === 'all') {
+                        // Overall PR Champion
+                        const prChampionshipSummary = calculatePRChampionshipSummary(allExerciseLogs, users, exercises);
+                        return prChampionshipSummary && prChampionshipSummary.champion ? (
+                          <Card className="rounded-2xl bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border border-yellow-200 dark:border-yellow-800">
+                            <CardContent className="p-4">
+                              <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-sm">
+                                  <Crown className="h-6 w-6 text-yellow-900" />
+                                </div>
+                                <div className="flex-1">
+                                  <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                                    Overall PR Champion
+                                    <span className="text-xs bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 px-2 py-1 rounded-full font-medium">
+                                      {prChampionshipSummary.championCount} PRs
+                                    </span>
+                                  </h3>
+                                  <div className="flex items-center gap-3 mt-1">
+                                    <Avatar className="h-8 w-8">
+                                      <AvatarImage src={prChampionshipSummary.champion.avatarUrl} alt={prChampionshipSummary.champion.name} />
+                                      <AvatarFallback className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 text-sm">
+                                        {prChampionshipSummary.champion.name?.substring(0, 2).toUpperCase() || 'U'}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <span className="font-semibold text-foreground">{prChampionshipSummary.champion.name}</span>
+                                    <span className="text-sm text-muted-foreground">
+                                      holds {prChampionshipSummary.championCount} of {prChampionshipSummary.totalExercises} exercise records
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ) : null;
+                            </CardContent>
+                          </Card>
+                        ) : null;
+                      } else {
+                        // Category-specific PR Champion
+                        const categoryPRSummary = calculatePRChampionshipSummary(allExerciseLogs, users, exercises, selectedCategoryId);
+                        const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
+                        const categoryKey = selectedCategory ? getCategoryKeyByName(selectedCategory.name) : 'default';
+                        const categoryColors = getCategoryColors(categoryKey);
+                        
+                        return categoryPRSummary && categoryPRSummary.champion ? (
+                          <Card 
+                            className="rounded-2xl border"
+                            style={{
+                              background: `linear-gradient(to right, ${categoryColors.primary}10, ${categoryColors.primary}05)`,
+                              borderColor: `${categoryColors.primary}40`
+                            }}
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex items-center gap-4">
+                                <div 
+                                  className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm"
+                                  style={{
+                                    background: `linear-gradient(to bottom right, ${categoryColors.primary}, ${categoryColors.primary}dd)`
+                                  }}
+                                >
+                                  <Crown className="h-6 w-6 text-white" />
+                                </div>
+                                <div className="flex-1">
+                                  <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                                    {selectedCategory?.name} PR Champion
+                                    <span 
+                                      className="text-xs px-2 py-1 rounded-full font-medium text-white"
+                                      style={{ backgroundColor: categoryColors.primary }}
+                                    >
+                                      {categoryPRSummary.championCount} PRs
+                                    </span>
+                                  </h3>
+                                  <div className="flex items-center gap-3 mt-1">
+                                    <Avatar className="h-8 w-8">
+                                      <AvatarImage src={categoryPRSummary.champion.avatarUrl} alt={categoryPRSummary.champion.name} />
+                                      <AvatarFallback 
+                                        className="text-sm text-white"
+                                        style={{ backgroundColor: `${categoryColors.primary}cc` }}
+                                      >
+                                        {categoryPRSummary.champion.name?.substring(0, 2).toUpperCase() || 'U'}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <span className="font-semibold text-foreground">{categoryPRSummary.champion.name}</span>
+                                    <span className="text-sm text-muted-foreground">
+                                      holds {categoryPRSummary.championCount} of {categoryPRSummary.totalExercises} {selectedCategory?.name.toLowerCase()} records
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ) : null;
+                      }
                     })()}
                     
                     {/* PR Records List with Apple Health style cards */}
