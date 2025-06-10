@@ -47,6 +47,8 @@ interface ProgressChartProps {
   blendWithBackground?: boolean; // New prop for Robinhood-style charts
   customColors?: string[]; // Allow custom colors to be passed in
   onTimeframeChange?: (timeframe: TimeframeOption, gain: number | null) => void; // Callback for timeframe changes
+  onHoverData?: (data: any) => void; // New callback for hover data
+  hideTooltip?: boolean; // Option to hide traditional tooltip
 }
 
 // Define timeframe options
@@ -148,10 +150,30 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
   appleStyle = false,
   blendWithBackground = false,
   customColors,
-  onTimeframeChange
+  onTimeframeChange,
+  onHoverData,
+  hideTooltip = false
 }) => {
   const [timeframe, setTimeframe] = useState<TimeframeOption>('1M');
   const [dotVisible, setDotVisible] = useState(false);
+
+  // Handle chart hover for custom tooltip
+  const handleChartHover = (data: any) => {
+    if (onHoverData && data && data.activePayload && data.activePayload.length > 0) {
+      const payload = data.activePayload[0].payload;
+      onHoverData({
+        date: payload.date,
+        data: payload,
+        label: data.label
+      });
+    }
+  };
+
+  const handleChartLeave = () => {
+    if (onHoverData) {
+      onHoverData(null);
+    }
+  };
 
   // Filter data based on selected timeframe
   const filteredData = useMemo(() => {
@@ -262,8 +284,8 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
               bottom: 15,
             }}
             syncId={undefined}
-            onMouseMove={undefined}
-            onMouseLeave={undefined}
+            onMouseMove={onHoverData ? handleChartHover : undefined}
+            onMouseLeave={onHoverData ? handleChartLeave : undefined}
           >
             <CartesianGrid 
               strokeDasharray={blendWithBackground ? "0 0" : appleStyle ? "0 0" : "3 3"} 
@@ -295,7 +317,9 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
                 return [`${value}${formatUnit}`, displayName];
               }}
               labelFormatter={(value) => `Date: ${value}`}
-              contentStyle={appleStyle || blendWithBackground ? { 
+              contentStyle={hideTooltip ? {
+                display: 'none'
+              } : (appleStyle || blendWithBackground ? { 
                 backgroundColor: 'rgba(255, 255, 255, 0.98)',
                 borderRadius: '12px',
                 border: 'none', 
@@ -303,7 +327,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
                 padding: '12px 16px',
                 fontSize: '14px',
                 fontWeight: '500'
-              } : undefined}
+              } : undefined)}
               cursor={{ 
                 stroke: appleStyle ? '#8E8E93' : '#94A3B8', 
                 strokeWidth: 1.5,

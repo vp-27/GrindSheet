@@ -10,6 +10,7 @@ import { TrendingUp, Clock, Trophy, ChevronRight, Activity, Zap } from 'lucide-r
 import { useAuth } from '@/context/AuthContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import TournamentStatusCard from '@/components/dashboard/TournamentStatusCard';
+import ChartTooltipCard from '@/components/dashboard/ChartTooltipCard';
 import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
 import { format } from 'date-fns';
 import { Tournament } from '@/types';
@@ -25,6 +26,7 @@ const Dashboard = () => {
   const [currentTournament, setCurrentTournament] = useState<Tournament | null>(null);
   const [tournamentLoading, setTournamentLoading] = useState(true);
   const [tournamentInitialized, setTournamentInitialized] = useState(false);
+  const [chartHoverData, setChartHoverData] = useState<any>(null);
 
   // Use the same color system as the rest of the app
   const chartColors = getCategoryChartColors();
@@ -248,6 +250,8 @@ const Dashboard = () => {
                 appleStyle={true}
                 blendWithBackground={true}
                 customColors={chartColors}
+                onHoverData={setChartHoverData}
+                hideTooltip={true}
               />
             ) : (
               <div className="text-center text-muted-foreground py-16">
@@ -258,13 +262,22 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* Tournament Status Card */}
-          <TournamentStatusCard 
-            tournament={currentTournament}
-            currentUserId={profile?.id || ''}
-            loading={tournamentLoading}
-            initialized={tournamentInitialized}
-          />
+          {/* Tournament Status Card or Chart Tooltip */}
+          {chartHoverData ? (
+            <ChartTooltipCard 
+              hoverData={chartHoverData}
+              showPercentage={!selectedCategoryId}
+              weightUnit="lbs"
+              multiple={true}
+            />
+          ) : (
+            <TournamentStatusCard 
+              tournament={currentTournament}
+              currentUserId={profile?.id || ''}
+              loading={tournamentLoading}
+              initialized={tournamentInitialized}
+            />
+          )}
           
           {/* Category Filter Buttons */}
           <div className="relative">

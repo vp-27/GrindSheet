@@ -41,6 +41,7 @@ const ExerciseDetail = () => {
   // Chart timeframe state
   const [currentTimeframe, setCurrentTimeframe] = useState<'1M' | 'ALL'>('1M');
   const [timeframeGain, setTimeframeGain] = useState<number | null>(null);
+  const [chartHoverData, setChartHoverData] = useState<any>(null);
   
   // Get the exercise details
   const exercise = useMemo(() => {
@@ -276,6 +277,8 @@ const ExerciseDetail = () => {
               blendWithBackground={true}
               customColors={categoryColors ? [categoryColors.primary] : undefined}
               onTimeframeChange={handleTimeframeChange}
+              onHoverData={setChartHoverData}
+              hideTooltip={true}
             />
           ) : (
             <div className="text-center text-muted-foreground py-16">
@@ -310,12 +313,16 @@ const ExerciseDetail = () => {
                       '--category-color': categoryColors?.primary || '#10b981'
                     } as React.CSSProperties}
                   />
-                  <p className="text-sm font-medium text-muted-foreground">Current</p>
+                  <p className="text-sm font-medium text-muted-foreground">
+                    {chartHoverData ? format(new Date(chartHoverData.date), 'MMM d') : 'Current'}
+                  </p>
                 </div>
                 <p className="text-3xl font-bold text-foreground">
-                  {progress?.currentWeight || 0}
+                  {chartHoverData ? chartHoverData.data.weight || 0 : progress?.currentWeight || 0}
                 </p>
-                <p className="text-sm text-muted-foreground">lbs</p>
+                <p className="text-sm text-muted-foreground">
+                  {chartHoverData ? `${chartHoverData.data.weight || 0} lbs` : 'lbs'}
+                </p>
               </div>
               
               {/* Personal Record */}
