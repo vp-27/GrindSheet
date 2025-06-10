@@ -164,7 +164,8 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
       onHoverData({
         date: payload.date,
         data: payload,
-        label: data.label
+        label: data.label,
+        colors: colors // Pass the actual colors being used by the chart
       });
     }
   };

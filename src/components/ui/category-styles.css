@@ -992,6 +992,34 @@
   }
 }
 
+/* Tooltip Card Transition Animations */
+.tooltip-card-container {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tooltip-card-enter {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+}
+
+.tooltip-card-enter-active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tooltip-card-exit {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.tooltip-card-exit-active {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Category-specific CSS custom properties for dynamic theming */
 /* Utility classes for specific category colors to avoid inline styles */
 .category-arms {

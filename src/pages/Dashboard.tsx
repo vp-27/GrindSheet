@@ -263,21 +263,28 @@ const Dashboard = () => {
           </div>
 
           {/* Tournament Status Card or Chart Tooltip */}
-          {chartHoverData ? (
-            <ChartTooltipCard 
-              hoverData={chartHoverData}
-              showPercentage={!selectedCategoryId}
-              weightUnit="lbs"
-              multiple={true}
-            />
-          ) : (
-            <TournamentStatusCard 
-              tournament={currentTournament}
-              currentUserId={profile?.id || ''}
-              loading={tournamentLoading}
-              initialized={tournamentInitialized}
-            />
-          )}
+          <div className="tooltip-card-container">
+            {chartHoverData ? (
+              <div className="tooltip-card-enter-active">
+                <ChartTooltipCard 
+                  hoverData={chartHoverData}
+                  showPercentage={!selectedCategoryId}
+                  weightUnit="lbs"
+                  multiple={true}
+                  customColors={chartColors}
+                />
+              </div>
+            ) : (
+              <div className="tooltip-card-exit-active" style={{ opacity: 1, transform: 'translateY(0) scale(1)' }}>
+                <TournamentStatusCard 
+                  tournament={currentTournament}
+                  currentUserId={profile?.id || ''}
+                  loading={tournamentLoading}
+                  initialized={tournamentInitialized}
+                />
+              </div>
+            )}
+          </div>
           
           {/* Category Filter Buttons */}
           <div className="relative">
