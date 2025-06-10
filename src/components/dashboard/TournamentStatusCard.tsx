@@ -74,6 +74,13 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
     );
   }
 
+  // Ensure participants are properly sorted and find the actual rank
+  const participantsSorted = [...tournament.participants].sort((a, b) => b.totalPoints - a.totalPoints);
+  const actualRank = participantsSorted.findIndex(p => p.userId === currentUserId) + 1;
+  
+  // Use the calculated rank instead of the stored rank to ensure accuracy
+  const displayRank = actualRank > 0 ? actualRank : currentParticipant.rank;
+
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
@@ -116,13 +123,15 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
   };
 
   const totalParticipants = tournament.participants.length;
-  const topPerformer = tournament.participants[0];
-  const isTopPerformer = currentParticipant.rank === 1;
+  
+  // Find the actual top performer
+  const topPerformer = participantsSorted[0];
+  const isTopPerformer = displayRank === 1;
   const pointsFromLeader = topPerformer ? topPerformer.totalPoints - currentParticipant.totalPoints : 0;
 
   return (
     <Card 
-      className={`bg-gradient-to-br ${getRankColor(currentParticipant.rank)} cursor-pointer hover:shadow-lg transition-all duration-200`}
+      className={`bg-gradient-to-br ${getRankColor(displayRank)} cursor-pointer hover:shadow-lg transition-all duration-200`}
       onClick={() => navigate('/tournament')}
     >
       <CardContent className="p-3">
@@ -130,15 +139,15 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="relative">
-              {getRankIcon(currentParticipant.rank)}
-              {currentParticipant.rank === 1 && (
+              {getRankIcon(displayRank)}
+              {displayRank === 1 && (
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
               )}
             </div>
             <div className="flex items-center gap-2 text-sm">
               <span className="font-bold text-foreground">Weekly Tournament</span>
               <span className="text-muted-foreground">•</span>
-              <span className="font-semibold text-foreground">{getRankText(currentParticipant.rank)}</span>
+              <span className="font-semibold text-foreground">{getRankText(displayRank)}</span>
               {!isTopPerformer && (
                 <>
                   <span className="text-muted-foreground">•</span>

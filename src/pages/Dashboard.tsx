@@ -33,7 +33,7 @@ const Dashboard = () => {
   useEffect(() => {
     const generateTournament = async () => {
       // Don't start loading until we have all necessary data
-      if (!exercises.length || !categories.length || !exerciseLogs.length) {
+      if (!exercises.length || !categories.length) {
         return;
       }
 
@@ -57,7 +57,29 @@ const Dashboard = () => {
           avatarUrl: u.avatar_url
         }));
 
-        const tournament = generateCurrentTournament(users, exerciseLogs, exercises, categories);
+        // Fetch ALL exercise logs for tournament calculation (not just current user's)
+        const { data: allLogsData, error: logsError } = await supabase
+          .from('exercise_logs')
+          .select('*');
+        
+        if (logsError || !allLogsData) {
+          setCurrentTournament(null);
+          setTournamentLoading(false);
+          setTournamentInitialized(true);
+          return;
+        }
+
+        const allExerciseLogs = allLogsData.map((log: any) => ({
+          id: log.id,
+          userId: log.user_id,
+          exerciseId: log.exercise_id,
+          weight: log.weight,
+          timestamp: log.timestamp,
+          note: log.note,
+          weightUnit: log.weight_unit
+        }));
+
+        const tournament = generateCurrentTournament(users, allExerciseLogs, exercises, categories);
         setCurrentTournament(tournament);
         setTournamentLoading(false);
         setTournamentInitialized(true);
@@ -70,10 +92,10 @@ const Dashboard = () => {
     };
 
     // Only generate when we have all data and haven't initialized yet
-    if (exercises.length > 0 && categories.length > 0 && exerciseLogs.length > 0 && !tournamentInitialized) {
+    if (exercises.length > 0 && categories.length > 0 && !tournamentInitialized) {
       generateTournament();
     }
-  }, [exercises, categories, exerciseLogs, tournamentInitialized]);
+  }, [exercises, categories, tournamentInitialized]);
   
   // Get color for a category based on its index
   const getCategoryColor = (categoryIndex: number) => {
