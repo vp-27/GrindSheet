@@ -1041,6 +1041,40 @@
 .chart-tooltip-indicator[data-color="#8b5cf6"] { background-color: #8b5cf6; }
 .chart-tooltip-indicator[data-color="#ec4899"] { background-color: #ec4899; }
 
+/* Chart tooltip text colors - values and units match legend colors */
+.chart-tooltip-value[data-color="#34C759"], 
+.chart-tooltip-unit[data-color="#34C759"] { color: #34C759; }
+.chart-tooltip-value[data-color="#5AC8FA"], 
+.chart-tooltip-unit[data-color="#5AC8FA"] { color: #5AC8FA; }
+.chart-tooltip-value[data-color="#FF9500"], 
+.chart-tooltip-unit[data-color="#FF9500"] { color: #FF9500; }
+.chart-tooltip-value[data-color="#FF2D55"], 
+.chart-tooltip-unit[data-color="#FF2D55"] { color: #FF2D55; }
+.chart-tooltip-value[data-color="#AF52DE"], 
+.chart-tooltip-unit[data-color="#AF52DE"] { color: #AF52DE; }
+.chart-tooltip-value[data-color="#000000"], 
+.chart-tooltip-unit[data-color="#000000"] { color: #000000; }
+.chart-tooltip-value[data-color="#3b82f6"], 
+.chart-tooltip-unit[data-color="#3b82f6"] { color: #3b82f6; }
+.chart-tooltip-value[data-color="#10b981"], 
+.chart-tooltip-unit[data-color="#10b981"] { color: #10b981; }
+.chart-tooltip-value[data-color="#f59e0b"], 
+.chart-tooltip-unit[data-color="#f59e0b"] { color: #f59e0b; }
+.chart-tooltip-value[data-color="#ef4444"], 
+.chart-tooltip-unit[data-color="#ef4444"] { color: #ef4444; }
+.chart-tooltip-value[data-color="#8b5cf6"], 
+.chart-tooltip-unit[data-color="#8b5cf6"] { color: #8b5cf6; }
+.chart-tooltip-value[data-color="#ec4899"], 
+.chart-tooltip-unit[data-color="#ec4899"] { color: #ec4899; }
+
+/* Dark mode adjustments for better contrast */
+@media (prefers-color-scheme: dark) {
+  .chart-tooltip-value[data-color="#000000"], 
+  .chart-tooltip-unit[data-color="#000000"] { 
+    color: #ffffff; 
+  }
+}
+
 /* Category-specific CSS custom properties for dynamic theming */
 /* Utility classes for specific category colors to avoid inline styles */
 .category-arms {

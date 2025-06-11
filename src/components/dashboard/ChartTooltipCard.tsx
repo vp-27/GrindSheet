@@ -1,6 +1,5 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { TrendingUp, Calendar, Activity } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface ChartTooltipCardProps {
@@ -24,8 +23,8 @@ const ChartTooltipCard: React.FC<ChartTooltipCardProps> = ({
 
   const { date, data, colors: hoverColors } = hoverData;
   
-  // Format the date nicely
-  const formattedDate = format(new Date(date), 'MMM d, yyyy');
+  // Format the date more compactly for mobile
+  const formattedDate = format(new Date(date), 'MMM d');
   
   // Get the data keys (excluding 'date')
   const dataKeys = Object.keys(data).filter(key => key !== 'date');
@@ -34,40 +33,45 @@ const ChartTooltipCard: React.FC<ChartTooltipCardProps> = ({
   const colors = hoverColors || customColors || ['#34C759', '#5AC8FA', '#FF9500', '#FF2D55', '#AF52DE', '#000000'];
   
   return (
-    <Card className="bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 dark:from-purple-950/30 dark:via-blue-950/30 dark:to-indigo-950/30 border-purple-200/50 dark:border-purple-800/50 rounded-xl backdrop-blur-sm">
-      <CardContent className="p-4">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-600 rounded-full flex items-center justify-center">
-            <TrendingUp className="h-4 w-4 text-white" />
-          </div>
-          <div>
-            <h3 className="text-lg font-semibold text-foreground">{formattedDate}</h3>
-            <p className="text-xs text-muted-foreground">Chart data point</p>
-          </div>
+    <Card className="bg-background/95 dark:bg-background/95 border border-border/50 rounded-lg backdrop-blur-sm shadow-lg">
+      <CardContent className="p-3">
+        {/* Compact header with just date */}
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-2 h-2 bg-primary rounded-full"></div>
+          <span className="text-sm font-medium text-foreground">{formattedDate}</span>
         </div>
         
-        <div className="space-y-2">
+        {/* Compact data rows */}
+        <div className="space-y-1.5">
           {dataKeys.map((key, index) => {
             const value = data[key];
             const formatUnit = showPercentage ? '%' : weightUnit;
             const color = colors[index % colors.length];
             
             return (
-              <div key={key} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+              <div key={key} className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 min-w-0 flex-1">
                   <div 
-                    className="w-3 h-3 rounded-full chart-tooltip-indicator"
+                    className="w-2 h-2 rounded-full chart-tooltip-indicator flex-shrink-0"
                     data-color={color}
                   />
-                  <span className="text-sm font-medium text-foreground">
+                  <span className="text-xs font-medium text-muted-foreground truncate">
                     {multiple ? key : (showPercentage ? 'Progress' : 'Weight')}
                   </span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="text-lg font-bold text-foreground">
+                <div className="flex items-baseline gap-0.5 flex-shrink-0">
+                  <span 
+                    className="text-sm font-bold chart-tooltip-value"
+                    data-color={color}
+                  >
                     {typeof value === 'number' ? value.toFixed(1) : value}
                   </span>
-                  <span className="text-sm text-muted-foreground">{formatUnit}</span>
+                  <span 
+                    className="text-xs chart-tooltip-unit"
+                    data-color={color}
+                  >
+                    {formatUnit}
+                  </span>
                 </div>
               </div>
             );
