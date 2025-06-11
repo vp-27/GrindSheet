@@ -1,6 +1,6 @@
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { format } from 'date-fns';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ChartTooltipCardProps {
   hoverData: any;
@@ -17,6 +17,8 @@ const ChartTooltipCard: React.FC<ChartTooltipCardProps> = ({
   multiple = false,
   customColors
 }) => {
+  const isMobile = useIsMobile();
+  
   if (!hoverData) {
     return null;
   }
@@ -31,54 +33,129 @@ const ChartTooltipCard: React.FC<ChartTooltipCardProps> = ({
   
   // Use colors from hover data first, then custom colors, then fallback to defaults
   const colors = hoverColors || customColors || ['#34C759', '#5AC8FA', '#FF9500', '#FF2D55', '#AF52DE', '#000000'];
-  
-  return (
-    <Card className="bg-background/95 dark:bg-background/95 border border-border/50 rounded-lg backdrop-blur-sm shadow-lg">
-      <CardContent className="p-3">
-        {/* Compact header with just date */}
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-2 h-2 bg-primary rounded-full"></div>
-          <span className="text-sm font-medium text-foreground">{formattedDate}</span>
+   // For mobile, use horizontal layout when multiple items or optimize single item
+  if (isMobile) {
+    return (
+      <div className="p-2 space-y-1.5">
+        {/* Clean date header */}
+        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          {formattedDate}
         </div>
         
-        {/* Compact data rows */}
-        <div className="space-y-1.5">
-          {dataKeys.map((key, index) => {
-            const value = data[key];
-            const formatUnit = showPercentage ? '%' : weightUnit;
-            const color = colors[index % colors.length];
-            
-            return (
-              <div key={key} className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  <div 
-                    className="w-2 h-2 rounded-full chart-tooltip-indicator flex-shrink-0"
-                    data-color={color}
-                  />
-                  <span className="text-xs font-medium text-muted-foreground truncate">
-                    {multiple ? key : (showPercentage ? 'Progress' : 'Weight')}
-                  </span>
+        {dataKeys.length === 1 ? (
+          // Single item - clean, prominent display
+          <div className="flex items-end justify-between">
+            <div className="flex items-center gap-2">
+              <div 
+                className="w-3 h-3 rounded-sm chart-tooltip-indicator"
+                data-color={colors[0]}
+              />
+              <span className="text-sm font-medium text-foreground">
+                {multiple ? dataKeys[0] : (showPercentage ? 'Progress' : 'Weight')}
+              </span>
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span 
+                className="text-xl font-bold chart-tooltip-value"
+                data-color={colors[0]}
+              >
+                {typeof data[dataKeys[0]] === 'number' ? data[dataKeys[0]].toFixed(1) : data[dataKeys[0]]}
+              </span>
+              <span 
+                className="text-sm font-medium text-muted-foreground chart-tooltip-unit"
+                data-color={colors[0]}
+              >
+                {showPercentage ? '%' : weightUnit}
+              </span>
+            </div>
+          </div>
+        ) : (
+          // Multiple items - clean grid layout
+          <div className="grid grid-cols-2 gap-1.5">
+            {dataKeys.map((key, index) => {
+              const value = data[key];
+              const formatUnit = showPercentage ? '%' : weightUnit;
+              const color = colors[index % colors.length];
+              
+              return (
+                <div key={key} className="flex flex-col gap-0.5 p-1.5 rounded-md bg-muted/30">
+                  <div className="flex items-center gap-1.5">
+                    <div 
+                      className="w-2.5 h-2.5 rounded-sm chart-tooltip-indicator"
+                      data-color={color}
+                    />
+                    <span className="text-xs font-medium text-muted-foreground truncate">
+                      {multiple ? key : (showPercentage ? 'Progress' : 'Weight')}
+                    </span>
+                  </div>
+                  <div className="flex items-baseline gap-0.5">
+                    <span 
+                      className="text-base font-bold chart-tooltip-value"
+                      data-color={color}
+                    >
+                      {typeof value === 'number' ? value.toFixed(1) : value}
+                    </span>
+                    <span 
+                      className="text-xs font-medium text-muted-foreground chart-tooltip-unit"
+                      data-color={color}
+                    >
+                      {formatUnit}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-baseline gap-0.5 flex-shrink-0">
-                  <span 
-                    className="text-sm font-bold chart-tooltip-value"
-                    data-color={color}
-                  >
-                    {typeof value === 'number' ? value.toFixed(1) : value}
-                  </span>
-                  <span 
-                    className="text-xs chart-tooltip-unit"
-                    data-color={color}
-                  >
-                    {formatUnit}
-                  </span>
-                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  }
+  
+  // Desktop version - cleaner vertical layout
+  return (
+    <div className="p-2.5 space-y-2">
+      {/* Clean date header */}
+      <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+        {formattedDate}
+      </div>
+      
+      {/* Clean data rows */}
+      <div className="space-y-1.5">
+        {dataKeys.map((key, index) => {
+          const value = data[key];
+          const formatUnit = showPercentage ? '%' : weightUnit;
+          const color = colors[index % colors.length];
+          
+          return (
+            <div key={key} className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 min-w-0 flex-1">
+                <div 
+                  className="w-2.5 h-2.5 rounded-sm chart-tooltip-indicator flex-shrink-0"
+                  data-color={color}
+                />
+                <span className="text-sm font-medium text-foreground truncate">
+                  {multiple ? key : (showPercentage ? 'Progress' : 'Weight')}
+                </span>
               </div>
-            );
-          })}
-        </div>
-      </CardContent>
-    </Card>
+              <div className="flex items-baseline gap-1 flex-shrink-0">
+                <span 
+                  className="text-base font-bold chart-tooltip-value"
+                  data-color={color}
+                >
+                  {typeof value === 'number' ? value.toFixed(1) : value}
+                </span>
+                <span 
+                  className="text-xs font-medium text-muted-foreground chart-tooltip-unit"
+                  data-color={color}
+                >
+                  {formatUnit}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 };
 

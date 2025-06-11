@@ -222,10 +222,10 @@ const Dashboard = () => {
           />
         )}
         
-        <div className="relative flex flex-col gap-8 pb-6 z-10">
+        <div className="relative flex flex-col gap-4 pb-6 z-10">
           {/* Progress Chart Section - Embedded in background */}
           <div className="relative -mx-4 px-4">
-            <div className="mb-6">
+            <div className="mb-4">
               <h2 
                 className={`text-xl font-bold mb-2 ${selectedCategoryId ? 'category-title' : 'text-foreground'}`}
                 style={selectedCategoryColor ? {
@@ -262,8 +262,8 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* Tournament Status Card or Chart Tooltip */}
-          <div className="tooltip-card-container">
+          {/* Tournament Status Card or Chart Tooltip - Closer to chart */}
+          <div className="tooltip-card-container -mt-2">
             {chartHoverData ? (
               <div className="tooltip-card-enter-active">
                 <ChartTooltipCard 
