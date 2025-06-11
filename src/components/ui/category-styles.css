@@ -1020,6 +1020,27 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Tournament status card should be visible when chart is not hovered */
+.tournament-status-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Chart tooltip indicator colors */
+.chart-tooltip-indicator[data-color="#34C759"] { background-color: #34C759; }
+.chart-tooltip-indicator[data-color="#5AC8FA"] { background-color: #5AC8FA; }
+.chart-tooltip-indicator[data-color="#FF9500"] { background-color: #FF9500; }
+.chart-tooltip-indicator[data-color="#FF2D55"] { background-color: #FF2D55; }
+.chart-tooltip-indicator[data-color="#AF52DE"] { background-color: #AF52DE; }
+.chart-tooltip-indicator[data-color="#000000"] { background-color: #000000; }
+.chart-tooltip-indicator[data-color="#3b82f6"] { background-color: #3b82f6; }
+.chart-tooltip-indicator[data-color="#10b981"] { background-color: #10b981; }
+.chart-tooltip-indicator[data-color="#f59e0b"] { background-color: #f59e0b; }
+.chart-tooltip-indicator[data-color="#ef4444"] { background-color: #ef4444; }
+.chart-tooltip-indicator[data-color="#8b5cf6"] { background-color: #8b5cf6; }
+.chart-tooltip-indicator[data-color="#ec4899"] { background-color: #ec4899; }
+
 /* Category-specific CSS custom properties for dynamic theming */
 /* Utility classes for specific category colors to avoid inline styles */
 .category-arms {

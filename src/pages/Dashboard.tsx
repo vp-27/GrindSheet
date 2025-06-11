@@ -275,7 +275,7 @@ const Dashboard = () => {
                 />
               </div>
             ) : (
-              <div className="tooltip-card-exit-active" style={{ opacity: 1, transform: 'translateY(0) scale(1)' }}>
+              <div className="tournament-status-visible">
                 <TournamentStatusCard 
                   tournament={currentTournament}
                   currentUserId={profile?.id || ''}

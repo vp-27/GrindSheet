@@ -56,8 +56,8 @@ const ChartTooltipCard: React.FC<ChartTooltipCardProps> = ({
               <div key={key} className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <div 
-                    className="w-3 h-3 rounded-full"
-                    style={{ backgroundColor: color }}
+                    className="w-3 h-3 rounded-full chart-tooltip-indicator"
+                    data-color={color}
                   />
                   <span className="text-sm font-medium text-foreground">
                     {multiple ? key : (showPercentage ? 'Progress' : 'Weight')}
