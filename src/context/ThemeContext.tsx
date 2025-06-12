@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { updateManifestLink } from '@/utils/manifestUtils';
+import { updateManifestLink, updateFavicon } from '@/utils/manifestUtils';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -48,7 +48,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
     // Determine if dark mode should be active
     let shouldBeDark = false;
-    
     if (theme === 'dark') {
       shouldBeDark = true;
     } else if (theme === 'light') {
@@ -70,9 +69,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
 
     // Update theme-color meta tag dynamically
     updateThemeColorMeta(shouldBeDark);
-    
     // Update manifest dynamically for PWA
     updateManifestLink(shouldBeDark);
+    // Update favicon dynamically
+    updateFavicon(shouldBeDark);
   }, [theme]);
 
   // Listen for system theme changes when using 'system' theme
@@ -90,9 +90,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       }
       // Update theme-color meta tag when system theme changes
       updateThemeColorMeta(mediaQuery.matches);
-      
       // Update manifest dynamically when system theme changes
       updateManifestLink(mediaQuery.matches);
+      // Update favicon dynamically when system theme changes
+      updateFavicon(mediaQuery.matches);
     };
 
     mediaQuery.addEventListener('change', handleChange);

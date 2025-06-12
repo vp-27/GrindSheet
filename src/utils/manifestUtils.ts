@@ -71,3 +71,16 @@ export const cleanupManifestURL = () => {
     URL.revokeObjectURL(manifestLink.href);
   }
 };
+
+// Dynamically update favicon based on theme
+export const updateFavicon = (isDark: boolean) => {
+  const faviconId = 'dynamic-favicon';
+  let favicon = document.getElementById(faviconId) as HTMLLinkElement | null;
+  if (!favicon) {
+    favicon = document.createElement('link');
+    favicon.rel = 'icon';
+    favicon.id = faviconId;
+    document.head.appendChild(favicon);
+  }
+  favicon.href = isDark ? '/faviconDark.ico' : '/favicon.ico';
+};
