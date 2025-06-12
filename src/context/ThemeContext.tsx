@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { updateManifestLink, updateFavicon } from '@/utils/manifestUtils';
+import { updateManifestLink, updateFavicon, updateAppleTouchIcon } from '@/utils/manifestUtils';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -73,6 +73,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     updateManifestLink(shouldBeDark);
     // Update favicon dynamically
     updateFavicon(shouldBeDark);
+    // Update apple-touch-icon dynamically for iOS PWA
+    updateAppleTouchIcon(shouldBeDark);
   }, [theme]);
 
   // Listen for system theme changes when using 'system' theme
@@ -94,6 +96,8 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       updateManifestLink(mediaQuery.matches);
       // Update favicon dynamically when system theme changes
       updateFavicon(mediaQuery.matches);
+      // Update apple-touch-icon dynamically for iOS PWA
+      updateAppleTouchIcon(mediaQuery.matches);
     };
 
     mediaQuery.addEventListener('change', handleChange);

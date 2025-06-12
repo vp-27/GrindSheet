@@ -84,3 +84,16 @@ export const updateFavicon = (isDark: boolean) => {
   }
   favicon.href = isDark ? '/faviconDark.ico' : '/favicon.ico';
 };
+
+// Dynamically update apple-touch-icon for iOS home screen
+export const updateAppleTouchIcon = (isDark: boolean) => {
+  const iconId = 'dynamic-apple-touch-icon';
+  let appleIcon = document.getElementById(iconId) as HTMLLinkElement | null;
+  if (!appleIcon) {
+    appleIcon = document.createElement('link');
+    appleIcon.rel = 'apple-touch-icon';
+    appleIcon.id = iconId;
+    document.head.appendChild(appleIcon);
+  }
+  appleIcon.href = isDark ? '/faviconDark.ico' : '/favicon.ico';
+};
