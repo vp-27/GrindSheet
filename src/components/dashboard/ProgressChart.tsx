@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useLayoutEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ProgressChartData } from '@/types';
@@ -157,6 +157,12 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
   const [timeframe, setTimeframe] = useState<TimeframeOption>('1M');
   const [dotVisible, setDotVisible] = useState(false);
 
+  // Slider state and refs for timeframe controls
+  const [timeframeSliderStyle, setTimeframeSliderStyle] = useState({ left: '0px', width: '0px', opacity: 0 });
+  const timeframeOptionsContainerRef = useRef<HTMLDivElement>(null);
+  const oneMonthBtnRef = useRef<HTMLButtonElement>(null);
+  const allBtnRef = useRef<HTMLButtonElement>(null);
+
   // Handle chart hover for custom tooltip
   const handleChartHover = (data: any) => {
     if (onHoverData && data && data.activePayload && data.activePayload.length > 0) {
@@ -203,6 +209,22 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
       onTimeframeChange(timeframe, timeframeGain);
     }
   }, [timeframe, timeframeGain, onTimeframeChange]);
+
+  useLayoutEffect(() => {
+    let activeRef: React.RefObject<HTMLButtonElement> | null = null;
+    if (timeframe === '1M') {
+      activeRef = oneMonthBtnRef;
+    } else if (timeframe === 'ALL') {
+      activeRef = allBtnRef;
+    }
+
+    if (activeRef?.current && timeframeOptionsContainerRef.current) {
+      const buttonElement = activeRef.current;
+      const left = buttonElement.offsetLeft;
+      const width = buttonElement.offsetWidth;
+      setTimeframeSliderStyle({ left: `${left}px`, width: `${width}px`, opacity: 1 });
+    }
+  }, [timeframe]);
 
   if (!data || data.length === 0) {
     return (
@@ -375,7 +397,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
         </ResponsiveContainer>
         
         {/* Chart Controls Section - Compact floating controls */}
-        <div className={`absolute ${exerciseId ? '-top-4' : '-top-12'} right-4 flex items-center gap-2`}>
+        <div className={`absolute ${exerciseId ? '-top-8' : '-top-12'} right-4 flex items-center gap-2`}>
           {/* Compact percentage gain indicator */}
           {timeframeGain !== null && !exerciseId && (
             <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium backdrop-blur-sm ${
@@ -390,15 +412,21 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
           )}
           
           {/* Compact Timeframe Controls */}
-          <div className="flex items-center gap-0.5 bg-background/80 backdrop-blur-sm rounded-lg p-0.5 shadow-sm border border-border/50">
+          <div ref={timeframeOptionsContainerRef} className="relative flex items-center bg-muted p-1 rounded-lg shadow-sm">
+            {/* Slider Element for Timeframe Controls */}
+            <div
+              className="absolute top-1 bottom-1 bg-background rounded-md shadow-md transition-all duration-300 ease-in-out"
+              style={timeframeSliderStyle}
+            />
             {(['1M', 'ALL'] as TimeframeOption[]).map((period) => (
               <button
                 key={period}
+                ref={period === '1M' ? oneMonthBtnRef : allBtnRef}
                 onClick={() => setTimeframe(period)}
-                className={`px-2 py-1 text-xs font-medium rounded-md transition-all ${
+                className={`relative z-10 px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-150 ease-in-out active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
                   timeframe === period
-                    ? 'bg-foreground text-background shadow-sm' 
-                    : 'text-muted-foreground active:text-foreground transition-colors'
+                    ? 'text-foreground'
+                    : 'text-muted-foreground hover:text-foreground/80'
                 }`}
               >
                 {period}
