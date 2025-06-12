@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { User, Category, Exercise, ExerciseLog } from '../types';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,6 +28,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const exercisesSubRef = useRef<any>(null);
+  const categoriesSubRef = useRef<any>(null);
+  const exerciseLogsSubRef = useRef<any>(null);
 
   // Redirect to auth if not logged in and trying to access protected routes
   useEffect(() => {
@@ -102,8 +106,23 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
     fetchData();
 
-    // Set up real-time subscriptions for categories and exercises (global)
-    const exercisesSubscription = supabase
+    // --- Real-time subscriptions (deduplicated) ---
+    // Clean up previous subscriptions if they exist
+    if (exercisesSubRef.current) {
+      supabase.removeChannel(exercisesSubRef.current);
+      exercisesSubRef.current = null;
+    }
+    if (categoriesSubRef.current) {
+      supabase.removeChannel(categoriesSubRef.current);
+      categoriesSubRef.current = null;
+    }
+    if (exerciseLogsSubRef.current) {
+      supabase.removeChannel(exerciseLogsSubRef.current);
+      exerciseLogsSubRef.current = null;
+    }
+
+    // Subscribe to global tables (only once per mount)
+    exercisesSubRef.current = supabase
       .channel('public:exercises')
       .on(
         'postgres_changes',
@@ -117,7 +136,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         }
       )
       .subscribe();
-    const categoriesSubscription = supabase
+    categoriesSubRef.current = supabase
       .channel('public:categories')
       .on(
         'postgres_changes',
@@ -132,10 +151,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
       )
       .subscribe();
 
-    // Only subscribe to exercise logs if user exists
-    let exerciseLogsSubscription: any = null;
+    // Subscribe to exercise_logs only if user exists
     if (user) {
-      exerciseLogsSubscription = supabase
+      exerciseLogsSubRef.current = supabase
         .channel('public:exercise_logs')
         .on(
           'postgres_changes',
@@ -151,10 +169,21 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         )
         .subscribe();
     }
+
+    // Cleanup on unmount or user change
     return () => {
-      supabase.removeChannel(exercisesSubscription);
-      supabase.removeChannel(categoriesSubscription);
-      if (exerciseLogsSubscription) supabase.removeChannel(exerciseLogsSubscription);
+      if (exercisesSubRef.current) {
+        supabase.removeChannel(exercisesSubRef.current);
+        exercisesSubRef.current = null;
+      }
+      if (categoriesSubRef.current) {
+        supabase.removeChannel(categoriesSubRef.current);
+        categoriesSubRef.current = null;
+      }
+      if (exerciseLogsSubRef.current) {
+        supabase.removeChannel(exerciseLogsSubRef.current);
+        exerciseLogsSubRef.current = null;
+      }
     };
   }, [user]);
 
