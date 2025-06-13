@@ -80,7 +80,6 @@ const Settings: React.FC = () => {
   const fetchCategories = async () => {
     if (categoriesLoaded || categoriesLoading) return;
     
-    setCategoriesLoading(true);
     try {
       const { data: categoriesData, error: categoriesError } = await supabase
         .from('categories')
@@ -109,7 +108,6 @@ const Settings: React.FC = () => {
   const fetchExercises = async () => {
     if (exercisesLoaded || exercisesLoading) return;
     
-    setExercisesLoading(true);
     try {
       const { data: exercisesData, error: exercisesError } = await supabase
         .from('exercises')
@@ -135,18 +133,28 @@ const Settings: React.FC = () => {
   };
 
   // Handle categories section toggle
-  const handleCategoriesToggle = (open: boolean) => {
-    setCategoriesOpen(open);
+  const handleCategoriesToggle = async (open: boolean) => {
     if (open && !categoriesLoaded) {
-      fetchCategories();
+      // Start loading but don't open yet
+      setCategoriesLoading(true);
+      await fetchCategories();
+      // Only open after data is loaded
+      setCategoriesOpen(true);
+    } else {
+      setCategoriesOpen(open);
     }
   };
 
   // Handle exercises section toggle
-  const handleExercisesToggle = (open: boolean) => {
-    setExercisesOpen(open);
+  const handleExercisesToggle = async (open: boolean) => {
     if (open && !exercisesLoaded) {
-      fetchExercises();
+      // Start loading but don't open yet
+      setExercisesLoading(true);
+      await fetchExercises();
+      // Only open after data is loaded
+      setExercisesOpen(true);
+    } else {
+      setExercisesOpen(open);
     }
   };
 
@@ -496,6 +504,9 @@ const Settings: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    {categoriesLoading && (
+                      <div className="w-4 h-4 border-2 border-muted-foreground/20 border-t-muted-foreground rounded-full animate-spin" />
+                    )}
                     {categoriesLoaded && (
                       <span className="text-sm text-muted-foreground px-3 py-1 bg-muted/40 rounded-full">
                         {categories.length}
@@ -618,6 +629,9 @@ const Settings: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
+                    {exercisesLoading && (
+                      <div className="w-4 h-4 border-2 border-muted-foreground/20 border-t-muted-foreground rounded-full animate-spin" />
+                    )}
                     {exercisesLoaded && (
                       <span className="text-sm text-muted-foreground px-3 py-1 bg-muted/40 rounded-full">
                         {exercises.length}
