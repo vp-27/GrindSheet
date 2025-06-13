@@ -1,8 +1,10 @@
-import React, { useState, useMemo, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { MobileSlider } from '@/components/ui/mobile-slider';
 import { ProgressChartData } from '@/types';
 import { addDays, isBefore, parseISO } from 'date-fns';
+import { Calendar, Clock } from 'lucide-react';
 import './ProgressChart.css';
 
 // Custom Legend Component with beautiful styling
@@ -157,12 +159,6 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
   const [timeframe, setTimeframe] = useState<TimeframeOption>('1M');
   const [dotVisible, setDotVisible] = useState(false);
 
-  // Slider state and refs for timeframe controls
-  const [timeframeSliderStyle, setTimeframeSliderStyle] = useState({ left: '0px', width: '0px', opacity: 0 });
-  const timeframeOptionsContainerRef = useRef<HTMLDivElement>(null);
-  const oneMonthBtnRef = useRef<HTMLButtonElement>(null);
-  const allBtnRef = useRef<HTMLButtonElement>(null);
-
   // Handle chart hover for custom tooltip
   const handleChartHover = (data: any) => {
     if (onHoverData && data && data.activePayload && data.activePayload.length > 0) {
@@ -209,22 +205,6 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
       onTimeframeChange(timeframe, timeframeGain);
     }
   }, [timeframe, timeframeGain, onTimeframeChange]);
-
-  useLayoutEffect(() => {
-    let activeRef: React.RefObject<HTMLButtonElement> | null = null;
-    if (timeframe === '1M') {
-      activeRef = oneMonthBtnRef;
-    } else if (timeframe === 'ALL') {
-      activeRef = allBtnRef;
-    }
-
-    if (activeRef?.current && timeframeOptionsContainerRef.current) {
-      const buttonElement = activeRef.current;
-      const left = buttonElement.offsetLeft;
-      const width = buttonElement.offsetWidth;
-      setTimeframeSliderStyle({ left: `${left}px`, width: `${width}px`, opacity: 1 });
-    }
-  }, [timeframe]);
 
   if (!data || data.length === 0) {
     return (
@@ -411,28 +391,16 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
             </div>
           )}
           
-          {/* Compact Timeframe Controls */}
-          <div ref={timeframeOptionsContainerRef} className="relative flex items-center bg-muted p-1 rounded-lg shadow-sm">
-            {/* Slider Element for Timeframe Controls */}
-            <div
-              className="absolute top-1 bottom-1 bg-background rounded-md shadow-md transition-all duration-300 ease-in-out"
-              style={timeframeSliderStyle}
-            />
-            {(['1M', 'ALL'] as TimeframeOption[]).map((period) => (
-              <button
-                key={period}
-                ref={period === '1M' ? oneMonthBtnRef : allBtnRef}
-                onClick={() => setTimeframe(period)}
-                className={`relative z-10 px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-150 ease-in-out active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                  timeframe === period
-                    ? 'text-foreground'
-                    : 'text-muted-foreground hover:text-foreground/80'
-                }`}
-              >
-                {period}
-              </button>
-            ))}
-          </div>
+          {/* Compact Timeframe Controls using MobileSlider */}
+          <MobileSlider
+            options={[
+              { id: '1M', label: '1M' },
+              { id: 'ALL', label: 'ALL' }
+            ]}
+            activeOption={timeframe}
+            onOptionChange={(optionId) => setTimeframe(optionId as TimeframeOption)}
+            variant="compact"
+          />
         </div>
       </div>
     </div>

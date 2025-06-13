@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useLayoutEffect, useRef } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import TournamentStatusCard from '@/components/dashboard/TournamentStatusCard';
 import ChartTooltipCard from '@/components/dashboard/ChartTooltipCard';
+import { MobileSlider } from '@/components/ui/mobile-slider';
 import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
 import { format } from 'date-fns';
 import { Tournament } from '@/types';
@@ -27,13 +28,6 @@ const Dashboard = () => {
   const [tournamentLoading, setTournamentLoading] = useState(true);
   const [tournamentInitialized, setTournamentInitialized] = useState(false);
   const [chartHoverData, setChartHoverData] = useState<any>(null);
-
-  // Slider state and refs for sort controls
-  const [sliderStyle, setSliderStyle] = useState({ left: '0px', width: '0px', opacity: 0 });
-  const sortOptionsContainerRef = useRef<HTMLDivElement>(null);
-  const recentBtnRef = useRef<HTMLButtonElement>(null);
-  const prBtnRef = useRef<HTMLButtonElement>(null);
-  const progressBtnRef = useRef<HTMLButtonElement>(null);
 
   // Use the same color system as the rest of the app
   const chartColors = getCategoryChartColors();
@@ -105,27 +99,6 @@ const Dashboard = () => {
       generateTournament();
     }
   }, [exercises, categories, tournamentInitialized]);
-
-  useLayoutEffect(() => {
-    let activeRef: React.RefObject<HTMLButtonElement> | null = null;
-    if (sortBy === 'recent') {
-      activeRef = recentBtnRef;
-    } else if (sortBy === 'pr') {
-      activeRef = prBtnRef;
-    } else if (sortBy === 'progress') {
-      activeRef = progressBtnRef;
-    }
-
-    if (activeRef?.current && sortOptionsContainerRef.current) {
-      const buttonElement = activeRef.current;
-      // const containerElement = sortOptionsContainerRef.current; // Not strictly needed if using offsetLeft/offsetWidth
-
-      const left = buttonElement.offsetLeft;
-      const width = buttonElement.offsetWidth;
-
-      setSliderStyle({ left: `${left}px`, width: `${width}px`, opacity: 1 });
-    }
-  }, [sortBy]); // Re-run when sortBy changes
 
   // Get color for a category based on its index
   const getCategoryColor = (categoryIndex: number) => {
@@ -361,48 +334,17 @@ const Dashboard = () => {
           <div className="mb-6 flex items-center justify-between">
             <h2 className="text-xl font-bold text-foreground">Your Progress</h2>
             
-            {/* Compact Sort Controls - smaller and more integrated */}
-            <div ref={sortOptionsContainerRef} className="relative flex items-center bg-muted p-1 rounded-lg shadow-sm">
-              {/* Slider Element */}
-              <div
-                className="absolute top-1 bottom-1 bg-background rounded-md shadow-md transition-all duration-300 ease-in-out"
-                style={sliderStyle}
-              />
-              {/* Buttons */}
-              <button
-                ref={recentBtnRef}
-                onClick={() => setSortBy('recent')}
-                className={`relative z-10 px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-150 ease-in-out active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                  sortBy === 'recent'
-                    ? 'text-foreground'
-                    : 'text-muted-foreground hover:text-foreground/80'
-                }`}
-              >
-                Recent
-              </button>
-              <button
-                ref={prBtnRef}
-                onClick={() => setSortBy('pr')}
-                className={`relative z-10 px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-150 ease-in-out active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                  sortBy === 'pr'
-                    ? 'text-foreground'
-                    : 'text-muted-foreground hover:text-foreground/80'
-                }`}
-              >
-                PRs
-              </button>
-              <button
-                ref={progressBtnRef}
-                onClick={() => setSortBy('progress')}
-                className={`relative z-10 px-3 py-1.5 text-xs font-medium rounded-md transition-colors duration-150 ease-in-out active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${
-                  sortBy === 'progress'
-                    ? 'text-foreground'
-                    : 'text-muted-foreground hover:text-foreground/80'
-                }`}
-              >
-                Progress
-              </button>
-            </div>
+            {/* Compact Sort Controls using MobileSlider */}
+            <MobileSlider
+              options={[
+                { id: 'recent', label: 'Recent' },
+                { id: 'pr', label: 'PRs' },
+                { id: 'progress', label: 'Progress' }
+              ]}
+              activeOption={sortBy}
+              onOptionChange={(optionId) => setSortBy(optionId as 'recent' | 'pr' | 'progress')}
+              variant="compact"
+            />
           </div>
           
           {exerciseProgressItems.length > 0 ? (

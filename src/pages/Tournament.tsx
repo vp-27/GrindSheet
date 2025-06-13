@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { MobileSlider } from '@/components/ui/mobile-slider';
 import { 
   Trophy, 
   Crown, 
@@ -443,37 +444,17 @@ const TournamentPage: React.FC = () => {
   return (
     <Layout title={activeTab === 'records' ? 'PR Records' : 'Tournament'}>
       <div className="space-y-6 relative">
-        {/* Clean Tab System - moved to top */}
-        <div className="bg-muted/20 p-1 rounded-2xl">
-          <div className="grid grid-cols-2 gap-1">
-            <Button
-              variant={activeTab === 'tournament' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveTab('tournament')}
-              className={`rounded-xl transition-all duration-200 ${
-                activeTab === 'tournament'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'hover:bg-background/50'
-              }`}
-            >
-              <Trophy className="h-4 w-4 mr-2" />
-              Tournament
-            </Button>
-            <Button
-              variant={activeTab === 'records' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setActiveTab('records')}
-              className={`rounded-xl transition-all duration-200 ${
-                activeTab === 'records'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'hover:bg-background/50'
-              }`}
-            >
-              <Medal className="h-4 w-4 mr-2" />
-              PR Records
-            </Button>
-          </div>
-        </div>
+        {/* Clean Tab System using MobileSlider */}
+        <MobileSlider
+          options={[
+            { id: 'tournament', label: 'Tournament' },
+            { id: 'records', label: 'PR Records' }
+          ]}
+          activeOption={activeTab}
+          onOptionChange={(optionId) => setActiveTab(optionId as 'tournament' | 'records')}
+          variant="default"
+          className="mb-6"
+        />
 
         {/* Tournament-specific header and controls */}
         {activeTab === 'tournament' && (
