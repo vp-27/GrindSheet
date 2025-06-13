@@ -482,9 +482,9 @@ const Settings: React.FC = () => {
           </div>
 
           {/* Categories Management - Collapsible */}
-          <Collapsible open={categoriesOpen} onOpenChange={handleCategoriesToggle}>
+          <Collapsible open={categoriesOpen} onOpenChange={handleCategoriesToggle} className="collapsible-root">
             <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 shadow-sm">
-              <CollapsibleTrigger className="w-full p-6 cursor-pointer active:bg-muted/20 transition-colors rounded-2xl">
+              <CollapsibleTrigger className="collapsible-trigger w-full p-6 cursor-pointer active:bg-muted/20 transition-colors rounded-2xl">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center flex-shrink-0">
@@ -501,17 +501,13 @@ const Settings: React.FC = () => {
                         {categories.length}
                       </span>
                     )}
-                    {categoriesOpen ? (
-                      <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform" />
-                    ) : (
-                      <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform" />
-                    )}
+                    <ChevronRight className="collapsible-chevron h-5 w-5 text-muted-foreground" />
                   </div>
                 </div>
               </CollapsibleTrigger>
               
-              <CollapsibleContent className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-                <div className="px-6 pb-6">
+              <CollapsibleContent className="smooth-collapsible-content">
+                <div className="collapsible-inner px-6 pb-6">
                   <div className="flex justify-end mb-4">
                     <Button 
                       onClick={() => {
@@ -608,9 +604,9 @@ const Settings: React.FC = () => {
           </Collapsible>
 
           {/* Exercises Management - Collapsible */}
-          <Collapsible open={exercisesOpen} onOpenChange={handleExercisesToggle}>
+          <Collapsible open={exercisesOpen} onOpenChange={handleExercisesToggle} className="collapsible-root">
             <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 shadow-sm">
-              <CollapsibleTrigger className="w-full p-6 cursor-pointer active:bg-muted/20 transition-colors rounded-2xl">
+              <CollapsibleTrigger className="collapsible-trigger w-full p-6 cursor-pointer active:bg-muted/20 transition-colors rounded-2xl">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center flex-shrink-0">
@@ -627,17 +623,13 @@ const Settings: React.FC = () => {
                         {exercises.length}
                       </span>
                     )}
-                    {exercisesOpen ? (
-                      <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform" />
-                    ) : (
-                      <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform" />
-                    )}
+                    <ChevronRight className="collapsible-chevron h-5 w-5 text-muted-foreground" />
                   </div>
                 </div>
               </CollapsibleTrigger>
               
-              <CollapsibleContent className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-                <div className="px-6 pb-6">
+              <CollapsibleContent className="smooth-collapsible-content">
+                <div className="collapsible-inner px-6 pb-6">
                   <div className="flex justify-end mb-4">
                     <Button 
                       onClick={() => {

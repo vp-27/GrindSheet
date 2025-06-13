@@ -1,8 +1,67 @@
 /* Smooth Settings Page Animations */
 
+/* Custom smooth collapsible animations that prevent jarring close */
+.smooth-collapsible-content {
+  overflow: hidden;
+  will-change: height;
+  /* Remove default transition to let Radix handle it smoothly */
+}
+
+.smooth-collapsible-content[data-state="open"] {
+  animation: smoothExpand 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.smooth-collapsible-content[data-state="closed"] {
+  animation: smoothCollapse 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes smoothExpand {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes smoothCollapse {
+  from {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+  20% {
+    /* Content fades first */
+    height: var(--radix-collapsible-content-height);
+    opacity: 0;
+  }
+  100% {
+    /* Then height collapses slowly */
+    height: 0;
+    opacity: 0;
+  }
+}
+
+/* Refined inner content fade during transitions */
+.smooth-collapsible-content[data-state="closing"] .collapsible-inner,
+.smooth-collapsible-content[data-state="closed"] .collapsible-inner {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 150ms ease-out, transform 150ms ease-out;
+}
+
+.smooth-collapsible-content[data-state="open"] .collapsible-inner {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms ease-out 100ms, transform 300ms ease-out 100ms; /* Delay for smooth entrance */
+}
+
 /* Collapsible trigger smooth interactions */
 .collapsible-trigger {
   transition: background-color 200ms ease;
+  position: relative;
+  z-index: 1;
 }
 
 .collapsible-trigger:hover {
@@ -13,13 +72,29 @@
   background: hsl(var(--muted) / 0.2);
 }
 
-/* Chevron rotation animation */
+/* Chevron rotation animation with smoother timing */
 .collapsible-chevron {
-  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 400ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transform-origin: center;
 }
 
 .collapsible-trigger[data-state="open"] .collapsible-chevron {
   transform: rotate(90deg);
+}
+
+/* Prevent layout shift during animations */
+.collapsible-trigger[data-state="closed"] .collapsible-chevron {
+  transform: rotate(0deg);
+}
+
+/* Add smooth spacing for content below collapsibles */
+.collapsible-root {
+  margin-bottom: 0;
+  transition: margin-bottom 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.collapsible-root[data-state="closed"] {
+  margin-bottom: 0;
 }
 
 /* Count badge animation */
@@ -50,6 +125,39 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Prevent layout shifts in the main container */
+.settings-container {
+  min-height: 100vh;
+  transition: all 300ms ease-out;
+}
+
+/* Smooth spacing for Sign Out button and footer elements */
+.settings-footer {
+  margin-top: 2rem;
+  transition: margin-top 500ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Hardware acceleration optimizations */
+.smooth-collapsible-content,
+.collapsible-chevron,
+.collapsible-trigger {
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+  will-change: transform, height, opacity;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .smooth-collapsible-content,
+  .collapsible-chevron,
+  .collapsible-trigger,
+  .collapsible-inner {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
 
