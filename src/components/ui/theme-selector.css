@@ -54,10 +54,25 @@
   gap: 0.5rem;
   border-radius: 0.75rem;
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   cursor: pointer;
   transition: all 200ms ease;
   color: hsl(var(--foreground));
+  /* Add subtle interactive hints */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Interactive state for unselected buttons - light mode */
+.theme-selector-button:not(.selected) {
+  border: 1px solid hsl(var(--border) / 0.3);
+  background: hsl(var(--background) / 0.5);
+}
+
+/* Interactive state for unselected buttons - dark mode */
+.dark .theme-selector-button:not(.selected) {
+  border: 1px solid hsl(var(--border) / 0.4);
+  background: hsl(var(--muted) / 0.2);
+  box-shadow: 0 1px 3px rgba(255, 255, 255, 0.02);
 }
 
 .theme-selector-button:active {
@@ -66,10 +81,15 @@
 
 .theme-selector-button.selected {
   color: hsl(var(--primary-foreground));
+  border: 1px solid transparent;
+  background: transparent;
+  box-shadow: none;
 }
 
 .theme-selector-button:not(.selected):active {
   color: hsl(var(--foreground) / 0.8);
+  transform: scale(0.95);
+  border-color: hsl(var(--border) / 0.6);
 }
 
 .theme-selector-icon {
@@ -90,7 +110,17 @@
 /* Smooth hover effects for desktop */
 @media (hover: hover) and (pointer: fine) {
   .theme-selector-button:hover:not(.selected) {
-    background: hsl(var(--muted) / 0.5);
+    background: hsl(var(--muted) / 0.6);
+    border-color: hsl(var(--border) / 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Dark mode hover adjustments */
+  .dark .theme-selector-button:hover:not(.selected) {
+    background: hsl(var(--muted) / 0.4);
+    border-color: hsl(var(--border) / 0.6);
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.05);
   }
 }
 

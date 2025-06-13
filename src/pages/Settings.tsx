@@ -455,6 +455,7 @@ const Settings: React.FC = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-lg font-semibold text-foreground">Appearance</h3>
+                <p className="text-sm text-muted-foreground">Choose your preferred theme</p>
               </div>
             </div>
             
