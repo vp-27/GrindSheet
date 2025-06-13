@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { useAuth } from '@/context/AuthContext';
@@ -11,21 +11,32 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
-import { ChevronRight, Edit2, Plus, Trash2, Pencil, LogOut, Folder, Palette, Dumbbell, Sun, Moon, Monitor } from 'lucide-react';
+import { ChevronRight, ChevronDown, Edit2, Plus, Trash2, Pencil, LogOut, Folder, Palette, Dumbbell, Sun, Moon, Monitor } from 'lucide-react';
 import { getCategoryColors, getCategoryKeyByName } from '@/utils/categoryColors';
 import { CategoryDialog, ExerciseDialog } from '@/components/ui/shared-dialogs';
 import '@/components/ui/color-indicator.css';
+import '@/components/ui/theme-selector.css';
+import '@/components/ui/settings-animations.css';
 
 const Settings: React.FC = () => {
   const { user, profile, signOut, updateProfile } = useAuth();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState('profile');
+  
+  // Lazy loading states
+  const [categoriesOpen, setCategoriesOpen] = useState(false);
+  const [exercisesOpen, setExercisesOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [exercises, setExercises] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const [exercisesLoading, setExercisesLoading] = useState(false);
+  const [categoriesLoaded, setCategoriesLoaded] = useState(false);
+  const [exercisesLoaded, setExercisesLoaded] = useState(false);
+  
+  // Dialog states
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
   const [isAddExerciseOpen, setIsAddExerciseOpen] = useState(false);
@@ -65,54 +76,125 @@ const Settings: React.FC = () => {
     }
   }, [profile]);
 
-  // Fetch categories and exercises
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return;
-      
-      setLoading(true);
-      
-      try {
-        // Fetch all categories (shared across all users)
-        const { data: categoriesData, error: categoriesError } = await supabase
-          .from('categories')
-          .select('*')
-          .order('name');
-          
-        if (categoriesError) throw categoriesError;
-        setCategories(categoriesData || []);
-
-        // Fetch all exercises (shared across all users)
-        const { data: exercisesData, error: exercisesError } = await supabase
-          .from('exercises')
-          .select('*')
-          .order('name');
-          
-        if (exercisesError) throw exercisesError;
-        setExercises(exercisesData || []);
+  // Lazy load categories when section is opened
+  const fetchCategories = async () => {
+    if (categoriesLoaded || categoriesLoading) return;
+    
+    setCategoriesLoading(true);
+    try {
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from('categories')
+        .select('*')
+        .order('name');
         
-        // Check which items can be deleted
-        await checkDeletableItems(categoriesData || [], exercisesData || []);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-        toast({
-          title: 'Error loading data',
-          description: 'Failed to load your categories and exercises.',
-          variant: 'destructive',
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
+      if (categoriesError) throw categoriesError;
+      setCategories(categoriesData || []);
+      setCategoriesLoaded(true);
+      
+      // Check which categories can be deleted
+      await checkDeletableCategories(categoriesData || []);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      toast({
+        title: 'Error loading categories',
+        description: 'Failed to load categories.',
+        variant: 'destructive',
+      });
+    } finally {
+      setCategoriesLoading(false);
+    }
+  };
 
-    fetchData();
-  }, [user]);
+  // Lazy load exercises when section is opened
+  const fetchExercises = async () => {
+    if (exercisesLoaded || exercisesLoading) return;
+    
+    setExercisesLoading(true);
+    try {
+      const { data: exercisesData, error: exercisesError } = await supabase
+        .from('exercises')
+        .select('*')
+        .order('name');
+        
+      if (exercisesError) throw exercisesError;
+      setExercises(exercisesData || []);
+      setExercisesLoaded(true);
+      
+      // Check which exercises can be deleted
+      await checkDeletableExercises(exercisesData || []);
+    } catch (error) {
+      console.error('Error fetching exercises:', error);
+      toast({
+        title: 'Error loading exercises',
+        description: 'Failed to load exercises.',
+        variant: 'destructive',
+      });
+    } finally {
+      setExercisesLoading(false);
+    }
+  };
 
-  // Helper function to check which categories and exercises can be deleted
-  const checkDeletableItems = async (categories: any[], exercises: any[]) => {
+  // Handle categories section toggle
+  const handleCategoriesToggle = (open: boolean) => {
+    setCategoriesOpen(open);
+    if (open && !categoriesLoaded) {
+      fetchCategories();
+    }
+  };
+
+  // Handle exercises section toggle
+  const handleExercisesToggle = (open: boolean) => {
+    setExercisesOpen(open);
+    if (open && !exercisesLoaded) {
+      fetchExercises();
+    }
+  };
+
+  // Helper function to check which categories can be deleted
+  const checkDeletableCategories = async (categories: any[]) => {
     if (!user) return;
 
     const deletableCategoryIds = new Set<string>();
+
+    // Fetch all exercise logs not belonging to the current user
+    const { data: otherUserLogsData, error: otherUserLogsError } = await supabase
+      .from('exercise_logs')
+      .select('exercise_id')
+      .neq('user_id', user.id);
+
+    if (otherUserLogsError) {
+      console.error('Error fetching other user logs:', otherUserLogsError);
+      setDeletableItems(prev => ({ ...prev, categories: new Set() }));
+      return;
+    }
+
+    const protectedExerciseIds = new Set(otherUserLogsData?.map(log => log.exercise_id) || []);
+
+    // Fetch all exercises to check category relationships
+    const { data: allExercises } = await supabase
+      .from('exercises')
+      .select('*');
+
+    // Determine deletable categories
+    for (const category of categories) {
+      const exercisesInCategory = (allExercises || []).filter(ex => ex.category_id === category.id);
+      const isCategoryDeletable = exercisesInCategory.every(ex => !protectedExerciseIds.has(ex.id));
+      
+      if (isCategoryDeletable) {
+        deletableCategoryIds.add(category.id);
+      }
+    }
+    
+    setDeletableItems(prev => ({
+      ...prev,
+      categories: deletableCategoryIds
+    }));
+  };
+
+  // Helper function to check which exercises can be deleted
+  const checkDeletableExercises = async (exercises: any[]) => {
+    if (!user) return;
+
     const deletableExerciseIds = new Set<string>();
 
     // Fetch all exercise logs not belonging to the current user
@@ -123,8 +205,7 @@ const Settings: React.FC = () => {
 
     if (otherUserLogsError) {
       console.error('Error fetching other user logs:', otherUserLogsError);
-      // Fallback: assume nothing is deletable to be safe
-      setDeletableItems({ categories: new Set(), exercises: new Set() });
+      setDeletableItems(prev => ({ ...prev, exercises: new Set() }));
       return;
     }
 
@@ -136,23 +217,11 @@ const Settings: React.FC = () => {
         deletableExerciseIds.add(exercise.id);
       }
     }
-
-    // Determine deletable categories
-    for (const category of categories) {
-      const exercisesInCategory = exercises.filter(ex => ex.category_id === category.id);
-      // A category is deletable if all its exercises are deletable
-      // (or if it has no exercises)
-      const isCategoryDeletable = exercisesInCategory.every(ex => deletableExerciseIds.has(ex.id));
-      
-      if (isCategoryDeletable) {
-        deletableCategoryIds.add(category.id);
-      }
-    }
     
-    setDeletableItems({
-      categories: deletableCategoryIds,
+    setDeletableItems(prev => ({
+      ...prev,
       exercises: deletableExerciseIds
-    });
+    }));
   };
 
   const handleProfileSubmit = async (data) => {
@@ -175,10 +244,6 @@ const Settings: React.FC = () => {
       });
     }
   };
-
-
-
-
 
   const handleEditCategory = (category) => {
     setEditingCategory(category);
@@ -213,24 +278,8 @@ const Settings: React.FC = () => {
         
       if (error) throw error;
       
-      // Refresh categories - get all categories
-      const { data: refreshedCategories } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name');
-        
-      setCategories(refreshedCategories || []);
-      
-      // Also refresh exercises as some might have been deleted
-      const { data: refreshedExercises } = await supabase
-        .from('exercises')
-        .select('*')
-        .order('name');
-        
-      setExercises(refreshedExercises || []);
-      
-      // Refresh deletable items
-      await checkDeletableItems(refreshedCategories || [], refreshedExercises || []);
+      // Refresh categories
+      await fetchCategories();
       
       toast({
         title: 'Category deleted',
@@ -268,22 +317,8 @@ const Settings: React.FC = () => {
         
       if (error) throw error;
       
-      // Refresh exercises - get all exercises
-      const { data: refreshedExercises } = await supabase
-        .from('exercises')
-        .select('*')
-        .order('name');
-        
-      setExercises(refreshedExercises || []);
-      
-      // Refresh categories for consistency  
-      const { data: refreshedCategories } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name');
-      
-      // Refresh deletable items
-      await checkDeletableItems(refreshedCategories || [], refreshedExercises || []);
+      // Refresh exercises
+      await fetchExercises();
       
       toast({
         title: 'Exercise deleted',
@@ -415,7 +450,14 @@ const Settings: React.FC = () => {
               </div>
             </div>
             
-            <div className="grid grid-cols-3 gap-3">
+            {/* Animated Theme Selector */}
+            <div 
+              className="theme-selector-container"
+              data-active={theme}
+            >
+              {/* Sliding Background Indicator */}
+              <div className="theme-selector-slider" />
+              
               {[
                 { value: 'light' as const, label: 'Light', icon: 'Sun' },
                 { value: 'dark' as const, label: 'Dark', icon: 'Moon' },
@@ -426,234 +468,271 @@ const Settings: React.FC = () => {
                                      themeOption.icon === 'Moon' ? Moon : Monitor;
                 
                 return (
-                  <Button
+                  <button
                     key={themeOption.value}
-                    variant={isSelected ? "default" : "outline"}
-                    className={`h-20 p-3 flex flex-col gap-2 rounded-xl transition-all duration-200 ${
-                      isSelected 
-                        ? 'bg-primary text-primary-foreground shadow-md border-primary' 
-                        : 'bg-background/60 border-border/60 active:bg-background/80 text-foreground active:border-border'
-                    }`}
+                    className={`theme-selector-button ${isSelected ? 'selected' : ''}`}
                     onClick={() => setTheme(themeOption.value)}
                   >
-                    <IconComponent className="h-5 w-5" />
-                    <span className="text-sm font-medium">{themeOption.label}</span>
-                  </Button>
+                    <IconComponent className="theme-selector-icon" />
+                    <span className="theme-selector-label">{themeOption.label}</span>
+                  </button>
                 );
               })}
             </div>
           </div>
 
-          {/* Categories Management */}
-          <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center flex-shrink-0">
-                  <Folder className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-lg font-semibold text-foreground">Categories</h3>
-                </div>
-              </div>
-              <Button 
-                onClick={() => {
-                  setEditingCategory(null);
-                  setIsAddCategoryOpen(true);
-                }}
-                className="h-10 px-4 rounded-xl font-medium bg-primary active:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200 flex-shrink-0"
-              >
-                <Plus className="h-4 w-4 mr-2" /> 
-                Add Category
-              </Button>
-            </div>
-            
-            {loading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading categories...</div>
-            ) : categories.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {categories.map(category => {
-                  const categoryKey = getCategoryKeyByName(category.name);
-                  const colors = getCategoryColors(categoryKey);
-                  const canDelete = deletableItems.categories.has(category.id);
-                  
-                  return (
-                    <div 
-                      key={category.id} 
-                      className={`apple-health-card group category-colored-card ${getCategoryClassName(categoryKey)}`}
-                    >
-                      {/* Top row: Category name + Actions */}
-                      <div className="flex items-start justify-between mb-4">
-                        <h3 className="apple-health-card-title">
-                          {category.name}
-                        </h3>
-                        <div className="flex gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleEditCategory(category)}
-                            className="h-8 w-8 rounded-lg active:bg-muted/60 text-muted-foreground active:text-foreground transition-colors"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleDeleteCategory(category.id)}
-                            disabled={!canDelete}
-                            className={`h-8 w-8 rounded-lg ${
-                              canDelete 
-                                ? 'text-muted-foreground active:text-red-600 active:bg-red-50 dark:active:bg-red-950/30' 
-                                : 'text-muted-foreground/40 cursor-not-allowed'
-                            }`}
-                            title={canDelete ? 'Delete category' : 'Cannot delete - used by other users'}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Description if exists */}
-                      {category.description && (
-                        <div className="mb-4">
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {category.description}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Bottom row: Status */}
-                      <div className="flex items-end justify-between">
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="w-3 h-3 rounded-full category-indicator-dot"
-                          />
-                          <span className="text-sm text-muted-foreground">
-                            {exercises.filter(ex => ex.category_id === category.id).length} exercises
-                          </span>
-                        </div>
-                        
-                        {!canDelete && (
-                          <div className="apple-health-progress-badge protected-badge">
-                            Protected
-                          </div>
-                        )}
-                      </div>
+          {/* Categories Management - Collapsible */}
+          <Collapsible open={categoriesOpen} onOpenChange={handleCategoriesToggle}>
+            <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 shadow-sm">
+              <CollapsibleTrigger className="w-full p-6 cursor-pointer active:bg-muted/20 transition-colors rounded-2xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center flex-shrink-0">
+                      <Folder className="h-5 w-5 text-muted-foreground" />
                     </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                No categories found. Create your first category!
-              </div>
-            )}
-          </div>
-
-          {/* Exercises Management */}
-          <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center flex-shrink-0">
-                  <Dumbbell className="h-5 w-5 text-muted-foreground" />
-                </div>
-                <div className="min-w-0">
-                  <h3 className="text-lg font-semibold text-foreground">Exercises</h3>
-                </div>
-              </div>
-              <Button 
-                onClick={() => {
-                  setEditingExercise(null);
-                  setIsAddExerciseOpen(true);
-                }}
-                className="h-10 px-4 rounded-xl font-medium bg-primary active:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200 flex-shrink-0"
-              >
-                <Plus className="h-4 w-4 mr-2" /> 
-                Add Exercise
-              </Button>
-            </div>
-            
-            {loading ? (
-              <div className="text-center py-8 text-muted-foreground">Loading exercises...</div>
-            ) : exercises.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {exercises.map(exercise => {
-                  const category = categories.find(c => c.id === exercise.category_id);
-                  const categoryKey = category ? getCategoryKeyByName(category.name) : 'default';
-                  const colors = getCategoryColors(categoryKey);
-                  const canDelete = deletableItems.exercises.has(exercise.id);
-                  
-                  return (
-                    <div 
-                      key={exercise.id} 
-                      className={`apple-health-card group category-colored-card ${getCategoryClassName(categoryKey)}`}
-                    >
-                      {/* Top row: Exercise name + Actions */}
-                      <div className="flex items-start justify-between mb-4">
-                        <h3 className="apple-health-card-title">
-                          {exercise.name}
-                        </h3>
-                        <div className="flex gap-1">
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleEditExercise(exercise)}
-                            className="h-8 w-8 rounded-lg active:bg-muted/60 text-muted-foreground active:text-foreground transition-colors"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleDeleteExercise(exercise.id)}
-                            disabled={!canDelete}
-                            className={`h-8 w-8 rounded-lg ${
-                              canDelete 
-                                ? 'text-muted-foreground active:text-red-600 active:bg-red-50 dark:active:bg-red-950/30' 
-                                : 'text-muted-foreground/40 cursor-not-allowed'
-                            }`}
-                            title={canDelete ? 'Delete exercise' : 'Cannot delete - used by other users'}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Description if exists */}
-                      {exercise.description && (
-                        <div className="mb-4">
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {exercise.description}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Bottom row: Category and status */}
-                      <div className="flex items-end justify-between">
-                        <div className="flex items-center gap-2">
-                          <div 
-                            className="w-3 h-3 rounded-full category-indicator-dot"
-                          />
-                          <span className="text-sm text-muted-foreground">
-                            {category?.name || 'Uncategorized'}
-                          </span>
-                        </div>
-                        
-                        {!canDelete && (
-                          <div className="apple-health-progress-badge protected-badge">
-                            Protected
-                          </div>
-                        )}
-                      </div>
+                    <div className="min-w-0 text-left">
+                      <h3 className="text-lg font-semibold text-foreground">Categories</h3>
+                      <p className="text-sm text-muted-foreground">Manage exercise categories</p>
                     </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                No exercises found. Create your first exercise!
-              </div>
-            )}
-          </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {categoriesLoaded && (
+                      <span className="text-sm text-muted-foreground px-3 py-1 bg-muted/40 rounded-full">
+                        {categories.length}
+                      </span>
+                    )}
+                    {categoriesOpen ? (
+                      <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform" />
+                    ) : (
+                      <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform" />
+                    )}
+                  </div>
+                </div>
+              </CollapsibleTrigger>
+              
+              <CollapsibleContent className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                <div className="px-6 pb-6">
+                  <div className="flex justify-end mb-4">
+                    <Button 
+                      onClick={() => {
+                        setEditingCategory(null);
+                        setIsAddCategoryOpen(true);
+                      }}
+                      className="h-10 px-4 rounded-xl font-medium bg-primary active:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
+                    >
+                      <Plus className="h-4 w-4 mr-2" /> 
+                      Add Category
+                    </Button>
+                  </div>
+                  
+                  {categoriesLoading ? (
+                    <div className="text-center py-8 text-muted-foreground">Loading categories...</div>
+                  ) : categories.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {categories.map((category, index) => {
+                        const categoryKey = getCategoryKeyByName(category.name);
+                        const canDelete = deletableItems.categories.has(category.id);
+                        
+                        return (
+                          <div 
+                            key={category.id} 
+                            className={`apple-health-card settings-card-item group category-colored-card ${getCategoryClassName(categoryKey)}`}
+                          >
+                            {/* Top row: Category name + Actions */}
+                            <div className="flex items-start justify-between mb-4">
+                              <h3 className="apple-health-card-title">
+                                {category.name}
+                              </h3>
+                              <div className="flex gap-1">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => handleEditCategory(category)}
+                                  className="h-8 w-8 rounded-lg active:bg-muted/60 text-muted-foreground active:text-foreground transition-colors"
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => handleDeleteCategory(category.id)}
+                                  disabled={!canDelete}
+                                  className={`h-8 w-8 rounded-lg ${
+                                    canDelete 
+                                      ? 'text-muted-foreground active:text-red-600 active:bg-red-50 dark:active:bg-red-950/30' 
+                                      : 'text-muted-foreground/40 cursor-not-allowed'
+                                  }`}
+                                  title={canDelete ? 'Delete category' : 'Cannot delete - used by other users'}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+
+                            {/* Description if exists */}
+                            {category.description && (
+                              <div className="mb-4">
+                                <p className="text-sm text-muted-foreground line-clamp-2">
+                                  {category.description}
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Bottom row: Status */}
+                            <div className="flex items-end justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full category-indicator-dot" />
+                                <span className="text-sm text-muted-foreground">
+                                  {exercisesLoaded ? exercises.filter(ex => ex.category_id === category.id).length : '...'} exercises
+                                </span>
+                              </div>
+                              
+                              {!canDelete && (
+                                <div className="apple-health-progress-badge protected-badge">
+                                  Protected
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No categories found. Create your first category!
+                    </div>
+                  )}
+                </div>
+              </CollapsibleContent>
+            </div>
+          </Collapsible>
+
+          {/* Exercises Management - Collapsible */}
+          <Collapsible open={exercisesOpen} onOpenChange={handleExercisesToggle}>
+            <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 shadow-sm">
+              <CollapsibleTrigger className="w-full p-6 cursor-pointer active:bg-muted/20 transition-colors rounded-2xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center flex-shrink-0">
+                      <Dumbbell className="h-5 w-5 text-muted-foreground" />
+                    </div>
+                    <div className="min-w-0 text-left">
+                      <h3 className="text-lg font-semibold text-foreground">Exercises</h3>
+                      <p className="text-sm text-muted-foreground">Manage your exercises</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {exercisesLoaded && (
+                      <span className="text-sm text-muted-foreground px-3 py-1 bg-muted/40 rounded-full">
+                        {exercises.length}
+                      </span>
+                    )}
+                    {exercisesOpen ? (
+                      <ChevronDown className="h-5 w-5 text-muted-foreground transition-transform" />
+                    ) : (
+                      <ChevronRight className="h-5 w-5 text-muted-foreground transition-transform" />
+                    )}
+                  </div>
+                </div>
+              </CollapsibleTrigger>
+              
+              <CollapsibleContent className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+                <div className="px-6 pb-6">
+                  <div className="flex justify-end mb-4">
+                    <Button 
+                      onClick={() => {
+                        setEditingExercise(null);
+                        setIsAddExerciseOpen(true);
+                      }}
+                      className="h-10 px-4 rounded-xl font-medium bg-primary active:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
+                    >
+                      <Plus className="h-4 w-4 mr-2" /> 
+                      Add Exercise
+                    </Button>
+                  </div>
+                  
+                  {exercisesLoading ? (
+                    <div className="text-center py-8 text-muted-foreground">Loading exercises...</div>
+                  ) : exercises.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {exercises.map((exercise, index) => {
+                        const category = categoriesLoaded ? categories.find(c => c.id === exercise.category_id) : null;
+                        const categoryKey = category ? getCategoryKeyByName(category.name) : 'default';
+                        const canDelete = deletableItems.exercises.has(exercise.id);
+                        
+                        return (
+                          <div 
+                            key={exercise.id} 
+                            className={`apple-health-card settings-card-item group category-colored-card ${getCategoryClassName(categoryKey)}`}
+                          >
+                            {/* Top row: Exercise name + Actions */}
+                            <div className="flex items-start justify-between mb-4">
+                              <h3 className="apple-health-card-title">
+                                {exercise.name}
+                              </h3>
+                              <div className="flex gap-1">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => handleEditExercise(exercise)}
+                                  className="h-8 w-8 rounded-lg active:bg-muted/60 text-muted-foreground active:text-foreground transition-colors"
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => handleDeleteExercise(exercise.id)}
+                                  disabled={!canDelete}
+                                  className={`h-8 w-8 rounded-lg ${
+                                    canDelete 
+                                      ? 'text-muted-foreground active:text-red-600 active:bg-red-50 dark:active:bg-red-950/30' 
+                                      : 'text-muted-foreground/40 cursor-not-allowed'
+                                  }`}
+                                  title={canDelete ? 'Delete exercise' : 'Cannot delete - used by other users'}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </div>
+
+                            {/* Description if exists */}
+                            {exercise.description && (
+                              <div className="mb-4">
+                                <p className="text-sm text-muted-foreground line-clamp-2">
+                                  {exercise.description}
+                                </p>
+                              </div>
+                            )}
+
+                            {/* Bottom row: Category and status */}
+                            <div className="flex items-end justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full category-indicator-dot" />
+                                <span className="text-sm text-muted-foreground">
+                                  {category?.name || 'Uncategorized'}
+                                </span>
+                              </div>
+                              
+                              {!canDelete && (
+                                <div className="apple-health-progress-badge protected-badge">
+                                  Protected
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      No exercises found. Create your first exercise!
+                    </div>
+                  )}
+                </div>
+              </CollapsibleContent>
+            </div>
+          </Collapsible>
 
           {/* Logout Section */}
           <div 
@@ -679,22 +758,9 @@ const Settings: React.FC = () => {
         isOpen={isAddExerciseOpen}
         onOpenChange={setIsAddExerciseOpen}
         editingExercise={editingExercise}
-        categories={categories}
+        categories={categoriesLoaded ? categories : []}
         onSuccess={(exercise) => {
           // Refresh exercises
-          const fetchExercises = async () => {
-            const { data: refreshedExercises } = await supabase
-              .from('exercises')
-              .select('*')
-              .order('name');
-            setExercises(refreshedExercises || []);
-            
-            const { data: refreshedCategories } = await supabase
-              .from('categories')
-              .select('*')
-              .order('name');
-            await checkDeletableItems(refreshedCategories || [], refreshedExercises || []);
-          };
           fetchExercises();
           setEditingExercise(null);
         }}
@@ -704,22 +770,9 @@ const Settings: React.FC = () => {
         isOpen={isAddCategoryOpen}
         onOpenChange={setIsAddCategoryOpen}
         editingCategory={editingCategory}
-        categories={categories}
+        categories={categoriesLoaded ? categories : []}
         onSuccess={(category) => {
           // Refresh categories
-          const fetchCategories = async () => {
-            const { data: refreshedCategories } = await supabase
-              .from('categories')
-              .select('*')
-              .order('name');
-            setCategories(refreshedCategories || []);
-            
-            const { data: refreshedExercises } = await supabase
-              .from('exercises')
-              .select('*')
-              .order('name');
-            await checkDeletableItems(refreshedCategories || [], refreshedExercises || []);
-          };
           fetchCategories();
           setEditingCategory(null);
         }}

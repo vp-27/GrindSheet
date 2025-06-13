@@ -1,0 +1,165 @@
+/* Theme Selector Sliding Animation */
+.theme-selector-container {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  background: hsl(var(--muted) / 0.2);
+  padding: 0.5rem;
+  border-radius: 1rem;
+  overflow: hidden; /* Ensure the slider doesn't overflow */
+}
+
+.theme-selector-slider {
+  position: absolute;
+  top: 0.5rem;
+  bottom: 0.5rem;
+  background: hsl(var(--primary));
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  opacity: 0;
+  transform: translateX(0);
+  will-change: left, right, opacity; /* Optimize for animations */
+}
+
+/* Position states for the slider */
+.theme-selector-container[data-active="light"] .theme-selector-slider {
+  left: 0.5rem;
+  right: calc(66.666% + 0.5rem);
+  opacity: 1;
+}
+
+.theme-selector-container[data-active="dark"] .theme-selector-slider {
+  left: calc(33.333% + 0.5rem);
+  right: calc(33.333% + 0.5rem);
+  opacity: 1;
+}
+
+.theme-selector-container[data-active="system"] .theme-selector-slider {
+  left: calc(66.666% + 0.5rem);
+  right: 0.5rem;
+  opacity: 1;
+}
+
+.theme-selector-button {
+  position: relative;
+  z-index: 10;
+  height: 4rem;
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 200ms ease;
+  color: hsl(var(--foreground));
+}
+
+.theme-selector-button:active {
+  transform: scale(0.95);
+}
+
+.theme-selector-button.selected {
+  color: hsl(var(--primary-foreground));
+}
+
+.theme-selector-button:not(.selected):active {
+  color: hsl(var(--foreground) / 0.8);
+}
+
+.theme-selector-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.theme-selector-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Dark mode adjustments */
+.dark .theme-selector-slider {
+  box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1), 0 2px 4px rgba(255, 255, 255, 0.05);
+}
+
+/* Smooth hover effects for desktop */
+@media (hover: hover) and (pointer: fine) {
+  .theme-selector-button:hover:not(.selected) {
+    background: hsl(var(--muted) / 0.5);
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .theme-selector-container {
+    padding: 0.375rem;
+  }
+  
+  .theme-selector-slider {
+    top: 0.375rem;
+    bottom: 0.375rem;
+  }
+  
+  .theme-selector-container[data-active="light"] .theme-selector-slider {
+    left: 0.375rem;
+    right: calc(66.666% + 0.375rem);
+  }
+
+  .theme-selector-container[data-active="dark"] .theme-selector-slider {
+    left: calc(33.333% + 0.375rem);
+    right: calc(33.333% + 0.375rem);
+  }
+
+  .theme-selector-container[data-active="system"] .theme-selector-slider {
+    left: calc(66.666% + 0.375rem);
+    right: 0.375rem;
+  }
+  
+  .theme-selector-button {
+    height: 3.5rem;
+    padding: 0.5rem;
+  }
+  
+  .theme-selector-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+  
+  .theme-selector-label {
+    font-size: 0.75rem;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .theme-selector-slider {
+    transition: opacity 200ms ease-in-out;
+  }
+  
+  .theme-selector-button {
+    transition: color 200ms ease-in-out;
+  }
+  
+  .theme-selector-button:active {
+    transform: none;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .theme-selector-slider {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    border: 2px solid hsl(var(--primary));
+  }
+}
+
+/* Focus management for accessibility */
+.theme-selector-button:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+}

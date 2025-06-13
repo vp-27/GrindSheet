@@ -1,0 +1,286 @@
+/* Smooth Settings Page Animations */
+
+/* Collapsible trigger smooth interactions */
+.collapsible-trigger {
+  transition: background-color 200ms ease;
+}
+
+.collapsible-trigger:hover {
+  background: hsl(var(--muted) / 0.1);
+}
+
+.collapsible-trigger:active {
+  background: hsl(var(--muted) / 0.2);
+}
+
+/* Chevron rotation animation */
+.collapsible-chevron {
+  transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.collapsible-trigger[data-state="open"] .collapsible-chevron {
+  transform: rotate(90deg);
+}
+
+/* Count badge animation */
+.count-badge {
+  transition: all 200ms ease;
+  transform: scale(0);
+  opacity: 0;
+}
+
+.count-badge.visible {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* Enhanced card grid animations */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  animation: fadeInUp 400ms ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Staggered card animations */
+.card-grid > * {
+  animation: cardSlideIn 400ms ease-out backwards;
+}
+
+.card-grid > *:nth-child(1) { animation-delay: 0ms; }
+.card-grid > *:nth-child(2) { animation-delay: 50ms; }
+.card-grid > *:nth-child(3) { animation-delay: 100ms; }
+.card-grid > *:nth-child(4) { animation-delay: 150ms; }
+.card-grid > *:nth-child(5) { animation-delay: 200ms; }
+.card-grid > *:nth-child(6) { animation-delay: 250ms; }
+
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Enhanced staggered animations for better visual appeal */
+.settings-card-item {
+  animation: cardSlideIn 400ms cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+[data-state="open"] .settings-card-item:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+[data-state="open"] .settings-card-item:nth-child(2) {
+  animation-delay: 50ms;
+}
+
+[data-state="open"] .settings-card-item:nth-child(3) {
+  animation-delay: 100ms;
+}
+
+[data-state="open"] .settings-card-item:nth-child(4) {
+  animation-delay: 150ms;
+}
+
+[data-state="open"] .settings-card-item:nth-child(5) {
+  animation-delay: 200ms;
+}
+
+[data-state="open"] .settings-card-item:nth-child(n+6) {
+  animation-delay: 250ms;
+}
+
+/* Loading state animations */
+.loading-skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--muted) / 0.5) 50%,
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Smooth loading skeleton animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.settings-loading-skeleton {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background: linear-gradient(90deg, 
+    hsl(var(--muted)) 25%, 
+    hsl(var(--muted) / 0.5) 50%, 
+    hsl(var(--muted)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  [data-state="open"],
+  [data-state="closed"] {
+    animation: none;
+  }
+  
+  .settings-card-item {
+    animation: none;
+  }
+  
+  .settings-loading-skeleton {
+    animation: none;
+    background: hsl(var(--muted));
+  }
+  
+  /* Use simple opacity transition instead of complex animations */
+  [data-state="open"] {
+    opacity: 1;
+    transition: opacity 200ms ease;
+  }
+  
+  [data-state="closed"] {
+    opacity: 0;
+    transition: opacity 200ms ease;
+  }
+}
+
+/* High performance animations for modern browsers */
+@supports (will-change: auto) {
+  [data-state="open"],
+  [data-state="closed"] {
+    will-change: height, opacity;
+  }
+  
+  .settings-card-item {
+    will-change: transform, opacity;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .settings-card-item {
+    /* Reduce animation complexity on touch devices */
+    animation-duration: 200ms;
+  }
+}
+
+/* Enhanced mobile responsiveness */
+@media (max-width: 640px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+  
+  .collapsible-trigger {
+    padding: 1rem;
+  }
+  
+  .count-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+/* Dark mode enhancements */
+.dark .loading-skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 25%,
+    hsl(var(--muted) / 0.3) 50%,
+    hsl(var(--muted)) 75%
+  );
+}
+
+/* Performance optimizations to prevent stuttering */
+.collapsible-chevron,
+.card-grid,
+.settings-card-item {
+  will-change: transform;
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}
+
+.count-badge {
+  will-change: transform, opacity;
+}
+
+/* Reduced motion preferences - prevent conflicts */
+@media (prefers-reduced-motion: reduce) {
+  .collapsible-chevron,
+  .count-badge,
+  .card-grid,
+  .settings-card-item {
+    transition: none !important;
+    animation: none !important;
+    will-change: auto;
+  }
+  
+  /* Still allow simple opacity changes */
+  .count-badge {
+    transition: opacity 200ms ease !important;
+  }
+}
+
+/* Ensure smooth rendering on mobile devices */
+@media (max-width: 768px) {
+  .card-grid,
+  .settings-card-item {
+    animation-duration: 250ms; /* Slightly faster on mobile */
+  }
+  
+  /* Reduce complexity on smaller screens */
+  .collapsible-chevron {
+    transition-duration: 200ms;
+  }
+}
