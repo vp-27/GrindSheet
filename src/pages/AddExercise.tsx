@@ -310,7 +310,28 @@ const AddExercise = () => {
               
               <Button 
                 type="submit" 
-                className="w-full h-12 rounded-xl font-medium text-white shadow-lg transition-all duration-200 active:shadow-xl active:scale-[0.98] bg-primary active:bg-primary/90 text-primary-foreground"
+                className={`w-full h-12 rounded-xl font-medium text-white shadow-lg transition-all duration-200 active:shadow-xl active:scale-[0.98] ${
+                  !categoryColors ? 'bg-primary active:bg-primary/90 text-primary-foreground' : ''
+                }`}
+                style={categoryColors ? {
+                  backgroundColor: categoryColors.primary,
+                  boxShadow: `0 10px 25px -5px ${categoryColors.primary}25, 0 8px 10px -6px ${categoryColors.primary}15`
+                } : {}}
+                onMouseDown={(e) => {
+                  if (categoryColors) {
+                    e.currentTarget.style.backgroundColor = `${categoryColors.primary}dd`;
+                  }
+                }}
+                onMouseUp={(e) => {
+                  if (categoryColors) {
+                    e.currentTarget.style.backgroundColor = categoryColors.primary;
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (categoryColors) {
+                    e.currentTarget.style.backgroundColor = categoryColors.primary;
+                  }
+                }}
                 disabled={isSubmitting || !selectedExerciseId || !weight}
               >
                 {isSubmitting ? (
