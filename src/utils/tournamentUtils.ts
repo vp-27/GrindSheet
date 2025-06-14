@@ -13,6 +13,7 @@ import {
 } from '../types';
 import { calculateProgress } from './progressUtils';
 
+// --- Revamped Point System ---
 // Points configuration for different actions
 export const POINTS_CONFIG: Record<string, PointsRule> = {
   PR_ACHIEVEMENT: {
@@ -88,6 +89,14 @@ export const BADGE_DEFINITIONS: Record<BadgeType, { name: string; description: s
   }
 };
 
+// Competitive bonus configuration
+export const COMPETITIVE_BONUS_CONFIG = {
+  TAKEOVER: { points: 20, description: 'Takeover: Beat another user\'s PR' },
+  CLOSE_WIN: { points: 10, description: 'Close Win: Beat another user by <5%' },
+  FIRST_TIME_PR: { points: 10, description: 'First time PR (first log for exercise)' },
+  IMPROVEMENT_CAP: 50 // max improvement points per exercise per week
+};
+
 /**
  * Get the current week's tournament dates (Monday to Sunday)
  */
@@ -147,7 +156,8 @@ export const calculateTournamentPoints = (
   categories: Category[],
   tournamentStart: string,
   tournamentEnd: string,
-  allParticipantLogs: ExerciseLog[] = []
+  allParticipantLogs: ExerciseLog[] = [],
+  allUsers: User[] = []
 ): TournamentParticipant => {
   const startDate = new Date(tournamentStart);
   const endDate = new Date(tournamentEnd);
@@ -166,7 +176,8 @@ export const calculateTournamentPoints = (
     consistencyPoints: 0,
     improvementPoints: 0,
     participationPoints: 0,
-    bonusPoints: 0
+    bonusPoints: 0,
+    competitivePoints: 0
   };
 
   let badges: TournamentBadge[] = [];
@@ -200,43 +211,42 @@ export const calculateTournamentPoints = (
     pointsBreakdown.consistencyPoints += POINTS_CONFIG.CONSISTENCY_BONUS.points;
   }
 
-  // 4. PR points and improvement points
+  // 4. PR points, improvement points, and competitive bonuses
   const exerciseProgress = new Map<string, { hadPR: boolean; improvementPercent: number }>();
   const prDetails: PRDetail[] = [];
-  
+  const competitiveDetails: { exerciseId: string; type: string; targetUser?: string; points: number; }[] = [];
   exercises.forEach(exercise => {
     const exerciseLogs = logs.filter(log => log.exerciseId === exercise.id);
     const userExerciseLogs = exerciseLogs.filter(log => log.userId === user.id);
-    
     if (userExerciseLogs.length === 0) return;
-
     const progress = calculateProgress(exerciseLogs, exercise.id, exercise);
-    
-    // Check for PRs during tournament
+    // Tournament logs for this exercise
     const tournamentExerciseLogs = userExerciseLogs.filter(log => {
       const logDate = new Date(log.timestamp);
       return logDate >= startDate && logDate <= endDate;
     });
-
     if (tournamentExerciseLogs.length > 0) {
       const maxTournamentWeight = Math.max(...tournamentExerciseLogs.map(log => log.weight));
       const preTournamentLogs = userExerciseLogs.filter(log => {
         const logDate = new Date(log.timestamp);
         return logDate < startDate;
       });
-      
+      // --- PR LOGIC ---
+      let achievedPR = false;
       if (preTournamentLogs.length > 0) {
         const previousBest = Math.max(...preTournamentLogs.map(log => log.weight));
-        
         // PR achieved if tournament weight exceeds previous best
         if (maxTournamentWeight > previousBest) {
+          achievedPR = true;
           pointsBreakdown.prPoints += POINTS_CONFIG.PR_ACHIEVEMENT.points;
           const improvementPercent = ((maxTournamentWeight - previousBest) / previousBest) * 100;
-          exerciseProgress.set(exercise.id, { 
-            hadPR: true, 
-            improvementPercent 
-          });
-          
+          // Cap improvement points per exercise
+          const improvementPoints = Math.min(
+            Math.floor(improvementPercent * POINTS_CONFIG.IMPROVEMENT_PERCENT.points),
+            COMPETITIVE_BONUS_CONFIG.IMPROVEMENT_CAP
+          );
+          pointsBreakdown.improvementPoints += improvementPoints;
+          exerciseProgress.set(exercise.id, { hadPR: true, improvementPercent });
           // Find the exact log where the PR was achieved
           const prLog = tournamentExerciseLogs.find(log => log.weight === maxTournamentWeight);
           prDetails.push({
@@ -248,17 +258,35 @@ export const calculateTournamentPoints = (
             improvementPercent
           });
         }
+      } else {
+        // First log for this exercise (not a PR)
+        pointsBreakdown.bonusPoints += COMPETITIVE_BONUS_CONFIG.FIRST_TIME_PR.points;
+        // Do NOT add to prDetails or count as PR
       }
-      // Note: First time doing an exercise during tournament no longer counts as a PR
+      // --- COMPETITIVE BONUS LOGIC ---
+      // Only award if achievedPR (true PR this week)
+      if (achievedPR) {
+        allUsers.forEach(otherUser => {
+          if (otherUser.id === user.id) return;
+          const otherLogs = exerciseLogs.filter(log => log.userId === otherUser.id && new Date(log.timestamp) <= endDate);
+          if (otherLogs.length === 0) return;
+          const otherBest = Math.max(...otherLogs.map(log => log.weight));
+          if (maxTournamentWeight > otherBest) {
+            // Takeover bonus
+            pointsBreakdown.competitivePoints = (pointsBreakdown.competitivePoints || 0) + COMPETITIVE_BONUS_CONFIG.TAKEOVER.points;
+            competitiveDetails.push({ exerciseId: exercise.id, exerciseName: exercise.name, type: 'Takeover', targetUser: otherUser.name, points: COMPETITIVE_BONUS_CONFIG.TAKEOVER.points });
+            // Close win bonus
+            if ((maxTournamentWeight - otherBest) / otherBest < 0.05) {
+              pointsBreakdown.competitivePoints += COMPETITIVE_BONUS_CONFIG.CLOSE_WIN.points;
+              competitiveDetails.push({ exerciseId: exercise.id, exerciseName: exercise.name, type: 'Close Win', targetUser: otherUser.name, points: COMPETITIVE_BONUS_CONFIG.CLOSE_WIN.points });
+            }
+          }
+        });
+      }
     }
   });
 
-  // 5. Improvement percentage points
-  const totalImprovementPercent = Array.from(exerciseProgress.values())
-    .reduce((sum, progress) => sum + progress.improvementPercent, 0);
-  pointsBreakdown.improvementPoints = Math.floor(totalImprovementPercent * POINTS_CONFIG.IMPROVEMENT_PERCENT.points);
-
-  // 6. Category completion bonus
+  // 5. Category completion bonus
   const categoriesWorked = new Set(
     userLogs.map(log => {
       const exercise = exercises.find(ex => ex.id === log.exerciseId);
@@ -270,14 +298,20 @@ export const calculateTournamentPoints = (
     pointsBreakdown.bonusPoints += POINTS_CONFIG.CATEGORY_COMPLETION.points;
   }
 
-  // 7. Calculate badges
+  // 6. Calculate badges
   badges = calculateBadges(user, userLogs, exerciseProgress, workoutDates, categoriesWorked, categories, allParticipantLogs, tournamentStart);
-
   // Add badge points to bonus
   pointsBreakdown.bonusPoints += badges.reduce((sum, badge) => sum + badge.points, 0);
-
+  // Calculate total points (include competitivePoints)
   const totalPoints = Object.values(pointsBreakdown).reduce((sum, points) => sum + points, 0);
-
+  // Ensure all competitiveDetails have exerciseName (for type safety)
+  const competitiveDetailsWithName = competitiveDetails.map(cd => ({
+    exerciseId: cd.exerciseId,
+    exerciseName: cd.exerciseName || (exercises.find(e => e.id === cd.exerciseId)?.name ?? ''),
+    type: cd.type,
+    targetUser: cd.targetUser,
+    points: cd.points
+  }));
   return {
     userId: user.id,
     user,
@@ -286,7 +320,8 @@ export const calculateTournamentPoints = (
     rank: 0, // Will be calculated when sorting all participants
     badges,
     workoutDays,
-    prDetails
+    prDetails,
+    competitiveDetails: competitiveDetailsWithName
   };
 };
 
@@ -392,12 +427,10 @@ export const generateCurrentTournament = (
 ): Tournament => {
   const weekDates = getCurrentWeekDates();
   const tournamentId = generateTournamentId(weekDates.start);
-  
   // Calculate participants
   const participants = users.map(user => 
-    calculateTournamentPoints(user, logs, exercises, categories, weekDates.start, weekDates.end, logs)
+    calculateTournamentPoints(user, logs, exercises, categories, weekDates.start, weekDates.end, logs, users)
   );
-
   // Sort by total points and assign ranks
   participants.sort((a, b) => b.totalPoints - a.totalPoints);
   participants.forEach((participant, index) => {
@@ -436,7 +469,6 @@ export const generateTournamentHistory = (
   weeksBack: number = 4
 ): Tournament[] => {
   const tournaments: Tournament[] = [];
-  
   for (let i = 1; i <= weeksBack; i++) {
     const weekStart = new Date();
     weekStart.setDate(weekStart.getDate() - (7 * i));
@@ -461,8 +493,8 @@ export const generateTournamentHistory = (
     // Only create tournament if there were logs that week
     if (weekLogs.length > 0) {
       const participants = users.map(user => 
-        calculateTournamentPoints(user, logs, exercises, categories, weekDates.start, weekDates.end, logs)
-      ).filter(participant => participant.totalPoints > 0); // Only include users who participated
+        calculateTournamentPoints(user, logs, exercises, categories, weekDates.start, weekDates.end, logs, users)
+      ).filter(participant => participant.totalPoints > 0);
       
       if (participants.length > 0) {
         participants.sort((a, b) => b.totalPoints - a.totalPoints);
@@ -483,6 +515,5 @@ export const generateTournamentHistory = (
       }
     }
   }
-  
   return tournaments.reverse(); // Most recent first
 };

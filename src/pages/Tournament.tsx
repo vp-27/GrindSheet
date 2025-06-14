@@ -273,6 +273,14 @@ const TournamentPage: React.FC = () => {
                 <span className="font-medium">{participant.pointsBreakdown.prPoints}</span>
               </div>
               <div className="flex justify-between">
+                <span className="text-muted-foreground">Improvement:</span>
+                <span className="font-medium">{participant.pointsBreakdown.improvementPoints}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Competitive:</span>
+                <span className="font-medium">{participant.pointsBreakdown.competitivePoints || 0}</span>
+              </div>
+              <div className="flex justify-between">
                 <span className="text-muted-foreground">Consistency:</span>
                 <span className="font-medium">{participant.pointsBreakdown.consistencyPoints}</span>
               </div>
@@ -352,6 +360,31 @@ const TournamentPage: React.FC = () => {
                               </span>
                             </div>
                           </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Competitive Bonuses */}
+                {participant.competitiveDetails && participant.competitiveDetails.length > 0 && (
+                  <div className="bg-white/20 dark:bg-black/10 rounded p-3">
+                    <h4 className="font-medium text-foreground mb-2">Competitive Bonuses</h4>
+                    <div className="space-y-2">
+                      {participant.competitiveDetails.map((comp, idx) => (
+                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded p-2 flex items-center justify-between">
+                          <span>
+                            <span className="font-medium text-sm text-foreground">{comp.type}</span>
+                            {comp.exerciseName && (
+                              <span className="ml-2 text-foreground">({comp.exerciseName})</span>
+                            )}
+                            {comp.targetUser && (
+                              <span className="ml-2 text-muted-foreground">vs {comp.targetUser}</span>
+                            )}
+                          </span>
+                          <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs font-medium">
+                            +{comp.points} pts
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -520,7 +553,47 @@ const TournamentPage: React.FC = () => {
                         Beat your previous best weight on any exercise
                       </p>
                     </div>
-                    
+                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <TrendingUp className="h-4 w-4 text-blue-500" />
+                        <span className="text-sm font-semibold">Improvement</span>
+                      </div>
+                      <div className="mb-2">
+                        <span className="text-2xl font-bold text-blue-600">2</span>
+                        <span className="text-sm text-muted-foreground ml-1">points per 1% improvement (max 50 per exercise)</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Earn points for every percent you improve your PR in a week
+                      </p>
+                    </div>
+                    <div className="bg-pink-50 dark:bg-pink-900/20 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Award className="h-4 w-4 text-pink-500" />
+                        <span className="text-sm font-semibold">Competitive Bonuses</span>
+                      </div>
+                      <div className="mb-2">
+                        <span className="text-2xl font-bold text-pink-600">20</span>
+                        <span className="text-sm text-muted-foreground ml-1">Takeover</span>
+                        <span className="text-2xl font-bold text-pink-600 ml-4">10</span>
+                        <span className="text-sm text-muted-foreground ml-1">Close Win</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Takeover: Beat a friend’s PR in a shared exercise. Close Win: Beat a friend’s PR by less than 5%.
+                      </p>
+                    </div>
+                    <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Star className="h-4 w-4 text-purple-500" />
+                        <span className="text-sm font-semibold">Special Badges</span>
+                      </div>
+                      <div className="mb-2">
+                        <span className="text-2xl font-bold text-purple-600">5-25</span>
+                        <span className="text-sm text-muted-foreground ml-1">points</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Weekend Warrior, First PR, Perfect Week, etc.
+                      </p>
+                    </div>
                     <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
                       <div className="flex items-center gap-2 mb-2">
                         <CheckCircle className="h-4 w-4 text-green-500" />
@@ -534,32 +607,17 @@ const TournamentPage: React.FC = () => {
                         Log at least one exercise on any day
                       </p>
                     </div>
-                    
-                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
+                    <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4">
                       <div className="flex items-center gap-2 mb-2">
-                        <Flame className="h-4 w-4 text-blue-500" />
-                        <span className="text-sm font-semibold">Consistency Bonus</span>
+                        <Flame className="h-4 w-4 text-orange-500" />
+                        <span className="text-sm font-semibold">First Time PR</span>
                       </div>
                       <div className="mb-2">
-                        <span className="text-2xl font-bold text-blue-600">{POINTS_CONFIG.CONSISTENCY_BONUS.points}</span>
+                        <span className="text-2xl font-bold text-orange-600">10</span>
                         <span className="text-sm text-muted-foreground ml-1">points</span>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Work out 5 or more days in the week
-                      </p>
-                    </div>
-                    
-                    <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Star className="h-4 w-4 text-purple-500" />
-                        <span className="text-sm font-semibold">Special Badges</span>
-                      </div>
-                      <div className="mb-2">
-                        <span className="text-2xl font-bold text-purple-600">5-25</span>
-                        <span className="text-sm text-muted-foreground ml-1">points</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Weekend Warrior, First PR, Perfect Week, etc.
+                        First time logging an exercise (not as much as a true PR)
                       </p>
                     </div>
                   </div>

@@ -85,11 +85,13 @@ export interface TournamentParticipant {
     improvementPoints: number;
     participationPoints: number;
     bonusPoints: number;
+    competitivePoints?: number; // NEW: for competitive bonuses
   };
   rank: number;
   badges: TournamentBadge[];
   workoutDays: string[]; // ISO date strings of days they worked out
   prDetails: PRDetail[]; // Detailed PR achievements
+  competitiveDetails?: { exerciseId: string; exerciseName: string; type: string; targetUser?: string; points: number }[]; // Add exerciseName
 }
 
 export interface PRDetail {
