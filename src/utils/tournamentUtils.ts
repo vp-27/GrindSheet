@@ -214,7 +214,7 @@ export const calculateTournamentPoints = (
   // 4. PR points, improvement points, and competitive bonuses
   const exerciseProgress = new Map<string, { hadPR: boolean; improvementPercent: number }>();
   const prDetails: PRDetail[] = [];
-  const competitiveDetails: { exerciseId: string; type: string; targetUser?: string; points: number; }[] = [];
+  const competitiveDetails: { exerciseId: string; exerciseName: string; type: string; targetUser?: string; points: number; }[] = [];
   exercises.forEach(exercise => {
     const exerciseLogs = logs.filter(log => log.exerciseId === exercise.id);
     const userExerciseLogs = exerciseLogs.filter(log => log.userId === user.id);
@@ -274,11 +274,23 @@ export const calculateTournamentPoints = (
           if (maxTournamentWeight > otherBest) {
             // Takeover bonus
             pointsBreakdown.competitivePoints = (pointsBreakdown.competitivePoints || 0) + COMPETITIVE_BONUS_CONFIG.TAKEOVER.points;
-            competitiveDetails.push({ exerciseId: exercise.id, exerciseName: exercise.name, type: 'Takeover', targetUser: otherUser.name, points: COMPETITIVE_BONUS_CONFIG.TAKEOVER.points });
+            competitiveDetails.push({ 
+              exerciseId: exercise.id, 
+              exerciseName: exercise.name, 
+              type: 'Takeover', 
+              targetUser: otherUser.name, 
+              points: COMPETITIVE_BONUS_CONFIG.TAKEOVER.points 
+            });
             // Close win bonus
             if ((maxTournamentWeight - otherBest) / otherBest < 0.05) {
               pointsBreakdown.competitivePoints += COMPETITIVE_BONUS_CONFIG.CLOSE_WIN.points;
-              competitiveDetails.push({ exerciseId: exercise.id, exerciseName: exercise.name, type: 'Close Win', targetUser: otherUser.name, points: COMPETITIVE_BONUS_CONFIG.CLOSE_WIN.points });
+              competitiveDetails.push({ 
+                exerciseId: exercise.id, 
+                exerciseName: exercise.name, 
+                type: 'Close Win', 
+                targetUser: otherUser.name, 
+                points: COMPETITIVE_BONUS_CONFIG.CLOSE_WIN.points 
+              });
             }
           }
         });
@@ -304,14 +316,7 @@ export const calculateTournamentPoints = (
   pointsBreakdown.bonusPoints += badges.reduce((sum, badge) => sum + badge.points, 0);
   // Calculate total points (include competitivePoints)
   const totalPoints = Object.values(pointsBreakdown).reduce((sum, points) => sum + points, 0);
-  // Ensure all competitiveDetails have exerciseName (for type safety)
-  const competitiveDetailsWithName = competitiveDetails.map(cd => ({
-    exerciseId: cd.exerciseId,
-    exerciseName: cd.exerciseName || (exercises.find(e => e.id === cd.exerciseId)?.name ?? ''),
-    type: cd.type,
-    targetUser: cd.targetUser,
-    points: cd.points
-  }));
+  
   return {
     userId: user.id,
     user,
@@ -321,7 +326,7 @@ export const calculateTournamentPoints = (
     badges,
     workoutDays,
     prDetails,
-    competitiveDetails: competitiveDetailsWithName
+    competitiveDetails
   };
 };
 

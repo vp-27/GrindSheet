@@ -26,7 +26,7 @@ const History = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Use the same color system as the rest of the app
-  const chartColors = getCategoryChartColors();
+  const chartColors = getCategoryChartColors(categories);
   
   // Get color for a category based on its index
   const getCategoryColor = (categoryIndex: number) => {

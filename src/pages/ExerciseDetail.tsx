@@ -79,9 +79,7 @@ const ExerciseDetail = () => {
 
   // Get category colors
   const categoryColors = useMemo(() => {
-    if (!category) return null;
-    const categoryKey = getCategoryKeyByName(category.name);
-    return getCategoryColors(categoryKey);
+    return getCategoryColors(category);
   }, [category]);
   
   // Handle timeframe changes from chart
@@ -463,7 +461,7 @@ const ExerciseDetail = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredLogs.slice(0, 6).map(log => {
                 const categoryIndex = categories.findIndex(cat => cat.id === category?.id);
-                const categoryColor = categoryIndex >= 0 ? getCategoryChartColors()[categoryIndex % getCategoryChartColors().length] : '#10b981';
+                const categoryColor = categoryIndex >= 0 ? getCategoryChartColors(categories)[categoryIndex % getCategoryChartColors(categories).length] : '#10b981';
                 
                 return (
                   <ExerciseLogCard

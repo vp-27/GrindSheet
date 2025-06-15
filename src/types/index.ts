@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   name: string;
@@ -98,7 +99,7 @@ export interface TournamentParticipant {
   badges: TournamentBadge[];
   workoutDays: string[]; // ISO date strings of days they worked out
   prDetails: PRDetail[]; // Detailed PR achievements
-  competitiveDetails?: { exerciseId: string; exerciseName: string; type: string; targetUser?: string; points: number }[]; // Add exerciseName
+  competitiveDetails?: { exerciseId: string; exerciseName: string; type: string; targetUser?: string; points: number }[]; // Fixed: Add exerciseName
 }
 
 export interface PRDetail {
