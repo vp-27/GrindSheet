@@ -9,6 +9,13 @@ export interface Category {
   id: string;
   name: string;
   description?: string;
+  primary_color?: string;
+  light_color?: string;
+  gradient_from?: string;
+  gradient_to?: string;
+  shadow_color?: string;
+  text_color?: string;
+  dark_text_color?: string;
 }
 
 export interface Exercise {

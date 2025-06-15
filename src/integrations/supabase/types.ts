@@ -12,24 +12,42 @@ export type Database = {
       categories: {
         Row: {
           created_at: string
+          dark_text_color: string | null
           description: string | null
+          gradient_from: string | null
+          gradient_to: string | null
           id: string
+          light_color: string | null
           name: string
-          user_id: string | null
+          primary_color: string | null
+          shadow_color: string | null
+          text_color: string | null
         }
         Insert: {
           created_at?: string
+          dark_text_color?: string | null
           description?: string | null
+          gradient_from?: string | null
+          gradient_to?: string | null
           id?: string
+          light_color?: string | null
           name: string
-          user_id?: string | null
+          primary_color?: string | null
+          shadow_color?: string | null
+          text_color?: string | null
         }
         Update: {
           created_at?: string
+          dark_text_color?: string | null
           description?: string | null
+          gradient_from?: string | null
+          gradient_to?: string | null
           id?: string
+          light_color?: string | null
           name?: string
-          user_id?: string | null
+          primary_color?: string | null
+          shadow_color?: string | null
+          text_color?: string | null
         }
         Relationships: []
       }

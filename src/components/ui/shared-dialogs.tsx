@@ -6,10 +6,20 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown, Palette } from 'lucide-react';
+import ColorPicker from './ColorPicker';
 
 interface CategoryFormData {
   name: string;
   description: string;
+  primary_color: string;
+  light_color: string;
+  gradient_from: string;
+  gradient_to: string;
+  shadow_color: string;
+  text_color: string;
+  dark_text_color: string;
 }
 
 interface ExerciseFormData {
@@ -43,10 +53,19 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
   onSuccess
 }) => {
   const { toast } = useToast();
+  const [isColorSectionOpen, setIsColorSectionOpen] = React.useState(false);
+  
   const form = useForm<CategoryFormData>({
     defaultValues: {
       name: editingCategory?.name || '',
       description: editingCategory?.description || '',
+      primary_color: editingCategory?.primary_color || '#8E8E93',
+      light_color: editingCategory?.light_color || '#F2F2F7',
+      gradient_from: editingCategory?.gradient_from || 'from-gray-50',
+      gradient_to: editingCategory?.gradient_to || 'to-gray-100',
+      shadow_color: editingCategory?.shadow_color || 'shadow-gray-200/50',
+      text_color: editingCategory?.text_color || 'text-gray-700',
+      dark_text_color: editingCategory?.dark_text_color || 'text-gray-900',
     }
   });
 
@@ -56,9 +75,26 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
       form.reset({
         name: editingCategory.name || '',
         description: editingCategory.description || '',
+        primary_color: editingCategory.primary_color || '#8E8E93',
+        light_color: editingCategory.light_color || '#F2F2F7',
+        gradient_from: editingCategory.gradient_from || 'from-gray-50',
+        gradient_to: editingCategory.gradient_to || 'to-gray-100',
+        shadow_color: editingCategory.shadow_color || 'shadow-gray-200/50',
+        text_color: editingCategory.text_color || 'text-gray-700',
+        dark_text_color: editingCategory.dark_text_color || 'text-gray-900',
       });
     } else {
-      form.reset({ name: '', description: '' });
+      form.reset({ 
+        name: '', 
+        description: '', 
+        primary_color: '#8E8E93',
+        light_color: '#F2F2F7',
+        gradient_from: 'from-gray-50',
+        gradient_to: 'to-gray-100',
+        shadow_color: 'shadow-gray-200/50',
+        text_color: 'text-gray-700',
+        dark_text_color: 'text-gray-900',
+      });
     }
   }, [editingCategory, form]);
 
@@ -73,6 +109,13 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
           .update({
             name: data.name,
             description: data.description,
+            primary_color: data.primary_color,
+            light_color: data.light_color,
+            gradient_from: data.gradient_from,
+            gradient_to: data.gradient_to,
+            shadow_color: data.shadow_color,
+            text_color: data.text_color,
+            dark_text_color: data.dark_text_color,
           })
           .eq('id', editingCategory.id)
           .select();
@@ -83,6 +126,13 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
           .insert({
             name: data.name,
             description: data.description,
+            primary_color: data.primary_color,
+            light_color: data.light_color,
+            gradient_from: data.gradient_from,
+            gradient_to: data.gradient_to,
+            shadow_color: data.shadow_color,
+            text_color: data.text_color,
+            dark_text_color: data.dark_text_color,
           })
           .select();
       }
@@ -96,7 +146,17 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
           : 'Your new category has been added successfully.',
       });
       
-      form.reset({ name: '', description: '' });
+      form.reset({ 
+        name: '', 
+        description: '', 
+        primary_color: '#8E8E93',
+        light_color: '#F2F2F7',
+        gradient_from: 'from-gray-50',
+        gradient_to: 'to-gray-100',
+        shadow_color: 'shadow-gray-200/50',
+        text_color: 'text-gray-700',
+        dark_text_color: 'text-gray-900',
+      });
       onOpenChange(false);
       
       if (onSuccess && response.data[0]) {
@@ -113,7 +173,7 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] max-w-[95vw] w-full rounded-2xl backdrop-blur-sm bg-card/95 border-border/50 mobile-dialog">
+      <DialogContent className="sm:max-w-[500px] max-w-[95vw] w-full rounded-2xl backdrop-blur-sm bg-card/95 border-border/50 mobile-dialog max-h-[90vh] overflow-y-auto">
         <form onSubmit={form.handleSubmit(handleSubmit)}>
           <DialogHeader>
             <DialogTitle className="text-foreground mobile-dialog-title">
@@ -149,6 +209,52 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
                 placeholder="Chest exercises"
               />
             </div>
+            
+            {/* Color Customization Section */}
+            <Collapsible open={isColorSectionOpen} onOpenChange={setIsColorSectionOpen}>
+              <CollapsibleTrigger className="flex items-center justify-between w-full p-3 rounded-xl bg-muted/20 hover:bg-muted/30 transition-colors">
+                <div className="flex items-center gap-2">
+                  <Palette className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-foreground">Color Customization</span>
+                </div>
+                <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200" 
+                  style={{ transform: isColorSectionOpen ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-4 pt-4">
+                <ColorPicker
+                  label="Primary Color"
+                  value={form.watch('primary_color')}
+                  onChange={(value) => form.setValue('primary_color', value)}
+                  placeholder="#3b82f6"
+                />
+                <ColorPicker
+                  label="Light Color"
+                  value={form.watch('light_color')}
+                  onChange={(value) => form.setValue('light_color', value)}
+                  placeholder="#dbeafe"
+                />
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-foreground">Gradient From</Label>
+                    <Input
+                      value={form.watch('gradient_from')}
+                      onChange={(e) => form.setValue('gradient_from', e.target.value)}
+                      placeholder="from-blue-100"
+                      className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-foreground">Gradient To</Label>
+                    <Input
+                      value={form.watch('gradient_to')}
+                      onChange={(e) => form.setValue('gradient_to', e.target.value)}
+                      placeholder="to-blue-200"
+                      className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0"
+                    />
+                  </div>
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           </div>
           <DialogFooter className="mobile-dialog-footer">
             <Button

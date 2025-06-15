@@ -17,7 +17,7 @@ import {
 } from '@/components/ui/select';
 import { useAppContext } from '@/context/useAppContext';
 import { useAuth } from '@/context/AuthContext';
-import { getCategoryColors, getCategoryKeyByName } from '@/utils/categoryColors';
+import { getCategoryColors } from '@/utils/categoryColors';
 import { CategoryDialog, ExerciseDialog } from '@/components/ui/shared-dialogs';
 
 const AddExercise = () => {
@@ -56,11 +56,10 @@ const AddExercise = () => {
   const selectedCategory = localCategories.find(cat => cat.id === selectedCategoryId);
   const selectedExercise = localExercises.find(ex => ex.id === selectedExerciseId);
   
-  // Get category colors for styling
+  // Get category colors for styling from database
   const categoryColors = useMemo(() => {
     if (!selectedCategory) return null;
-    const categoryKey = getCategoryKeyByName(selectedCategory.name);
-    return getCategoryColors(categoryKey);
+    return getCategoryColors(selectedCategory);
   }, [selectedCategory]);
 
   // Handler for when a new category is successfully added
