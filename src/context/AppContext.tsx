@@ -50,7 +50,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     const fetchData = async () => {
       // Always fetch categories and exercises, even if no user
       try {
-        // Fetch categories (global for all users)
+        // Fetch categories (global for all users) - preserve all color fields
         const { data: categoriesData, error: categoriesError } = await supabase
           .from('categories')
           .select('*')
@@ -60,6 +60,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
           id: cat.id,
           name: cat.name,
           description: cat.description,
+          primary_color: cat.primary_color,
+          light_color: cat.light_color,
+          gradient_from: cat.gradient_from,
+          gradient_to: cat.gradient_to,
+          shadow_color: cat.shadow_color,
+          text_color: cat.text_color,
+          dark_text_color: cat.dark_text_color,
         }));
         setCategories(mappedCategories);
 
@@ -241,6 +248,13 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         id: cat.id,
         name: cat.name,
         description: cat.description,
+        primary_color: cat.primary_color,
+        light_color: cat.light_color,
+        gradient_from: cat.gradient_from,
+        gradient_to: cat.gradient_to,
+        shadow_color: cat.shadow_color,
+        text_color: cat.text_color,
+        dark_text_color: cat.dark_text_color,
       }));
       setCategories(mappedCategories);
     } catch (error) {

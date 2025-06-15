@@ -10,6 +10,7 @@ export interface Category {
   id: string;
   name: string;
   description?: string;
+  // Database color fields
   primary_color?: string;
   light_color?: string;
   gradient_from?: string;
