@@ -30,7 +30,9 @@ const History = () => {
   
   // Get color for a category based on its index
   const getCategoryColor = (categoryIndex: number) => {
-    return chartColors[categoryIndex % chartColors.length];
+    if (categoryIndex < 0 || categoryIndex >= categories.length) return "#10b981";
+    const cat = categories[categoryIndex];
+    return cat?.primary_color || chartColors[categoryIndex % chartColors.length] || "#10b981";
   };
 
   // Group logs by date
@@ -195,8 +197,8 @@ const History = () => {
                   const exerciseName = getExerciseName(log.exerciseId);
                   const category = getCategoryForExercise(log.exerciseId);
                   const categoryIndex = categories.findIndex(cat => cat.id === category?.id);
-                  const categoryColor = categoryIndex >= 0 ? getCategoryColor(categoryIndex) : '#10b981';
-                  
+                  const categoryColor = category?.primary_color || getCategoryColor(categoryIndex);
+
                   return (
                     <div 
                       key={log.id}

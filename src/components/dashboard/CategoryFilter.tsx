@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Category } from '@/types';
 import { cn } from '@/lib/utils';
@@ -43,12 +42,13 @@ const CategoryFilter: React.FC<CategoryFilterProps> = ({
                 : "border-transparent hover:opacity-80"
             )}
             style={isSelected ? {
-              backgroundColor: colors.primary,
-              color: 'white'
+             backgroundColor: colors.primary,
+             color: 'white',
+             borderColor: colors.primary + "55"
             } : {
-              backgroundColor: `${colors.primary}15`,
-              color: colors.primary,
-              borderColor: `${colors.primary}30`
+             backgroundColor: `${colors.primary}15`,
+             color: colors.primary,
+             borderColor: `${colors.primary}30`
             }}
             onClick={() => onSelectCategory(category.id)}
           >
