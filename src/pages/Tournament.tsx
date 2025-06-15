@@ -727,7 +727,7 @@ const TournamentPage: React.FC = () => {
                 </Button>
                 
                 {categories.map((category, index) => {
-                  const categoryColor = getCategoryChartColors()[index % getCategoryChartColors().length];
+                  const categoryColor = getCategoryChartColors(categories)[index % getCategoryChartColors(categories).length];
                   const isSelected = selectedCategoryId === category.id;
                   
                   return (
@@ -819,8 +819,7 @@ const TournamentPage: React.FC = () => {
                         // Category-specific PR Champion
                         const categoryPRSummary = calculatePRChampionshipSummary(allExerciseLogs, users, exercises, selectedCategoryId);
                         const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
-                        const categoryKey = selectedCategory ? getCategoryKeyByName(selectedCategory.name) : 'default';
-                        const categoryColors = getCategoryColors(categoryKey);
+                        const categoryColors = getCategoryColors(selectedCategory);
                         
                         return categoryPRSummary && categoryPRSummary.champion ? (
                           <Card 
@@ -893,8 +892,7 @@ const TournamentPage: React.FC = () => {
                         const showMultipleAvatars = tiedUsers.length > 1;
                         
                         // Get category color for the exercise title
-                        const categoryKey = exerciseCategory ? getCategoryKeyByName(exerciseCategory.name) : 'default';
-                        const categoryColors = getCategoryColors(categoryKey);
+                        const categoryColors = getCategoryColors(exerciseCategory);
                         
                         return (
                           <Card 
