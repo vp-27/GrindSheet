@@ -14,7 +14,7 @@ import { useForm } from 'react-hook-form';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 import { ChevronRight, ChevronDown, Edit2, Plus, Trash2, Pencil, LogOut, Folder, Palette, Dumbbell, Sun, Moon, Monitor } from 'lucide-react';
-import { getCategoryColors } from '@/utils/categoryColors';
+import { getCategoryColors, getCategoryKeyByName } from '@/utils/categoryColors';
 import { CategoryDialog, ExerciseDialog } from '@/components/ui/shared-dialogs';
 import '@/components/ui/color-indicator.css';
 import '@/components/ui/theme-selector.css';
@@ -44,13 +44,10 @@ const Settings: React.FC = () => {
   const [editingExercise, setEditingExercise] = useState(null);
   const [deletableItems, setDeletableItems] = useState({ categories: new Set(), exercises: new Set() });
   
-  // Get category color styles using database colors
-  const getCategoryColorStyles = (category: any) => {
-    const colors = getCategoryColors(category);
-    return {
-      backgroundColor: `${colors.primary}08`,
-      borderColor: `${colors.primary}20`
-    };
+  // Helper function to get CSS class name for category
+  const getCategoryClassName = (categoryKey: string) => {
+    const validKeys = ['arms', 'back', 'chest', 'core', 'legs', 'shoulders'];
+    return validKeys.includes(categoryKey) ? `category-${categoryKey}` : 'category-default';
   };
   
   const profileForm = useForm({
@@ -541,26 +538,22 @@ const Settings: React.FC = () => {
                   ) : categories.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {categories.map((category, index) => {
-                        const colors = getCategoryColors(category);
+                        const categoryKey = getCategoryKeyByName(category.name);
                         const canDelete = deletableItems.categories.has(category.id);
                         
                         return (
                           <div 
                             key={category.id} 
-                            className="apple-health-card settings-card-item group rounded-xl border p-4 transition-all duration-200"
-                            style={{
-                              backgroundColor: `${colors.primary}08`,
-                              borderColor: `${colors.primary}20`
-                            }}
+                            className={`apple-health-card settings-card-item group category-colored-card ${getCategoryClassName(categoryKey)}`}
                           >
                             {/* Top row: Category name + Actions */}
                             <div className="flex items-start justify-between mb-4">
-                              <h3 className="apple-health-card-title font-semibold" style={{ color: colors.primary }}>
+                              <h3 className="apple-health-card-title">
                                 {category.name}
                               </h3>
                               <div className="flex gap-1">
                                 <Button 
-                                  variant="ghost"
+                                  variant="ghost" 
                                   size="sm"
                                   onClick={() => handleEditCategory(category)}
                                   className="h-8 w-8 rounded-lg active:bg-muted/60 text-muted-foreground active:text-foreground transition-colors"
@@ -568,7 +561,7 @@ const Settings: React.FC = () => {
                                   <Pencil className="h-4 w-4" />
                                 </Button>
                                 <Button 
-                                  variant="ghost"
+                                  variant="ghost" 
                                   size="sm"
                                   onClick={() => handleDeleteCategory(category.id)}
                                   disabled={!canDelete}
@@ -596,17 +589,14 @@ const Settings: React.FC = () => {
                             {/* Bottom row: Status */}
                             <div className="flex items-end justify-between">
                               <div className="flex items-center gap-2">
-                                <div 
-                                  className="w-3 h-3 rounded-full" 
-                                  style={{ backgroundColor: colors.primary }}
-                                />
+                                <div className="w-3 h-3 rounded-full category-indicator-dot" />
                                 <span className="text-sm text-muted-foreground">
                                   {exercisesLoaded ? exercises.filter(ex => ex.category_id === category.id).length : '...'} exercises
                                 </span>
                               </div>
                               
                               {!canDelete && (
-                                <div className="apple-health-progress-badge protected-badge text-xs px-2 py-1 rounded-full bg-muted/40 text-muted-foreground">
+                                <div className="apple-health-progress-badge protected-badge">
                                   Protected
                                 </div>
                               )}
@@ -674,26 +664,22 @@ const Settings: React.FC = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                       {exercises.map((exercise, index) => {
                         const category = categoriesLoaded ? categories.find(c => c.id === exercise.category_id) : null;
-                        const colors = getCategoryColors(category);
+                        const categoryKey = category ? getCategoryKeyByName(category.name) : 'default';
                         const canDelete = deletableItems.exercises.has(exercise.id);
                         
                         return (
                           <div 
                             key={exercise.id} 
-                            className="apple-health-card settings-card-item group rounded-xl border p-4 transition-all duration-200"
-                            style={{
-                              backgroundColor: `${colors.primary}08`,
-                              borderColor: `${colors.primary}20`
-                            }}
+                            className={`apple-health-card settings-card-item group category-colored-card ${getCategoryClassName(categoryKey)}`}
                           >
                             {/* Top row: Exercise name + Actions */}
                             <div className="flex items-start justify-between mb-4">
-                              <h3 className="apple-health-card-title font-semibold" style={{ color: colors.primary }}>
+                              <h3 className="apple-health-card-title">
                                 {exercise.name}
                               </h3>
                               <div className="flex gap-1">
                                 <Button 
-                                  variant="ghost"
+                                  variant="ghost" 
                                   size="sm"
                                   onClick={() => handleEditExercise(exercise)}
                                   className="h-8 w-8 rounded-lg active:bg-muted/60 text-muted-foreground active:text-foreground transition-colors"
@@ -701,7 +687,7 @@ const Settings: React.FC = () => {
                                   <Pencil className="h-4 w-4" />
                                 </Button>
                                 <Button 
-                                  variant="ghost"
+                                  variant="ghost" 
                                   size="sm"
                                   onClick={() => handleDeleteExercise(exercise.id)}
                                   disabled={!canDelete}
@@ -729,17 +715,14 @@ const Settings: React.FC = () => {
                             {/* Bottom row: Category and status */}
                             <div className="flex items-end justify-between">
                               <div className="flex items-center gap-2">
-                                <div 
-                                  className="w-3 h-3 rounded-full" 
-                                  style={{ backgroundColor: colors.primary }}
-                                />
+                                <div className="w-3 h-3 rounded-full category-indicator-dot" />
                                 <span className="text-sm text-muted-foreground">
                                   {category?.name || 'Uncategorized'}
                                 </span>
                               </div>
                               
                               {!canDelete && (
-                                <div className="apple-health-progress-badge protected-badge text-xs px-2 py-1 rounded-full bg-muted/40 text-muted-foreground">
+                                <div className="apple-health-progress-badge protected-badge">
                                   Protected
                                 </div>
                               )}

@@ -1,4 +1,3 @@
-
 export interface User {
   id: string;
   name: string;
@@ -10,14 +9,6 @@ export interface Category {
   id: string;
   name: string;
   description?: string;
-  // Database color fields
-  primary_color?: string;
-  light_color?: string;
-  gradient_from?: string;
-  gradient_to?: string;
-  shadow_color?: string;
-  text_color?: string;
-  dark_text_color?: string;
 }
 
 export interface Exercise {
@@ -100,7 +91,7 @@ export interface TournamentParticipant {
   badges: TournamentBadge[];
   workoutDays: string[]; // ISO date strings of days they worked out
   prDetails: PRDetail[]; // Detailed PR achievements
-  competitiveDetails?: { exerciseId: string; exerciseName: string; type: string; targetUser?: string; points: number }[]; // Fixed: Add exerciseName
+  competitiveDetails?: { exerciseId: string; exerciseName: string; type: string; targetUser?: string; points: number }[]; // Add exerciseName
 }
 
 export interface PRDetail {

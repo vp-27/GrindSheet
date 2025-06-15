@@ -30,7 +30,7 @@ const Dashboard = () => {
   const [chartHoverData, setChartHoverData] = useState<any>(null);
 
   // Use the same color system as the rest of the app
-  const chartColors = getCategoryChartColors(categories);
+  const chartColors = getCategoryChartColors();
 
   // Generate tournament data with better state management
   useEffect(() => {
@@ -102,11 +102,7 @@ const Dashboard = () => {
 
   // Get color for a category based on its index
   const getCategoryColor = (categoryIndex: number) => {
-    // Defensive: If index is invalid, fallback to categories[0]
-    if (categoryIndex < 0 || categoryIndex >= categories.length) return "#10b981";
-    const cat = categories[categoryIndex];
-    // Use primary_color if set, else fall back on chartColors
-    return cat?.primary_color || chartColors[categoryIndex % chartColors.length] || "#10b981";
+    return chartColors[categoryIndex % chartColors.length];
   };
 
   // Filter logs based on selected category
@@ -308,7 +304,7 @@ const Dashboard = () => {
               </Button>
               
               {categories.map((category, index) => {
-                const categoryColor = category.primary_color || getCategoryColor(index);
+                const categoryColor = getCategoryColor(index);
                 const isSelected = selectedCategoryId === category.id;
                 
                 return (
@@ -324,13 +320,12 @@ const Dashboard = () => {
                     }`}
                     style={{
                       '--category-color': categoryColor,
-                      '--category-color-rgb': categoryColor.replace('#','').match(/.{2}/g)?.map(hex=>parseInt(hex,16)).join(', ')||'16,185,129'
+                      '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
                     } as React.CSSProperties}
                   >
-                    {category.name}
-                  </Button>
-                );
-              })}
+                  {category.name}
+                </Button>
+              );              })}
             </div>
           </div>
 
@@ -355,9 +350,9 @@ const Dashboard = () => {
           {exerciseProgressItems.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {exerciseProgressItems.map((progress, index) => {
-                const catIdx = categories.findIndex(cat => cat.id === progress.exercise.categoryId);
-                const cat = categories[catIdx];
-                const categoryColor = cat?.primary_color || getCategoryColor(catIdx);
+                const categoryColor = getCategoryColor(
+                  categories.findIndex(cat => cat.id === progress.exercise.categoryId)
+                );
                 // Only show PR if:
                 // 1. Not the first log (has previous weight)
                 // 2. Current weight is actually higher than previous weight

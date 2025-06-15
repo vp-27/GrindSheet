@@ -26,13 +26,11 @@ const History = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Use the same color system as the rest of the app
-  const chartColors = getCategoryChartColors(categories);
+  const chartColors = getCategoryChartColors();
   
   // Get color for a category based on its index
   const getCategoryColor = (categoryIndex: number) => {
-    if (categoryIndex < 0 || categoryIndex >= categories.length) return "#10b981";
-    const cat = categories[categoryIndex];
-    return cat?.primary_color || chartColors[categoryIndex % chartColors.length] || "#10b981";
+    return chartColors[categoryIndex % chartColors.length];
   };
 
   // Group logs by date
@@ -197,8 +195,8 @@ const History = () => {
                   const exerciseName = getExerciseName(log.exerciseId);
                   const category = getCategoryForExercise(log.exerciseId);
                   const categoryIndex = categories.findIndex(cat => cat.id === category?.id);
-                  const categoryColor = category?.primary_color || getCategoryColor(categoryIndex);
-
+                  const categoryColor = categoryIndex >= 0 ? getCategoryColor(categoryIndex) : '#10b981';
+                  
                   return (
                     <div 
                       key={log.id}
