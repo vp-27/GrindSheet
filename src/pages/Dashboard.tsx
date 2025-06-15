@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
@@ -30,7 +31,7 @@ const Dashboard = () => {
   const [chartHoverData, setChartHoverData] = useState<any>(null);
 
   // Use the same color system as the rest of the app
-  const chartColors = getCategoryChartColors();
+  const chartColors = getCategoryChartColors(categories);
 
   // Generate tournament data with better state management
   useEffect(() => {
