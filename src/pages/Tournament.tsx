@@ -637,21 +637,27 @@ const TournamentPage: React.FC = () => {
             )}
 
             {/* Tournament Week Selection with blue-purple design */}
-            {tournamentHistory.length > 0 && (
+            {(currentTournament || tournamentHistory.length > 0) && (
               <div className="flex gap-2 overflow-x-auto pb-2">
-                <Button
-                  variant={selectedTournament?.id === currentTournament?.id ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedTournament(currentTournament)}
-                  className={`rounded-2xl whitespace-nowrap transition-all duration-200 font-medium ${
-                    selectedTournament?.id === currentTournament?.id
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-md hover:from-blue-600 hover:to-purple-700'
-                      : 'border-2 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20'
-                  }`}
-                >
-                  Current
-                </Button>
+                {/* Current Tournament Button */}
+                {currentTournament && (
+                  <Button
+                    variant={selectedTournament?.id === currentTournament?.id ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setSelectedTournament(currentTournament)}
+                    className={`rounded-2xl whitespace-nowrap transition-all duration-200 font-medium ${
+                      selectedTournament?.id === currentTournament?.id
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-md hover:from-blue-600 hover:to-purple-700'
+                        : 'border-2 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                    }`}
+                  >
+                    Current
+                  </Button>
+                )}
+                
+                {/* Past Tournament Buttons - filter out current tournament to avoid duplicates */}
                 {tournamentHistory
+                  .filter(tournament => tournament.id !== currentTournament?.id)
                   .slice()
                   .reverse()
                   .map(tournament => (
@@ -663,7 +669,7 @@ const TournamentPage: React.FC = () => {
                     className={`rounded-2xl whitespace-nowrap transition-all duration-200 font-medium ${
                       selectedTournament?.id === tournament.id
                         ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-md hover:from-blue-600 hover:to-purple-700'
-                        : 'border-2 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                        : 'border-2 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 opacity-75'
                     }`}
                   >
                     {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
