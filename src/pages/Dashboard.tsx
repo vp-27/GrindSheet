@@ -398,7 +398,7 @@ const Dashboard = () => {
                     {/* Apple Health Style Card */}
                     {/* eslint-disable-next-line */}
                     <div 
-                      className={`apple-health-card ${miniChartData.length <= 1 ? 'compact' : ''}`}
+                      className={`apple-health-card ${miniChartData.length <= 1 ? 'compact' : ''} ${selectedCategoryId ? 'category-tinted' : ''}`}
                       style={{
                         '--category-color': categoryColor,
                         '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
@@ -503,7 +503,7 @@ const Dashboard = () => {
               })}
             </div>
           ) : (
-            <div className="bg-card rounded-2xl border border-border p-12 text-center shadow-sm">
+            <div className={`glass-card rounded-2xl p-12 text-center ${selectedCategoryId ? 'category-tinted' : ''}`}>
               <Activity className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">No Progress Data Yet</h3>
               <p className="text-muted-foreground">Start logging your workouts to see amazing progress charts!</p>

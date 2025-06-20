@@ -381,25 +381,65 @@
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
 
-/* Apple Health-style progress cards */
+/* Apple Health-style progress cards with glassmorphism effect */
 .apple-health-card {
   position: relative;
-  background-color: hsl(var(--card));
+  /* Glassmorphism: Semi-transparent background with backdrop blur */
+  background-color: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   border-radius: 1rem;
-  border: 1px solid hsl(var(--border));
+  border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 1rem;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  transition: all 0.3s ease;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08), 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+  transition: transform 0.1s ease;
   overflow: hidden;
   cursor: pointer;
 }
 
-/* Desktop-only hover effects for apple health cards */
-@media (hover: hover) and (pointer: fine) {
-  .apple-health-card:hover {
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -5px rgba(0, 0, 0, 0.04);
-    transform: translateY(-2px);
+/* Enhanced glassmorphism when category background tint is active */
+.apple-health-card.category-tinted {
+  background-color: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.06), 0 2px 8px 0 rgba(0, 0, 0, 0.03);
+}
+
+/* Dark mode for category tinted cards */
+@media (prefers-color-scheme: dark) {
+  .apple-health-card.category-tinted {
+    background-color: rgba(28, 28, 30, 0.75);
+    border: none;
   }
+}
+
+.dark .apple-health-card.category-tinted {
+  background-color: rgba(28, 28, 30, 0.75);
+  border: none;
+}
+
+[data-theme="dark"] .apple-health-card.category-tinted {
+  background-color: rgba(28, 28, 30, 0.75);
+  border: none;
+}
+
+/* Dark mode glassmorphism - Apple Health style gray-black */
+@media (prefers-color-scheme: dark) {
+  .apple-health-card {
+    background-color: rgba(28, 28, 30, 0.85);
+    border: none;
+  }
+}
+
+/* Dark theme class support */
+.dark .apple-health-card {
+  background-color: rgba(28, 28, 30, 0.85);
+  border: none;
+}
+
+/* Data theme attribute support */
+[data-theme="dark"] .apple-health-card {
+  background-color: rgba(28, 28, 30, 0.85);
+  border: none;
 }
 
 /* Mobile active state for apple health cards */
@@ -1120,22 +1160,22 @@
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  /* Light mode: More visible gradient - increased from original 15, 08, 03, 01 */
+  /* Light mode: Subtle but visible gradient - reduced from 25, 15, 08, 03 */
+  background: linear-gradient(to top, 
+    rgba(var(--category-color-rgb), 0.18) 0%, 
+    rgba(var(--category-color-rgb), 0.10) 25%, 
+    rgba(var(--category-color-rgb), 0.05) 50%, 
+    rgba(var(--category-color-rgb), 0.02) 75%, 
+    transparent 100%);
+}
+
+/* Dark mode: Reduced visibility for better balance */
+.category-background-tint.dark-mode {
   background: linear-gradient(to top, 
     rgba(var(--category-color-rgb), 0.25) 0%, 
     rgba(var(--category-color-rgb), 0.15) 25%, 
     rgba(var(--category-color-rgb), 0.08) 50%, 
-    rgba(var(--category-color-rgb), 0.03) 75%, 
-    transparent 100%);
-}
-
-/* Dark mode: Enhanced visibility with higher opacity values for better contrast */
-.category-background-tint.dark-mode {
-  background: linear-gradient(to top, 
-    rgba(var(--category-color-rgb), 0.4) 0%, 
-    rgba(var(--category-color-rgb), 0.25) 25%, 
-    rgba(var(--category-color-rgb), 0.15) 50%, 
-    rgba(var(--category-color-rgb), 0.08) 75%, 
+    rgba(var(--category-color-rgb), 0.04) 75%, 
     transparent 100%);
 }
 
@@ -1143,10 +1183,10 @@
 @media (prefers-color-scheme: dark) {
   .category-background-tint:not(.force-light) {
     background: linear-gradient(to top, 
-      rgba(var(--category-color-rgb), 0.4) 0%, 
-      rgba(var(--category-color-rgb), 0.25) 25%, 
-      rgba(var(--category-color-rgb), 0.15) 50%, 
-      rgba(var(--category-color-rgb), 0.08) 75%, 
+      rgba(var(--category-color-rgb), 0.25) 0%, 
+      rgba(var(--category-color-rgb), 0.15) 25%, 
+      rgba(var(--category-color-rgb), 0.08) 50%, 
+      rgba(var(--category-color-rgb), 0.04) 75%, 
       transparent 100%);
   }
 }
@@ -1154,19 +1194,69 @@
 /* Support for data-theme attribute */
 [data-theme="dark"] .category-background-tint {
   background: linear-gradient(to top, 
-    rgba(var(--category-color-rgb), 0.4) 0%, 
-    rgba(var(--category-color-rgb), 0.25) 25%, 
-    rgba(var(--category-color-rgb), 0.15) 50%, 
-    rgba(var(--category-color-rgb), 0.08) 75%, 
+    rgba(var(--category-color-rgb), 0.25) 0%, 
+    rgba(var(--category-color-rgb), 0.15) 25%, 
+    rgba(var(--category-color-rgb), 0.08) 50%, 
+    rgba(var(--category-color-rgb), 0.04) 75%, 
     transparent 100%);
 }
 
 /* Support for .dark class */
 .dark .category-background-tint {
   background: linear-gradient(to top, 
-    rgba(var(--category-color-rgb), 0.4) 0%, 
-    rgba(var(--category-color-rgb), 0.25) 25%, 
-    rgba(var(--category-color-rgb), 0.15) 50%, 
-    rgba(var(--category-color-rgb), 0.08) 75%, 
+    rgba(var(--category-color-rgb), 0.25) 0%, 
+    rgba(var(--category-color-rgb), 0.15) 25%, 
+    rgba(var(--category-color-rgb), 0.08) 50%, 
+    rgba(var(--category-color-rgb), 0.04) 75%, 
     transparent 100%);
+}
+
+/* Glassmorphism for empty state cards */
+.glass-card {
+  background-color: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08), 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+}
+
+/* Dark mode for glass cards - Apple Health style gray-black */
+@media (prefers-color-scheme: dark) {
+  .glass-card {
+    background-color: rgba(28, 28, 30, 0.85);
+    border: none;
+  }
+}
+
+.dark .glass-card {
+  background-color: rgba(28, 28, 30, 0.85);
+  border: none;
+}
+
+[data-theme="dark"] .glass-card {
+  background-color: rgba(28, 28, 30, 0.85);
+  border: none;
+}
+
+/* Enhanced glass card when category is selected */
+.glass-card.category-tinted {
+  background-color: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+@media (prefers-color-scheme: dark) {
+  .glass-card.category-tinted {
+    background-color: rgba(28, 28, 30, 0.75);
+    border: none;
+  }
+}
+
+.dark .glass-card.category-tinted {
+  background-color: rgba(28, 28, 30, 0.75);
+  border: none;
+}
+
+[data-theme="dark"] .glass-card.category-tinted {
+  background-color: rgba(28, 28, 30, 0.75);
+  border: none;
 }
