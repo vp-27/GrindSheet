@@ -189,7 +189,7 @@ const TournamentPage: React.FC = () => {
         case 2:
           return 'bg-gradient-to-r from-slate-50 via-gray-50 to-zinc-50 dark:from-slate-950/30 dark:via-gray-950/30 dark:to-zinc-950/30 border-slate-300/50 dark:border-slate-700/50 shadow-md';
         case 3:
-          return 'bg-gradient-to-r from-orange-50 via-amber-50 to-yellow-50 dark:from-orange-950/30 dark:via-amber-950/30 dark:to-yellow-950/30 border-orange-300/50 dark:border-orange-700/50 shadow-md';
+          return 'bg-gradient-to-r from-slate-50 via-gray-50 to-zinc-50 dark:from-slate-950/30 dark:via-gray-950/30 dark:to-zinc-950/30 border-slate-300/50 dark:border-slate-700/50 shadow-md';
         default:
           return 'bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90 transition-colors';
       }
