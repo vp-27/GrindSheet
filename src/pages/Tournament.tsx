@@ -191,14 +191,14 @@ const TournamentPage: React.FC = () => {
         case 3:
           return 'bg-gradient-to-r from-slate-50 via-gray-50 to-zinc-50 dark:from-slate-950/30 dark:via-gray-950/30 dark:to-zinc-950/30 border-slate-300/50 dark:border-slate-700/50 shadow-md';
         default:
-          return 'bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90 transition-colors';
+          return 'apple-card interactive';
       }
     };
     
     return (
       <Card 
         key={participant.userId}
-        className={`relative rounded-xl ${getCardStyling(participant.rank, isCurrentUser)}`}
+        className={`relative ${getCardStyling(participant.rank, isCurrentUser)}`}
       >
         <CardContent className="p-4">
           <div className="flex items-center gap-4">
@@ -531,7 +531,7 @@ const TournamentPage: React.FC = () => {
 
             {/* Streamlined Points Guide */}
             {showPointsGuide && (
-              <Card className="rounded-2xl bg-card/80 backdrop-blur-sm border-border/50">
+              <Card className="apple-card">
                 <CardHeader className="pb-4">
                   <CardTitle className="flex items-center gap-2 text-lg">
                     <Target className="h-4 w-4" />
@@ -701,7 +701,7 @@ const TournamentPage: React.FC = () => {
                   renderParticipant(participant, index)
                 )
               ) : (
-                <Card className="rounded-2xl border-border/50 bg-card/50 backdrop-blur-sm">
+                <Card className="apple-card">
                   <CardContent className="p-12 text-center">
                     <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-foreground mb-2">No Participants Yet</h3>
@@ -771,7 +771,7 @@ const TournamentPage: React.FC = () => {
 
                 if (leaderboardData.length === 0) {
                   return (
-                    <Card className="rounded-2xl border-border/50 bg-card/50 backdrop-blur-sm">
+                    <Card className="apple-card">
                       <CardContent className="p-12 text-center">
                         <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                         <h3 className="text-lg font-semibold text-foreground mb-2">No Records Found</h3>
@@ -905,7 +905,7 @@ const TournamentPage: React.FC = () => {
                         return (
                           <Card 
                             key={entry.exerciseId || index}
-                            className="rounded-2xl bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90 transition-colors"
+                            className="apple-card interactive"
                             style={{
                               '--category-color': categoryColors.primary
                             } as React.CSSProperties}

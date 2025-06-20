@@ -372,7 +372,7 @@ const Settings: React.FC = () => {
       <div className="flex flex-col gap-6 pb-6">
         {/* Profile Section - Clean Apple-style */}
         <div className="relative">
-          <div className="flex items-center gap-6 p-6 bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 shadow-sm">
+          <div className="flex items-center gap-6 p-6 apple-card shadow-sm">
             <Avatar className="h-20 w-20 ring-2 ring-border/20">
               <AvatarImage src={profile.avatar_url} alt={profile.name} />
               <AvatarFallback className="bg-muted text-muted-foreground text-lg font-semibold">
@@ -393,7 +393,7 @@ const Settings: React.FC = () => {
                   <Edit2 className="h-5 w-5 text-muted-foreground" />
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px] rounded-2xl backdrop-blur-sm bg-card/95 border-border/50">
+              <DialogContent className="sm:max-w-[425px] apple-card border-border/50">
                 <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)}>
                   <DialogHeader>
                     <DialogTitle className="text-foreground">Edit Profile</DialogTitle>
@@ -448,7 +448,7 @@ const Settings: React.FC = () => {
         {/* Settings Sections */}
         <div className="space-y-6">
           {/* Theme Settings */}
-          <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 p-6 shadow-sm">
+          <div className="apple-card p-6 shadow-sm">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center">
                 <Palette className="h-5 w-5 text-muted-foreground" />
@@ -492,7 +492,7 @@ const Settings: React.FC = () => {
 
           {/* Categories Management - Collapsible */}
           <Collapsible open={categoriesOpen} onOpenChange={handleCategoriesToggle} className="collapsible-root">
-            <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 shadow-sm">
+            <div className="apple-card shadow-sm">
               <CollapsibleTrigger className="collapsible-trigger w-full p-6 cursor-pointer active:bg-muted/20 transition-colors rounded-2xl">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -617,7 +617,7 @@ const Settings: React.FC = () => {
 
           {/* Exercises Management - Collapsible */}
           <Collapsible open={exercisesOpen} onOpenChange={handleExercisesToggle} className="collapsible-root">
-            <div className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 shadow-sm">
+            <div className="apple-card shadow-sm">
               <CollapsibleTrigger className="collapsible-trigger w-full p-6 cursor-pointer active:bg-muted/20 transition-colors rounded-2xl">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -743,7 +743,7 @@ const Settings: React.FC = () => {
 
           {/* Logout Section */}
           <div 
-            className="bg-card/50 backdrop-blur-sm rounded-2xl border border-border/40 p-6 shadow-sm cursor-pointer active:bg-red-50/20 dark:active:bg-red-950/10 transition-colors group"
+            className="apple-card interactive p-6 shadow-sm cursor-pointer active:bg-red-50/20 dark:active:bg-red-950/10 transition-colors group"
             onClick={handleLogout}
           >
             <div className="flex items-center gap-3">

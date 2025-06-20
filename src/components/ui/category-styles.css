@@ -394,7 +394,6 @@
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08), 0 2px 8px 0 rgba(0, 0, 0, 0.04);
   transition: transform 0.1s ease;
   overflow: hidden;
-  cursor: pointer;
 }
 
 /* Enhanced glassmorphism when category background tint is active */
@@ -446,6 +445,67 @@
 .apple-health-card:active {
   transform: scale(0.98);
   transition: transform 0.1s ease;
+}
+
+/* Universal Apple-style card for consistency across all pages */
+.apple-card {
+  position: relative;
+  /* Light mode: Semi-transparent white with backdrop blur */
+  background-color: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08), 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+/* Dark mode for universal apple card - matches Dashboard progress cards */
+@media (prefers-color-scheme: dark) {
+  .apple-card {
+    background-color: rgba(28, 28, 30, 0.85);
+    border: none;
+  }
+}
+
+.dark .apple-card {
+  background-color: rgba(28, 28, 30, 0.85);
+  border: none;
+}
+
+[data-theme="dark"] .apple-card {
+  background-color: rgba(28, 28, 30, 0.85);
+  border: none;
+}
+
+/* Hover state for interactive apple cards */
+.apple-card.interactive {
+  cursor: pointer;
+}
+
+.apple-card.interactive:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.12), 0 4px 12px 0 rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  .apple-card.interactive:hover {
+    background-color: rgba(28, 28, 30, 0.9);
+  }
+}
+
+.dark .apple-card.interactive:hover {
+  background-color: rgba(28, 28, 30, 0.9);
+}
+
+[data-theme="dark"] .apple-card.interactive:hover {
+  background-color: rgba(28, 28, 30, 0.9);
+}
+
+/* Active state for mobile touch */
+.apple-card.interactive:active {
+  transform: scale(0.98);
 }
 
 .apple-health-card-title {
