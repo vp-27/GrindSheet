@@ -1113,3 +1113,60 @@
   --category-color: #10b981;
   --category-color-rgb: 16, 185, 129;
 }
+
+/* Category background tinting for Dashboard - Enhanced visibility for both light and dark modes */
+.category-background-tint {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  /* Light mode: More visible gradient - increased from original 15, 08, 03, 01 */
+  background: linear-gradient(to top, 
+    rgba(var(--category-color-rgb), 0.25) 0%, 
+    rgba(var(--category-color-rgb), 0.15) 25%, 
+    rgba(var(--category-color-rgb), 0.08) 50%, 
+    rgba(var(--category-color-rgb), 0.03) 75%, 
+    transparent 100%);
+}
+
+/* Dark mode: Enhanced visibility with higher opacity values for better contrast */
+.category-background-tint.dark-mode {
+  background: linear-gradient(to top, 
+    rgba(var(--category-color-rgb), 0.4) 0%, 
+    rgba(var(--category-color-rgb), 0.25) 25%, 
+    rgba(var(--category-color-rgb), 0.15) 50%, 
+    rgba(var(--category-color-rgb), 0.08) 75%, 
+    transparent 100%);
+}
+
+/* Alternative dark mode detection methods */
+@media (prefers-color-scheme: dark) {
+  .category-background-tint:not(.force-light) {
+    background: linear-gradient(to top, 
+      rgba(var(--category-color-rgb), 0.4) 0%, 
+      rgba(var(--category-color-rgb), 0.25) 25%, 
+      rgba(var(--category-color-rgb), 0.15) 50%, 
+      rgba(var(--category-color-rgb), 0.08) 75%, 
+      transparent 100%);
+  }
+}
+
+/* Support for data-theme attribute */
+[data-theme="dark"] .category-background-tint {
+  background: linear-gradient(to top, 
+    rgba(var(--category-color-rgb), 0.4) 0%, 
+    rgba(var(--category-color-rgb), 0.25) 25%, 
+    rgba(var(--category-color-rgb), 0.15) 50%, 
+    rgba(var(--category-color-rgb), 0.08) 75%, 
+    transparent 100%);
+}
+
+/* Support for .dark class */
+.dark .category-background-tint {
+  background: linear-gradient(to top, 
+    rgba(var(--category-color-rgb), 0.4) 0%, 
+    rgba(var(--category-color-rgb), 0.25) 25%, 
+    rgba(var(--category-color-rgb), 0.15) 50%, 
+    rgba(var(--category-color-rgb), 0.08) 75%, 
+    transparent 100%);
+}

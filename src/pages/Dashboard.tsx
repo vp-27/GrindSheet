@@ -8,6 +8,7 @@ import { calculateProgress, getOverallProgressChartData, getExerciseProgressChar
 import { generateCurrentTournament } from '@/utils/tournamentUtils';
 import { TrendingUp, Clock, Trophy, ChevronRight, Activity, Zap } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import TournamentStatusCard from '@/components/dashboard/TournamentStatusCard';
 import ChartTooltipCard from '@/components/dashboard/ChartTooltipCard';
@@ -21,6 +22,7 @@ import '@/components/ui/category-styles.css';
 const Dashboard = () => {
   const { categories, exercises, exerciseLogs } = useAppContext();
   const { profile } = useAuth();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'recent' | 'pr' | 'progress'>('recent');
@@ -212,14 +214,13 @@ const Dashboard = () => {
   return (
     <Layout title="Home">
       <div className="relative">
-        {/* Subtle bottom category tinting */}
+        {/* Enhanced category background tinting - visible in both light and dark modes */}
         {selectedCategoryColor && (
-          // eslint-disable-next-line
           <div 
-            className="fixed inset-0 pointer-events-none z-0"
+            className={`category-background-tint ${isDark ? 'dark-mode' : ''}`}
             style={{
-              background: `linear-gradient(to top, ${selectedCategoryColor}15 0%, ${selectedCategoryColor}08 25%, ${selectedCategoryColor}03 50%, ${selectedCategoryColor}01 75%, transparent 100%)`
-            }}
+              '--category-color-rgb': selectedCategoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
+            } as React.CSSProperties}
           />
         )}
         
