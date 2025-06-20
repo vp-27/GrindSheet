@@ -1,8 +1,22 @@
 import React, { useState } from 'react';
-import { Home, Trophy, History, User, Plus, Settings, LogOut, Target } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
+// Heroicons imports - outline versions
+import {
+  HomeIcon as HomeOutline,
+  TrophyIcon as TrophyOutline,
+  ClockIcon as ClockOutline,
+  CogIcon as CogOutline,
+} from '@heroicons/react/24/outline';
+// Heroicons imports - solid versions
+import {
+  HomeIcon as HomeSolid,
+  TrophyIcon as TrophySolid,
+  ClockIcon as ClockSolid,
+  CogIcon as CogSolid,
+} from '@heroicons/react/24/solid';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -22,6 +36,33 @@ interface LayoutProps {
   title?: string;
   categoryColor?: string;
 }
+
+// Icon transition component
+interface AnimatedIconProps {
+  outlineIcon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  solidIcon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  isActive: boolean;
+  className?: string;
+}
+
+const AnimatedIcon: React.FC<AnimatedIconProps> = ({ outlineIcon: OutlineIcon, solidIcon: SolidIcon, isActive, className }) => {
+  return (
+    <div className={cn("relative transition-all duration-200", className)}>
+      <OutlineIcon 
+        className={cn(
+          "h-6 w-6 transition-opacity duration-200",
+          isActive ? "opacity-0" : "opacity-100"
+        )} 
+      />
+      <SolidIcon 
+        className={cn(
+          "h-6 w-6 absolute inset-0 transition-opacity duration-200",
+          isActive ? "opacity-100" : "opacity-0"
+        )} 
+      />
+    </div>
+  );
+};
 
 const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor }) => {
   const { profile, signOut } = useAuth();
@@ -61,19 +102,39 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor }) => {
       <div className="sticky bottom-0 z-10 backdrop-blur-lg bg-background/70 pb-3 w-full sm:max-w-lg sm:mx-auto rounded-t-xl px-2 sm:px-0">
         <nav className="relative flex items-center justify-between p-2">
           <div className="flex-1 flex justify-center items-center">
-            <NavLink to="/" icon={<Home />} label="Home" />
+            <NavLink 
+              to="/" 
+              outlineIcon={HomeOutline}
+              solidIcon={HomeSolid}
+              label="Home" 
+            />
           </div>
           <div className="flex-1 flex justify-center items-center">
-            <NavLink to="/tournament" icon={<Trophy />} label="Compete" />
+            <NavLink 
+              to="/tournament" 
+              outlineIcon={TrophyOutline}
+              solidIcon={TrophySolid}
+              label="Compete" 
+            />
           </div>
           <div className="flex-1 flex justify-center items-center">
             <div className="w-16 h-14 flex-shrink-0" />
           </div>
           <div className="flex-1 flex justify-center items-center">
-            <NavLink to="/history" icon={<History />} label="History" />
+            <NavLink 
+              to="/history" 
+              outlineIcon={ClockOutline}
+              solidIcon={ClockSolid}
+              label="History" 
+            />
           </div>
           <div className="flex-1 flex justify-center items-center">
-            <NavLink to="/settings" icon={<Settings />} label="Settings" />
+            <NavLink 
+              to="/settings" 
+              outlineIcon={CogOutline}
+              solidIcon={CogSolid}
+              label="Settings" 
+            />
           </div>
           {/* Absolutely positioned AddExerciseButton for precise centering */}
           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -85,7 +146,12 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor }) => {
   );
 };
 
-const NavLink: React.FC<{ to: string; icon: React.ReactNode; label?: string }> = ({ to, icon, label }) => {
+const NavLink: React.FC<{ 
+  to: string; 
+  outlineIcon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  solidIcon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  label?: string; 
+}> = ({ to, outlineIcon, solidIcon, label }) => {
   // Get current path
   const currentPath = window.location.pathname;
   const isActive = currentPath === to || 
@@ -99,8 +165,14 @@ const NavLink: React.FC<{ to: string; icon: React.ReactNode; label?: string }> =
         isActive ? "text-primary font-medium" : "text-muted-foreground"
       )}
     >
-      <div className={cn("text-lg mb-0.5 text-icon", isActive ? "text-primary" : "text-icon-muted")}>{icon}</div>
-      {label && <span className="text-center truncate w-full">{label}</span>}
+      <div className={cn("mb-0.5", isActive ? "text-primary" : "text-icon-muted")}>
+        <AnimatedIcon 
+          outlineIcon={outlineIcon}
+          solidIcon={solidIcon}
+          isActive={isActive}
+        />
+      </div>
+      {label && <span className={cn("text-center truncate w-full", isActive ? "font-bold" : "font-normal")}>{label}</span>}
     </Link>
   );
 };
