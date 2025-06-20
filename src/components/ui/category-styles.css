@@ -76,8 +76,9 @@
 
 /* Styles for the "All" filter button */
 .all-button-selected {
-  color: white !important;
-  background-color: hsl(var(--foreground)) !important; /* Using a neutral color from theme */
+  /* Use primary color instead of foreground for better contrast */
+  color: hsl(var(--primary-foreground)) !important;
+  background-color: hsl(var(--primary)) !important;
   border-color: transparent !important;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
@@ -85,21 +86,22 @@
 /* Desktop-only hover effects for "All" button */
 @media (hover: hover) and (pointer: fine) {
   .all-button-selected:hover {
-    background-color: hsl(var(--foreground) / 0.9) !important; /* Slightly lighter on hover */
+    background-color: hsl(var(--primary) / 0.9) !important;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   }
 
   .all-button-unselected:hover {
-    background-color: hsl(var(--foreground)) !important;
-    color: hsl(var(--background)) !important;
+    background-color: hsl(var(--primary) / 0.1) !important;
+    color: hsl(var(--primary)) !important;
+    border-color: hsl(var(--primary)) !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
 }
 
 .all-button-unselected {
   background-color: transparent !important;
-  color: hsl(var(--foreground)) !important;
-  border-color: hsl(var(--foreground)) !important;
+  color: hsl(var(--muted-foreground)) !important;
+  border-color: hsl(var(--border)) !important;
 }
 
 /* Mobile active states for "All" button */
@@ -109,7 +111,7 @@
 }
 
 .all-button-unselected:active {
-  background-color: hsl(var(--foreground) / 0.2) !important;
+  background-color: hsl(var(--primary) / 0.2) !important;
   transform: scale(0.98);
   transition: transform 0.1s ease;
 }
