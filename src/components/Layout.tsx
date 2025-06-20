@@ -99,8 +99,8 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor }) => {
       </main>
       
       {/* Apple-style bottom navigation with glass effect */}
-      <div className="sticky bottom-0 z-10 backdrop-blur-xl bg-background/30 pb-3 w-full sm:max-w-lg sm:mx-auto rounded-t-2xl px-2 sm:px-0 border-t border-white/10 shadow-2xl shadow-black/20">
-        <nav className="relative flex items-center justify-between p-2 bg-gradient-to-t from-white/5 to-transparent rounded-t-2xl">
+      <div className="sticky bottom-0 z-10 backdrop-blur-xl bg-background/30 pb-3 w-full sm:max-w-lg sm:mx-auto rounded-t-2xl px-2 sm:px-0 border-t border-border/20 shadow-2xl shadow-black/20">
+        <nav className="relative flex items-center justify-between p-2 rounded-t-2xl">
           <div className="flex-1 flex justify-center items-center">
             <NavLink 
               to="/" 
