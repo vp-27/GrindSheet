@@ -301,7 +301,7 @@ const ExerciseDetail = () => {
           />
           
           {/* Stats container */}
-          <div className="relative backdrop-blur-sm bg-card/80 rounded-3xl border shadow-lg p-6">
+          <div className="apple-card p-6 shadow-lg">
             <div className="grid grid-cols-2 gap-6">
               {/* Current Weight */}
               <div className="text-center">
@@ -367,7 +367,7 @@ const ExerciseDetail = () => {
             } as React.CSSProperties}
           />
           
-          <div className="relative backdrop-blur-sm bg-card/90 rounded-2xl border border-border/30 p-6 shadow-sm">
+          <div className="apple-card p-6 shadow-sm">
             <div className="mb-4 flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-foreground">Log New Weight</h3>
@@ -479,7 +479,7 @@ const ExerciseDetail = () => {
               })}
             </div>
           ) : (
-            <div className="backdrop-blur-sm bg-card/90 rounded-2xl border p-12 text-center shadow-sm">
+            <div className="apple-card p-12 text-center shadow-sm">
               <Activity className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">No history yet</h3>
               <p className="text-muted-foreground">Log your first weight to start tracking progress!</p>
@@ -489,7 +489,7 @@ const ExerciseDetail = () => {
 
         {/* Edit Exercise Log Dialog */}
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="apple-card sm:max-w-md">
             <form onSubmit={handleEditSubmit}>
               <DialogHeader className="pb-4">
                 <DialogTitle className="text-xl font-semibold">Edit Exercise Log</DialogTitle>

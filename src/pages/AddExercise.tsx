@@ -19,6 +19,7 @@ import { useAppContext } from '@/context/useAppContext';
 import { useAuth } from '@/context/AuthContext';
 import { getCategoryColors, getCategoryKeyByName } from '@/utils/categoryColors';
 import { CategoryDialog, ExerciseDialog } from '@/components/ui/shared-dialogs';
+import '@/components/ui/category-styles.css';
 
 const AddExercise = () => {
   const { categories, exercises, addExerciseLog } = useAppContext();
@@ -138,7 +139,7 @@ const AddExercise = () => {
             style={{ backgroundColor: categoryColors?.primary || '#10b981' }}
           />
           
-          <div className="relative backdrop-blur-sm bg-card/90 rounded-2xl border border-border/30 p-6 shadow-sm">
+          <div className="apple-card p-6 shadow-sm">
             <div className="mb-6 flex items-start justify-between">
               <div>
                 <h3 className="text-lg font-semibold text-foreground">Exercise Details</h3>
@@ -174,7 +175,7 @@ const AddExercise = () => {
                     >
                       <SelectValue placeholder="Category" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-border/60 bg-card/95 backdrop-blur-md">
+                    <SelectContent className="apple-card border-border/60 backdrop-blur-md">
                       {localCategories.map(category => (
                         <SelectItem key={category.id} value={category.id} className="rounded-lg">
                           {category.name}
@@ -216,7 +217,7 @@ const AddExercise = () => {
                           : "Category first"
                       } />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-border/60 bg-card/95 backdrop-blur-md">
+                    <SelectContent className="apple-card border-border/60 backdrop-blur-md">
                       {filteredExercises.length > 0 ? (
                         <>
                           {filteredExercises.map(exercise => (
