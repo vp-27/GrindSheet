@@ -70,16 +70,15 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
                 {/* Make "Be the First!" the main focal point */}
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-lg text-foreground leading-tight">Be the First! 🏃‍♂️</span>
-                  {/* Compact action indicator */}
-                  <div 
-                    className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0 cursor-pointer active:scale-90 transition-all duration-150 shadow-md ring-2 ring-white/50"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate('/add-exercise');
-                    }}
-                  >
-                    <span className="text-white text-sm font-bold">+</span>
-                  </div>
+                  {/* Compact action indicator */}                <div 
+                  className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0 cursor-pointer active:scale-90 transition-all duration-150 shadow-lg ring-2 ring-white/20 dark:ring-gray-800/20"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate('/add-exercise');
+                  }}
+                >
+                  <span className="text-white text-base font-bold">+</span>
+                </div>
                 </div>
                 {/* Motivational subtitle */}
                 <div className="mt-1 text-sm text-muted-foreground">
@@ -127,22 +126,19 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
   const getRankIcon = (rank: number) => {
     switch (rank) {
       case 1:
-        return (
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-md">
-            <Crown className="h-4 w-4 text-yellow-900" />
-          </div>
+        return (        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-lg ring-2 ring-yellow-200/50">
+          <Crown className="h-5 w-5 text-yellow-900" />
+        </div>
         );
       case 2:
-        return (
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shadow-md">
-            <Medal className="h-4 w-4 text-gray-700" />
-          </div>
+        return (        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shadow-lg ring-2 ring-gray-200/50">
+          <Medal className="h-5 w-5 text-gray-700" />
+        </div>
         );
       case 3:
-        return (
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center shadow-md">
-            <Award className="h-4 w-4 text-amber-100" />
-          </div>
+        return (        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center shadow-lg ring-2 ring-amber-200/50">
+          <Award className="h-5 w-5 text-amber-100" />
+        </div>
         );
       default:
         return (
@@ -193,7 +189,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
     if (rank === 1) {
       const closeGames = participantsSorted.filter(p => p.totalPoints > 0 && (topPerformer.totalPoints - p.totalPoints) <= 20);
       if (closeGames.length > 1) return "Crown's getting heavy 👑";
-      return "Untouchable right now �";
+      return "Untouchable right now";
     }
     
     if (rank === 2) {
@@ -250,13 +246,13 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
                 <span className="font-bold text-lg text-foreground leading-tight">{randomRoast}</span>
                 {/* Compact action indicator */}
                 <div 
-                  className="w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center flex-shrink-0 cursor-pointer active:scale-90 transition-all duration-150 shadow-md ring-2 ring-white/50"
+                  className="w-10 h-10 rounded-full bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center flex-shrink-0 cursor-pointer active:scale-90 transition-all duration-150 shadow-lg ring-2 ring-white/20 dark:ring-gray-800/20"
                   onClick={(e) => {
                     e.stopPropagation();
                     navigate('/add-exercise');
                   }}
                 >
-                  <span className="text-white text-sm font-bold">+</span>
+                  <span className="text-white text-base font-bold">+</span>
                 </div>
               </div>
               {/* Subtle motivational subtitle */}
@@ -281,16 +277,12 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
           <div className="flex items-center gap-3 flex-1 min-w-0">
             {/* Only show rank icon for top 3, otherwise show minimal rank number */}
             {displayRank <= 3 ? (
-              <div className="relative flex-shrink-0">
+              <div className="flex-shrink-0">
                 {getRankIcon(displayRank)}
-                {displayRank === 1 && (
-                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
-                )}
               </div>
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground font-bold text-sm flex-shrink-0">
-                {displayRank}
-              </div>
+            ) : (          <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground font-bold text-lg flex-shrink-0 shadow-sm">
+            {displayRank}
+          </div>
             )}
             
             <div className="flex flex-col gap-1 flex-1 min-w-0">
@@ -333,8 +325,8 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
                 {currentParticipant.badges.length} 🏅
               </span>
             )}
-            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
-              <span className="text-primary text-xs font-bold">→</span>
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shadow-sm">
+              <span className="text-primary text-sm font-bold">→</span>
             </div>
           </div>
         </div>

@@ -180,7 +180,7 @@ const NavLink: React.FC<{
 const AddExerciseButton: React.FC = () => {
   return (
     <Link to="/add-exercise">
-      <Button className="rounded-full h-14 w-14 flex items-center justify-center shadow-2xl bg-primary text-primary-foreground transition-all duration-300 active:scale-95 active:shadow-2xl border border-white/30 backdrop-blur-lg">
+      <Button className="rounded-full h-14 w-14 flex items-center justify-center shadow-xl bg-primary text-primary-foreground transition-all duration-300 active:scale-95 active:shadow-2xl ring-2 ring-white/20 dark:ring-gray-800/20 backdrop-blur-lg">
         <Plus className="h-6 w-6" />
       </Button>
     </Link>
