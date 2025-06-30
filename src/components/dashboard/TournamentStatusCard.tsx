@@ -61,31 +61,29 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
     if (!hasActiveParticipants) {
       return (
         <Card 
-          className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 border-blue-200/50 dark:border-blue-800/50 cursor-pointer hover:shadow-lg transition-all duration-200 rounded-xl backdrop-blur-sm"
-          onClick={() => navigate('/add-exercise')}
+          className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 border-blue-200/50 dark:border-blue-800/50 cursor-pointer active:opacity-80 transition-opacity duration-150 rounded-xl backdrop-blur-sm"
+          onClick={() => navigate('/tournament')}
         >
           <CardContent className="p-4">
             <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="relative flex-shrink-0">
-                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-md">
-                    <Trophy className="h-4 w-4 text-white" />
+              <div className="flex-1 min-w-0">
+                {/* Make "Be the First!" the main focal point */}
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-lg text-foreground leading-tight">Be the First! 🏃‍♂️</span>
+                  {/* Compact action indicator */}
+                  <div 
+                    className="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0 cursor-pointer active:scale-90 transition-all duration-150 shadow-md ring-2 ring-white/50"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate('/add-exercise');
+                    }}
+                  >
+                    <span className="text-white text-sm font-bold">+</span>
                   </div>
                 </div>
-                <div className="flex flex-col gap-1 flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-lg text-foreground whitespace-nowrap">Be the First!</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="font-medium text-muted-foreground truncate">Fresh week, fresh competition!</span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 flex-shrink-0">
-                <div className="text-right">
-                  <div className="font-bold text-lg text-blue-600 dark:text-blue-400">
-                    Lead Early
-                  </div>
+                {/* Motivational subtitle */}
+                <div className="mt-1 text-sm text-muted-foreground">
+                  Fresh week, fresh competition!
                 </div>
               </div>
             </div>
@@ -105,7 +103,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
   if (!currentParticipant) {
     return (
       <Card 
-        className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 border-blue-200/50 dark:border-blue-800/50 cursor-pointer active:scale-95 rounded-xl backdrop-blur-sm hover:shadow-lg transition-all duration-200"
+        className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 border-blue-200/50 dark:border-blue-800/50 cursor-pointer active:opacity-80 rounded-xl backdrop-blur-sm transition-opacity duration-150"
         onClick={() => navigate('/add-exercise')}
       >
         <CardContent className="p-4 text-center">
@@ -194,18 +192,18 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
   const getCompetitiveMessage = (rank: number, pointsGap: number, totalParticipants: number) => {
     if (rank === 1) {
       const closeGames = participantsSorted.filter(p => p.totalPoints > 0 && (topPerformer.totalPoints - p.totalPoints) <= 20);
-      if (closeGames.length > 1) return "They're hunting you 🎯";
-      return "Crown is heavy? 👑";
+      if (closeGames.length > 1) return "Crown's getting heavy 👑";
+      return "Untouchable right now �";
     }
     
     if (rank === 2) {
       if (pointsGap <= 10) return "Breathing down their neck 😤";
-      if (pointsGap <= 30) return "Second place = first loser 😏";
-      return "Silver medal collecting 🥈";
+      if (pointsGap <= 30) return "Silver suits you... for now 🥈";
+      return "So close, yet so far 🎯";
     }
     
     if (rank === 3) {
-      if (pointsGap <= 20) return "Bronze is still shiny 🥉";
+      if (pointsGap <= 20) return "Bronze is just warm-up 🥉";
       return "Podium's getting cold 🧊";
     }
     
@@ -214,10 +212,10 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
     }
     
     if (rank === totalParticipants && totalParticipants > 1) {
-      return "Taking Ls like a champ 🏆";
+      return "Rock bottom has great WiFi 📶";
     }
     
-    return "Bottom feeder energy 🐟";
+    return "Gravity seems stronger for you 🌍";
   };
 
   // Determine message based on rank and points
@@ -227,43 +225,43 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
   if (currentParticipant.totalPoints === 0) {
     const wittyRoasts = [
       "Ghost mode activated 👻",
-      "Spectator of the year 🏆",
+      "Spectator of the year 🏆", 
       "Still warming the bench? 🪑",
       "Your muscles called - they're bored 😴",
       "Even the couch is lifting more 🛋️",
-      "Tutorial mode: OFF 🎮"
+      "Tutorial mode: OFF 🎮",
+      "Dust bunnies have better PRs 🐰",
+      "Netflix has seen more action 📺",
+      "Your gym membership is crying 😢"
     ];
     
     const randomRoast = wittyRoasts[Math.floor(Math.random() * wittyRoasts.length)];
     
     return (
       <Card 
-        className="bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 dark:from-red-950/30 dark:via-orange-950/30 dark:to-yellow-950/30 border-red-200/50 dark:border-red-800/50 cursor-pointer hover:shadow-lg transition-all duration-200 rounded-xl backdrop-blur-sm"
-        onClick={() => navigate('/add-exercise')}
+        className="bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 dark:from-red-950/30 dark:via-orange-950/30 dark:to-yellow-950/30 border-red-200/50 dark:border-red-800/50 cursor-pointer active:opacity-80 transition-opacity duration-150 rounded-xl backdrop-blur-sm"
+        onClick={() => navigate('/tournament')}
       >
         <CardContent className="p-4">
           <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="relative flex-shrink-0">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center shadow-md">
-                  <Target className="h-4 w-4 text-white" />
+            <div className="flex-1 min-w-0">
+              {/* Make the roast the main focal point */}
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-lg text-foreground leading-tight">{randomRoast}</span>
+                {/* Compact action indicator */}
+                <div 
+                  className="w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center flex-shrink-0 cursor-pointer active:scale-90 transition-all duration-150 shadow-md ring-2 ring-white/50"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate('/add-exercise');
+                  }}
+                >
+                  <span className="text-white text-sm font-bold">+</span>
                 </div>
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-orange-400 rounded-full animate-pulse" />
               </div>
-              <div className="flex flex-col gap-1 flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-bold text-lg text-foreground whitespace-nowrap">Wake Up Call</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="font-medium text-muted-foreground truncate">{randomRoast}</span>
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 flex-shrink-0">
-              <div className="text-right">
-                <div className="font-bold text-lg text-red-600 dark:text-red-400">
-                  Log Now
-                </div>
+              {/* Subtle motivational subtitle */}
+              <div className="mt-1 text-sm text-muted-foreground">
+                Time to get those gains 💪
               </div>
             </div>
           </div>
@@ -274,64 +272,71 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
 
   return (
     <Card 
-      className={`bg-gradient-to-r ${getRankColor(displayRank)} cursor-pointer hover:shadow-lg transition-all duration-200 rounded-xl backdrop-blur-sm`}
+      className={`bg-gradient-to-r ${getRankColor(displayRank)} cursor-pointer active:opacity-80 transition-opacity duration-150 rounded-xl backdrop-blur-sm`}
       onClick={() => navigate('/tournament')}
     >
       <CardContent className="p-4">
-        {/* Tournament Status - Mobile Optimized */}
+        {/* Tournament Status - Redesigned for better visual hierarchy */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            <div className="relative flex-shrink-0">
-              {getRankIcon(displayRank)}
-              {displayRank === 1 && (
-                <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
-              )}
-            </div>
-            <div className="flex flex-col gap-1 flex-1 min-w-0">
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-lg text-foreground whitespace-nowrap">{getRankText(displayRank, true)}</span>
+            {/* Only show rank icon for top 3, otherwise show minimal rank number */}
+            {displayRank <= 3 ? (
+              <div className="relative flex-shrink-0">
+                {getRankIcon(displayRank)}
+                {displayRank === 1 && (
+                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-yellow-400 rounded-full animate-pulse" />
+                )}
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="font-medium text-muted-foreground truncate">Weekly Tournament</span>
-                {!isTopPerformer && (
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground font-bold text-sm flex-shrink-0">
+                {displayRank}
+              </div>
+            )}
+            
+            <div className="flex flex-col gap-1 flex-1 min-w-0">
+              {/* Make the witty comment the main focal point */}
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-lg text-foreground leading-tight">
+                  {competitiveMessage}
+                </span>
+                <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
+                  #{displayRank}
+                </span>
+              </div>
+              
+              {/* Condensed tournament info */}
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span className="font-medium">{currentParticipant.totalPoints} pts</span>
+                {!isTopPerformer && pointsFromLeader > 0 && (
                   <>
-                    <span className="text-muted-foreground hidden xs:inline">•</span>
-                    <span className="text-muted-foreground truncate">{pointsFromLeader} pts behind</span>
+                    <span>•</span>
+                    <span className="truncate">{pointsFromLeader} behind leader</span>
                   </>
                 )}
-                {/* Add subtle streak indicator if user has workout streak */}
+                {/* Streak indicator for engaged users */}
                 {currentParticipant.workoutDays.length >= 3 && (
                   <>
-                    <span className="text-muted-foreground hidden sm:inline">•</span>
+                    <span className="hidden sm:inline">•</span>
                     <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded-full font-medium hidden sm:inline">
-                      {currentParticipant.workoutDays.length} day streak
+                      {currentParticipant.workoutDays.length}d streak
                     </span>
                   </>
                 )}
               </div>
-              {/* Competitive context message */}
-              <div className="text-xs text-muted-foreground/80 mt-0.5 hidden sm:block">
-                {getCompetitiveMessage(displayRank, pointsFromLeader, totalParticipants)}
-              </div>
             </div>
           </div>
-          <div className="flex items-center gap-3 flex-shrink-0">
+          
+          {/* Compact action indicator */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             {currentParticipant.badges.length > 0 && (
               <span className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline">
-                {currentParticipant.badges.length} badge{currentParticipant.badges.length !== 1 ? 's' : ''}
+                {currentParticipant.badges.length} 🏅
               </span>
             )}
-            <div className="text-right">
-              <div className="font-bold text-lg text-foreground">
-                {currentParticipant.totalPoints}
-                <span className="text-xs text-muted-foreground ml-1">pts</span>
-              </div>
+            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+              <span className="text-primary text-xs font-bold">→</span>
             </div>
           </div>
-        </div>
-        {/* Competitive Messaging - Always Visible */}
-        <div className="mt-2 text-center">
-          <span className="text-sm text-muted-foreground">{competitiveMessage}</span>
         </div>
       </CardContent>
     </Card>
