@@ -1441,7 +1441,7 @@
 
 /* Progress dropdown and search container - prevent layout shifts */
 .progress-search-container {
-  min-height: 3.5rem; /* Fixed height to prevent shifts */
+  min-height: 2.75rem; /* Fixed height to prevent shifts - more compact */
   display: flex;
   align-items: flex-start;
   gap: 1rem;
@@ -1451,19 +1451,19 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  min-height: 3.5rem; /* Match container height */
+  min-height: 2.75rem; /* Match container height */
 }
 
 .search-section {
   flex: 1;
-  min-height: 3.5rem; /* Match container height */
+  min-height: 2.75rem; /* Match container height */
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
 }
 
 .search-input-container {
-  height: 3rem; /* Fixed height for input */
+  height: 2.25rem; /* Compact height matching mobile slider proportions */
   display: flex;
   align-items: center;
 }
@@ -1477,13 +1477,14 @@
 
 /* Override the problematic search input styles */
 .search-input-mobile.chart-slider-border {
-  font-size: 16px !important;
-  min-height: 3rem !important;
-  height: 3rem !important;
+  font-size: 14px !important;
+  min-height: 2.25rem !important;
+  height: 2.25rem !important;
   -webkit-appearance: none !important;
   appearance: none !important;
   outline: none !important;
   color: rgba(60, 60, 67, 0.85) !important;
+  padding: 0.5rem 0.75rem !important;
 }
 
 .dark .search-input-mobile.chart-slider-border {

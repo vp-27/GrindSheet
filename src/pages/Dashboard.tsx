@@ -426,7 +426,7 @@ const Dashboard = () => {
                 '--category-color-rgb': selectedCategoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
               } as React.CSSProperties : undefined}
             >
-              <div className="search-input-container max-w-md relative">
+              <div className="search-input-container max-w-xs relative">
                 {/* Search Input */}
                 <input
                   type="text"
@@ -435,7 +435,7 @@ const Dashboard = () => {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onFocus={() => setIsSearchFocused(true)}
                   onBlur={() => setIsSearchFocused(false)}
-                  className={`w-full pl-4 pr-10 text-sm rounded-lg transition-all duration-300 search-input-mobile chart-slider-border
+                  className={`w-full pl-3 pr-8 text-sm transition-all duration-300 search-input-mobile chart-slider-border
                     ${selectedCategory && isSearchFocused
                       ? 'category-search-focused'
                       : selectedCategory && !isSearchFocused
@@ -448,9 +448,9 @@ const Dashboard = () => {
                   <button
                     onClick={() => setSearchQuery('')}
                     aria-label="Clear search"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground active:text-foreground transition-colors duration-200 active:scale-90 transform"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground active:text-foreground transition-colors duration-200 active:scale-90 transform"
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-3.5 w-3.5" />
                   </button>
                 )}
               </div>
