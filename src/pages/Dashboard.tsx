@@ -6,13 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAppContext } from '@/context/useAppContext';
 import { calculateProgress, getOverallProgressChartData, getExerciseProgressChartData } from '@/utils/progressUtils';
 import { generateCurrentTournament } from '@/utils/tournamentUtils';
-import { TrendingUp, Clock, Trophy, ChevronRight, Activity, Zap } from 'lucide-react';
+import { TrendingUp, Clock, Trophy, ChevronRight, Activity, Zap, Search, X, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import TournamentStatusCard from '@/components/dashboard/TournamentStatusCard';
 import ChartTooltipCard from '@/components/dashboard/ChartTooltipCard';
-import { MobileSlider } from '@/components/ui/mobile-slider';
 import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
 import { format } from 'date-fns';
 import { Tournament } from '@/types';
@@ -30,6 +29,9 @@ const Dashboard = () => {
   const [tournamentLoading, setTournamentLoading] = useState(true);
   const [tournamentInitialized, setTournamentInitialized] = useState(false);
   const [chartHoverData, setChartHoverData] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isProgressDropdownOpen, setIsProgressDropdownOpen] = useState(false);
 
   // Use the same color system as the rest of the app
   const chartColors = getCategoryChartColors();
@@ -102,6 +104,18 @@ const Dashboard = () => {
     }
   }, [exercises, categories, tournamentInitialized]);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isProgressDropdownOpen && !(event.target as Element).closest('.progress-dropdown-container')) {
+        setIsProgressDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isProgressDropdownOpen]);
+
   // Get color for a category based on its index
   const getCategoryColor = (categoryIndex: number) => {
     return chartColors[categoryIndex % chartColors.length];
@@ -137,7 +151,7 @@ const Dashboard = () => {
     }
   }, [exerciseLogs, exercises, categories, selectedCategoryId]);
 
-  // Calculate progress for each exercise with sorting
+  // Calculate progress for each exercise with sorting and search filtering
   const exerciseProgressItems = useMemo(() => {
     const items = [];
     
@@ -165,8 +179,16 @@ const Dashboard = () => {
       }
     });
     
+    // Filter by search query
+    const filteredItems = searchQuery.trim() 
+      ? items.filter(item => 
+          item.exercise.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          categories.find(cat => cat.id === item.exercise.categoryId)?.name.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+      : items;
+    
     // Sort based on selected sort method
-    return items.sort((a, b) => {
+    return filteredItems.sort((a, b) => {
       switch (sortBy) {
         case 'recent':
           // Sort by most recent activity
@@ -193,7 +215,7 @@ const Dashboard = () => {
           return 0;
       }
     });
-  }, [exercises, exerciseLogs, selectedCategoryId, sortBy]);
+  }, [exercises, exerciseLogs, selectedCategoryId, sortBy, searchQuery, categories]);
 
   // Remove the recentLogs useMemo as we're integrating it into the main progress section
 
@@ -203,6 +225,25 @@ const Dashboard = () => {
     // Scroll to top after navigation
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Get progress type display name
+  const getProgressDisplayName = (sortType: string) => {
+    switch (sortType) {
+      case 'recent':
+        return 'Recent Progress';
+      case 'pr':
+        return 'PR Progress';
+      case 'progress':
+        return 'Growth Progress';
+      default:
+        return 'Recent Progress';
+    }
+  };
+
+  // Get selected category info
+  const selectedCategory = selectedCategoryId 
+    ? categories.find(cat => cat.id === selectedCategoryId) 
+    : null;
 
   // Get selected category color for subtle background tinting
   const selectedCategoryColor = useMemo(() => {
@@ -332,20 +373,102 @@ const Dashboard = () => {
 
           {/* Exercise Progress Grid */}
         <div className="relative">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-foreground">Your Progress</h2>
-            
-            {/* Compact Sort Controls using MobileSlider */}
-            <MobileSlider
-              options={[
-                { id: 'recent', label: 'Recent' },
-                { id: 'pr', label: 'PRs' },
-                { id: 'progress', label: 'Progress' }
-              ]}
-              activeOption={sortBy}
-              onOptionChange={(optionId) => setSortBy(optionId as 'recent' | 'pr' | 'progress')}
-              variant="compact"
-            />
+          {/* Progress Title with Inline Dropdown + Compact Search Bar */}
+          <div className="mb-6 progress-search-container">
+            {/* Progress Dropdown */}
+            <div className="relative progress-dropdown-container progress-dropdown-section">
+              <button
+                onClick={() => setIsProgressDropdownOpen(!isProgressDropdownOpen)}
+                className="flex items-center gap-2 text-xl font-bold text-foreground active:scale-95 transition-transform duration-150"
+              >
+                <span>{getProgressDisplayName(sortBy)}</span>
+                <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${isProgressDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {/* Dropdown Menu */}
+              {isProgressDropdownOpen && (
+                <div className="absolute top-full left-0 mt-2 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-md z-50 min-w-48 progress-dropdown">
+                  <div className="p-2">
+                    {[
+                      { id: 'recent', label: 'Recent Progress', icon: Clock },
+                      { id: 'pr', label: 'PR Progress', icon: Trophy },
+                      { id: 'progress', label: 'Growth Progress', icon: TrendingUp }
+                    ].map((option) => {
+                      const Icon = option.icon;
+                      return (
+                        <button
+                          key={option.id}
+                          onClick={() => {
+                            setSortBy(option.id as 'recent' | 'pr' | 'progress');
+                            setIsProgressDropdownOpen(false);
+                          }}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-95 ${
+                            sortBy === option.id
+                              ? 'bg-primary text-primary-foreground'
+                              : 'text-foreground active:bg-gray-100 dark:active:bg-gray-800'
+                          }`}
+                        >
+                          <Icon className="h-4 w-4" />
+                          <span className="font-medium">{option.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Compact Search Bar with Category Integration */}
+            <div 
+              className="search-section"
+              style={selectedCategoryColor ? {
+                '--category-color': selectedCategoryColor,
+                '--category-color-rgb': selectedCategoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
+              } as React.CSSProperties : undefined}
+            >
+              <div className="search-input-container max-w-md relative">
+                {/* Search Input */}
+                <input
+                  type="text"
+                  placeholder="Search exercises..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => setIsSearchFocused(true)}
+                  onBlur={() => setIsSearchFocused(false)}
+                  className={`w-full pl-4 pr-10 text-sm rounded-lg transition-all duration-300 search-input-mobile chart-slider-border
+                    ${selectedCategory && isSearchFocused
+                      ? 'category-search-focused'
+                      : selectedCategory && !isSearchFocused
+                        ? 'category-search-border'
+                        : ''
+                    }`}
+                />
+                {/* Clear Button */}
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    aria-label="Clear search"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground active:text-foreground transition-colors duration-200 active:scale-90 transform"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              {/* Search Results Count */}
+              <div className="search-results-count">
+                {searchQuery.trim() && (
+                  <span className="text-xs text-muted-foreground">
+                    {exerciseProgressItems.length === 0 ? (
+                      <>No exercises found for "{searchQuery}"</>
+                    ) : (
+                      <>
+                        {exerciseProgressItems.length} exercise{exerciseProgressItems.length !== 1 ? 's' : ''} found
+                      </>
+                    )}
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
           
           {exerciseProgressItems.length > 0 ? (
@@ -504,9 +627,28 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className={`glass-card rounded-2xl p-12 text-center ${selectedCategoryId ? 'category-tinted' : ''}`}>
-              <Activity className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">No Progress Data Yet</h3>
-              <p className="text-muted-foreground">Start logging your workouts to see amazing progress charts!</p>
+              {searchQuery.trim() ? (
+                <>
+                  <Search className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-foreground mb-2">No exercises found</h3>
+                  <p className="text-muted-foreground mb-4">
+                    No exercises match "{searchQuery}"
+                  </p>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setSearchQuery('')}
+                    className="mt-2"
+                  >
+                    Clear search
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Activity className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold text-foreground mb-2">No Progress Data Yet</h3>
+                  <p className="text-muted-foreground">Start logging your workouts to see amazing progress charts!</p>
+                </>
+              )}
             </div>
           )}
         </div>

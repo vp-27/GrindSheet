@@ -1320,3 +1320,186 @@
   background-color: rgba(28, 28, 30, 0.75);
   border: none;
 }
+
+/* Search bar styles for mobile PWA optimization */
+.category-search-tinted {
+  --search-tint: rgba(var(--category-color-rgb), 0.05);
+  background-color: var(--search-tint) !important;
+}
+
+.category-search-tinted:focus {
+  --search-focus-tint: rgba(var(--category-color-rgb), 0.1);
+  background-color: var(--search-focus-tint) !important;
+  border-color: var(--category-color) !important;
+  box-shadow: 0 0 0 3px rgba(var(--category-color-rgb), 0.1) !important;
+}
+
+/* --- Search Bar & Pill Styles --- */
+.category-search-pill, .category-search-pill-selected {
+  background: #f7fafc; /* slider bg, light gray */
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  font-weight: 500;
+  box-shadow: none;
+}
+.dark .category-search-pill, .dark .category-search-pill-selected {
+  background: #23272f;
+  border-color: #374151;
+  color: #d1d5db;
+}
+
+.category-search-pill-selected {
+  border-color: var(--category-color) !important;
+  color: var(--category-color) !important;
+  background: rgba(var(--category-color-rgb), 0.08) !important;
+}
+
+.category-search-border {
+  border-color: var(--category-color) !important;
+  background: rgba(var(--category-color-rgb), 0.08) !important;
+}
+
+.category-search-focused {
+  border-color: var(--category-color) !important;
+  background: rgba(var(--category-color-rgb), 0.13) !important;
+  box-shadow: 0 0 0 2px rgba(var(--category-color-rgb), 0.18) !important;
+}
+
+.search-input-mobile {
+  font-size: 16px;
+  min-height: 44px;
+  -webkit-appearance: none;
+  appearance: none;
+  outline: none;
+  background: #f7fafc;
+  border: 1px solid #e5e7eb;
+  color: #374151;
+  box-shadow: none;
+}
+.dark .search-input-mobile {
+  background: #23272f;
+  border-color: #374151;
+  color: #d1d5db;
+}
+
+.search-input-mobile:focus {
+  border-color: #a1a1aa !important;
+  background: #fff !important;
+  color: #111827;
+}
+.dark .search-input-mobile:focus {
+  border-color: #818cf8 !important;
+  background: #18181b !important;
+  color: #f3f4f6;
+}
+
+/* Remove dot from pill */
+.category-search-pill-no-dot span,
+.category-search-pill-selected span {
+  margin-left: 0 !important;
+}
+
+/* Chart slider border - matches mobile slider default styling */
+.chart-slider-border {
+  background-color: rgba(120, 120, 128, 0.16) !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease !important;
+}
+
+.dark .chart-slider-border {
+  background-color: rgba(39, 39, 41, 1) !important;
+  border: none !important;
+}
+
+/* Search bar focus state - subtle enhancement without changing background */
+.chart-slider-border:focus {
+  background-color: rgba(120, 120, 128, 0.20) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px rgba(120, 120, 128, 0.3) !important;
+}
+
+.dark .chart-slider-border:focus {
+  background-color: rgba(39, 39, 41, 1) !important;
+  box-shadow: 0 0 0 1px rgba(142, 142, 147, 0.5) !important;
+}
+
+/* Fix for category-specific search styling to not override chart-slider-border */
+.chart-slider-border.category-search-border {
+  background-color: rgba(var(--category-color-rgb), 0.12) !important;
+  border: none !important;
+}
+
+.chart-slider-border.category-search-focused {
+  background-color: rgba(var(--category-color-rgb), 0.16) !important;
+  border: none !important;
+  box-shadow: 0 0 0 1px rgba(var(--category-color-rgb), 0.3) !important;
+}
+
+/* Progress dropdown and search container - prevent layout shifts */
+.progress-search-container {
+  min-height: 3.5rem; /* Fixed height to prevent shifts */
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.progress-dropdown-section {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  min-height: 3.5rem; /* Match container height */
+}
+
+.search-section {
+  flex: 1;
+  min-height: 3.5rem; /* Match container height */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.search-input-container {
+  height: 3rem; /* Fixed height for input */
+  display: flex;
+  align-items: center;
+}
+
+.search-results-count {
+  height: 1.25rem; /* Fixed height for results text */
+  display: flex;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+/* Override the problematic search input styles */
+.search-input-mobile.chart-slider-border {
+  font-size: 16px !important;
+  min-height: 3rem !important;
+  height: 3rem !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  outline: none !important;
+  color: rgba(60, 60, 67, 0.85) !important;
+}
+
+.dark .search-input-mobile.chart-slider-border {
+  color: rgba(235, 235, 245, 0.85) !important;
+}
+
+.search-input-mobile.chart-slider-border:focus {
+  color: rgba(0, 0, 0, 0.9) !important;
+}
+
+.dark .search-input-mobile.chart-slider-border:focus {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Remove dot from pill */
+.category-search-pill-no-dot span,
+.category-search-pill-selected span {
+  margin-left: 0 !important;
+}
