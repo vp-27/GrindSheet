@@ -1510,3 +1510,201 @@
 .category-search-pill-selected span {
   margin-left: 0 !important;
 }
+
+/* Expandable Search Bar - Apple Style Animation */
+.expandable-search-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 2.25rem;
+  max-width: 280px;
+  margin-left: auto; /* Align to the right */
+}
+
+/* Search Icon Button */
+.search-icon-button {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(120, 120, 128, 0.16);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: none;
+  color: rgba(60, 60, 67, 0.6);
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 2;
+}
+
+.dark .search-icon-button {
+  background: rgba(39, 39, 41, 1);
+  color: rgba(235, 235, 245, 0.6);
+}
+
+/* Search icon states */
+.search-icon-button.search-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(-50%) scale(1);
+}
+
+.search-icon-button.search-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) scale(0.8);
+}
+
+/* Search icon hover/active states */
+.search-icon-button:hover {
+  background: rgba(120, 120, 128, 0.24);
+  color: rgba(60, 60, 67, 0.8);
+  transform: translateY(-50%) scale(1.05);
+}
+
+.dark .search-icon-button:hover {
+  background: rgba(39, 39, 41, 1);
+  color: rgba(235, 235, 245, 0.8);
+}
+
+.search-icon-button:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* Expandable Search Input Container */
+.expandable-search-input {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 2.25rem;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+}
+
+/* Collapsed state - starts as icon width */
+.expandable-search-input.search-collapsed {
+  width: 2.25rem;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Expanded state - full search bar width */
+.expandable-search-input.search-expanded {
+  width: 280px;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* The actual search input field */
+.expandable-search-field {
+  width: 100%;
+  height: 100%;
+  padding: 0.5rem 2.5rem 0.5rem 0.75rem !important;
+  font-size: 16px !important; /* Prevent iOS zoom */
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  outline: none !important;
+  border-radius: 0.5rem !important;
+  transition: all 0.3s ease !important;
+}
+
+/* Desktop can use smaller font size */
+@media (min-width: 768px) {
+  .expandable-search-field {
+    font-size: 14px !important;
+  }
+}
+
+/* Clear button positioning */
+.search-clear-button {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: rgba(60, 60, 67, 0.6);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease;
+}
+
+.dark .search-clear-button {
+  color: rgba(235, 235, 245, 0.6);
+}
+
+.search-clear-button:hover {
+  color: rgba(60, 60, 67, 0.8);
+  background: rgba(120, 120, 128, 0.16);
+}
+
+.dark .search-clear-button:hover {
+  color: rgba(235, 235, 245, 0.8);
+  background: rgba(39, 39, 41, 0.8);
+}
+
+.search-clear-button:active {
+  transform: translateY(-50%) scale(0.9);
+}
+
+/* Category-specific styling for expanded search */
+.expandable-search-field.category-search-border {
+  background: rgba(var(--category-color-rgb), 0.12) !important;
+  border: none !important;
+}
+
+.expandable-search-field.category-search-focused {
+  background: rgba(var(--category-color-rgb), 0.16) !important;
+  border: none !important;
+  box-shadow: 0 0 0 1px rgba(var(--category-color-rgb), 0.3) !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .expandable-search-container {
+    max-width: 240px;
+  }
+  
+  .expandable-search-input.search-expanded {
+    width: 240px;
+  }
+}
+
+@media (max-width: 480px) {
+  .expandable-search-container {
+    max-width: 200px;
+  }
+  
+  .expandable-search-input.search-expanded {
+    width: 200px;
+  }
+}
+
+/* Animation timing adjustments for ultra-smooth feel */
+@media (prefers-reduced-motion: no-preference) {
+  .expandable-search-input,
+  .search-icon-button {
+    transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Apple's easeOutQuad */
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .expandable-search-input,
+  .search-icon-button,
+  .expandable-search-field,
+  .search-clear-button {
+    transition-duration: 0.1s !important;
+  }
+}

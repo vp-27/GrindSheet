@@ -373,7 +373,7 @@ const Dashboard = () => {
 
           {/* Exercise Progress Grid */}
         <div className="relative">
-          {/* Progress Title with Inline Dropdown + Compact Search Bar */}
+          {/* Progress Title with Inline Dropdown + Expandable Search */}
           <div className="mb-6 progress-search-container">
             {/* Progress Dropdown */}
             <div className="relative progress-dropdown-container progress-dropdown-section">
@@ -418,7 +418,7 @@ const Dashboard = () => {
               )}
             </div>
 
-            {/* Compact Search Bar with Category Integration */}
+            {/* Expandable Search with Apple-style Animation */}
             <div 
               className="search-section"
               style={selectedCategoryColor ? {
@@ -426,34 +426,58 @@ const Dashboard = () => {
                 '--category-color-rgb': selectedCategoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
               } as React.CSSProperties : undefined}
             >
-              <div className="search-input-container max-w-xs relative">
-                {/* Search Input */}
-                <input
-                  type="text"
-                  placeholder="Search exercises..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onFocus={() => setIsSearchFocused(true)}
-                  onBlur={() => setIsSearchFocused(false)}
-                  className={`w-full pl-3 pr-8 text-sm transition-all duration-300 search-input-mobile chart-slider-border
-                    ${selectedCategory && isSearchFocused
-                      ? 'category-search-focused'
-                      : selectedCategory && !isSearchFocused
-                        ? 'category-search-border'
-                        : ''
-                    }`}
-                />
-                {/* Clear Button */}
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    aria-label="Clear search"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground active:text-foreground transition-colors duration-200 active:scale-90 transform"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                )}
+              <div className="expandable-search-container">
+                {/* Search Icon Button - Visible when collapsed */}
+                <button
+                  onClick={() => setIsSearchFocused(true)}
+                  className={`search-icon-button ${isSearchFocused || searchQuery ? 'search-hidden' : 'search-visible'}`}
+                  aria-label="Search exercises"
+                >
+                  <Search className="h-4 w-4" />
+                </button>
+
+                {/* Expandable Search Input */}
+                <div className={`expandable-search-input ${isSearchFocused || searchQuery ? 'search-expanded' : 'search-collapsed'}`}>
+                  <input
+                    ref={(el) => {
+                      if (el && isSearchFocused && !searchQuery) {
+                        // Small delay to allow animation to start
+                        setTimeout(() => el.focus(), 150);
+                      }
+                    }}
+                    type="text"
+                    placeholder="Search exercises..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onBlur={() => {
+                      if (!searchQuery) {
+                        setIsSearchFocused(false);
+                      }
+                    }}
+                    className={`expandable-search-field chart-slider-border
+                      ${selectedCategory && (isSearchFocused || searchQuery)
+                        ? 'category-search-focused'
+                        : selectedCategory && !isSearchFocused
+                          ? 'category-search-border'
+                          : ''
+                      }`}
+                  />
+                  {/* Clear Button */}
+                  {searchQuery && (
+                    <button
+                      onClick={() => {
+                        setSearchQuery('');
+                        setIsSearchFocused(false);
+                      }}
+                      aria-label="Clear search"
+                      className="search-clear-button"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  )}
+                </div>
               </div>
+
               {/* Search Results Count */}
               <div className="search-results-count">
                 {searchQuery.trim() && (
