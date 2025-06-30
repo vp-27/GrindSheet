@@ -1443,7 +1443,7 @@
 .progress-search-container {
   min-height: 2.75rem; /* Fixed height to prevent shifts - more compact */
   display: flex;
-  align-items: flex-start;
+  align-items: flex-start; /* Start alignment to handle different content heights */
   gap: 1rem;
 }
 
@@ -1451,12 +1451,11 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  min-height: 2.75rem; /* Match container height */
+  padding-top: 0.125rem; /* Slight offset to visually align with search input baseline */
 }
 
 .search-section {
   flex: 1;
-  min-height: 2.75rem; /* Match container height */
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
