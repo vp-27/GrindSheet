@@ -191,7 +191,7 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
         {/* Backdrop - only covers the main content area, not navbar */}
         <div 
           className={cn(
-            "absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 bottom-16 rounded-t-3xl border-t border-border/20",
+            "absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 bottom-16",
             isOpen ? "opacity-100" : "opacity-0"
           )}
           onClick={() => onOpenChange(false)}
