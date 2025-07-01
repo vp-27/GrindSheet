@@ -314,20 +314,12 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
               />
             </div>
 
-            {/* Submit Button */}
-            <div className="flex gap-3 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                className="flex-1"
-              >
-                Cancel
-              </Button>
+            {/* Submit Button - Full Width */}
+            <div className="pt-4">
               <Button
                 type="submit"
                 disabled={isSubmitting || !selectedExerciseId || !weight}
-                className="flex-1"
+                className="w-full h-12 text-base font-semibold"
                 style={categoryColors ? {
                   backgroundColor: categoryColors.primary,
                   borderColor: categoryColors.primary,
