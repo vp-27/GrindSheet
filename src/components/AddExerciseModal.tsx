@@ -201,12 +201,17 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
         {/* Modal content that slides up from bottom, behind navbar */}
         <div 
           className={cn(
-            "absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl shadow-2xl transition-transform duration-500 ease-out",
+            "absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl transition-transform duration-500 ease-out",
             "mx-2 sm:mx-auto sm:max-w-md",
             "border-t border-border/20",
             "pb-20", // Add padding to account for navbar height
             isOpen ? "translate-y-0" : "translate-y-full"
           )}
+          style={categoryColors ? {
+            boxShadow: `0 -8px 32px ${categoryColors.primary}30, 0 -4px 16px ${categoryColors.primary}20, 0 8px 32px rgba(0,0,0,0.1)`
+          } : {
+            boxShadow: "0 8px 32px rgba(0,0,0,0.15)"
+          }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
@@ -319,7 +324,7 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
               <Button
                 type="submit"
                 disabled={isSubmitting || !selectedExerciseId || !weight}
-                className="w-full h-12 text-base font-semibold"
+                className="w-full h-12 text-base font-semibold rounded-2xl"
                 style={categoryColors ? {
                   backgroundColor: categoryColors.primary,
                   borderColor: categoryColors.primary,
