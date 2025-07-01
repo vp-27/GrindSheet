@@ -236,15 +236,26 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
               <Label htmlFor="category">Category</Label>
               <div className="flex gap-2">
                 <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
-                  <SelectTrigger className="flex-1">
+                  <SelectTrigger className="flex-1 rounded-lg border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 h-10 text-sm">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="apple-card border-border/60 backdrop-blur-md">
                     {localCategories.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
+                      <SelectItem key={category.id} value={category.id} className="rounded-lg">
                         {category.name}
                       </SelectItem>
                     ))}
+                    <div className="border-t border-border/60 mt-2 pt-2">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="w-full justify-start text-sm text-muted-foreground active:text-foreground active:bg-muted/60 transition-colors"
+                        onClick={() => setIsAddCategoryOpen(true)}
+                      >
+                        <Plus className="h-4 w-4 mr-2 text-icon" />
+                        Add New Category
+                      </Button>
+                    </div>
                   </SelectContent>
                 </Select>
                 <Button
@@ -268,15 +279,53 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                   onValueChange={setSelectedExerciseId}
                   disabled={!selectedCategoryId}
                 >
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Select exercise" />
+                  <SelectTrigger className="flex-1 rounded-lg border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 h-10 text-sm">
+                    <SelectValue placeholder={
+                      selectedCategoryId 
+                        ? "Select exercise" 
+                        : "Category first"
+                    } />
                   </SelectTrigger>
-                  <SelectContent>
-                    {filteredExercises.map((exercise) => (
-                      <SelectItem key={exercise.id} value={exercise.id}>
-                        {exercise.name}
-                      </SelectItem>
-                    ))}
+                  <SelectContent className="apple-card border-border/60 backdrop-blur-md">
+                    {filteredExercises.length > 0 ? (
+                      <>
+                        {filteredExercises.map((exercise) => (
+                          <SelectItem key={exercise.id} value={exercise.id} className="rounded-lg">
+                            {exercise.name}
+                          </SelectItem>
+                        ))}
+                        <div className="border-t border-border/60 mt-2 pt-2">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="w-full justify-start text-sm text-muted-foreground active:text-foreground active:bg-muted/60 transition-colors"
+                            onClick={() => setIsAddExerciseOpen(true)}
+                          >
+                            <Plus className="h-4 w-4 mr-2 text-icon" />
+                            Add New Exercise
+                          </Button>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <SelectItem value="none" disabled className="rounded-lg">
+                          No exercises found
+                        </SelectItem>
+                        {selectedCategoryId && (
+                          <div className="border-t border-border/60 mt-2 pt-2">
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              className="w-full justify-start text-sm text-muted-foreground active:text-foreground active:bg-muted/60 transition-colors"
+                              onClick={() => setIsAddExerciseOpen(true)}
+                            >
+                              <Plus className="h-4 w-4 mr-2 text-icon" />
+                              Add New Exercise
+                            </Button>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
                 <Button
@@ -298,12 +347,25 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
               <Input
                 id="weight"
                 type="number"
-                step="0.25"
+                step="0.5"
                 min="0"
                 value={weight}
-                onChange={(e) => setWeight(e.target.value)}
+                onChange={e => {
+                  const value = e.target.value;
+                  // Only allow numeric input (including decimals)
+                  if (value === '' || /^\d*\.?\d*$/.test(value)) {
+                    setWeight(value);
+                  }
+                }}
+                onKeyDown={(e) => {
+                  // Prevent non-numeric characters except for allowed keys
+                  if (!/[0-9.]/.test(e.key) && 
+                      !['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+                    e.preventDefault();
+                  }
+                }}
                 placeholder="Enter weight"
-                className="w-full"
+                className="w-full rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 text-lg h-12"
               />
             </div>
 
@@ -315,7 +377,7 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Add any notes about your set..."
-                className="resize-none h-20"
+                className="resize-none h-20 rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0"
               />
             </div>
 

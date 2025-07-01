@@ -74,7 +74,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
                   className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center flex-shrink-0 cursor-pointer active:scale-90 transition-all duration-150 shadow-lg ring-2 ring-white/20 dark:ring-gray-800/20"
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate('/add-exercise');
+                    navigate('/tournament');
                   }}
                 >
                   <span className="text-white text-base font-bold">+</span>
@@ -103,7 +103,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
     return (
       <Card 
         className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 border-blue-200/50 dark:border-blue-800/50 cursor-pointer active:opacity-80 rounded-xl backdrop-blur-sm transition-opacity duration-150"
-        onClick={() => navigate('/add-exercise')}
+        onClick={() => navigate('/tournament')}
       >
         <CardContent className="p-4 text-center">
           <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-sm mx-auto mb-3">
@@ -249,7 +249,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
                   className="w-10 h-10 rounded-full bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center flex-shrink-0 cursor-pointer active:scale-90 transition-all duration-150 shadow-lg ring-2 ring-white/20 dark:ring-gray-800/20"
                   onClick={(e) => {
                     e.stopPropagation();
-                    navigate('/add-exercise');
+                    navigate('/tournament');
                   }}
                 >
                   <span className="text-white text-base font-bold">+</span>

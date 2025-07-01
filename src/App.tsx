@@ -7,7 +7,6 @@ import { AppProvider } from "@/context/AppContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import Dashboard from "./pages/Dashboard";
-import AddExercise from "./pages/AddExercise";
 import History from "./pages/History";
 import ExerciseDetail from "./pages/ExerciseDetail";
 import Tournament from "./pages/Tournament";
@@ -28,7 +27,6 @@ const App = () => (
               <Sonner />
               <Routes>
                 <Route path="/" element={<Dashboard />} />
-                <Route path="/add-exercise" element={<AddExercise />} />
                 <Route path="/exercise-detail" element={<ExerciseDetail />} />
                 <Route path="/history" element={<History />} />
                 <Route path="/tournament" element={<Tournament />} />
