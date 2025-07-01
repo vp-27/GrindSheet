@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
+import AddExerciseModal from '@/components/AddExerciseModal';
 // Heroicons imports - outline versions
 import {
   HomeIcon as HomeOutline,
@@ -67,6 +68,7 @@ const AnimatedIcon: React.FC<AnimatedIconProps> = ({ outlineIcon: OutlineIcon, s
 const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor }) => {
   const { profile, signOut } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isAddExerciseModalOpen, setIsAddExerciseModalOpen] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -99,7 +101,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor }) => {
       </main>
       
       {/* Apple-style bottom navigation with glass effect */}
-      <div className="sticky bottom-0 z-10 backdrop-blur-xl bg-background/30 pb-3 w-full sm:max-w-lg sm:mx-auto rounded-t-2xl px-2 sm:px-0 border-t border-border/20 shadow-2xl shadow-black/20">
+      <div className="sticky bottom-0 z-50 backdrop-blur-xl bg-background/30 pb-3 w-full sm:max-w-lg sm:mx-auto rounded-t-2xl px-2 sm:px-0 border-t border-border/20 shadow-2xl shadow-black/20">
         <nav className="relative flex items-center justify-between p-2 rounded-t-2xl">
           <div className="flex-1 flex justify-center items-center">
             <NavLink 
@@ -138,10 +140,20 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor }) => {
           </div>
           {/* Absolutely positioned AddExerciseButton for precise centering */}
           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <AddExerciseButton />
+            <AddExerciseButton 
+              isModalOpen={isAddExerciseModalOpen}
+              onOpenModal={() => setIsAddExerciseModalOpen(true)}
+              onCloseModal={() => setIsAddExerciseModalOpen(false)}
+            />
           </div>
         </nav>
       </div>
+
+      {/* Add Exercise Modal */}
+      <AddExerciseModal 
+        isOpen={isAddExerciseModalOpen}
+        onOpenChange={setIsAddExerciseModalOpen}
+      />
     </div>
   );
 };
@@ -177,13 +189,34 @@ const NavLink: React.FC<{
   );
 };
 
-const AddExerciseButton: React.FC = () => {
+const AddExerciseButton: React.FC<{
+  isModalOpen: boolean;
+  onOpenModal: () => void;
+  onCloseModal: () => void;
+}> = ({ isModalOpen, onOpenModal, onCloseModal }) => {
+  const handleClick = () => {
+    if (isModalOpen) {
+      onCloseModal();
+    } else {
+      onOpenModal();
+    }
+  };
+
   return (
-    <Link to="/add-exercise">
-      <Button className="rounded-full h-14 w-14 flex items-center justify-center shadow-xl bg-primary text-primary-foreground transition-all duration-300 active:scale-95 active:shadow-2xl ring-2 ring-white/20 dark:ring-gray-800/20 backdrop-blur-lg">
-        <Plus className="h-6 w-6" />
-      </Button>
-    </Link>
+    <Button 
+      onClick={handleClick}
+      className={cn(
+        "rounded-full h-14 w-14 flex items-center justify-center shadow-xl transition-all duration-300 ring-2 backdrop-blur-lg group hover:scale-105 active:scale-95",
+        isModalOpen 
+          ? "bg-primary text-primary-foreground shadow-2xl ring-primary/40 scale-105 shadow-primary/25" 
+          : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-2xl hover:shadow-primary/20 ring-white/20 dark:ring-gray-800/20"
+      )}
+    >
+      <Plus className={cn(
+        "h-6 w-6 transition-all duration-300 group-hover:scale-110", 
+        isModalOpen ? "rotate-45 scale-110" : "group-active:rotate-90"
+      )} />
+    </Button>
   );
 };
 
