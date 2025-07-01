@@ -191,8 +191,7 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
         {/* Backdrop - only covers the main content area, not navbar */}
         <div 
           className={cn(
-            "absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300",
-            "bottom-20", // Don't cover the navbar (adjust based on navbar height)
+            "absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 bottom-16 rounded-t-3xl border-t border-border/20",
             isOpen ? "opacity-100" : "opacity-0"
           )}
           onClick={() => onOpenChange(false)}
@@ -201,10 +200,9 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
         {/* Modal content that slides up from bottom, behind navbar */}
         <div 
           className={cn(
-            "absolute bottom-0 left-0 right-0 bg-background rounded-t-3xl transition-transform duration-500 ease-out",
+            "absolute bottom-20 left-0 right-0 bg-background rounded-t-3xl transition-transform duration-500 ease-out",
             "mx-2 sm:mx-auto sm:max-w-md",
             "border-t border-border/20",
-            "pb-20", // Add padding to account for navbar height
             isOpen ? "translate-y-0" : "translate-y-full"
           )}
           style={categoryColors ? {
