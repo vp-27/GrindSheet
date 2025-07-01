@@ -158,6 +158,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
 }) => {
   const [timeframe, setTimeframe] = useState<TimeframeOption>('1M');
   const [dotVisible, setDotVisible] = useState(false);
+  const [disableInitialAnimation, setDisableInitialAnimation] = useState(true);
 
   // Handle chart hover for custom tooltip
   const handleChartHover = (data: any) => {
@@ -205,6 +206,11 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
       onTimeframeChange(timeframe, timeframeGain);
     }
   }, [timeframe, timeframeGain, onTimeframeChange]);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setDisableInitialAnimation(false), 50);
+    return () => clearTimeout(timeout);
+  }, []);
 
   if (!data || data.length === 0) {
     return (
@@ -355,7 +361,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
                       strokeWidth={appleStyle ? 2.5 : 2}
                       dot={renderEndDot(key, filteredData)}
                       activeDot={false}
-                      animationDuration={800}
+                      animationDuration={disableInitialAnimation ? 0 : 800}
                       animationBegin={index * 100}
                       onAnimationEnd={() => setDotVisible(true)}
                     />
@@ -369,7 +375,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
                 strokeWidth={appleStyle ? 2.5 : 2}
                 dot={renderEndDot(showPercentage ? "percentGain" : "weight", filteredData)}
                 activeDot={false}
-                animationDuration={800}
+                animationDuration={disableInitialAnimation ? 0 : 800}
                 onAnimationEnd={() => setDotVisible(true)}
               />
             )}

@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from 'react';
+import React, { useLayoutEffect, useRef, useState, useEffect } from 'react';
 import './mobile-slider.css';
 
 interface SliderOption {
@@ -23,6 +23,7 @@ export const MobileSlider: React.FC<MobileSliderProps> = ({
   className = ''
 }) => {
   const [sliderStyle, setSliderStyle] = useState({ left: '0px', width: '0px', opacity: 0 });
+  const [disableAnimation, setDisableAnimation] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
 
@@ -37,12 +38,18 @@ export const MobileSlider: React.FC<MobileSliderProps> = ({
     }
   }, [activeOption, options]);
 
+  // Remove animation after first render
+  useEffect(() => {
+    const timeout = setTimeout(() => setDisableAnimation(false), 50);
+    return () => clearTimeout(timeout);
+  }, []);
+
   const isCompact = variant === 'compact';
 
   return (
     <div 
       ref={containerRef} 
-      className={`mobile-slider ${isCompact ? 'mobile-slider-compact' : 'mobile-slider-default'} ${className}`}
+      className={`mobile-slider ${isCompact ? 'mobile-slider-compact' : 'mobile-slider-default'} ${className} ${disableAnimation ? 'no-animate' : ''}`}
     >
       {/* Slider background track */}
       <div 

@@ -165,3 +165,8 @@
     transition: none;
   }
 }
+
+.mobile-slider.no-animate .mobile-slider-track,
+.mobile-slider.no-animate .mobile-slider-option {
+  transition: none !important;
+}
