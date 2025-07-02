@@ -1142,11 +1142,9 @@
 .chart-tooltip-unit[data-color="#ec4899"] { color: #ec4899; }
 
 /* Dark mode adjustments for better contrast */
-@media (prefers-color-scheme: dark) {
-  .chart-tooltip-value[data-color="#000000"], 
-  .chart-tooltip-unit[data-color="#000000"] { 
-    color: #ffffff; 
-  }
+.dark .chart-tooltip-value[data-color="#000000"], 
+.dark .chart-tooltip-unit[data-color="#000000"] { 
+  color: #ffffff; 
 }
 
 /* Category-specific CSS custom properties for dynamic theming */
@@ -1241,13 +1239,6 @@
 }
 
 /* Dark mode for glass cards - Apple Health style gray-black */
-@media (prefers-color-scheme: dark) {
-  .glass-card {
-    background-color: rgba(28, 28, 30, 0.85);
-    border: none;
-  }
-}
-
 .dark .glass-card {
   background-color: rgba(28, 28, 30, 0.85);
   border: none;
@@ -1262,13 +1253,6 @@
 .glass-card.category-tinted {
   background-color: rgba(255, 255, 255, 0.75);
   border: 1px solid rgba(255, 255, 255, 0.4);
-}
-
-@media (prefers-color-scheme: dark) {
-  .glass-card.category-tinted {
-    background-color: rgba(28, 28, 30, 0.75);
-    border: none;
-  }
 }
 
 .dark .glass-card.category-tinted {
