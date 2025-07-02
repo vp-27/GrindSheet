@@ -5,6 +5,7 @@ import { MobileSlider } from '@/components/ui/mobile-slider';
 import { ProgressChartData } from '@/types';
 import { addDays, isBefore, parseISO } from 'date-fns';
 import { Calendar, Clock } from 'lucide-react';
+import AnimatedCounter from '@/components/ui/animated-counter';
 import './ProgressChart.css';
 
 // Custom Legend Component with beautiful styling
@@ -70,6 +71,89 @@ const filterDataByTimeframe = (data: any[], timeframe: TimeframeOption) => {
   }
   
   return data.filter(item => new Date(item.date) >= cutoffDate);
+};
+
+// Enhanced function to calculate percentage gain from chart start date (visible timeframe)
+const calculatePercentageFromChartStart = (
+  data: any[],
+  timeframe: TimeframeOption,
+  multiple: boolean,
+  showPercentage: boolean
+): number | null => {
+  if (!data || data.length === 0) return null;
+
+  // Filter data based on timeframe first
+  const filteredData = filterDataByTimeframe(data, timeframe);
+  if (filteredData.length === 0) return null;
+
+  // Get the first point in the visible chart (chart start date)
+  const chartStartPoint = filteredData[0];
+  const chartEndPoint = filteredData[filteredData.length - 1];
+
+  if (multiple && showPercentage) {
+    // For "Overall Progress" (all categories) - percentage data
+    const keys = Object.keys(chartEndPoint).filter(key => key !== 'date');
+    let totalGain = 0;
+    let validGains = 0;
+    
+    keys.forEach(key => {
+      const startValue = chartStartPoint[key];
+      const endValue = chartEndPoint[key];
+      
+      if (
+        startValue !== null && startValue !== undefined && !isNaN(startValue) &&
+        endValue !== null && endValue !== undefined && !isNaN(endValue)
+      ) {
+        totalGain += (endValue - startValue);
+        validGains++;
+      }
+    });
+    
+    return validGains > 0 ? totalGain / validGains : 0;
+  } else if (multiple && !showPercentage) {
+    // For category-specific view with weight data
+    const keys = Object.keys(chartEndPoint).filter(key => key !== 'date');
+    let totalGain = 0;
+    let validGains = 0;
+    
+    keys.forEach(key => {
+      const startValue = chartStartPoint[key];
+      const endValue = chartEndPoint[key];
+      
+      if (
+        startValue !== null && startValue !== undefined && !isNaN(startValue) && startValue > 0 &&
+        endValue !== null && endValue !== undefined && !isNaN(endValue)
+      ) {
+        totalGain += ((endValue - startValue) / startValue) * 100;
+        validGains++;
+      }
+    });
+    
+    return validGains > 0 ? totalGain / validGains : 0;
+  } else {
+    // Single metric
+    const key = showPercentage ? "percentGain" : "weight";
+    const startValue = chartStartPoint[key];
+    const endValue = chartEndPoint[key];
+    
+    if (showPercentage) {
+      if (
+        startValue !== null && startValue !== undefined && !isNaN(startValue) &&
+        endValue !== null && endValue !== undefined && !isNaN(endValue)
+      ) {
+        return endValue - startValue;
+      }
+      return 0;
+    } else {
+      if (
+        startValue !== null && startValue !== undefined && !isNaN(startValue) && startValue > 0 &&
+        endValue !== null && endValue !== undefined && !isNaN(endValue)
+      ) {
+        return ((endValue - startValue) / startValue) * 100;
+      }
+      return 0;
+    }
+  }
 };
 
 // Helper function to calculate percentage gain for timeframe
@@ -184,9 +268,9 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
     return filterDataByTimeframe(data, timeframe);
   }, [data, timeframe]);
   
-  // Calculate percentage gain for current timeframe
+  // Calculate percentage gain for current timeframe - using chart start date
   const timeframeGain = useMemo(() => {
-    return calculateTimeframeGain(data, timeframe, multiple, showPercentage);
+    return calculatePercentageFromChartStart(data, timeframe, multiple, showPercentage);
   }, [data, timeframe, multiple, showPercentage]);
 
   useEffect(() => {
@@ -384,7 +468,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
         
         {/* Chart Controls Section - Compact floating controls */}
         <div className={`absolute ${exerciseId ? '-top-8' : '-top-12'} right-4 flex items-center gap-2`}>
-          {/* Compact percentage gain indicator */}
+          {/* Compact percentage gain indicator with animated counter */}
           {timeframeGain !== null && !exerciseId && (
             <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium backdrop-blur-sm ${
               timeframeGain >= 0 
@@ -392,7 +476,13 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
                 : 'text-red-700 bg-red-50/90 dark:text-red-400 dark:bg-red-900/40'
             }`}>
               <span className="font-semibold">
-                {timeframeGain >= 0 ? '+' : ''}{timeframeGain.toFixed(1)}%
+                {timeframeGain >= 0 ? '+' : ''}
+                <AnimatedCounter 
+                  value={timeframeGain} 
+                  formatValue={(val) => `${val.toFixed(1)}%`}
+                  duration={600}
+                  className="counter-highlight"
+                />
               </span>
             </div>
           )}

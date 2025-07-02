@@ -2,6 +2,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Clock, Pencil, Trash2 } from 'lucide-react';
+import AnimatedCounter from '@/components/ui/animated-counter';
 
 interface ExerciseLogCardProps {
   log: {
@@ -91,7 +92,14 @@ const ExerciseLogCard: React.FC<ExerciseLogCardProps> = ({
       {/* Bottom row: Weight display + Note */}
       <div className="flex items-end justify-between">
         <div>
-          <p className="apple-health-weight-display">{log.weight}</p>
+          <div className="apple-health-weight-display">
+            <AnimatedCounter 
+              value={log.weight} 
+              formatValue={(val) => val.toFixed(1)}
+              duration={600}
+              className="tabular-nums"
+            />
+          </div>
           <p className="apple-health-weight-unit">lbs</p>
         </div>
         

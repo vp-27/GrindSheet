@@ -924,3 +924,107 @@ export const calculateCategoryProgressLeaders = (
   
   return categoryLeaders;
 };
+
+// Define timeframe options type
+type TimeframeOption = '1M' | 'ALL';
+
+// Helper function to filter data based on timeframe
+const filterDataByTimeframe = (data: any[], timeframe: TimeframeOption) => {
+  if (timeframe === 'ALL' || !data.length) return data;
+  
+  const now = new Date();
+  const cutoffDate = new Date();
+  
+  switch (timeframe) {
+    case '1M':
+      cutoffDate.setMonth(now.getMonth() - 1);
+      break;
+  }
+  
+  return data.filter(item => new Date(item.date) >= cutoffDate);
+};
+
+// Enhanced function to calculate percentage gain from chart start date (visible timeframe)
+export const calculatePercentageFromChartStart = (
+  data: any[],
+  timeframe: '1M' | 'ALL',
+  multiple: boolean,
+  showPercentage: boolean
+): number | null => {
+  if (!data || data.length === 0) return null;
+
+  // Filter data based on timeframe first
+  const filteredData = filterDataByTimeframe(data, timeframe);
+  if (filteredData.length === 0) return null;
+
+  // Get the first point in the visible chart (chart start date)
+  const chartStartPoint = filteredData[0];
+  const chartEndPoint = filteredData[filteredData.length - 1];
+
+  if (multiple && showPercentage) {
+    // For "Overall Progress" (all categories) - percentage data
+    const keys = Object.keys(chartEndPoint).filter(key => key !== 'date');
+    let totalGain = 0;
+    let validGains = 0;
+    
+    keys.forEach(key => {
+      const startValue = chartStartPoint[key];
+      const endValue = chartEndPoint[key];
+      
+      if (
+        startValue !== null && startValue !== undefined && !isNaN(startValue) &&
+        endValue !== null && endValue !== undefined && !isNaN(endValue)
+      ) {
+        totalGain += (endValue - startValue);
+        validGains++;
+      }
+    });
+    
+    return validGains > 0 ? totalGain / validGains : 0;
+  } else if (multiple && !showPercentage) {
+    // For category-specific view with weight data
+    const keys = Object.keys(chartEndPoint).filter(key => key !== 'date');
+    let totalGain = 0;
+    let validGains = 0;
+    
+    keys.forEach(key => {
+      const startValue = chartStartPoint[key];
+      const endValue = chartEndPoint[key];
+      
+      if (
+        startValue !== null && startValue !== undefined && !isNaN(startValue) && startValue > 0 &&
+        endValue !== null && endValue !== undefined && !isNaN(endValue)
+      ) {
+        totalGain += ((endValue - startValue) / startValue) * 100;
+        validGains++;
+      }
+    });
+    
+    return validGains > 0 ? totalGain / validGains : 0;
+  } else {
+    // Single metric
+    const key = showPercentage ? "percentGain" : "weight";
+    const startValue = chartStartPoint[key];
+    const endValue = chartEndPoint[key];
+    
+    if (showPercentage) {
+      if (
+        startValue !== null && startValue !== undefined && !isNaN(startValue) &&
+        endValue !== null && endValue !== undefined && !isNaN(endValue)
+      ) {
+        return endValue - startValue;
+      }
+      return 0;
+    } else {
+      if (
+        startValue !== null && startValue !== undefined && !isNaN(startValue) && startValue > 0 &&
+        endValue !== null && endValue !== undefined && !isNaN(endValue)
+      ) {
+        return ((endValue - startValue) / startValue) * 100;
+      }
+      return 0;
+    }
+  }
+};
+
+// ...existing code...

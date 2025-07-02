@@ -1652,3 +1652,56 @@
     transition-duration: 0.1s !important;
   }
 }
+
+/* Animated Counter Styles - Robinhood-style number transitions */
+.animated-counter {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  transition: transform 0.2s ease, color 0.3s ease;
+}
+
+.animated-counter.animating-counter {
+  transform: scale(1.02);
+  filter: brightness(1.1);
+}
+
+/* Tabular numbers for consistent digit spacing */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Enhanced number animation styles */
+.counter-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.counter-highlight {
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.counter-highlight.animating-counter {
+  color: var(--category-color, hsl(var(--primary))) !important;
+  font-weight: 700;
+}
+
+/* Smooth number morphing effect */
+@keyframes numberMorph {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.05);
+    filter: brightness(1.15);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+.animated-counter.animating-counter {
+  animation: numberMorph 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}

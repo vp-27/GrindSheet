@@ -1,6 +1,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { useIsMobile } from '@/hooks/use-mobile';
+import AnimatedCounter from '@/components/ui/animated-counter';
 
 interface ChartTooltipCardProps {
   hoverData: any;
@@ -56,7 +57,12 @@ const ChartTooltipCard: React.FC<ChartTooltipCardProps> = ({
               className="text-lg font-bold chart-tooltip-value"
               data-color={colors[0]}
             >
-              {typeof data[dataKeys[0]] === 'number' ? data[dataKeys[0]].toFixed(1) : data[dataKeys[0]]}{showPercentage ? '%' : weightUnit}
+              <AnimatedCounter 
+                value={typeof data[dataKeys[0]] === 'number' ? data[dataKeys[0]] : 0}
+                formatValue={(val) => `${val.toFixed(1)}${showPercentage ? '%' : weightUnit}`}
+                duration={400}
+                className="tabular-nums"
+              />
             </span>
           </div>
         ) : (
@@ -80,7 +86,12 @@ const ChartTooltipCard: React.FC<ChartTooltipCardProps> = ({
                     className="text-sm font-bold chart-tooltip-value"
                     data-color={color}
                   >
-                    {typeof value === 'number' ? value.toFixed(1) : value}{formatUnit}
+                    <AnimatedCounter 
+                      value={typeof value === 'number' ? value : 0}
+                      formatValue={(val) => `${val.toFixed(1)}${formatUnit}`}
+                      duration={400}
+                      className="tabular-nums"
+                    />
                   </span>
                 </div>
               );
@@ -119,7 +130,12 @@ const ChartTooltipCard: React.FC<ChartTooltipCardProps> = ({
                 className="text-base font-bold chart-tooltip-value"
                 data-color={color}
               >
-                {typeof value === 'number' ? value.toFixed(1) : value}{formatUnit}
+                <AnimatedCounter 
+                  value={typeof value === 'number' ? value : 0}
+                  formatValue={(val) => `${val.toFixed(1)}${formatUnit}`}
+                  duration={400}
+                  className="tabular-nums"
+                />
               </span>
             </div>
           );

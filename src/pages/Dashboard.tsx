@@ -16,6 +16,7 @@ import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from 
 import { format } from 'date-fns';
 import { Tournament } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
+import AnimatedCounter from '@/components/ui/animated-counter';
 import '@/components/ui/category-styles.css';
 
 const Dashboard = () => {
@@ -619,7 +620,14 @@ const Dashboard = () => {
                       {/* Bottom row: Current weight and stats */}
                       <div className="flex items-end justify-between">
                         <div>
-                          <p className="apple-health-weight-display">{progress.currentWeight}</p>
+                          <div className="apple-health-weight-display">
+                            <AnimatedCounter 
+                              value={progress.currentWeight} 
+                              formatValue={(val) => val.toFixed(1)}
+                              duration={600}
+                              className="tabular-nums"
+                            />
+                          </div>
                           <p className="apple-health-weight-unit">lbs</p>
                         </div>
                         
@@ -628,7 +636,13 @@ const Dashboard = () => {
                             <div className={`apple-health-progress-badge ${
                               progress.percentGainFromPrevious > 0 ? 'positive' : 'negative'
                             }`}>
-                              {progress.percentGainFromPrevious > 0 ? '+' : ''}{progress.percentGainFromPrevious.toFixed(1)}%
+                              {progress.percentGainFromPrevious > 0 ? '+' : ''}
+                              <AnimatedCounter 
+                                value={progress.percentGainFromPrevious} 
+                                formatValue={(val) => `${val.toFixed(1)}%`}
+                                duration={500}
+                                className="tabular-nums"
+                              />
                             </div>
                           )}
                           {isPersonalRecord && (

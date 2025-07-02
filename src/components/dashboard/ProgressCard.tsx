@@ -3,6 +3,7 @@ import { Progress } from '@/types';
 import { cn } from '@/lib/utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowUp, ArrowDown } from 'lucide-react';
+import AnimatedCounter from '@/components/ui/animated-counter';
 
 interface ProgressCardProps {
   progress: Progress;
@@ -36,7 +37,14 @@ const ProgressCard: React.FC<ProgressCardProps> = ({ progress, onClick }) => {
       <CardContent className="p-4">
         <div className="flex justify-between items-center">
           <h3 className="font-medium">{exercise.name}</h3>
-          <div className="font-bold text-lg">{currentWeight} {weightUnit}</div>
+          <div className="font-bold text-lg tabular-nums">
+            <AnimatedCounter 
+              value={currentWeight} 
+              formatValue={(val) => `${val.toFixed(1)} ${weightUnit}`}
+              duration={600}
+              className="counter-highlight"
+            />
+          </div>
         </div>
 
         <div className="flex justify-between items-center mt-2 text-sm text-muted-foreground">
@@ -58,7 +66,12 @@ const ProgressCard: React.FC<ProgressCardProps> = ({ progress, onClick }) => {
               <ArrowDown className="h-4 w-4 mr-1" />
             ) : null}
             <span>
-              {Math.abs(percentGainFromPrevious).toFixed(1)}% from last
+              <AnimatedCounter 
+                value={Math.abs(percentGainFromPrevious)} 
+                formatValue={(val) => `${val.toFixed(1)}% from last`}
+                duration={500}
+                className="tabular-nums"
+              />
             </span>
           </div>
         )}
