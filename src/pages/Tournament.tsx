@@ -187,11 +187,11 @@ const TournamentPage: React.FC = () => {
         case 1:
           return 'bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-950/30 dark:via-yellow-950/30 dark:to-orange-950/30 border-amber-300/50 dark:border-amber-700/50 shadow-lg';
         case 2:
-          return 'bg-gradient-to-r from-slate-50 via-gray-50 to-zinc-50 dark:from-slate-950/30 dark:via-gray-950/30 dark:to-zinc-950/30 border-slate-300/50 dark:border-slate-700/50 shadow-md';
+          return 'apple-card';
         case 3:
-          return 'bg-gradient-to-r from-slate-50 via-gray-50 to-zinc-50 dark:from-slate-950/30 dark:via-gray-950/30 dark:to-zinc-950/30 border-slate-300/50 dark:border-slate-700/50 shadow-md';
+          return 'apple-card';
         default:
-          return 'apple-card interactive';
+          return 'apple-card';
       }
     };
     
