@@ -59,7 +59,10 @@ const ChartTooltipCard: React.FC<ChartTooltipCardProps> = ({
             >
               <AnimatedCounter 
                 value={typeof data[dataKeys[0]] === 'number' ? data[dataKeys[0]] : 0}
-                formatValue={(val) => `${val.toFixed(1)}${showPercentage ? '%' : weightUnit}`}
+                formatValue={(val) => {
+                  const formattedNum = val % 1 === 0 ? val.toString() : val.toFixed(1);
+                  return `${formattedNum}${showPercentage ? '%' : weightUnit}`;
+                }}
                 duration={400}
                 className="tabular-nums"
               />
@@ -88,7 +91,10 @@ const ChartTooltipCard: React.FC<ChartTooltipCardProps> = ({
                   >
                     <AnimatedCounter 
                       value={typeof value === 'number' ? value : 0}
-                      formatValue={(val) => `${val.toFixed(1)}${formatUnit}`}
+                      formatValue={(val) => {
+                        const formattedNum = val % 1 === 0 ? val.toString() : val.toFixed(1);
+                        return `${formattedNum}${formatUnit}`;
+                      }}
                       duration={400}
                       className="tabular-nums"
                     />
@@ -132,7 +138,10 @@ const ChartTooltipCard: React.FC<ChartTooltipCardProps> = ({
               >
                 <AnimatedCounter 
                   value={typeof value === 'number' ? value : 0}
-                  formatValue={(val) => `${val.toFixed(1)}${formatUnit}`}
+                  formatValue={(val) => {
+                    const formattedNum = val % 1 === 0 ? val.toString() : val.toFixed(1);
+                    return `${formattedNum}${formatUnit}`;
+                  }}
                   duration={400}
                   className="tabular-nums"
                 />

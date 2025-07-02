@@ -95,7 +95,7 @@ const ExerciseLogCard: React.FC<ExerciseLogCardProps> = ({
           <div className="apple-health-weight-display">
             <AnimatedCounter 
               value={log.weight} 
-              formatValue={(val) => val.toFixed(1)}
+              formatValue={(val) => val % 1 === 0 ? val.toString() : val.toFixed(1)}
               duration={600}
               className="tabular-nums"
             />

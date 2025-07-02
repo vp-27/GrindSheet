@@ -30,6 +30,11 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
     startValueRef.current = displayValue;
     startTimeRef.current = Date.now();
 
+    // Check if both start and end values are integers
+    const startIsInteger = Number.isInteger(startValueRef.current);
+    const endIsInteger = Number.isInteger(value);
+    const shouldUseIntegerSteps = startIsInteger && endIsInteger;
+
     const animate = () => {
       const now = Date.now();
       const elapsed = now - (startTimeRef.current || now);
@@ -38,7 +43,13 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
       // Use easing function for smooth animation (easeOutQuart)
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
       
-      const currentValue = startValueRef.current + (value - startValueRef.current) * easeOutQuart;
+      let currentValue = startValueRef.current + (value - startValueRef.current) * easeOutQuart;
+      
+      // If animating between integers, round to nearest integer during animation
+      if (shouldUseIntegerSteps && progress < 1) {
+        currentValue = Math.round(currentValue);
+      }
+      
       setDisplayValue(currentValue);
 
       if (progress < 1) {

@@ -15,6 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import ProgressChart from '@/components/dashboard/ProgressChart';
 import { getProgressChartData, calculateProgress } from '@/utils/progressUtils';
 import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
+import AnimatedCounter from '@/components/ui/animated-counter';
 import '@/components/ui/category-styles.css';
 
 const ExerciseDetail = () => {
@@ -318,10 +319,26 @@ const ExerciseDetail = () => {
                   </p>
                 </div>
                 <p className="text-3xl font-bold text-foreground">
-                  {chartHoverData ? chartHoverData.data.weight || 0 : progress?.currentWeight || 0}
+                  <AnimatedCounter 
+                    value={chartHoverData ? chartHoverData.data.weight || 0 : progress?.currentWeight || 0}
+                    formatValue={(val) => val % 1 === 0 ? val.toString() : val.toFixed(1)}
+                    duration={600}
+                    className="tabular-nums"
+                  />
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {chartHoverData ? `${chartHoverData.data.weight || 0} lbs` : 'lbs'}
+                  {chartHoverData ? (
+                    <>
+                      <AnimatedCounter 
+                        value={chartHoverData.data.weight || 0}
+                        formatValue={(val) => `${val % 1 === 0 ? val.toString() : val.toFixed(1)} lbs`}
+                        duration={400}
+                        className="tabular-nums"
+                      />
+                    </>
+                  ) : (
+                    'lbs'
+                  )}
                 </p>
               </div>
               
@@ -332,7 +349,12 @@ const ExerciseDetail = () => {
                   <p className="text-sm font-medium text-muted-foreground">Record</p>
                 </div>
                 <p className="text-3xl font-bold text-foreground">
-                  {progress?.personalRecord || 0}
+                  <AnimatedCounter 
+                    value={progress?.personalRecord || 0}
+                    formatValue={(val) => val % 1 === 0 ? val.toString() : val.toFixed(1)}
+                    duration={600}
+                    className="tabular-nums"
+                  />
                 </p>
                 <p className="text-sm text-muted-foreground">lbs</p>
               </div>
@@ -345,9 +367,24 @@ const ExerciseDetail = () => {
                   <TrendingUp className="w-4 h-4 text-green-500" />
                   <span className="text-sm font-medium text-foreground">
                     {timeframeGain !== null && timeframeGain !== 0 ? (
-                      `${timeframeGain >= 0 ? '+' : ''}${timeframeGain.toFixed(1)}% ${currentTimeframe} progress`
+                      <>
+                        {timeframeGain >= 0 ? '+' : ''}
+                        <AnimatedCounter 
+                          value={timeframeGain}
+                          formatValue={(val) => `${val.toFixed(1)}% ${currentTimeframe} progress`}
+                          duration={500}
+                          className="tabular-nums"
+                        />
+                      </>
                     ) : (
-                      `+${progress?.percentGainFromStart?.toFixed(1)}% total progress`
+                      <>
+                        +<AnimatedCounter 
+                          value={progress?.percentGainFromStart || 0}
+                          formatValue={(val) => `${val.toFixed(1)}% total progress`}
+                          duration={500}
+                          className="tabular-nums"
+                        />
+                      </>
                     )}
                   </span>
                 </div>
