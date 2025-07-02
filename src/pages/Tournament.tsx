@@ -242,20 +242,12 @@ const TournamentPage: React.FC = () => {
 
             {/* User Info */}
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="relative">
-                <Avatar className="h-8 w-8 ring-1 ring-white dark:ring-gray-800">
-                  <AvatarImage src={participant.user.avatarUrl} alt={participant.user.name} />
-                  <AvatarFallback className="bg-muted text-muted-foreground text-xs">
-                    {participant.user.name?.substring(0, 2).toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                {/* Fire animation for winning streak */}
-                {participant.rank === 1 && winningStreak >= 2 && (
-                  <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center animate-pulse">
-                    <Flame className="w-2.5 h-2.5 text-white" />
-                  </div>
-                )}
-              </div>
+              <Avatar className="h-8 w-8 ring-1 ring-white dark:ring-gray-800">
+                <AvatarImage src={participant.user.avatarUrl} alt={participant.user.name} />
+                <AvatarFallback className="bg-muted text-muted-foreground text-xs">
+                  {participant.user.name?.substring(0, 2).toUpperCase() || 'U'}
+                </AvatarFallback>
+              </Avatar>
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
