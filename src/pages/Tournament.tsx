@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { MobileSlider } from '@/components/ui/mobile-slider';
+import AnimatedCounter from '@/components/ui/animated-counter';
 import { 
   Trophy, 
   Crown, 
@@ -302,7 +303,10 @@ const TournamentPage: React.FC = () => {
             {/* Points and Stats - Compact */}
             <div className="text-right flex-shrink-0">
               <div className="font-bold text-lg text-foreground">
-                {participant.totalPoints}
+                <AnimatedCounter
+                  value={participant.totalPoints}
+                  duration={800}
+                />
               </div>
               <div className="text-xs text-muted-foreground">
                 pts
@@ -319,37 +323,79 @@ const TournamentPage: React.FC = () => {
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">PRs:</span>
                 <span className="font-medium bg-yellow-100/50 dark:bg-yellow-900/20 px-2 py-0.5 rounded text-xs">
-                  {participant.pointsBreakdown.prPoints}
+                  {selectedTournament?.id === currentTournament?.id ? (
+                    <AnimatedCounter
+                      value={participant.pointsBreakdown.prPoints}
+                      duration={600}
+                    />
+                  ) : (
+                    participant.pointsBreakdown.prPoints
+                  )}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">Improve:</span>
                 <span className="font-medium bg-blue-100/50 dark:bg-blue-900/20 px-2 py-0.5 rounded text-xs">
-                  {participant.pointsBreakdown.improvementPoints}
+                  {selectedTournament?.id === currentTournament?.id ? (
+                    <AnimatedCounter
+                      value={participant.pointsBreakdown.improvementPoints}
+                      duration={600}
+                    />
+                  ) : (
+                    participant.pointsBreakdown.improvementPoints
+                  )}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">Comp:</span>
                 <span className="font-medium bg-purple-100/50 dark:bg-purple-900/20 px-2 py-0.5 rounded text-xs">
-                  {participant.pointsBreakdown.competitivePoints || 0}
+                  {selectedTournament?.id === currentTournament?.id ? (
+                    <AnimatedCounter
+                      value={participant.pointsBreakdown.competitivePoints || 0}
+                      duration={600}
+                    />
+                  ) : (
+                    participant.pointsBreakdown.competitivePoints || 0
+                  )}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">Consist:</span>
                 <span className="font-medium bg-green-100/50 dark:bg-green-900/20 px-2 py-0.5 rounded text-xs">
-                  {participant.pointsBreakdown.consistencyPoints}
+                  {selectedTournament?.id === currentTournament?.id ? (
+                    <AnimatedCounter
+                      value={participant.pointsBreakdown.consistencyPoints}
+                      duration={600}
+                    />
+                  ) : (
+                    participant.pointsBreakdown.consistencyPoints
+                  )}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">Daily:</span>
                 <span className="font-medium bg-orange-100/50 dark:bg-orange-900/20 px-2 py-0.5 rounded text-xs">
-                  {participant.pointsBreakdown.participationPoints}
+                  {selectedTournament?.id === currentTournament?.id ? (
+                    <AnimatedCounter
+                      value={participant.pointsBreakdown.participationPoints}
+                      duration={600}
+                    />
+                  ) : (
+                    participant.pointsBreakdown.participationPoints
+                  )}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">Bonus:</span>
                 <span className="font-medium bg-pink-100/50 dark:bg-pink-900/20 px-2 py-0.5 rounded text-xs">
-                  {participant.pointsBreakdown.bonusPoints}
+                  {selectedTournament?.id === currentTournament?.id ? (
+                    <AnimatedCounter
+                      value={participant.pointsBreakdown.bonusPoints}
+                      duration={600}
+                    />
+                  ) : (
+                    participant.pointsBreakdown.bonusPoints
+                  )}
                 </span>
               </div>
             </div>
