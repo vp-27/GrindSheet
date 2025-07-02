@@ -404,13 +404,6 @@
 }
 
 /* Dark mode for category tinted cards */
-@media (prefers-color-scheme: dark) {
-  .apple-health-card.category-tinted {
-    background-color: rgba(28, 28, 30, 0.75);
-    border: none;
-  }
-}
-
 .dark .apple-health-card.category-tinted {
   background-color: rgba(28, 28, 30, 0.75);
   border: none;
@@ -422,14 +415,6 @@
 }
 
 /* Dark mode glassmorphism - Apple Health style gray-black */
-@media (prefers-color-scheme: dark) {
-  .apple-health-card {
-    background-color: rgba(28, 28, 30, 0.85);
-    border: none;
-  }
-}
-
-/* Dark theme class support */
 .dark .apple-health-card {
   background-color: rgba(28, 28, 30, 0.85);
   border: none;
@@ -462,13 +447,6 @@
 }
 
 /* Dark mode for universal apple card - matches Dashboard progress cards */
-@media (prefers-color-scheme: dark) {
-  .apple-card {
-    background-color: rgba(28, 28, 30, 0.85);
-    border: none;
-  }
-}
-
 .dark .apple-card {
   background-color: rgba(28, 28, 30, 0.85);
   border: none;
@@ -487,12 +465,6 @@
 .apple-card.interactive:hover {
   background-color: rgba(255, 255, 255, 0.9);
   box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.12), 0 4px 12px 0 rgba(0, 0, 0, 0.06);
-}
-
-@media (prefers-color-scheme: dark) {
-  .apple-card.interactive:hover {
-    background-color: rgba(28, 28, 30, 0.9);
-  }
 }
 
 .dark .apple-card.interactive:hover {
@@ -1237,18 +1209,6 @@
     rgba(var(--category-color-rgb), 0.08) 50%, 
     rgba(var(--category-color-rgb), 0.04) 75%, 
     transparent 100%);
-}
-
-/* Alternative dark mode detection methods */
-@media (prefers-color-scheme: dark) {
-  .category-background-tint:not(.force-light) {
-    background: linear-gradient(to top, 
-      rgba(var(--category-color-rgb), 0.25) 0%, 
-      rgba(var(--category-color-rgb), 0.15) 25%, 
-      rgba(var(--category-color-rgb), 0.08) 50%, 
-      rgba(var(--category-color-rgb), 0.04) 75%, 
-      transparent 100%);
-  }
 }
 
 /* Support for data-theme attribute */
