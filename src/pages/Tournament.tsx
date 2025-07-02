@@ -378,7 +378,7 @@ const TournamentPage: React.FC = () => {
               <div className="space-y-3 text-sm">
                 {/* Workout Days */}
                 {participant.workoutDays.length > 0 && (
-                  <div className="rounded-xl p-3 border border-border/20">
+                  <div className="rounded-xl p-3">
                     <h4 className="font-medium text-foreground mb-2 text-sm">Workout Days ({participant.workoutDays.length})</h4>
                     <div className="flex flex-wrap gap-1">
                       {participant.workoutDays.map((date, idx) => {
@@ -397,11 +397,11 @@ const TournamentPage: React.FC = () => {
 
                 {/* PR Details */}
                 {participant.prDetails.length > 0 && (
-                  <div className="rounded-xl p-3 border border-border/20">
+                  <div className="rounded-xl p-3">
                     <h4 className="font-medium text-foreground mb-2 text-sm">Personal Records ({participant.prDetails.length})</h4>
                     <div className="space-y-2">
                       {participant.prDetails.map((pr, idx) => (
-                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded-lg p-2 border border-border/10">
+                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded-lg p-2">
                           <div className="flex items-center justify-between mb-1">
                             <span className="font-medium text-sm text-foreground">{pr.exerciseName}</span>
                             <span className="text-xs text-muted-foreground">
@@ -436,11 +436,11 @@ const TournamentPage: React.FC = () => {
 
                 {/* Competitive Bonuses */}
                 {participant.competitiveDetails && participant.competitiveDetails.length > 0 && (
-                  <div className="rounded-xl p-3 border border-border/20">
+                  <div className="rounded-xl p-3">
                     <h4 className="font-medium text-foreground mb-2 text-sm">Competitive Bonuses</h4>
                     <div className="space-y-2">
                       {participant.competitiveDetails.map((comp, idx) => (
-                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded-lg p-2 flex items-center justify-between border border-border/10">
+                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded-lg p-2 flex items-center justify-between">
                           <span>
                             <span className="font-medium text-sm text-foreground">{comp.type}</span>
                             {comp.exerciseName && (
@@ -461,11 +461,11 @@ const TournamentPage: React.FC = () => {
 
                 {/* Badge Details */}
                 {participant.badges.length > 0 && (
-                  <div className="rounded-xl p-3 border border-border/20">
+                  <div className="rounded-xl p-3">
                     <h4 className="font-medium text-foreground mb-2 text-sm">Badges Earned</h4>
                     <div className="space-y-2">
                       {participant.badges.map(badge => (
-                        <div key={badge.id} className="bg-white/10 dark:bg-black/5 rounded-lg p-2 border border-border/10">
+                        <div key={badge.id} className="bg-white/10 dark:bg-black/5 rounded-lg p-2">
                           <div className="flex items-center justify-between mb-1">
                             <span className="font-medium text-sm text-foreground">{badge.name}</span>
                             <span className="text-xs text-muted-foreground">
@@ -486,11 +486,11 @@ const TournamentPage: React.FC = () => {
 
                 {/* Consistency Details */}
                 {(participant.pointsBreakdown.consistencyPoints > 0 || participant.pointsBreakdown.participationPoints > 0) && (
-                  <div className="rounded-lg p-3 border border-border/20">
+                  <div className="rounded-lg p-3">
                     <h4 className="font-medium text-foreground mb-2 text-sm">Activity Points</h4>
                     <div className="space-y-2">
                       {participant.pointsBreakdown.participationPoints > 0 && (
-                        <div className="bg-white/10 dark:bg-black/5 rounded-lg p-2 border border-border/10">
+                        <div className="bg-white/10 dark:bg-black/5 rounded-lg p-2">
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-foreground">Daily Workouts ({participant.workoutDays.length} days)</span>
                             <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full text-xs font-medium">
@@ -500,7 +500,7 @@ const TournamentPage: React.FC = () => {
                         </div>
                       )}
                       {participant.pointsBreakdown.consistencyPoints > 0 && (
-                        <div className="bg-white/10 dark:bg-black/5 rounded-lg p-2 border border-border/10">
+                        <div className="bg-white/10 dark:bg-black/5 rounded-lg p-2">
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-foreground">Consistency Bonus (5+ days)</span>
                             <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full text-xs font-medium">
