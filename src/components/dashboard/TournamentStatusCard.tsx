@@ -1,8 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
-import { Trophy, Target, Users, Crown, Medal, Award } from 'lucide-react';
+import { Trophy, Target, Users, Crown, Medal, Award, Flame } from 'lucide-react';
 import { Tournament, TournamentParticipant } from '@/types';
+import './TournamentStatusCard.css';
+
+// Harsh roast lines for zero-point users
+const harshRoasts = [
+  "Your gym card is just a keychain accessory at this point.",
+  "You log more rest days than workouts.",
+  "If laziness was a sport, you'd be world champ.",
+  "Your muscles are in witness protection.",
+  "Even your shadow skips leg day.",
+  "You're the reason the dumbbells collect dust.",
+  "Your PR? Personal Retreat.",
+  "The only thing you're lifting is expectations—then dropping them.",
+  "You've got more excuses than reps.",
+  "Your gains are on the back of a milk carton.",
+  "You rest so much, your Fitbit thinks you're dead.",
+  "The treadmill misses you. It told me.",
+  "You're the before photo in every ad.",
+  "Your sweat glands filed for unemployment.",
+  "You're one workout away from a comeback. And you keep missing it."
+];
+
+// Store roast messages globally to persist across navigation
+const roastStorage = {
+  zeroPointsRoast: null as string | null,
+  secondPlaceRoast: null as string | null,
+  lastTournamentId: null as string | null
+};
 
 interface TournamentStatusCardProps {
   tournament: Tournament | null;
@@ -18,6 +45,32 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
   initialized = false
 }) => {
   const navigate = useNavigate();
+  const [showBorderFlare, setShowBorderFlare] = useState(false);
+  const hasShownFlareRef = useRef(false);
+  
+  // Show border flare only once per session on first load
+  useEffect(() => {
+    if (initialized && tournament && !hasShownFlareRef.current) {
+      setShowBorderFlare(true);
+      hasShownFlareRef.current = true;
+      
+      // Remove the flare effect after animation completes
+      const timer = setTimeout(() => {
+        setShowBorderFlare(false);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [initialized, tournament]);
+
+  // Reset roast storage when tournament changes
+  useEffect(() => {
+    if (tournament && tournament.id !== roastStorage.lastTournamentId) {
+      roastStorage.zeroPointsRoast = null;
+      roastStorage.secondPlaceRoast = null;
+      roastStorage.lastTournamentId = tournament.id;
+    }
+  }, [tournament?.id]);
   
   // Show loader only if not initialized and loading
   if (!initialized && loading) {
@@ -193,9 +246,21 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
     }
     
     if (rank === 2) {
-      if (pointsGap <= 10) return "Breathing down their neck 😤";
-      if (pointsGap <= 30) return "Silver suits you... for now 🥈";
-      return "So close, yet so far 🎯";
+      // Use persistent roast for second place
+      if (!roastStorage.secondPlaceRoast) {
+        const secondPlaceRoasts = [
+          "First loser, but make it fancy 🥈",
+          "Almost there, almost counts in horseshoes",
+          "Second place is the first loser with a medal",
+          "You tried, and that's what counts... right?",
+          "Silver medal, golden disappointment",
+          "You peaked at 'almost good enough'",
+          "Close only counts in hand grenades and horseshoes",
+          "First place's emotional support system"
+        ];
+        roastStorage.secondPlaceRoast = secondPlaceRoasts[Math.floor(Math.random() * secondPlaceRoasts.length)];
+      }
+      return roastStorage.secondPlaceRoast;
     }
     
     if (rank === 3) {
@@ -217,119 +282,90 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
   // Determine message based on rank and points
   const competitiveMessage = getCompetitiveMessage(displayRank, pointsFromLeader, totalParticipants);
 
-  // Special handling for users with 0 points - show witty roast to motivate action
+  // Special handling for users with 0 points - show harsh roast to motivate action
   if (currentParticipant.totalPoints === 0) {
-    const wittyRoasts = [
-      "Ghost mode activated 👻",
-      "Spectator of the year 🏆", 
-      "Still warming the bench? 🪑",
-      "Your muscles called - they're bored 😴",
-      "Even the couch is lifting more 🛋️",
-      "Tutorial mode: OFF 🎮",
-      "Dust bunnies have better PRs 🐰",
-      "Netflix has seen more action 📺",
-      "Your gym membership is crying 😢"
-    ];
+    // Use persistent roast that only changes when tournament changes
+    if (!roastStorage.zeroPointsRoast) {
+      roastStorage.zeroPointsRoast = harshRoasts[Math.floor(Math.random() * harshRoasts.length)];
+    }
     
-    const randomRoast = wittyRoasts[Math.floor(Math.random() * wittyRoasts.length)];
-    
+    const streak = currentParticipant.workoutDays.length;
     return (
       <Card 
-        className="bg-gradient-to-r from-red-50 via-orange-50 to-yellow-50 dark:from-red-950/30 dark:via-orange-950/30 dark:to-yellow-950/30 border-red-200/50 dark:border-red-800/50 cursor-pointer active:opacity-80 transition-opacity duration-150 rounded-xl backdrop-blur-sm"
+        className="apple-card rounded-xl backdrop-blur-sm cursor-pointer active:opacity-80 transition-opacity duration-150 w-full max-w-full px-3 py-3 sm:px-4 sm:py-4"
         onClick={() => navigate('/tournament')}
       >
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex-1 min-w-0">
-              {/* Make the roast the main focal point */}
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-lg text-foreground leading-tight">{randomRoast}</span>
-                {/* Compact action indicator */}
-                <div 
-                  className="w-10 h-10 rounded-full bg-gradient-to-r from-red-500 to-orange-500 flex items-center justify-center flex-shrink-0 cursor-pointer active:scale-90 transition-all duration-150 shadow-lg ring-2 ring-white/20 dark:ring-gray-800/20"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    navigate('/tournament');
-                  }}
-                >
-                  <span className="text-white text-base font-bold">+</span>
-                </div>
-              </div>
-              {/* Subtle motivational subtitle */}
-              <div className="mt-1 text-sm text-muted-foreground">
-                Time to get those gains 💪
-              </div>
+        <CardContent className="flex flex-col items-center w-full p-0">
+          {/* Fire streak badge if streak >= 2 */}
+          {streak >= 2 && (
+            <div className="relative flex items-center mb-1">
+              <span className="inline-block text-orange-500 text-lg">
+                <Flame className="inline h-5 w-5" />
+              </span>
+              <span className="absolute right-0 bottom-0 bg-black/80 text-white text-[10px] rounded-full px-1 py-0.5 font-bold border-2 border-white ml-[-8px]">
+                {streak}
+              </span>
             </div>
+          )}
+          {/* Roast text, responsive and bold */}
+          <div className="w-full flex flex-col items-center">
+            <span className="font-extrabold text-sm sm:text-base text-center text-foreground leading-tight px-2">
+              {roastStorage.zeroPointsRoast}
+            </span>
+            <span className="mt-1 text-xs text-muted-foreground">Time to get those gains 💪</span>
           </div>
         </CardContent>
       </Card>
     );
   }
 
+  // Add fire streak badge to main card if streak >= 2
   return (
     <Card 
-      className={`bg-gradient-to-r ${getRankColor(displayRank)} cursor-pointer active:opacity-80 transition-opacity duration-150 rounded-xl backdrop-blur-sm`}
+      className={`tournament-status-card apple-card rounded-xl backdrop-blur-sm cursor-pointer active:opacity-80 transition-opacity duration-150 w-full max-w-full px-4 py-4 relative overflow-hidden ${showBorderFlare ? 'tournament-border-ai' : ''}`}
       onClick={() => navigate('/tournament')}
     >
-      <CardContent className="p-4">
-        {/* Tournament Status - Redesigned for better visual hierarchy */}
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            {/* Only show rank icon for top 3, otherwise show minimal rank number */}
-            {displayRank <= 3 ? (
-              <div className="flex-shrink-0">
-                {getRankIcon(displayRank)}
-              </div>
-            ) : (          <div className="w-10 h-10 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground font-bold text-lg flex-shrink-0 shadow-sm">
-            {displayRank}
-          </div>
-            )}
-            
-            <div className="flex flex-col gap-1 flex-1 min-w-0">
-              {/* Make the witty comment the main focal point */}
-              <div className="flex items-center justify-between">
-                <span className="font-bold text-lg text-foreground leading-tight">
-                  {competitiveMessage}
-                </span>
-                <span className="text-xs text-muted-foreground whitespace-nowrap ml-2">
-                  #{displayRank}
-                </span>
-              </div>
-              
-              {/* Condensed tournament info */}
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <span className="font-medium">{currentParticipant.totalPoints} pts</span>
-                {!isTopPerformer && pointsFromLeader > 0 && (
-                  <>
-                    <span>•</span>
-                    <span className="truncate">{pointsFromLeader} behind leader</span>
-                  </>
-                )}
-                {/* Streak indicator for engaged users */}
-                {currentParticipant.workoutDays.length >= 3 && (
-                  <>
-                    <span className="hidden sm:inline">•</span>
-                    <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded-full font-medium hidden sm:inline">
-                      {currentParticipant.workoutDays.length}d streak
-                    </span>
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-          
-          {/* Compact action indicator */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {currentParticipant.badges.length > 0 && (
-              <span className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline">
-                {currentParticipant.badges.length} 🏅
+      <CardContent className="flex items-center justify-between w-full p-0 relative z-10">
+        {/* Left: Rank icon and points */}
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            {getRankIcon(displayRank)}
+            <div className="flex flex-col">
+              <span className="text-lg font-bold text-foreground leading-tight">
+                {currentParticipant.totalPoints}
               </span>
-            )}
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shadow-sm">
-              <span className="text-primary text-sm font-bold">→</span>
+              <span className="text-xs text-muted-foreground">pts</span>
             </div>
           </div>
         </div>
+
+        {/* Center: Roast message (main focus) */}
+        <div className="flex-1 mx-4 text-center">
+          <span className="font-bold text-sm sm:text-base text-foreground leading-tight block">
+            {competitiveMessage}
+          </span>
+          <div className="flex items-center justify-center gap-2 mt-1 text-xs text-muted-foreground">
+            <span>{getRankText(displayRank, true)}</span>
+            {!isTopPerformer && pointsFromLeader > 0 && (
+              <>
+                <span>•</span>
+                <span>{pointsFromLeader} behind</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Right: Fire streak badge */}
+        {currentParticipant.workoutDays.length >= 2 && (
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <span className="inline-block text-orange-500 text-lg">
+              <Flame className="inline h-5 w-5" />
+            </span>
+            <span className="text-xs text-muted-foreground font-medium">
+              {currentParticipant.workoutDays.length}
+            </span>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

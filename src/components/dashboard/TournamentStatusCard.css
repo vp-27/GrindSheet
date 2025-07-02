@@ -1,0 +1,38 @@
+/* Tournament Status Card Styles */
+.tournament-status-card {
+  position: relative;
+}
+
+/* Smooth AI-style border that appears and disappears on first load */
+.tournament-border-ai {
+  position: relative;
+  border: 2px solid transparent;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(90deg, #3b82f6, #8b5cf6, #6366f1, #8b5cf6, #3b82f6) border-box;
+  background-size: 100% 100%, 300% 100%;
+  animation: tournament-ai-border 4s ease-in-out forwards;
+}
+
+@keyframes tournament-ai-border {
+  0% {
+    background-position: 0% 0%, -100% 0%;
+  }
+  25% {
+    background-position: 0% 0%, 0% 0%;
+  }
+  50% {
+    background-position: 0% 0%, 50% 0%;
+  }
+  75% {
+    background-position: 0% 0%, 100% 0%;
+  }
+  100% {
+    background-position: 0% 0%, 200% 0%;
+  }
+}
+
+/* Dark mode support */
+.dark .tournament-border-ai {
+  background: linear-gradient(rgb(3, 7, 18), rgb(3, 7, 18)) padding-box,
+              linear-gradient(90deg, #3b82f6, #8b5cf6, #6366f1, #8b5cf6, #3b82f6) border-box;
+}
