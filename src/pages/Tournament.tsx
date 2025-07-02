@@ -175,10 +175,41 @@ const TournamentPage: React.FC = () => {
     }
   };
 
+  // Calculate winning streak for participant up to a specific tournament
+  const getWinningStreakForTournament = (participantUserId: string, targetTournament: Tournament) => {
+    if (!tournamentHistory || tournamentHistory.length === 0) return 0;
+    
+    let streak = 0;
+    const allTournaments = [targetTournament, ...tournamentHistory];
+    const sortedTournaments = allTournaments.sort((a, b) => 
+      new Date(b.weekStart).getTime() - new Date(a.weekStart).getTime()
+    );
+    
+    // Find the target tournament in the sorted list
+    const targetIndex = sortedTournaments.findIndex(t => t.id === targetTournament.id);
+    if (targetIndex === -1) return 0;
+    
+    // Check from the target tournament backwards through history
+    for (let i = targetIndex; i < sortedTournaments.length; i++) {
+      const tournament = sortedTournaments[i];
+      if (tournament.participants.length === 0) break;
+      
+      const winner = tournament.participants.find(p => p.rank === 1);
+      if (winner?.userId === participantUserId) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    
+    return streak;
+  };
+
   // Render participant entry
   const renderParticipant = (participant: TournamentParticipant, index: number) => {
     const isCurrentUser = participant.userId === profile?.id;
     const isExpanded = expandedParticipant === participant.userId;
+    const winningStreak = selectedTournament ? getWinningStreakForTournament(participant.userId, selectedTournament) : 0;
     
     // Enhanced card styling based on rank
     const getCardStyling = (rank: number, isCurrentUser: boolean) => {
@@ -211,45 +242,68 @@ const TournamentPage: React.FC = () => {
 
             {/* User Info */}
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <Avatar className="h-8 w-8 ring-1 ring-white dark:ring-gray-800">
-                <AvatarImage src={participant.user.avatarUrl} alt={participant.user.name} />
-                <AvatarFallback className="bg-muted text-muted-foreground text-xs">
-                  {participant.user.name?.substring(0, 2).toUpperCase() || 'U'}
-                </AvatarFallback>
-              </Avatar>
+              <div className="relative">
+                <Avatar className="h-8 w-8 ring-1 ring-white dark:ring-gray-800">
+                  <AvatarImage src={participant.user.avatarUrl} alt={participant.user.name} />
+                  <AvatarFallback className="bg-muted text-muted-foreground text-xs">
+                    {participant.user.name?.substring(0, 2).toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                {/* Fire animation for winning streak */}
+                {participant.rank === 1 && winningStreak >= 2 && (
+                  <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center animate-pulse">
+                    <Flame className="w-2.5 h-2.5 text-white" />
+                  </div>
+                )}
+              </div>
               
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <h3 className="font-semibold text-sm text-foreground truncate">
                     {participant.user.name}
                   </h3>
-                  {isCurrentUser && (
-                    <span className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium border border-blue-200 dark:border-blue-800 flex-shrink-0">
-                      You
-                    </span>
-                  )}
                 </div>
                 
-                {/* Badges - Compact for mobile */}
-                {participant.badges.length > 0 && (
-                  <div className="flex gap-1 mt-1 flex-wrap">
-                    {participant.badges.slice(0, 2).map(badge => (
-                      <Badge 
-                        key={badge.id} 
-                        variant="secondary" 
-                        className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 rounded-full border-0"
-                      >
-                        {getBadgeIcon(badge.type)}
-                        <span className="ml-1 hidden sm:inline">{badge.name}</span>
-                      </Badge>
-                    ))}
-                    {participant.badges.length > 2 && (
+                {/* All badges together - Compact for mobile */}
+                <div className="flex gap-1 mt-1 flex-wrap">
+                  {/* You badge */}
+                  {isCurrentUser && (
+                    <Badge className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-full border border-blue-200 dark:border-blue-800 flex-shrink-0">
+                      You
+                    </Badge>
+                  )}
+                  
+                  {/* Winning streak badge */}
+                  {participant.rank === 1 && winningStreak >= 2 && (
+                    <Badge className="text-xs bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 dark:from-orange-900/30 dark:to-red-900/30 dark:text-orange-300 px-2 py-0.5 rounded-full border border-orange-200 dark:border-orange-800 flex-shrink-0 flex items-center gap-1">
+                      <Flame className="w-2.5 h-2.5" />
+                      <span>{winningStreak}x</span>
+                    </Badge>
+                  )}
+                  
+                  {/* Regular badges */}
+                  {participant.badges.slice(0, isCurrentUser || (participant.rank === 1 && winningStreak >= 2) ? 1 : 2).map(badge => (
+                    <Badge 
+                      key={badge.id} 
+                      variant="secondary" 
+                      className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 rounded-full border-0"
+                    >
+                      {getBadgeIcon(badge.type)}
+                      <span className="ml-1 hidden sm:inline">{badge.name}</span>
+                    </Badge>
+                  ))}
+                  
+                  {/* Show count of remaining badges */}
+                  {(() => {
+                    const visibleBadgeCount = isCurrentUser || (participant.rank === 1 && winningStreak >= 2) ? 1 : 2;
+                    const remainingBadges = participant.badges.length - visibleBadgeCount;
+                    return remainingBadges > 0 ? (
                       <Badge variant="outline" className="text-xs rounded-full px-2 py-0.5">
-                        +{participant.badges.length - 2}
+                        +{remainingBadges}
                       </Badge>
-                    )}
-                  </div>
-                )}
+                    ) : null;
+                  })()}
+                </div>
               </div>
             </div>
 
@@ -332,7 +386,7 @@ const TournamentPage: React.FC = () => {
               <div className="space-y-3 text-sm">
                 {/* Workout Days */}
                 {participant.workoutDays.length > 0 && (
-                  <div className="bg-white/20 dark:bg-black/10 rounded-xl p-3">
+                  <div className="rounded-xl p-3 border border-border/20">
                     <h4 className="font-medium text-foreground mb-2 text-sm">Workout Days ({participant.workoutDays.length})</h4>
                     <div className="flex flex-wrap gap-1">
                       {participant.workoutDays.map((date, idx) => {
@@ -351,11 +405,11 @@ const TournamentPage: React.FC = () => {
 
                 {/* PR Details */}
                 {participant.prDetails.length > 0 && (
-                  <div className="bg-white/20 dark:bg-black/10 rounded-xl p-3">
+                  <div className="rounded-xl p-3 border border-border/20">
                     <h4 className="font-medium text-foreground mb-2 text-sm">Personal Records ({participant.prDetails.length})</h4>
                     <div className="space-y-2">
                       {participant.prDetails.map((pr, idx) => (
-                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded-lg p-2">
+                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded-lg p-2 border border-border/10">
                           <div className="flex items-center justify-between mb-1">
                             <span className="font-medium text-sm text-foreground">{pr.exerciseName}</span>
                             <span className="text-xs text-muted-foreground">
@@ -390,11 +444,11 @@ const TournamentPage: React.FC = () => {
 
                 {/* Competitive Bonuses */}
                 {participant.competitiveDetails && participant.competitiveDetails.length > 0 && (
-                  <div className="bg-white/20 dark:bg-black/10 rounded-xl p-3">
+                  <div className="rounded-xl p-3 border border-border/20">
                     <h4 className="font-medium text-foreground mb-2 text-sm">Competitive Bonuses</h4>
                     <div className="space-y-2">
                       {participant.competitiveDetails.map((comp, idx) => (
-                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded-lg p-2 flex items-center justify-between">
+                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded-lg p-2 flex items-center justify-between border border-border/10">
                           <span>
                             <span className="font-medium text-sm text-foreground">{comp.type}</span>
                             {comp.exerciseName && (
@@ -415,11 +469,11 @@ const TournamentPage: React.FC = () => {
 
                 {/* Badge Details */}
                 {participant.badges.length > 0 && (
-                  <div className="bg-white/20 dark:bg-black/10 rounded-xl p-3">
+                  <div className="rounded-xl p-3 border border-border/20">
                     <h4 className="font-medium text-foreground mb-2 text-sm">Badges Earned</h4>
                     <div className="space-y-2">
                       {participant.badges.map(badge => (
-                        <div key={badge.id} className="bg-white/10 dark:bg-black/5 rounded-lg p-2">
+                        <div key={badge.id} className="bg-white/10 dark:bg-black/5 rounded-lg p-2 border border-border/10">
                           <div className="flex items-center justify-between mb-1">
                             <span className="font-medium text-sm text-foreground">{badge.name}</span>
                             <span className="text-xs text-muted-foreground">
@@ -440,11 +494,11 @@ const TournamentPage: React.FC = () => {
 
                 {/* Consistency Details */}
                 {(participant.pointsBreakdown.consistencyPoints > 0 || participant.pointsBreakdown.participationPoints > 0) && (
-                  <div className="bg-white/20 dark:bg-black/10 rounded-lg p-3">
+                  <div className="rounded-lg p-3 border border-border/20">
                     <h4 className="font-medium text-foreground mb-2 text-sm">Activity Points</h4>
                     <div className="space-y-2">
                       {participant.pointsBreakdown.participationPoints > 0 && (
-                        <div className="bg-white/10 dark:bg-black/5 rounded-lg p-2">
+                        <div className="bg-white/10 dark:bg-black/5 rounded-lg p-2 border border-border/10">
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-foreground">Daily Workouts ({participant.workoutDays.length} days)</span>
                             <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full text-xs font-medium">
@@ -454,7 +508,7 @@ const TournamentPage: React.FC = () => {
                         </div>
                       )}
                       {participant.pointsBreakdown.consistencyPoints > 0 && (
-                        <div className="bg-white/10 dark:bg-black/5 rounded-lg p-2">
+                        <div className="bg-white/10 dark:bg-black/5 rounded-lg p-2 border border-border/10">
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-foreground">Consistency Bonus (5+ days)</span>
                             <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full text-xs font-medium">
