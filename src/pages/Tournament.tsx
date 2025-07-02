@@ -198,54 +198,54 @@ const TournamentPage: React.FC = () => {
     return (
       <Card 
         key={participant.userId}
-        className={`relative rounded-3xl transition-all duration-500 ease-out transform ${getCardStyling(participant.rank, isCurrentUser)} ${
-          isExpanded ? 'scale-[1.02] shadow-xl' : 'shadow-md'
+        className={`relative rounded-2xl transition-all duration-500 ease-out transform ${getCardStyling(participant.rank, isCurrentUser)} ${
+          isExpanded ? 'scale-[1.01] shadow-xl' : 'shadow-md'
         }`}
       >
-        <CardContent className="p-6">
-          <div className="flex items-center gap-4">
+        <CardContent className="p-4">
+          <div className="flex items-center gap-3">
             {/* Position Badge */}
             <div className="flex-shrink-0">
               {renderPositionBadge(participant.rank)}
             </div>
 
             {/* User Info */}
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <Avatar className="h-10 w-10 ring-2 ring-white dark:ring-gray-800">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <Avatar className="h-8 w-8 ring-1 ring-white dark:ring-gray-800">
                 <AvatarImage src={participant.user.avatarUrl} alt={participant.user.name} />
-                <AvatarFallback className="bg-muted text-muted-foreground">
+                <AvatarFallback className="bg-muted text-muted-foreground text-xs">
                   {participant.user.name?.substring(0, 2).toUpperCase() || 'U'}
                 </AvatarFallback>
               </Avatar>
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-semibold text-foreground truncate">
+                  <h3 className="font-semibold text-sm text-foreground truncate">
                     {participant.user.name}
                   </h3>
                   {isCurrentUser && (
-                    <span className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1 rounded-full font-medium border border-blue-200 dark:border-blue-800">
+                    <span className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium border border-blue-200 dark:border-blue-800 flex-shrink-0">
                       You
                     </span>
                   )}
                 </div>
                 
-                {/* Badges */}
+                {/* Badges - Compact for mobile */}
                 {participant.badges.length > 0 && (
-                  <div className="flex gap-2 mt-2 flex-wrap">
-                    {participant.badges.slice(0, 3).map(badge => (
+                  <div className="flex gap-1 mt-1 flex-wrap">
+                    {participant.badges.slice(0, 2).map(badge => (
                       <Badge 
                         key={badge.id} 
                         variant="secondary" 
-                        className="text-xs px-3 py-1 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 rounded-full border-0"
+                        className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 rounded-full border-0"
                       >
                         {getBadgeIcon(badge.type)}
-                        <span className="ml-1">{badge.name}</span>
+                        <span className="ml-1 hidden sm:inline">{badge.name}</span>
                       </Badge>
                     ))}
-                    {participant.badges.length > 3 && (
-                      <Badge variant="outline" className="text-xs rounded-full px-3 py-1">
-                        +{participant.badges.length - 3}
+                    {participant.badges.length > 2 && (
+                      <Badge variant="outline" className="text-xs rounded-full px-2 py-0.5">
+                        +{participant.badges.length - 2}
                       </Badge>
                     )}
                   </div>
@@ -253,94 +253,94 @@ const TournamentPage: React.FC = () => {
               </div>
             </div>
 
-            {/* Points and Stats */}
+            {/* Points and Stats - Compact */}
             <div className="text-right flex-shrink-0">
-              <div className="font-bold text-xl text-foreground">
+              <div className="font-bold text-lg text-foreground">
                 {participant.totalPoints}
               </div>
               <div className="text-xs text-muted-foreground">
-                points
+                pts
               </div>
-              <div className="text-xs text-muted-foreground mt-1">
-                {participant.workoutDays.length} workout days
+              <div className="text-xs text-muted-foreground">
+                {participant.workoutDays.length}d
               </div>
             </div>
           </div>
 
-          {/* Points Breakdown (always visible) */}
-          <div className="mt-4 pt-4 border-t border-border/30 transition-all duration-300">
-            <div className="grid grid-cols-2 gap-3 text-sm">
+          {/* Points Breakdown (always visible) - More compact */}
+          <div className="mt-3 pt-3 border-t border-border/30 transition-all duration-300">
+            <div className="grid grid-cols-3 gap-2 text-sm">
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">PRs:</span>
-                <span className="font-medium bg-yellow-100/50 dark:bg-yellow-900/20 px-2 py-1 rounded-lg">
+                <span className="text-muted-foreground text-xs">PRs:</span>
+                <span className="font-medium bg-yellow-100/50 dark:bg-yellow-900/20 px-2 py-0.5 rounded text-xs">
                   {participant.pointsBreakdown.prPoints}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Improvement:</span>
-                <span className="font-medium bg-blue-100/50 dark:bg-blue-900/20 px-2 py-1 rounded-lg">
+                <span className="text-muted-foreground text-xs">Improve:</span>
+                <span className="font-medium bg-blue-100/50 dark:bg-blue-900/20 px-2 py-0.5 rounded text-xs">
                   {participant.pointsBreakdown.improvementPoints}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Competitive:</span>
-                <span className="font-medium bg-purple-100/50 dark:bg-purple-900/20 px-2 py-1 rounded-lg">
+                <span className="text-muted-foreground text-xs">Comp:</span>
+                <span className="font-medium bg-purple-100/50 dark:bg-purple-900/20 px-2 py-0.5 rounded text-xs">
                   {participant.pointsBreakdown.competitivePoints || 0}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Consistency:</span>
-                <span className="font-medium bg-green-100/50 dark:bg-green-900/20 px-2 py-1 rounded-lg">
+                <span className="text-muted-foreground text-xs">Consist:</span>
+                <span className="font-medium bg-green-100/50 dark:bg-green-900/20 px-2 py-0.5 rounded text-xs">
                   {participant.pointsBreakdown.consistencyPoints}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Participation:</span>
-                <span className="font-medium bg-orange-100/50 dark:bg-orange-900/20 px-2 py-1 rounded-lg">
+                <span className="text-muted-foreground text-xs">Daily:</span>
+                <span className="font-medium bg-orange-100/50 dark:bg-orange-900/20 px-2 py-0.5 rounded text-xs">
                   {participant.pointsBreakdown.participationPoints}
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Bonuses:</span>
-                <span className="font-medium bg-pink-100/50 dark:bg-pink-900/20 px-2 py-1 rounded-lg">
+                <span className="text-muted-foreground text-xs">Bonus:</span>
+                <span className="font-medium bg-pink-100/50 dark:bg-pink-900/20 px-2 py-0.5 rounded text-xs">
                   {participant.pointsBreakdown.bonusPoints}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Expandable Date Details Toggle */}
-          <div className="mt-4 pt-4 border-t border-border/30">
+          {/* Expandable Date Details Toggle - More compact */}
+          <div className="mt-3 pt-3 border-t border-border/30">
             <button
               onClick={() => setExpandedParticipant(isExpanded ? null : participant.userId)}
-              className={`w-full flex items-center justify-center gap-2 text-sm font-medium transition-all duration-300 ease-out py-3 px-4 rounded-2xl ${
+              className={`w-full flex items-center justify-center gap-2 text-sm font-medium transition-all duration-300 ease-out py-2 px-3 rounded-xl ${
                 isExpanded 
                   ? 'text-blue-600 dark:text-blue-400 bg-blue-50/80 dark:bg-blue-900/20' 
                   : 'text-muted-foreground bg-muted/30 active:bg-muted/50'
               }`}
             >
-              <span>{isExpanded ? 'Hide Details' : 'Show Details'}</span>
+              <span className="text-xs">{isExpanded ? 'Hide Details' : 'Show Details'}</span>
               <div className={`transition-transform duration-300 ease-out ${isExpanded ? 'rotate-180' : 'rotate-0'}`}>
-                <ChevronDown className="w-4 h-4" />
+                <ChevronDown className="w-3 h-3" />
               </div>
             </button>
 
-            {/* Expandable Date Breakdown with smooth animation */}
+            {/* Expandable Date Breakdown with smooth animation - More compact spacing */}
             <div className={`overflow-hidden transition-all duration-500 ease-out ${
-              isExpanded ? 'max-h-[2000px] opacity-100 mt-4' : 'max-h-0 opacity-0 mt-0'
+              isExpanded ? 'max-h-[2000px] opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0'
             }`}>
-              <div className="space-y-4 text-sm">
+              <div className="space-y-3 text-sm">
                 {/* Workout Days */}
                 {participant.workoutDays.length > 0 && (
-                  <div className="bg-white/20 dark:bg-black/10 rounded-2xl p-4">
-                    <h4 className="font-medium text-foreground mb-3">Workout Days ({participant.workoutDays.length})</h4>
-                    <div className="flex flex-wrap gap-2">
+                  <div className="bg-white/20 dark:bg-black/10 rounded-xl p-3">
+                    <h4 className="font-medium text-foreground mb-2 text-sm">Workout Days ({participant.workoutDays.length})</h4>
+                    <div className="flex flex-wrap gap-1">
                       {participant.workoutDays.map((date, idx) => {
                         // Parse YYYY-MM-DD format to avoid timezone shifts
                         const [year, month, day] = date.split('-').map(Number);
                         const localDate = new Date(year, month - 1, day); // month is 0-indexed
                         return (
-                          <span key={idx} className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-3 py-2 rounded-xl text-xs font-medium">
+                          <span key={idx} className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded-lg text-xs font-medium">
                             {localDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                           </span>
                         );
@@ -351,12 +351,12 @@ const TournamentPage: React.FC = () => {
 
                 {/* PR Details */}
                 {participant.prDetails.length > 0 && (
-                  <div className="bg-white/20 dark:bg-black/10 rounded-2xl p-4">
-                    <h4 className="font-medium text-foreground mb-3">Personal Records ({participant.prDetails.length})</h4>
-                    <div className="space-y-3">
+                  <div className="bg-white/20 dark:bg-black/10 rounded-xl p-3">
+                    <h4 className="font-medium text-foreground mb-2 text-sm">Personal Records ({participant.prDetails.length})</h4>
+                    <div className="space-y-2">
                       {participant.prDetails.map((pr, idx) => (
-                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded-xl p-3">
-                          <div className="flex items-center justify-between mb-2">
+                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded-lg p-2">
+                          <div className="flex items-center justify-between mb-1">
                             <span className="font-medium text-sm text-foreground">{pr.exerciseName}</span>
                             <span className="text-xs text-muted-foreground">
                               {new Date(pr.achievedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -377,7 +377,7 @@ const TournamentPage: React.FC = () => {
                                   +{pr.improvementPercent.toFixed(1)}%
                                 </span>
                               )}
-                              <span className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 px-3 py-1 rounded-full font-medium">
+                              <span className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 px-2 py-0.5 rounded-full font-medium">
                                 +75 pts
                               </span>
                             </div>
@@ -390,21 +390,21 @@ const TournamentPage: React.FC = () => {
 
                 {/* Competitive Bonuses */}
                 {participant.competitiveDetails && participant.competitiveDetails.length > 0 && (
-                  <div className="bg-white/20 dark:bg-black/10 rounded-2xl p-4">
-                    <h4 className="font-medium text-foreground mb-3">Competitive Bonuses</h4>
-                    <div className="space-y-3">
+                  <div className="bg-white/20 dark:bg-black/10 rounded-xl p-3">
+                    <h4 className="font-medium text-foreground mb-2 text-sm">Competitive Bonuses</h4>
+                    <div className="space-y-2">
                       {participant.competitiveDetails.map((comp, idx) => (
-                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded-xl p-3 flex items-center justify-between">
+                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded-lg p-2 flex items-center justify-between">
                           <span>
                             <span className="font-medium text-sm text-foreground">{comp.type}</span>
                             {comp.exerciseName && (
-                              <span className="ml-2 text-foreground">({comp.exerciseName})</span>
+                              <span className="ml-2 text-foreground text-xs">({comp.exerciseName})</span>
                             )}
                             {comp.targetUser && (
-                              <span className="ml-2 text-muted-foreground">vs {comp.targetUser}</span>
+                              <span className="ml-2 text-muted-foreground text-xs">vs {comp.targetUser}</span>
                             )}
                           </span>
-                          <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-xs font-medium">
+                          <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full text-xs font-medium">
                             +{comp.points} pts
                           </span>
                         </div>
@@ -415,12 +415,12 @@ const TournamentPage: React.FC = () => {
 
                 {/* Badge Details */}
                 {participant.badges.length > 0 && (
-                  <div className="bg-white/20 dark:bg-black/10 rounded-2xl p-4">
-                    <h4 className="font-medium text-foreground mb-3">Badges Earned</h4>
-                    <div className="space-y-3">
+                  <div className="bg-white/20 dark:bg-black/10 rounded-xl p-3">
+                    <h4 className="font-medium text-foreground mb-2 text-sm">Badges Earned</h4>
+                    <div className="space-y-2">
                       {participant.badges.map(badge => (
-                        <div key={badge.id} className="bg-white/10 dark:bg-black/5 rounded-xl p-3">
-                          <div className="flex items-center justify-between mb-2">
+                        <div key={badge.id} className="bg-white/10 dark:bg-black/5 rounded-lg p-2">
+                          <div className="flex items-center justify-between mb-1">
                             <span className="font-medium text-sm text-foreground">{badge.name}</span>
                             <span className="text-xs text-muted-foreground">
                               {new Date(badge.earnedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -428,7 +428,7 @@ const TournamentPage: React.FC = () => {
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-xs text-muted-foreground">{badge.description}</span>
-                            <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-3 py-1 rounded-full text-xs font-medium">
+                            <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full text-xs font-medium">
                               +{badge.points} pts
                             </span>
                           </div>
@@ -440,24 +440,24 @@ const TournamentPage: React.FC = () => {
 
                 {/* Consistency Details */}
                 {(participant.pointsBreakdown.consistencyPoints > 0 || participant.pointsBreakdown.participationPoints > 0) && (
-                  <div className="bg-white/20 dark:bg-black/10 rounded-xl p-4">
-                    <h4 className="font-medium text-foreground mb-3">Activity Points</h4>
-                    <div className="space-y-3">
+                  <div className="bg-white/20 dark:bg-black/10 rounded-lg p-3">
+                    <h4 className="font-medium text-foreground mb-2 text-sm">Activity Points</h4>
+                    <div className="space-y-2">
                       {participant.pointsBreakdown.participationPoints > 0 && (
-                        <div className="bg-white/10 dark:bg-black/5 rounded-lg p-3">
+                        <div className="bg-white/10 dark:bg-black/5 rounded-lg p-2">
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-foreground">Daily Workouts ({participant.workoutDays.length} days)</span>
-                            <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-3 py-1 rounded-full text-xs font-medium">
+                            <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full text-xs font-medium">
                               +{participant.pointsBreakdown.participationPoints} pts
                             </span>
                           </div>
                         </div>
                       )}
                       {participant.pointsBreakdown.consistencyPoints > 0 && (
-                        <div className="bg-white/10 dark:bg-black/5 rounded-lg p-3">
+                        <div className="bg-white/10 dark:bg-black/5 rounded-lg p-2">
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-foreground">Consistency Bonus (5+ days)</span>
-                            <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-xs font-medium">
+                            <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full text-xs font-medium">
                               +{participant.pointsBreakdown.consistencyPoints} pts
                             </span>
                           </div>
