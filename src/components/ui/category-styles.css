@@ -1705,3 +1705,23 @@
 .animated-counter.animating-counter {
   animation: numberMorph 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* PR Champion Card Styles */
+.pr-champion-card {
+  background: linear-gradient(to right, rgba(var(--category-color-rgb), 0.06), rgba(var(--category-color-rgb), 0.03)) !important;
+  border-color: rgba(var(--category-color-rgb), 0.25) !important;
+}
+
+.pr-champion-icon {
+  background: linear-gradient(to bottom right, var(--category-color), rgba(var(--category-color-rgb), 0.87)) !important;
+}
+
+.pr-champion-badge {
+  background-color: var(--category-color) !important;
+  color: white !important;
+}
+
+.pr-champion-avatar {
+  background-color: rgba(var(--category-color-rgb), 0.8) !important;
+  color: white !important;
+}

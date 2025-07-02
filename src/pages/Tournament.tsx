@@ -852,39 +852,28 @@ const TournamentPage: React.FC = () => {
                         
                         return categoryPRSummary && categoryPRSummary.champion ? (
                           <Card 
-                            className="rounded-2xl border"
+                            className="rounded-3xl border pr-champion-card"
                             style={{
-                              background: `linear-gradient(to right, ${categoryColors.primary}10, ${categoryColors.primary}05)`,
-                              borderColor: `${categoryColors.primary}40`
-                            }}
+                              '--category-color': categoryColors.primary,
+                              '--category-color-rgb': (categoryColors.primary || '#10b981').replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
+                            } as React.CSSProperties}
                           >
-                            <CardContent className="p-4">
+                            <CardContent className="p-6">
                               <div className="flex items-center gap-4">
-                                <div 
-                                  className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm"
-                                  style={{
-                                    background: `linear-gradient(to bottom right, ${categoryColors.primary}, ${categoryColors.primary}dd)`
-                                  }}
-                                >
+                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md pr-champion-icon">
                                   <Crown className="h-6 w-6 text-white" />
                                 </div>
                                 <div className="flex-1">
-                                  <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                                  <h3 className="text-lg font-bold text-foreground flex items-center gap-3">
                                     {selectedCategory?.name} PR Champion
-                                    <span 
-                                      className="text-xs px-2 py-1 rounded-full font-medium text-white"
-                                      style={{ backgroundColor: categoryColors.primary }}
-                                    >
+                                    <span className="text-xs px-3 py-1 rounded-full font-medium pr-champion-badge">
                                       {categoryPRSummary.championCount} PRs
                                     </span>
                                   </h3>
-                                  <div className="flex items-center gap-3 mt-1">
+                                  <div className="flex items-center gap-3 mt-2">
                                     <Avatar className="h-8 w-8">
                                       <AvatarImage src={categoryPRSummary.champion.avatarUrl} alt={categoryPRSummary.champion.name} />
-                                      <AvatarFallback 
-                                        className="text-sm text-white"
-                                        style={{ backgroundColor: `${categoryColors.primary}cc` }}
-                                      >
+                                      <AvatarFallback className="text-sm pr-champion-avatar">
                                         {categoryPRSummary.champion.name?.substring(0, 2).toUpperCase() || 'U'}
                                       </AvatarFallback>
                                     </Avatar>
