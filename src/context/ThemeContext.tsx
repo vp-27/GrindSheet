@@ -67,6 +67,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       root.classList.remove('dark');
     }
 
+    // Force style recalculation to prevent cached styles
+    root.style.setProperty('--theme-timestamp', Date.now().toString());
+
     // Update theme-color meta tag dynamically
     updateThemeColorMeta(shouldBeDark);
     // Update manifest dynamically for PWA
@@ -90,6 +93,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
       } else {
         root.classList.remove('dark');
       }
+      
+      // Force style recalculation to prevent cached styles
+      root.style.setProperty('--theme-timestamp', Date.now().toString());
+      
       // Update theme-color meta tag when system theme changes
       updateThemeColorMeta(mediaQuery.matches);
       // Update manifest dynamically when system theme changes

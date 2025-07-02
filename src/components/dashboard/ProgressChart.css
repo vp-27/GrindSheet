@@ -139,14 +139,12 @@
 }
 
 /* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .custom-legend-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-  }
-  
-  .custom-legend-text {
-    color: #94a3b8;
-  }
+.dark .custom-legend-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark .custom-legend-text {
+  color: #94a3b8;
 }
 
 /* Apple-style variant - simplified */
