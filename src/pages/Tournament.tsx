@@ -198,9 +198,11 @@ const TournamentPage: React.FC = () => {
     return (
       <Card 
         key={participant.userId}
-        className={`relative ${getCardStyling(participant.rank, isCurrentUser)}`}
+        className={`relative rounded-3xl transition-all duration-500 ease-out transform ${getCardStyling(participant.rank, isCurrentUser)} ${
+          isExpanded ? 'scale-[1.02] shadow-xl' : 'shadow-md'
+        }`}
       >
-        <CardContent className="p-4">
+        <CardContent className="p-6">
           <div className="flex items-center gap-4">
             {/* Position Badge */}
             <div className="flex-shrink-0">
@@ -222,7 +224,7 @@ const TournamentPage: React.FC = () => {
                     {participant.user.name}
                   </h3>
                   {isCurrentUser && (
-                    <span className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5 rounded-full font-medium border border-blue-200 dark:border-blue-800">
+                    <span className="text-xs bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-3 py-1 rounded-full font-medium border border-blue-200 dark:border-blue-800">
                       You
                     </span>
                   )}
@@ -230,19 +232,19 @@ const TournamentPage: React.FC = () => {
                 
                 {/* Badges */}
                 {participant.badges.length > 0 && (
-                  <div className="flex gap-1 mt-1 flex-wrap">
+                  <div className="flex gap-2 mt-2 flex-wrap">
                     {participant.badges.slice(0, 3).map(badge => (
                       <Badge 
                         key={badge.id} 
                         variant="secondary" 
-                        className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300"
+                        className="text-xs px-3 py-1 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 rounded-full border-0"
                       >
                         {getBadgeIcon(badge.type)}
                         <span className="ml-1">{badge.name}</span>
                       </Badge>
                     ))}
                     {participant.badges.length > 3 && (
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="outline" className="text-xs rounded-full px-3 py-1">
                         +{participant.badges.length - 3}
                       </Badge>
                     )}
@@ -266,59 +268,79 @@ const TournamentPage: React.FC = () => {
           </div>
 
           {/* Points Breakdown (always visible) */}
-          <div className="mt-3 pt-3 border-t border-border/50">
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <div className="flex justify-between">
+          <div className="mt-4 pt-4 border-t border-border/30 transition-all duration-300">
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">PRs:</span>
-                <span className="font-medium">{participant.pointsBreakdown.prPoints}</span>
+                <span className="font-medium bg-yellow-100/50 dark:bg-yellow-900/20 px-2 py-1 rounded-lg">
+                  {participant.pointsBreakdown.prPoints}
+                </span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Improvement:</span>
-                <span className="font-medium">{participant.pointsBreakdown.improvementPoints}</span>
+                <span className="font-medium bg-blue-100/50 dark:bg-blue-900/20 px-2 py-1 rounded-lg">
+                  {participant.pointsBreakdown.improvementPoints}
+                </span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Competitive:</span>
-                <span className="font-medium">{participant.pointsBreakdown.competitivePoints || 0}</span>
+                <span className="font-medium bg-purple-100/50 dark:bg-purple-900/20 px-2 py-1 rounded-lg">
+                  {participant.pointsBreakdown.competitivePoints || 0}
+                </span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Consistency:</span>
-                <span className="font-medium">{participant.pointsBreakdown.consistencyPoints}</span>
+                <span className="font-medium bg-green-100/50 dark:bg-green-900/20 px-2 py-1 rounded-lg">
+                  {participant.pointsBreakdown.consistencyPoints}
+                </span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Participation:</span>
-                <span className="font-medium">{participant.pointsBreakdown.participationPoints}</span>
+                <span className="font-medium bg-orange-100/50 dark:bg-orange-900/20 px-2 py-1 rounded-lg">
+                  {participant.pointsBreakdown.participationPoints}
+                </span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span className="text-muted-foreground">Bonuses:</span>
-                <span className="font-medium">{participant.pointsBreakdown.bonusPoints}</span>
+                <span className="font-medium bg-pink-100/50 dark:bg-pink-900/20 px-2 py-1 rounded-lg">
+                  {participant.pointsBreakdown.bonusPoints}
+                </span>
               </div>
             </div>
           </div>
 
           {/* Expandable Date Details Toggle */}
-          <div className="mt-3 pt-3 border-t border-border/50">
+          <div className="mt-4 pt-4 border-t border-border/30">
             <button
               onClick={() => setExpandedParticipant(isExpanded ? null : participant.userId)}
-              className="w-full flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              className={`w-full flex items-center justify-center gap-2 text-sm font-medium transition-all duration-300 ease-out py-3 px-4 rounded-2xl ${
+                isExpanded 
+                  ? 'text-blue-600 dark:text-blue-400 bg-blue-50/80 dark:bg-blue-900/20' 
+                  : 'text-muted-foreground bg-muted/30 active:bg-muted/50'
+              }`}
             >
-              <span>Date Details</span>
-              {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+              <span>{isExpanded ? 'Hide Details' : 'Show Details'}</span>
+              <div className={`transition-transform duration-300 ease-out ${isExpanded ? 'rotate-180' : 'rotate-0'}`}>
+                <ChevronDown className="w-4 h-4" />
+              </div>
             </button>
 
-            {/* Expandable Date Breakdown */}
-            {isExpanded && (
-              <div className="mt-3 space-y-3 text-xs">
+            {/* Expandable Date Breakdown with smooth animation */}
+            <div className={`overflow-hidden transition-all duration-500 ease-out ${
+              isExpanded ? 'max-h-[2000px] opacity-100 mt-4' : 'max-h-0 opacity-0 mt-0'
+            }`}>
+              <div className="space-y-4 text-sm">
                 {/* Workout Days */}
                 {participant.workoutDays.length > 0 && (
-                  <div className="bg-white/20 dark:bg-black/10 rounded p-3">
-                    <h4 className="font-medium text-foreground mb-2">Workout Days ({participant.workoutDays.length})</h4>
-                    <div className="flex flex-wrap gap-1">
+                  <div className="bg-white/20 dark:bg-black/10 rounded-2xl p-4">
+                    <h4 className="font-medium text-foreground mb-3">Workout Days ({participant.workoutDays.length})</h4>
+                    <div className="flex flex-wrap gap-2">
                       {participant.workoutDays.map((date, idx) => {
                         // Parse YYYY-MM-DD format to avoid timezone shifts
                         const [year, month, day] = date.split('-').map(Number);
                         const localDate = new Date(year, month - 1, day); // month is 0-indexed
                         return (
-                          <span key={idx} className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded text-xs">
+                          <span key={idx} className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-3 py-2 rounded-xl text-xs font-medium">
                             {localDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                           </span>
                         );
@@ -329,12 +351,12 @@ const TournamentPage: React.FC = () => {
 
                 {/* PR Details */}
                 {participant.prDetails.length > 0 && (
-                  <div className="bg-white/20 dark:bg-black/10 rounded p-3">
-                    <h4 className="font-medium text-foreground mb-2">Personal Records ({participant.prDetails.length})</h4>
-                    <div className="space-y-2">
+                  <div className="bg-white/20 dark:bg-black/10 rounded-2xl p-4">
+                    <h4 className="font-medium text-foreground mb-3">Personal Records ({participant.prDetails.length})</h4>
+                    <div className="space-y-3">
                       {participant.prDetails.map((pr, idx) => (
-                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded p-2">
-                          <div className="flex items-center justify-between mb-1">
+                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded-xl p-3">
+                          <div className="flex items-center justify-between mb-2">
                             <span className="font-medium text-sm text-foreground">{pr.exerciseName}</span>
                             <span className="text-xs text-muted-foreground">
                               {new Date(pr.achievedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -355,7 +377,7 @@ const TournamentPage: React.FC = () => {
                                   +{pr.improvementPercent.toFixed(1)}%
                                 </span>
                               )}
-                              <span className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 px-2 py-0.5 rounded font-medium">
+                              <span className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 px-3 py-1 rounded-full font-medium">
                                 +75 pts
                               </span>
                             </div>
@@ -368,11 +390,11 @@ const TournamentPage: React.FC = () => {
 
                 {/* Competitive Bonuses */}
                 {participant.competitiveDetails && participant.competitiveDetails.length > 0 && (
-                  <div className="bg-white/20 dark:bg-black/10 rounded p-3">
-                    <h4 className="font-medium text-foreground mb-2">Competitive Bonuses</h4>
-                    <div className="space-y-2">
+                  <div className="bg-white/20 dark:bg-black/10 rounded-2xl p-4">
+                    <h4 className="font-medium text-foreground mb-3">Competitive Bonuses</h4>
+                    <div className="space-y-3">
                       {participant.competitiveDetails.map((comp, idx) => (
-                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded p-2 flex items-center justify-between">
+                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded-xl p-3 flex items-center justify-between">
                           <span>
                             <span className="font-medium text-sm text-foreground">{comp.type}</span>
                             {comp.exerciseName && (
@@ -382,7 +404,7 @@ const TournamentPage: React.FC = () => {
                               <span className="ml-2 text-muted-foreground">vs {comp.targetUser}</span>
                             )}
                           </span>
-                          <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs font-medium">
+                          <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-xs font-medium">
                             +{comp.points} pts
                           </span>
                         </div>
@@ -393,12 +415,12 @@ const TournamentPage: React.FC = () => {
 
                 {/* Badge Details */}
                 {participant.badges.length > 0 && (
-                  <div className="bg-white/20 dark:bg-black/10 rounded p-3">
-                    <h4 className="font-medium text-foreground mb-2">Badges Earned</h4>
-                    <div className="space-y-2">
+                  <div className="bg-white/20 dark:bg-black/10 rounded-2xl p-4">
+                    <h4 className="font-medium text-foreground mb-3">Badges Earned</h4>
+                    <div className="space-y-3">
                       {participant.badges.map(badge => (
-                        <div key={badge.id} className="bg-white/10 dark:bg-black/5 rounded p-2">
-                          <div className="flex items-center justify-between mb-1">
+                        <div key={badge.id} className="bg-white/10 dark:bg-black/5 rounded-xl p-3">
+                          <div className="flex items-center justify-between mb-2">
                             <span className="font-medium text-sm text-foreground">{badge.name}</span>
                             <span className="text-xs text-muted-foreground">
                               {new Date(badge.earnedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -406,7 +428,7 @@ const TournamentPage: React.FC = () => {
                           </div>
                           <div className="flex items-center justify-between">
                             <span className="text-xs text-muted-foreground">{badge.description}</span>
-                            <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded text-xs font-medium">
+                            <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-3 py-1 rounded-full text-xs font-medium">
                               +{badge.points} pts
                             </span>
                           </div>
@@ -418,24 +440,24 @@ const TournamentPage: React.FC = () => {
 
                 {/* Consistency Details */}
                 {(participant.pointsBreakdown.consistencyPoints > 0 || participant.pointsBreakdown.participationPoints > 0) && (
-                  <div className="bg-white/20 dark:bg-black/10 rounded p-3">
-                    <h4 className="font-medium text-foreground mb-2">Activity Points</h4>
-                    <div className="space-y-2">
+                  <div className="bg-white/20 dark:bg-black/10 rounded-xl p-4">
+                    <h4 className="font-medium text-foreground mb-3">Activity Points</h4>
+                    <div className="space-y-3">
                       {participant.pointsBreakdown.participationPoints > 0 && (
-                        <div className="bg-white/10 dark:bg-black/5 rounded p-2">
+                        <div className="bg-white/10 dark:bg-black/5 rounded-lg p-3">
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-foreground">Daily Workouts ({participant.workoutDays.length} days)</span>
-                            <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded text-xs font-medium">
+                            <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-3 py-1 rounded-full text-xs font-medium">
                               +{participant.pointsBreakdown.participationPoints} pts
                             </span>
                           </div>
                         </div>
                       )}
                       {participant.pointsBreakdown.consistencyPoints > 0 && (
-                        <div className="bg-white/10 dark:bg-black/5 rounded p-2">
+                        <div className="bg-white/10 dark:bg-black/5 rounded-lg p-3">
                           <div className="flex items-center justify-between">
                             <span className="text-sm text-foreground">Consistency Bonus (5+ days)</span>
-                            <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs font-medium">
+                            <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-3 py-1 rounded-full text-xs font-medium">
                               +{participant.pointsBreakdown.consistencyPoints} pts
                             </span>
                           </div>
@@ -445,7 +467,7 @@ const TournamentPage: React.FC = () => {
                   </div>
                 )}
               </div>
-            )}
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -458,10 +480,10 @@ const TournamentPage: React.FC = () => {
         <div className="space-y-6">
           <div className="space-y-4">
             {[1, 2, 3].map(i => (
-              <div key={i} className="flex items-center gap-4 p-4 border border-border rounded-2xl animate-pulse">
+              <div key={i} className="flex items-center gap-4 p-6 border border-border rounded-3xl animate-pulse backdrop-blur-sm bg-white/50 dark:bg-black/20">
                 <div className="w-8 h-8 bg-muted rounded-full flex-shrink-0" />
                 <div className="w-10 h-10 bg-muted rounded-full flex-shrink-0" />
-                <div className="flex-1 space-y-2 min-w-0">
+                <div className="flex-1 space-y-3 min-w-0">
                   <div className="h-4 bg-muted rounded-full w-1/3" />
                   <div className="h-3 bg-muted rounded-full w-1/4" />
                 </div>
@@ -638,17 +660,17 @@ const TournamentPage: React.FC = () => {
 
             {/* Tournament Week Selection with blue-purple design */}
             {(currentTournament || tournamentHistory.length > 0) && (
-              <div className="flex gap-2 overflow-x-auto pb-2">
+              <div className="flex gap-3 overflow-x-auto pb-3 px-1 scrollbar-hide">
                 {/* Current Tournament Button */}
                 {currentTournament && (
                   <Button
                     variant={selectedTournament?.id === currentTournament?.id ? "default" : "outline"}
                     size="sm"
                     onClick={() => setSelectedTournament(currentTournament)}
-                    className={`rounded-2xl whitespace-nowrap transition-all duration-200 font-medium ${
+                    className={`rounded-3xl whitespace-nowrap transition-all duration-400 ease-out font-medium px-6 py-3 transform active:scale-95 ${
                       selectedTournament?.id === currentTournament?.id
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-md hover:from-blue-600 hover:to-purple-700'
-                        : 'border-2 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-lg scale-105'
+                        : 'border-2 border-blue-200/60 dark:border-blue-800/60 text-blue-600 dark:text-blue-400 bg-blue-50/30 dark:bg-blue-900/10 backdrop-blur-sm'
                     }`}
                   >
                     Current
@@ -666,10 +688,10 @@ const TournamentPage: React.FC = () => {
                     variant={selectedTournament?.id === tournament.id ? "default" : "outline"}
                     size="sm"
                     onClick={() => setSelectedTournament(tournament)}
-                    className={`rounded-2xl whitespace-nowrap transition-all duration-200 font-medium ${
+                    className={`rounded-3xl whitespace-nowrap transition-all duration-400 ease-out font-medium px-6 py-3 transform active:scale-95 ${
                       selectedTournament?.id === tournament.id
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-md hover:from-blue-600 hover:to-purple-700'
-                        : 'border-2 border-blue-200 dark:border-blue-800 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 opacity-75'
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-lg scale-105'
+                        : 'border-2 border-blue-200/60 dark:border-blue-800/60 text-blue-600 dark:text-blue-400 bg-blue-50/30 dark:bg-blue-900/10 backdrop-blur-sm opacity-75'
                     }`}
                   >
                     {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -695,13 +717,13 @@ const TournamentPage: React.FC = () => {
 
           {/* Tournament Leaderboard */}
           {activeTab === 'tournament' && selectedTournament && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {selectedTournament.participants.length > 0 ? (
                 selectedTournament.participants.map((participant, index) => 
                   renderParticipant(participant, index)
                 )
               ) : (
-                <Card className="apple-card">
+                <Card className="apple-card rounded-3xl">
                   <CardContent className="p-12 text-center">
                     <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
                     <h3 className="text-lg font-semibold text-foreground mb-2">No Participants Yet</h3>
