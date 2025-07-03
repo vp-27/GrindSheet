@@ -45,23 +45,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
   initialized = false
 }) => {
   const navigate = useNavigate();
-  const [showBorderFlare, setShowBorderFlare] = useState(false);
-  const hasShownFlareRef = useRef(false);
-  
-  // Show border flare only once per session on first load
-  useEffect(() => {
-    if (initialized && tournament && !hasShownFlareRef.current) {
-      setShowBorderFlare(true);
-      hasShownFlareRef.current = true;
-      
-      // Remove the flare effect after animation completes
-      const timer = setTimeout(() => {
-        setShowBorderFlare(false);
-      }, 3000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [initialized, tournament]);
+  // Removed border flare state and effect
 
   // Reset roast storage when tournament changes
   useEffect(() => {
@@ -322,7 +306,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
   // Add fire streak badge to main card if streak >= 2
   return (
     <Card 
-      className={`tournament-status-card apple-card rounded-xl backdrop-blur-sm cursor-pointer active:opacity-80 transition-opacity duration-150 w-full max-w-full px-4 py-4 relative overflow-hidden ${showBorderFlare ? 'tournament-border-ai' : ''}`}
+      className={"tournament-status-card apple-card rounded-xl backdrop-blur-sm cursor-pointer active:opacity-80 transition-opacity duration-150 w-full max-w-full px-4 py-4 relative overflow-hidden"}
       onClick={() => navigate('/tournament')}
     >
       <CardContent className="flex items-center justify-between w-full p-0 relative z-10">
