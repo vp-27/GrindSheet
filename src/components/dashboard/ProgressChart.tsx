@@ -243,11 +243,93 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
   const [timeframe, setTimeframe] = useState<TimeframeOption>('1M');
   const [dotVisible, setDotVisible] = useState(false);
   const [disableInitialAnimation, setDisableInitialAnimation] = useState(true);
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null); // NEW
 
-  // Handle chart hover for custom tooltip
+  // Filter data based on selected timeframe
+  const filteredData = useMemo(() => {
+    return filterDataByTimeframe(data, timeframe);
+  }, [data, timeframe]);
+
+  // Calculate percentage gain for current timeframe - using chart start date
+  const timeframeGain = useMemo(() => {
+    // If hovering, use hovered point for gain
+    if (hoveredIndex !== null && filteredData.length > 0) {
+      const chartStartPoint = filteredData[0];
+      const hoveredPoint = filteredData[hoveredIndex];
+      if (!hoveredPoint) return 0;
+      if (multiple && showPercentage) {
+        const keys = Object.keys(hoveredPoint).filter(key => key !== 'date');
+        let totalGain = 0;
+        let validGains = 0;
+        keys.forEach(key => {
+          const startValue = chartStartPoint[key];
+          const endValue = hoveredPoint[key];
+          if (
+            startValue !== null && startValue !== undefined && !isNaN(startValue) &&
+            endValue !== null && endValue !== undefined && !isNaN(endValue)
+          ) {
+            totalGain += (endValue - startValue);
+            validGains++;
+          }
+        });
+        return validGains > 0 ? totalGain / validGains : 0;
+      } else if (multiple && !showPercentage) {
+        const keys = Object.keys(hoveredPoint).filter(key => key !== 'date');
+        let totalGain = 0;
+        let validGains = 0;
+        keys.forEach(key => {
+          const startValue = chartStartPoint[key];
+          const endValue = hoveredPoint[key];
+          if (
+            startValue !== null && startValue !== undefined && !isNaN(startValue) && startValue > 0 &&
+            endValue !== null && endValue !== undefined && !isNaN(endValue)
+          ) {
+            totalGain += ((endValue - startValue) / startValue) * 100;
+            validGains++;
+          }
+        });
+        return validGains > 0 ? totalGain / validGains : 0;
+      } else {
+        const key = showPercentage ? "percentGain" : "weight";
+        const startValue = chartStartPoint[key];
+        const endValue = hoveredPoint[key];
+        if (showPercentage) {
+          if (
+            startValue !== null && startValue !== undefined && !isNaN(startValue) &&
+            endValue !== null && endValue !== undefined && !isNaN(endValue)
+          ) {
+            return endValue - startValue;
+          }
+          return 0;
+        } else {
+          if (
+            startValue !== null && startValue !== undefined && !isNaN(startValue) && startValue > 0 &&
+            endValue !== null && endValue !== undefined && !isNaN(endValue)
+          ) {
+            return ((endValue - startValue) / startValue) * 100;
+          }
+          return 0;
+        }
+      }
+    }
+    // Default: use last point
+    return calculatePercentageFromChartStart(data, timeframe, multiple, showPercentage);
+  }, [data, timeframe, multiple, showPercentage, hoveredIndex, filteredData]);
+
+  // Notify parent component when timeframe or gain changes
+  useEffect(() => {
+    if (onTimeframeChange) {
+      onTimeframeChange(timeframe, timeframeGain);
+    }
+  }, [timeframe, timeframeGain, onTimeframeChange]);
+
+  // Handle chart hover for custom tooltip and percent gain
   const handleChartHover = (data: any) => {
     if (onHoverData && data && data.activePayload && data.activePayload.length > 0) {
       const payload = data.activePayload[0].payload;
+      // Find hovered index in filteredData
+      const idx = filteredData.findIndex(d => d.date === payload.date);
+      setHoveredIndex(idx);
       onHoverData({
         date: payload.date,
         data: payload,
@@ -258,20 +340,11 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
   };
 
   const handleChartLeave = () => {
+    setHoveredIndex(null);
     if (onHoverData) {
       onHoverData(null);
     }
   };
-
-  // Filter data based on selected timeframe
-  const filteredData = useMemo(() => {
-    return filterDataByTimeframe(data, timeframe);
-  }, [data, timeframe]);
-  
-  // Calculate percentage gain for current timeframe - using chart start date
-  const timeframeGain = useMemo(() => {
-    return calculatePercentageFromChartStart(data, timeframe, multiple, showPercentage);
-  }, [data, timeframe, multiple, showPercentage]);
 
   useEffect(() => {
     if (filteredData && filteredData.length === 1) {
@@ -283,13 +356,6 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
     // We don't reset to false here to avoid potential flickers if data changes
     // while an animation has already completed and set it to true.
   }, [filteredData]);
-
-  // Notify parent component when timeframe or gain changes
-  useEffect(() => {
-    if (onTimeframeChange) {
-      onTimeframeChange(timeframe, timeframeGain);
-    }
-  }, [timeframe, timeframeGain, onTimeframeChange]);
 
   useEffect(() => {
     const timeout = setTimeout(() => setDisableInitialAnimation(false), 50);
