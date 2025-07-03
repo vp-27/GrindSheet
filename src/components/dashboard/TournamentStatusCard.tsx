@@ -16,12 +16,17 @@ const harshRoasts = [
   "Your PR? Personal Retreat.",
   "The only thing you're lifting is expectations—then dropping them.",
   "You've got more excuses than reps.",
-  "Your gains are on the back of a milk carton.",
+  "Your gains are missing—have you checked the lost and found?",
   "You rest so much, your Fitbit thinks you're dead.",
   "The treadmill misses you. It told me.",
   "You're the before photo in every ad.",
   "Your sweat glands filed for unemployment.",
-  "You're one workout away from a comeback. And you keep missing it."
+  "You're one workout away from a comeback. And you keep missing it.",
+  "If you worked out as much as you talk about it, you'd be in first place.",
+  "Your gym shoes are in mint condition.",
+  "Even the yoga mats are judging you.",
+  "You have more gym memberships than gym visits.",
+  "Your biceps are on a milk carton—missing since January."
 ];
 
 // Store roast messages globally to persist across navigation
@@ -233,16 +238,25 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
       // Use persistent roast for second place
       if (!roastStorage.secondPlaceRoast) {
         const secondPlaceRoasts = [
-          "First loser, but make it fancy 🥈",
-          "Almost there, almost counts in horseshoes",
-          "Second place is the first loser with a medal",
-          "You tried, and that's what counts... right?",
-          "Silver medal, golden disappointment",
-          "You peaked at 'almost good enough'",
-          "Close only counts in hand grenades and horseshoes",
-          "First place's emotional support system"
+          "First place but make it fancy",
+          "Second place: forever the bridesmaid, never the bride.",
+          "You’re so close, but {name} is still flexing on you.",
+          "Silver medal, golden disappointment.",
+          "You peaked at 'almost good enough'.",
+          "Second place: the best at losing.",
+          "Maybe if you trained as hard as {name}, you'd be on top.",
+          "First place is using your effort as a warmup.",
+          "Second place: the king of 'not quite'.",
+          "Silver looks good on you, but gold would look better—on someone else.",
+          "You’re the sequel nobody asked for.",
+          "You’re the plot twist where the hero almost wins."
         ];
-        roastStorage.secondPlaceRoast = secondPlaceRoasts[Math.floor(Math.random() * secondPlaceRoasts.length)];
+        let roast = secondPlaceRoasts[Math.floor(Math.random() * secondPlaceRoasts.length)];
+        if (roast.includes('{name}')) {
+          const name = topPerformer?.user?.name || 'first place';
+          roast = roast.replace('{name}', name);
+        }
+        roastStorage.secondPlaceRoast = roast;
       }
       return roastStorage.secondPlaceRoast;
     }
