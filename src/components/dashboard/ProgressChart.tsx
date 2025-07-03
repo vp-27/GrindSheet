@@ -534,25 +534,6 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
         
         {/* Chart Controls Section - Compact floating controls */}
         <div className={`absolute ${exerciseId ? '-top-8' : '-top-12'} right-4 flex items-center gap-2`}>
-          {/* Compact percentage gain indicator with animated counter */}
-          {timeframeGain !== null && !exerciseId && (
-            <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-medium backdrop-blur-sm ${
-              timeframeGain >= 0 
-                ? 'text-emerald-700 bg-emerald-50/90 dark:text-emerald-400 dark:bg-emerald-900/40' 
-                : 'text-red-700 bg-red-50/90 dark:text-red-400 dark:bg-red-900/40'
-            }`}>
-              <span className="font-semibold">
-                {timeframeGain >= 0 ? '+' : ''}
-                <AnimatedCounter 
-                  value={timeframeGain} 
-                  formatValue={(val) => `${val.toFixed(1)}%`}
-                  duration={600}
-                  className="counter-highlight"
-                />
-              </span>
-            </div>
-          )}
-          
           {/* Compact Timeframe Controls using MobileSlider */}
           <MobileSlider
             options={[

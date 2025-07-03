@@ -286,10 +286,29 @@ const Dashboard = () => {
                   color: 'var(--category-color)'
                 } as React.CSSProperties : undefined}
               >
-                {selectedCategoryId ? 
-                  `${categories.find(c => c.id === selectedCategoryId)?.name} Progress` : 
-                  "Overall Progress"
-                }
+                {dynamicPercentGain !== null ? (
+                  <>
+                    <span className={`${dynamicPercentGain >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                      {dynamicPercentGain >= 0 ? '+' : ''}
+                      <AnimatedCounter 
+                        value={dynamicPercentGain} 
+                        formatValue={(val) => `${val.toFixed(1)}%`}
+                        duration={600}
+                        className="tabular-nums"
+                      />
+                    </span>
+                    <span className={selectedCategoryId ? 'category-title' : 'text-foreground'}>
+                      {' '}{selectedCategoryId ? 
+                        `${categories.find(c => c.id === selectedCategoryId)?.name} Progress` : 
+                        "Overall Progress"
+                      }
+                    </span>
+                  </>
+                ) : (
+                  selectedCategoryId ? 
+                    `${categories.find(c => c.id === selectedCategoryId)?.name} Progress` : 
+                    "Overall Progress"
+                )}
               </h2>
             </div>
             {chartData.length > 0 ? (
