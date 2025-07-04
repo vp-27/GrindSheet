@@ -40,7 +40,7 @@ const ExerciseDetail = () => {
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
   
   // Chart timeframe state
-  const [currentTimeframe, setCurrentTimeframe] = useState<'1M' | 'ALL'>('1M');
+  const [currentTimeframe, setCurrentTimeframe] = useState<'1W' | '2W' | '1M' | 'ALL'>('1M');
   const [timeframeGain, setTimeframeGain] = useState<number | null>(null);
   const [chartHoverData, setChartHoverData] = useState<any>(null);
   
@@ -86,7 +86,7 @@ const ExerciseDetail = () => {
   }, [category]);
   
   // Handle timeframe changes from chart
-  const handleTimeframeChange = (timeframe: '1M' | 'ALL', gain: number | null) => {
+  const handleTimeframeChange = (timeframe: '1W' | '2W' | '1M' | 'ALL', gain: number | null) => {
     setCurrentTimeframe(timeframe);
     setTimeframeGain(gain);
   };

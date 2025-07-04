@@ -55,7 +55,7 @@ interface ProgressChartProps {
 }
 
 // Define timeframe options
-type TimeframeOption = '1M' | 'ALL';
+type TimeframeOption = '1W' | '2W' | '1M' | 'ALL';
 
 // Helper function to filter data based on timeframe
 const filterDataByTimeframe = (data: any[], timeframe: TimeframeOption) => {
@@ -65,6 +65,12 @@ const filterDataByTimeframe = (data: any[], timeframe: TimeframeOption) => {
   const cutoffDate = new Date();
   
   switch (timeframe) {
+    case '1W':
+      cutoffDate.setDate(now.getDate() - 7);
+      break;
+    case '2W':
+      cutoffDate.setDate(now.getDate() - 14);
+      break;
     case '1M':
       cutoffDate.setMonth(now.getMonth() - 1);
       break;
@@ -463,7 +469,11 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
               hide={false}
             />
             <YAxis 
-              tickFormatter={(value) => `${value}${formatUnit}`}
+              tickFormatter={(value) => {
+                const roundedValue = typeof value === 'number' ? 
+                  (value % 1 === 0 ? value.toString() : value.toFixed(1)) : value;
+                return `${roundedValue}${formatUnit}`;
+              }}
               tick={{ fontSize: 10, fill: appleStyle ? '#8E8E93' : '#6B7280' }}
               axisLine={!appleStyle}
               tickLine={!appleStyle}
@@ -473,7 +483,10 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
             <Tooltip 
               formatter={(value, name) => {
                 const displayName = multiple ? name : (showPercentage ? 'Progress' : 'Weight');
-                return [`${value}${formatUnit}`, displayName];
+                // Round percentage values to 1 decimal place, weight values to 1 decimal place
+                const roundedValue = typeof value === 'number' ? 
+                  (value % 1 === 0 ? value.toString() : value.toFixed(1)) : value;
+                return [`${roundedValue}${formatUnit}`, displayName];
               }}
               labelFormatter={(value) => `Date: ${value}`}
               contentStyle={hideTooltip ? {
@@ -537,6 +550,8 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
           {/* Compact Timeframe Controls using MobileSlider */}
           <MobileSlider
             options={[
+              { id: '1W', label: '1W' },
+              { id: '2W', label: '2W' },
               { id: '1M', label: '1M' },
               { id: 'ALL', label: 'ALL' }
             ]}

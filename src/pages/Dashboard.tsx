@@ -34,7 +34,7 @@ const Dashboard = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isProgressDropdownOpen, setIsProgressDropdownOpen] = useState(false);
   const [dynamicPercentGain, setDynamicPercentGain] = useState<number | null>(null); // NEW
-  const [chartTimeframe, setChartTimeframe] = useState<'1M' | 'ALL'>('1M'); // NEW
+  const [chartTimeframe, setChartTimeframe] = useState<'1W' | '2W' | '1M' | 'ALL'>('1M'); // NEW
 
   // Use the same color system as the rest of the app
   const chartColors = getCategoryChartColors();
@@ -143,12 +143,24 @@ const Dashboard = () => {
   const chartData = useMemo(() => {
     if (!selectedCategoryId) {
       // Overall progress chart (by category) - show percentage growth
-      // For 1M, pass windowStartDate so all lines start at 0%
-      if (chartTimeframe === '1M') {
-        // Find the cutoff date for 1M
+      // For timeframes other than ALL, pass windowStartDate so all lines start at 0%
+      if (chartTimeframe !== 'ALL') {
+        // Find the cutoff date for the selected timeframe
         const now = new Date();
         const cutoffDate = new Date();
-        cutoffDate.setMonth(now.getMonth() - 1);
+        
+        switch (chartTimeframe) {
+          case '1W':
+            cutoffDate.setDate(now.getDate() - 7);
+            break;
+          case '2W':
+            cutoffDate.setDate(now.getDate() - 14);
+            break;
+          case '1M':
+            cutoffDate.setMonth(now.getMonth() - 1);
+            break;
+        }
+        
         return getOverallProgressChartData(exerciseLogs, exercises, categories, cutoffDate);
       }
       return getOverallProgressChartData(exerciseLogs, exercises, categories);
@@ -323,7 +335,7 @@ const Dashboard = () => {
                 customColors={chartColors}
                 onHoverData={setChartHoverData}
                 onTimeframeChange={(tf, gain) => {
-                  setChartTimeframe(tf as '1M' | 'ALL');
+                  setChartTimeframe(tf as '1W' | '2W' | '1M' | 'ALL');
                   setDynamicPercentGain(gain);
                 }}
                 hideTooltip={true}

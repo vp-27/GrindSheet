@@ -147,7 +147,7 @@ export const getOverallProgressChartData = (
   logs: ExerciseLog[], 
   exercises: Exercise[], 
   categories: Category[],
-  windowStartDate?: Date // NEW: optional window start for 1M
+  windowStartDate?: Date // NEW: optional window start for 1W, 2W, 1M timeframes
 ): any[] => {
   const chartData = new Map();
   const exerciseStartWeights = new Map(); // Track the first recorded weight for each exercise
@@ -164,9 +164,24 @@ export const getOverallProgressChartData = (
     }
   });
 
+  // NEW: If windowStartDate is provided, filter to only include exercises that existed at that date
+  let allowedExercises = new Set<string>();
+  if (windowStartDate) {
+    // Find exercises that have logs at or before the windowStartDate
+    sortedLogs.forEach(log => {
+      if (new Date(log.timestamp) <= windowStartDate) {
+        allowedExercises.add(log.exerciseId);
+      }
+    });
+    console.log(`Baseline locking: Only including ${allowedExercises.size} exercises that existed at ${windowStartDate.toDateString()}`);
+  }
+
   // Initialize all categories with starting data to ensure complete coverage
   const allDates = new Set();
   sortedLogs.forEach(log => {
+    // Skip exercises not in allowedExercises if we're doing baseline locking
+    if (windowStartDate && !allowedExercises.has(log.exerciseId)) return;
+    
     const logDate = new Date(log.timestamp);
     const date = `${logDate.getMonth() + 1}/${logDate.getDate()}/${logDate.getFullYear()}`;
     allDates.add(date);
@@ -179,6 +194,9 @@ export const getOverallProgressChartData = (
 
   // Second pass: group logs by date and exercise, then calculate per-exercise percentage gains
   sortedLogs.forEach(log => {
+    // Skip exercises not in allowedExercises if we're doing baseline locking
+    if (windowStartDate && !allowedExercises.has(log.exerciseId)) return;
+    
     const logDate = new Date(log.timestamp);
     const date = `${logDate.getMonth() + 1}/${logDate.getDate()}/${logDate.getFullYear()}`;
     const exercise = exercises.find(e => e.id === log.exerciseId);
@@ -239,6 +257,9 @@ export const getOverallProgressChartData = (
   // Forward fill missing values to show maintained progress
   const logsOnDate = new Map();
   sortedLogs.forEach(log => {
+    // Skip exercises not in allowedExercises if we're doing baseline locking
+    if (windowStartDate && !allowedExercises.has(log.exerciseId)) return;
+    
     const logDate = new Date(log.timestamp);
     const date = `${logDate.getMonth() + 1}/${logDate.getDate()}/${logDate.getFullYear()}`;
     if (!logsOnDate.has(date)) {
@@ -251,6 +272,7 @@ export const getOverallProgressChartData = (
       const categoryName = category.name;
       const categoryExerciseIds = exercises
         .filter(ex => ex.categoryId === category.id)
+        .filter(ex => !windowStartDate || allowedExercises.has(ex.id)) // Only include allowed exercises
         .map(ex => ex.id);
       const currentDayLogs = logsOnDate.get(result[i].date) || [];
       const hasLogsThisDay = currentDayLogs.some(log => 
@@ -264,7 +286,7 @@ export const getOverallProgressChartData = (
     });
   }
 
-  // --- NEW: If windowStartDate is provided, re-baseline all categories to 0% at that date ---
+  // --- If windowStartDate is provided, re-baseline all categories to 0% at that date ---
   if (windowStartDate) {
     // Find the first index >= windowStartDate
     const windowStartIdx = result.findIndex(d => new Date(d.date) >= windowStartDate);
@@ -895,7 +917,7 @@ export const calculateCategoryProgressLeaders = (
 };
 
 // Define timeframe options type
-type TimeframeOption = '1M' | 'ALL';
+type TimeframeOption = '1W' | '2W' | '1M' | 'ALL';
 
 // Helper function to filter data based on timeframe
 const filterDataByTimeframe = (data: any[], timeframe: TimeframeOption) => {
@@ -905,6 +927,12 @@ const filterDataByTimeframe = (data: any[], timeframe: TimeframeOption) => {
   const cutoffDate = new Date();
   
   switch (timeframe) {
+    case '1W':
+      cutoffDate.setDate(now.getDate() - 7);
+      break;
+    case '2W':
+      cutoffDate.setDate(now.getDate() - 14);
+      break;
     case '1M':
       cutoffDate.setMonth(now.getMonth() - 1);
       break;
