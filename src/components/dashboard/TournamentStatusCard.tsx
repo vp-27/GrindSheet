@@ -294,7 +294,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
         <CardContent className="flex flex-col items-center w-full p-0">
           {/* Fire streak badge if streak >= 2 */}
           {streak >= 2 && (
-            <div className={`relative flex items-center mb-1 fire-streak-enter`}>
+            <div className="relative flex items-center mb-1">
               <span className="inline-block text-orange-500 text-lg">
                 <Flame className="inline h-5 w-5" />
               </span>
@@ -315,7 +315,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
                 showOnce={true}
               />
             </span>
-            <span className={`mt-1 text-xs text-muted-foreground stats-reveal`}>
+            <span className={`mt-1 text-xs text-muted-foreground`}>
               Time to get those gains 💪
             </span>
           </div>
@@ -327,12 +327,12 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
   // Add fire streak badge to main card if streak >= 2
   return (
     <Card 
-      className={`tournament-status-card apple-card rounded-xl cursor-pointer active:opacity-80 w-full max-w-full px-4 py-4 relative overflow-hidden tournament-status-card-enter ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+      className={`tournament-status-card gradient-border apple-card rounded-xl cursor-pointer active:opacity-80 w-full max-w-full px-4 py-4 relative overflow-hidden tournament-status-card-enter ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
       onClick={() => navigate('/tournament')}
     >
       <CardContent className="flex items-center justify-between w-full p-0 relative z-10">
         {/* Left: Rank icon and points */}
-        <div className={`flex items-center gap-3 flex-shrink-0 stats-reveal`}>
+        <div className="flex items-center gap-3 flex-shrink-0">
           <div className="flex items-center gap-2">
             {getRankIcon(displayRank)}
             <div className="flex flex-col">
@@ -356,7 +356,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
               showOnce={true}
             />
           </span>
-          <div className={`flex items-center justify-center gap-2 mt-1 text-xs text-muted-foreground stats-reveal`}>
+          <div className="flex items-center justify-center gap-2 mt-1 text-xs text-muted-foreground">
             <span>{getRankText(displayRank, true)}</span>
             {!isTopPerformer && pointsFromLeader > 0 && (
               <>
@@ -369,7 +369,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
 
         {/* Right: Fire streak badge */}
         {currentParticipant.workoutDays.length >= 2 && (
-          <div className={`flex items-center gap-1 flex-shrink-0 fire-streak-enter`}>
+          <div className="flex items-center gap-1 flex-shrink-0">
             <span className="inline-block text-orange-500 text-lg">
               <Flame className="inline h-5 w-5" />
             </span>

@@ -2,3 +2,29 @@
 .tournament-status-card {
   position: relative;
 }
+
+/* Purple-blue gradient border for main tournament card */
+.tournament-status-card.gradient-border {
+  position: relative;
+  background: linear-gradient(white, white) padding-box,
+              linear-gradient(135deg, #3b82f6, #8b5cf6, #3b82f6) border-box;
+  border: 2px solid transparent;
+}
+
+.dark .tournament-status-card.gradient-border {
+  background: linear-gradient(rgb(17, 24, 39), rgb(17, 24, 39)) padding-box,
+              linear-gradient(135deg, #3b82f6, #8b5cf6, #3b82f6) border-box;
+}
+
+/* Alternative approach using backdrop filter */
+.tournament-status-card.gradient-border-alt {
+  background-color: rgba(255, 255, 255, 0.9);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 2px solid;
+  border-image: linear-gradient(135deg, #3b82f6, #8b5cf6, #3b82f6) 1;
+}
+
+.dark .tournament-status-card.gradient-border-alt {
+  background-color: rgba(17, 24, 39, 0.9);
+}
