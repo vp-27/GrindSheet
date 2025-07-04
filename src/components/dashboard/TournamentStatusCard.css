@@ -1,15 +1,4 @@
 /* Tournament Status Card Styles */
 .tournament-status-card {
   position: relative;
-  border: 2px solid transparent;
-  background: linear-gradient(white, white) padding-box,
-              linear-gradient(90deg, #3b82f6, #8b5cf6, #6366f1, #8b5cf6, #3b82f6) border-box;
-  background-size: 100% 100%, 300% 100%;
-  border-radius: 0.75rem; /* keep rounded corners */
-}
-
-/* Dark mode support */
-.dark .tournament-status-card {
-  background: linear-gradient(rgb(3, 7, 18), rgb(3, 7, 18)) padding-box,
-              linear-gradient(90deg, #3b82f6, #8b5cf6, #6366f1, #8b5cf6, #3b82f6) border-box;
 }

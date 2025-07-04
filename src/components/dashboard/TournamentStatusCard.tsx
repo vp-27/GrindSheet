@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Trophy, Target, Users, Crown, Medal, Award, Flame } from 'lucide-react';
 import { Tournament, TournamentParticipant } from '@/types';
+import TypewriterText from '@/components/ui/typewriter-text';
 import './TournamentStatusCard.css';
 
 // Harsh roast lines for zero-point users
@@ -49,12 +50,22 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
 }) => {
   const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
+  const [messageKey, setMessageKey] = useState(0); // Force re-render of typewriter
 
   // Set visible with a small delay for entrance animation
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 100);
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 100);
     return () => clearTimeout(timer);
   }, []);
+
+  // Update message key when tournament changes to restart typewriter
+  useEffect(() => {
+    if (tournament) {
+      setMessageKey(prev => prev + 1);
+    }
+  }, [tournament?.id]);
 
   // Reset roast storage when tournament changes
   useEffect(() => {
@@ -62,13 +73,14 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
       roastStorage.zeroPointsRoast = null;
       roastStorage.secondPlaceRoast = null;
       roastStorage.lastTournamentId = tournament.id;
+      setMessageKey(prev => prev + 1); // Trigger new typewriter animation
     }
   }, [tournament?.id]);
   
   // Only show "no tournament" state if initialized and actually no tournament
   if (initialized && !tournament) {
     return (
-      <Card className={`bg-gradient-to-r from-gray-50 via-slate-50 to-zinc-50 dark:from-gray-950/30 dark:via-slate-950/30 dark:to-zinc-950/30 border-gray-200/50 dark:border-gray-800/50 rounded-xl backdrop-blur-sm transition-all duration-500 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+      <Card className={`bg-gradient-to-r from-gray-50 via-slate-50 to-zinc-50 dark:from-gray-950/30 dark:via-slate-950/30 dark:to-zinc-950/30 border-gray-200/50 dark:border-gray-800/50 rounded-xl tournament-status-card-enter ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
         <CardContent className="p-4 text-center">
           <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
             <Target className="h-5 w-5 text-muted-foreground" />
@@ -87,7 +99,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
     if (!hasActiveParticipants) {
       return (
         <Card 
-          className={`bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 border-blue-200/50 dark:border-blue-800/50 cursor-pointer active:opacity-80 transition-all duration-500 ease-out rounded-xl backdrop-blur-sm ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+          className={`bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 border-blue-200/50 dark:border-blue-800/50 cursor-pointer active:opacity-80 rounded-xl tournament-status-card-enter ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
           onClick={() => navigate('/tournament')}
         >
           <CardContent className="p-4">
@@ -130,7 +142,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
   if (!currentParticipant) {
     return (
       <Card 
-        className={`bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 border-blue-200/50 dark:border-blue-800/50 cursor-pointer active:opacity-80 rounded-xl backdrop-blur-sm transition-all duration-500 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+        className={`bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 border-blue-200/50 dark:border-blue-800/50 cursor-pointer active:opacity-80 rounded-xl tournament-status-card-enter ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
         onClick={() => navigate('/tournament')}
       >
         <CardContent className="p-4 text-center">
@@ -276,13 +288,13 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
     const streak = currentParticipant.workoutDays.length;
     return (
       <Card 
-        className={`apple-card rounded-xl backdrop-blur-sm cursor-pointer active:opacity-80 transition-all duration-500 ease-out w-full max-w-full px-3 py-3 sm:px-4 sm:py-4 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+        className={`apple-card rounded-xl cursor-pointer active:opacity-80 w-full max-w-full px-3 py-3 sm:px-4 sm:py-4 zero-points-roast-enter ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
         onClick={() => navigate('/tournament')}
       >
         <CardContent className="flex flex-col items-center w-full p-0">
           {/* Fire streak badge if streak >= 2 */}
           {streak >= 2 && (
-            <div className="relative flex items-center mb-1">
+            <div className={`relative flex items-center mb-1 fire-streak-enter`}>
               <span className="inline-block text-orange-500 text-lg">
                 <Flame className="inline h-5 w-5" />
               </span>
@@ -291,12 +303,21 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
               </span>
             </div>
           )}
-          {/* Roast text, responsive and bold */}
+          {/* Roast text with typewriter effect */}
           <div className="w-full flex flex-col items-center">
             <span className="font-extrabold text-sm sm:text-base text-center text-foreground leading-tight px-2">
-              {roastStorage.zeroPointsRoast}
+              <TypewriterText 
+                key={messageKey}
+                text={roastStorage.zeroPointsRoast || ''}
+                speed={30}
+                delay={600}
+                className="competitive-message-enter"
+                showOnce={true}
+              />
             </span>
-            <span className="mt-1 text-xs text-muted-foreground">Time to get those gains 💪</span>
+            <span className={`mt-1 text-xs text-muted-foreground stats-reveal`}>
+              Time to get those gains 💪
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -306,12 +327,12 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
   // Add fire streak badge to main card if streak >= 2
   return (
     <Card 
-      className={`tournament-status-card apple-card rounded-xl backdrop-blur-sm cursor-pointer active:opacity-80 transition-all duration-500 ease-out w-full max-w-full px-4 py-4 relative overflow-hidden ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+      className={`tournament-status-card apple-card rounded-xl cursor-pointer active:opacity-80 w-full max-w-full px-4 py-4 relative overflow-hidden tournament-status-card-enter ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
       onClick={() => navigate('/tournament')}
     >
       <CardContent className="flex items-center justify-between w-full p-0 relative z-10">
         {/* Left: Rank icon and points */}
-        <div className="flex items-center gap-3 flex-shrink-0">
+        <div className={`flex items-center gap-3 flex-shrink-0 stats-reveal`}>
           <div className="flex items-center gap-2">
             {getRankIcon(displayRank)}
             <div className="flex flex-col">
@@ -323,12 +344,19 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
           </div>
         </div>
 
-        {/* Center: Roast message (main focus) */}
+        {/* Center: Roast message (main focus) with typewriter effect */}
         <div className="flex-1 mx-4 text-center">
           <span className="font-bold text-sm sm:text-base text-foreground leading-tight block">
-            {competitiveMessage}
+            <TypewriterText 
+              key={messageKey}
+              text={competitiveMessage}
+              speed={40}
+              delay={600}
+              className="competitive-message-enter"
+              showOnce={true}
+            />
           </span>
-          <div className="flex items-center justify-center gap-2 mt-1 text-xs text-muted-foreground">
+          <div className={`flex items-center justify-center gap-2 mt-1 text-xs text-muted-foreground stats-reveal`}>
             <span>{getRankText(displayRank, true)}</span>
             {!isTopPerformer && pointsFromLeader > 0 && (
               <>
@@ -341,7 +369,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
 
         {/* Right: Fire streak badge */}
         {currentParticipant.workoutDays.length >= 2 && (
-          <div className="flex items-center gap-1 flex-shrink-0">
+          <div className={`flex items-center gap-1 flex-shrink-0 fire-streak-enter`}>
             <span className="inline-block text-orange-500 text-lg">
               <Flame className="inline h-5 w-5" />
             </span>
