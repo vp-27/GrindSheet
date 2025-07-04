@@ -275,8 +275,13 @@ const Dashboard = () => {
     return categoryIndex >= 0 ? getCategoryColor(categoryIndex) : null;
   }, [selectedCategoryId, categories]);
 
+  // Get the header title (without percentage)
+  const headerTitle = selectedCategoryId ? 
+    `${categories.find(c => c.id === selectedCategoryId)?.name} Progress` : 
+    "Overall Progress";
+
   return (
-    <Layout title="Home">
+    <Layout title={headerTitle} categoryColor={selectedCategoryColor}>
       <div className="relative">
         {/* Enhanced category background tinting - visible in both light and dark modes */}
         {selectedCategoryColor && (
@@ -290,39 +295,20 @@ const Dashboard = () => {
         <div className="relative flex flex-col gap-4 pb-6 z-10">
           {/* Progress Chart Section - Embedded in background */}
           <div className="relative -mx-4 px-4">
-            <div className="mb-4">
-              <h2 
-                className={`text-xl font-bold mb-2 ${selectedCategoryId ? 'category-title' : 'text-foreground'}`}
-                style={selectedCategoryColor ? {
-                  '--category-color': selectedCategoryColor,
-                  color: 'var(--category-color)'
-                } as React.CSSProperties : undefined}
-              >
-                {dynamicPercentGain !== null ? (
-                  <>
-                    <span className={`${dynamicPercentGain >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
-                      {dynamicPercentGain >= 0 ? '+' : ''}
-                      <AnimatedCounter 
-                        value={dynamicPercentGain} 
-                        formatValue={(val) => `${val.toFixed(1)}%`}
-                        duration={600}
-                        className="tabular-nums"
-                      />
-                    </span>
-                    <span className={selectedCategoryId ? 'category-title' : 'text-foreground'}>
-                      {' '}{selectedCategoryId ? 
-                        `${categories.find(c => c.id === selectedCategoryId)?.name} Progress` : 
-                        "Overall Progress"
-                      }
-                    </span>
-                  </>
-                ) : (
-                  selectedCategoryId ? 
-                    `${categories.find(c => c.id === selectedCategoryId)?.name} Progress` : 
-                    "Overall Progress"
-                )}
-              </h2>
-            </div>
+            {/* Show percentage gain if available */}
+            {dynamicPercentGain !== null && (
+              <div className="mb-4">
+                <div className={`text-2xl font-bold ${dynamicPercentGain >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                  {dynamicPercentGain >= 0 ? '+' : ''}
+                  <AnimatedCounter 
+                    value={dynamicPercentGain} 
+                    formatValue={(val) => `${val.toFixed(1)}%`}
+                    duration={600}
+                    className="tabular-nums"
+                  />
+                </div>
+              </div>
+            )}
             {chartData.length > 0 ? (
               <ProgressChart 
                 data={chartData} 
