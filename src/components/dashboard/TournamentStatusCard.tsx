@@ -39,18 +39,22 @@ const roastStorage = {
 interface TournamentStatusCardProps {
   tournament: Tournament | null;
   currentUserId: string;
-  loading?: boolean;
   initialized?: boolean;
 }
 
 const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({ 
   tournament, 
   currentUserId, 
-  loading,
   initialized = false
 }) => {
   const navigate = useNavigate();
-  // Removed border flare state and effect
+  const [isVisible, setIsVisible] = useState(false);
+
+  // Set visible with a small delay for entrance animation
+  useEffect(() => {
+    const timer = setTimeout(() => setIsVisible(true), 100);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Reset roast storage when tournament changes
   useEffect(() => {
@@ -61,30 +65,10 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
     }
   }, [tournament?.id]);
   
-  // Show loader only if not initialized and loading
-  if (!initialized && loading) {
-    return (
-      <Card className="bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 dark:from-purple-950/30 dark:via-blue-950/30 dark:to-indigo-950/30 border-purple-200/50 dark:border-purple-800/50 rounded-xl backdrop-blur-sm">
-        <CardContent className="p-4">
-          <div className="animate-pulse">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 bg-gradient-to-br from-purple-200 to-blue-200 dark:from-purple-800 dark:to-blue-800 rounded-full"></div>
-              <div className="w-24 h-3 bg-gradient-to-r from-purple-200 to-blue-200 dark:from-purple-800 dark:to-blue-800 rounded"></div>
-            </div>
-            <div className="flex items-center justify-between">
-              <div className="w-32 h-3 bg-gradient-to-r from-purple-200 to-blue-200 dark:from-purple-800 dark:to-blue-800 rounded"></div>
-              <div className="w-12 h-4 bg-gradient-to-r from-purple-200 to-blue-200 dark:from-purple-800 dark:to-blue-800 rounded"></div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   // Only show "no tournament" state if initialized and actually no tournament
   if (initialized && !tournament) {
     return (
-      <Card className="bg-gradient-to-r from-gray-50 via-slate-50 to-zinc-50 dark:from-gray-950/30 dark:via-slate-950/30 dark:to-zinc-950/30 border-gray-200/50 dark:border-gray-800/50 rounded-xl backdrop-blur-sm">
+      <Card className={`bg-gradient-to-r from-gray-50 via-slate-50 to-zinc-50 dark:from-gray-950/30 dark:via-slate-950/30 dark:to-zinc-950/30 border-gray-200/50 dark:border-gray-800/50 rounded-xl backdrop-blur-sm transition-all duration-500 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
         <CardContent className="p-4 text-center">
           <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mx-auto mb-3">
             <Target className="h-5 w-5 text-muted-foreground" />
@@ -103,7 +87,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
     if (!hasActiveParticipants) {
       return (
         <Card 
-          className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 border-blue-200/50 dark:border-blue-800/50 cursor-pointer active:opacity-80 transition-opacity duration-150 rounded-xl backdrop-blur-sm"
+          className={`bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 border-blue-200/50 dark:border-blue-800/50 cursor-pointer active:opacity-80 transition-all duration-500 ease-out rounded-xl backdrop-blur-sm ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
           onClick={() => navigate('/tournament')}
         >
           <CardContent className="p-4">
@@ -134,9 +118,11 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
     }
   }
 
-  // Don't render anything if not initialized yet
+  // Don't render anything if not initialized yet - avoid flash
   if (!initialized) {
-    return null;
+    return (
+      <div className="h-16" /> // Placeholder to maintain layout
+    );
   }
 
   const currentParticipant = tournament.participants.find(p => p.userId === currentUserId);
@@ -144,7 +130,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
   if (!currentParticipant) {
     return (
       <Card 
-        className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 border-blue-200/50 dark:border-blue-800/50 cursor-pointer active:opacity-80 rounded-xl backdrop-blur-sm transition-opacity duration-150"
+        className={`bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 border-blue-200/50 dark:border-blue-800/50 cursor-pointer active:opacity-80 rounded-xl backdrop-blur-sm transition-all duration-500 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
         onClick={() => navigate('/tournament')}
       >
         <CardContent className="p-4 text-center">
@@ -290,7 +276,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
     const streak = currentParticipant.workoutDays.length;
     return (
       <Card 
-        className="apple-card rounded-xl backdrop-blur-sm cursor-pointer active:opacity-80 transition-opacity duration-150 w-full max-w-full px-3 py-3 sm:px-4 sm:py-4"
+        className={`apple-card rounded-xl backdrop-blur-sm cursor-pointer active:opacity-80 transition-all duration-500 ease-out w-full max-w-full px-3 py-3 sm:px-4 sm:py-4 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
         onClick={() => navigate('/tournament')}
       >
         <CardContent className="flex flex-col items-center w-full p-0">
@@ -320,7 +306,7 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
   // Add fire streak badge to main card if streak >= 2
   return (
     <Card 
-      className={"tournament-status-card apple-card rounded-xl backdrop-blur-sm cursor-pointer active:opacity-80 transition-opacity duration-150 w-full max-w-full px-4 py-4 relative overflow-hidden"}
+      className={`tournament-status-card apple-card rounded-xl backdrop-blur-sm cursor-pointer active:opacity-80 transition-all duration-500 ease-out w-full max-w-full px-4 py-4 relative overflow-hidden ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
       onClick={() => navigate('/tournament')}
     >
       <CardContent className="flex items-center justify-between w-full p-0 relative z-10">

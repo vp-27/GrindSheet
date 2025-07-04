@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -69,11 +69,17 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor }) => {
   const { profile, signOut } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isAddExerciseModalOpen, setIsAddExerciseModalOpen] = useState(false);
+  const [avatarImageError, setAvatarImageError] = useState(false);
   const navigate = useNavigate();
 
   const handleLogout = async () => {
     await signOut();
   };
+
+  // Reset avatar error when profile changes
+  useEffect(() => {
+    setAvatarImageError(false);
+  }, [profile?.avatar_url]);
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -88,15 +94,23 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor }) => {
           {title || "Home"}
         </h1>
         <Button variant="ghost" className="p-0 h-auto" onClick={() => navigate('/settings')}>
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={profile?.avatar_url} alt={profile?.name} />
-            <AvatarFallback className="bg-muted text-muted-foreground">{profile?.name?.substring(0, 2).toUpperCase() || 'U'}</AvatarFallback>
+          <Avatar className="h-8 w-8 transition-opacity duration-200">
+            {!avatarImageError && profile?.avatar_url ? (
+              <AvatarImage 
+                src={profile.avatar_url} 
+                alt={profile?.name} 
+                onError={() => setAvatarImageError(true)}
+              />
+            ) : null}
+            <AvatarFallback className="bg-muted text-muted-foreground">
+              {profile?.name?.substring(0, 2).toUpperCase() || 'U'}
+            </AvatarFallback>
           </Avatar>
         </Button>
       </header>
       
       {/* Main content */}
-      <main className="flex-1 container max-w-lg mx-auto py-2 px-4">
+      <main className="flex-1 container max-w-lg mx-auto py-2 px-4 page-container">
         {children}
       </main>
       

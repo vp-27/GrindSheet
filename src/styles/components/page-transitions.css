@@ -1,0 +1,114 @@
+/* Page and Component Transition Animations */
+
+/* Smooth page entry animations - removes need for loaders */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: smoothPageEnter 500ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes smoothPageEnter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Staggered card entrance animations */
+.staggered-cards > * {
+  animation: cardFadeInUp 400ms cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+.staggered-cards > *:nth-child(1) { animation-delay: 0ms; }
+.staggered-cards > *:nth-child(2) { animation-delay: 80ms; }
+.staggered-cards > *:nth-child(3) { animation-delay: 160ms; }
+.staggered-cards > *:nth-child(4) { animation-delay: 240ms; }
+.staggered-cards > *:nth-child(5) { animation-delay: 320ms; }
+.staggered-cards > *:nth-child(n+6) { animation-delay: 400ms; }
+
+@keyframes cardFadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Tournament cards smooth entrance */
+.tournament-card-enter {
+  animation: tournamentCardEnter 600ms cubic-bezier(0.4, 0, 0.2, 1) backwards;
+}
+
+@keyframes tournamentCardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Avatar smooth transitions */
+.avatar-stable {
+  transition: all 200ms ease;
+}
+
+/* Prevent flash of unstyled content */
+.content-ready {
+  animation: contentReady 300ms ease-out;
+}
+
+@keyframes contentReady {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Layout stability improvements */
+.tournament-status-container {
+  min-height: 4rem; /* Prevent layout shift when cards load */
+  transition: all 300ms ease;
+}
+
+.exercise-grid-container {
+  min-height: 200px; /* Prevent content jump */
+}
+
+.page-container {
+  animation: pageStableEnter 400ms ease-out;
+}
+
+@keyframes pageStableEnter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .page-transition-enter,
+  .staggered-cards > *,
+  .tournament-card-enter,
+  .content-ready {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

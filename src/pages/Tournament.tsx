@@ -62,9 +62,9 @@ const TournamentPage: React.FC = () => {
   const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null);
   const [users, setUsers] = useState<any[]>([]);
   const [allExerciseLogs, setAllExerciseLogs] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showPointsGuide, setShowPointsGuide] = useState(false);
   const [expandedParticipant, setExpandedParticipant] = useState<string | null>(null);
+  const [contentReady, setContentReady] = useState(false);
 
   // PR Leaderboard state
   const [activeTab, setActiveTab] = useState<'tournament' | 'records'>('tournament');
@@ -73,8 +73,6 @@ const TournamentPage: React.FC = () => {
   // Fetch data on mount
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
-      
       // Fetch users
       const { data: usersData, error: usersError } = await supabase
         .from('profiles')
@@ -107,7 +105,8 @@ const TournamentPage: React.FC = () => {
         setAllExerciseLogs(formattedLogs);
       }
       
-      setLoading(false);
+      // Small delay to allow smooth entrance animation
+      setTimeout(() => setContentReady(true), 50);
     };
 
     fetchData();
@@ -574,31 +573,9 @@ const TournamentPage: React.FC = () => {
     );
   };
 
-  if (loading) {
-    return (
-      <Layout title="Tournament">
-        <div className="space-y-6">
-          <div className="space-y-4">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="flex items-center gap-4 p-6 border border-border rounded-3xl animate-pulse backdrop-blur-sm bg-white/50 dark:bg-black/20">
-                <div className="w-8 h-8 bg-muted rounded-full flex-shrink-0" />
-                <div className="w-10 h-10 bg-muted rounded-full flex-shrink-0" />
-                <div className="flex-1 space-y-3 min-w-0">
-                  <div className="h-4 bg-muted rounded-full w-1/3" />
-                  <div className="h-3 bg-muted rounded-full w-1/4" />
-                </div>
-                <div className="h-6 bg-muted rounded-full w-20 flex-shrink-0" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </Layout>
-    );
-  }
-
   return (
     <Layout title={activeTab === 'records' ? 'PR Records' : 'Tournament'}>
-      <div className="space-y-6 relative">
+      <div className={`space-y-6 relative transition-all duration-500 ease-out ${contentReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
         {/* Clean Tab System using MobileSlider */}
         <MobileSlider
           options={[
@@ -817,7 +794,7 @@ const TournamentPage: React.FC = () => {
 
           {/* Tournament Leaderboard */}
           {activeTab === 'tournament' && selectedTournament && (
-            <div className="space-y-4">
+            <div className="space-y-4 staggered-cards">
               {selectedTournament.participants.length > 0 ? (
                 selectedTournament.participants.map((participant, index) => 
                   renderParticipant(participant, index)

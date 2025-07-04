@@ -28,7 +28,6 @@ const Dashboard = () => {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'recent' | 'pr' | 'progress'>('recent');
   const [currentTournament, setCurrentTournament] = useState<Tournament | null>(null);
-  const [tournamentLoading, setTournamentLoading] = useState(true);
   const [tournamentInitialized, setTournamentInitialized] = useState(false);
   const [chartHoverData, setChartHoverData] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -43,12 +42,10 @@ const Dashboard = () => {
   // Generate tournament data with better state management
   useEffect(() => {
     const generateTournament = async () => {
-      // Don't start loading until we have all necessary data
+      // Don't start until we have all necessary data
       if (!exercises.length || !categories.length) {
         return;
       }
-
-      setTournamentLoading(true);
       
       try {
         // Fetch users from Supabase
@@ -56,7 +53,6 @@ const Dashboard = () => {
         
         if (usersError || !usersData) {
           setCurrentTournament(null);
-          setTournamentLoading(false);
           setTournamentInitialized(true);
           return;
         }
@@ -75,7 +71,6 @@ const Dashboard = () => {
         
         if (logsError || !allLogsData) {
           setCurrentTournament(null);
-          setTournamentLoading(false);
           setTournamentInitialized(true);
           return;
         }
@@ -92,12 +87,10 @@ const Dashboard = () => {
 
         const tournament = generateCurrentTournament(users, allExerciseLogs, exercises, categories);
         setCurrentTournament(tournament);
-        setTournamentLoading(false);
         setTournamentInitialized(true);
       } catch (error) {
         console.error('Error generating tournament:', error);
         setCurrentTournament(null);
-        setTournamentLoading(false);
         setTournamentInitialized(true);
       }
     };
@@ -349,7 +342,7 @@ const Dashboard = () => {
           </div>
 
           {/* Tournament Status Card or Chart Tooltip - Closer to chart */}
-          <div className="tooltip-card-container -mt-2">
+          <div className="tooltip-card-container tournament-status-container -mt-2">
             {chartHoverData ? (
               <div className="tooltip-card-enter-active">
                 <ChartTooltipCard 
@@ -365,7 +358,6 @@ const Dashboard = () => {
                 <TournamentStatusCard 
                   tournament={currentTournament}
                   currentUserId={profile?.id || ''}
-                  loading={tournamentLoading}
                   initialized={tournamentInitialized}
                 />
               </div>
@@ -415,7 +407,7 @@ const Dashboard = () => {
           </div>
 
           {/* Exercise Progress Grid */}
-        <div className="relative">
+        <div className="relative exercise-grid-container">
           {/* Progress Title with Inline Dropdown + Expandable Search */}
           <div className="mb-6 progress-search-container">
             {/* Progress Dropdown */}
@@ -539,7 +531,7 @@ const Dashboard = () => {
           </div>
           
           {exerciseProgressItems.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 staggered-cards">
               {exerciseProgressItems.map((progress, index) => {
                 const categoryColor = getCategoryColor(
                   categories.findIndex(cat => cat.id === progress.exercise.categoryId)
