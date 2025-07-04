@@ -602,9 +602,8 @@
 /* Category-colored exercise title */
 .category-exercise-title {
   color: var(--category-color) !important;
-  font-size: 1.5rem;
+  font-size: 1.875rem; /* text-3xl equivalent */
   font-weight: 700;
-  margin-bottom: 1rem;
 }
 
 /* Category-colored chart title */
