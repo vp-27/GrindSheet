@@ -450,8 +450,8 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
             data={filteredData}
             margin={{
               top: 15,
-              right: 15,
-              left: 10,
+              right: 10,
+              left: -20,
               bottom: 15,
             }}
             syncId={undefined}
