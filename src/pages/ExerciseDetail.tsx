@@ -280,6 +280,7 @@ const ExerciseDetail = () => {
               onTimeframeChange={handleTimeframeChange}
               onHoverData={setChartHoverData}
               hideTooltip={true}
+              defaultTimeframe="1M"
             />
           ) : (
             <div className="text-center text-muted-foreground py-16">

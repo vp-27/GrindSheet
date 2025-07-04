@@ -34,7 +34,7 @@ const Dashboard = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isProgressDropdownOpen, setIsProgressDropdownOpen] = useState(false);
   const [dynamicPercentGain, setDynamicPercentGain] = useState<number | null>(null); // NEW
-  const [chartTimeframe, setChartTimeframe] = useState<'1W' | '2W' | '1M' | 'ALL'>('1M'); // NEW
+  const [chartTimeframe, setChartTimeframe] = useState<'1W' | '2W' | '1M' | 'ALL'>('2W'); // NEW
 
   // Use the same color system as the rest of the app
   const chartColors = getCategoryChartColors();

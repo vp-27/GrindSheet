@@ -52,6 +52,7 @@ interface ProgressChartProps {
   onTimeframeChange?: (timeframe: TimeframeOption, gain: number | null) => void; // Callback for timeframe changes
   onHoverData?: (data: any) => void; // New callback for hover data
   hideTooltip?: boolean; // Option to hide traditional tooltip
+  defaultTimeframe?: TimeframeOption; // Allow parent to set initial timeframe
 }
 
 // Define timeframe options
@@ -244,9 +245,10 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
   customColors,
   onTimeframeChange,
   onHoverData,
-  hideTooltip = false
+  hideTooltip = false,
+  defaultTimeframe = '2W'
 }) => {
-  const [timeframe, setTimeframe] = useState<TimeframeOption>('1M');
+  const [timeframe, setTimeframe] = useState<TimeframeOption>(defaultTimeframe);
   const [dotVisible, setDotVisible] = useState(false);
   const [disableInitialAnimation, setDisableInitialAnimation] = useState(true);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null); // NEW
@@ -544,22 +546,21 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
             )}
           </LineChart>
         </ResponsiveContainer>
-        
-        {/* Chart Controls Section - Compact floating controls */}
-        <div className={`absolute ${exerciseId ? '-top-8' : '-top-12'} right-4 flex items-center gap-2`}>
-          {/* Compact Timeframe Controls using MobileSlider */}
-          <MobileSlider
-            options={[
-              { id: '1W', label: '1W' },
-              { id: '2W', label: '2W' },
-              { id: '1M', label: '1M' },
-              { id: 'ALL', label: 'ALL' }
-            ]}
-            activeOption={timeframe}
-            onOptionChange={(optionId) => setTimeframe(optionId as TimeframeOption)}
-            variant="compact"
-          />
-        </div>
+      </div>
+      
+      {/* Apple-style centered timeframe controls */}
+      <div className="flex justify-center mt-4 mb-2">
+        <MobileSlider
+          options={[
+            { id: '1W', label: '1W' },
+            { id: '2W', label: '2W' },
+            { id: '1M', label: '1M' },
+            { id: 'ALL', label: 'ALL' }
+          ]}
+          activeOption={timeframe}
+          onOptionChange={(optionId) => setTimeframe(optionId as TimeframeOption)}
+          variant="compact"
+        />
       </div>
     </div>
   );
