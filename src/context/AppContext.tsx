@@ -324,5 +324,5 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
     </AppContext.Provider>
   );
 };
-
+// hi
 // useAppContext hook has been removed from this file and moved to useAppContext.ts
