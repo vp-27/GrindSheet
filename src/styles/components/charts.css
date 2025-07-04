@@ -1,0 +1,414 @@
+/* ===== CHARTS & PROGRESS COMPONENTS ===== */
+/* Chart tooltips, progress cards, and data visualization styles */
+
+/* Apple Health-style progress cards with glassmorphism effect */
+.apple-health-card {
+  position: relative;
+  /* Glassmorphism: Semi-transparent background with backdrop blur */
+  background-color: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 1rem;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08), 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+  transition: transform 0.1s ease;
+  overflow: hidden;
+}
+
+/* Enhanced glassmorphism when category background tint is active */
+.apple-health-card.category-tinted {
+  background-color: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.06), 0 2px 8px 0 rgba(0, 0, 0, 0.03);
+}
+
+/* Dark mode for category tinted cards */
+.dark .apple-health-card.category-tinted {
+  background-color: rgba(28, 28, 30, 0.75);
+  border: none;
+}
+
+[data-theme="dark"] .apple-health-card.category-tinted {
+  background-color: rgba(28, 28, 30, 0.75);
+  border: none;
+}
+
+/* Dark mode glassmorphism - Apple Health style gray-black */
+.dark .apple-health-card {
+  background-color: rgba(28, 28, 30, 0.85);
+  border: none;
+}
+
+/* Data theme attribute support */
+[data-theme="dark"] .apple-health-card {
+  background-color: rgba(28, 28, 30, 0.85);
+  border: none;
+}
+
+/* Mobile active state for apple health cards */
+.apple-health-card:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* Universal Apple-style card for consistency across all pages */
+.apple-card {
+  position: relative;
+  /* Light mode: Semi-transparent white with backdrop blur */
+  background-color: rgba(255, 255, 255, 0.85);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border-radius: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08), 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+/* Dark mode for universal apple card - matches Dashboard progress cards */
+.dark .apple-card {
+  background-color: rgba(28, 28, 30, 0.85);
+  border: none;
+}
+
+[data-theme="dark"] .apple-card {
+  background-color: rgba(28, 28, 30, 0.85);
+  border: none;
+}
+
+/* Hover state for interactive apple cards */
+.apple-card.interactive {
+  cursor: pointer;
+}
+
+.apple-card.interactive:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.12), 0 4px 12px 0 rgba(0, 0, 0, 0.06);
+}
+
+.dark .apple-card.interactive:hover {
+  background-color: rgba(28, 28, 30, 0.9);
+}
+
+[data-theme="dark"] .apple-card.interactive:hover {
+  background-color: rgba(28, 28, 30, 0.9);
+}
+
+/* Active state for mobile touch */
+.apple-card.interactive:active {
+  transform: scale(0.98);
+}
+
+.apple-health-card-title {
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  color: var(--category-color);
+  flex: 1;
+  min-width: 0;
+  padding-right: 0.5rem;
+}
+
+.apple-health-card-time {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.apple-health-card-time-text {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.apple-health-card-arrow {
+  width: 0.75rem;
+  height: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.apple-health-mini-chart {
+  margin-bottom: 0.75rem;
+  height: 2rem;
+  position: relative;
+  width: 100%;
+}
+
+.apple-health-mini-chart-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.apple-health-weight-display {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+
+.apple-health-weight-unit {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+.apple-health-progress-badge {
+  display: flex;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.apple-health-progress-badge.positive {
+  color: rgb(5 150 105);
+  background-color: rgb(236 253 245);
+}
+
+.apple-health-progress-badge.negative {
+  color: rgb(239 68 68);
+  background-color: rgb(254 242 242);
+}
+
+.apple-health-pr-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background-color: rgb(254 243 199);
+  color: rgb(180 83 9);
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.apple-health-pr-badge-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.apple-health-first-log-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background-color: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.apple-health-first-log-badge-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* Compact card variant when no mini chart is present */
+.apple-health-card.compact {
+  gap: 1rem;
+}
+
+.apple-health-card.compact .apple-health-card-title {
+  margin-bottom: 0.5rem;
+}
+
+/* Glassmorphism for empty state cards */
+.glass-card {
+  background: rgba(255, 255, 255, 0.8);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08), 0 2px 8px 0 rgba(0, 0, 0, 0.04);
+}
+
+/* Dark mode for glass cards - Apple Health style gray-black */
+.dark .glass-card {
+  background: rgba(28, 28, 30, 0.8);
+  border: none;
+}
+
+[data-theme="dark"] .glass-card {
+  background: rgba(28, 28, 30, 0.8);
+  border: none;
+}
+
+/* Enhanced glass card when category is selected */
+.glass-card.category-tinted {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.06), 0 2px 8px 0 rgba(0, 0, 0, 0.03);
+}
+
+.dark .glass-card.category-tinted {
+  background: rgba(28, 28, 30, 0.7);
+  border: none;
+}
+
+[data-theme="dark"] .glass-card.category-tinted {
+  background: rgba(28, 28, 30, 0.7);
+  border: none;
+}
+
+/* Tooltip Card Transition Animations */
+.tooltip-card-container {
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tooltip-card-enter {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+}
+
+.tooltip-card-enter-active {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tooltip-card-exit {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.tooltip-card-exit-active {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.98);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Tournament status card should be visible when chart is not hovered */
+.tournament-status-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Chart tooltip indicator colors */
+.chart-tooltip-indicator[data-color="#34C759"] { background-color: #34C759; }
+.chart-tooltip-indicator[data-color="#5AC8FA"] { background-color: #5AC8FA; }
+.chart-tooltip-indicator[data-color="#FF9500"] { background-color: #FF9500; }
+.chart-tooltip-indicator[data-color="#FF2D55"] { background-color: #FF2D55; }
+.chart-tooltip-indicator[data-color="#AF52DE"] { background-color: #AF52DE; }
+.chart-tooltip-indicator[data-color="#000000"] { background-color: #000000; }
+.chart-tooltip-indicator[data-color="#3b82f6"] { background-color: #3b82f6; }
+.chart-tooltip-indicator[data-color="#10b981"] { background-color: #10b981; }
+.chart-tooltip-indicator[data-color="#f59e0b"] { background-color: #f59e0b; }
+.chart-tooltip-indicator[data-color="#ef4444"] { background-color: #ef4444; }
+.chart-tooltip-indicator[data-color="#8b5cf6"] { background-color: #8b5cf6; }
+.chart-tooltip-indicator[data-color="#ec4899"] { background-color: #ec4899; }
+
+/* Chart tooltip text colors - values and units match legend colors */
+.chart-tooltip-value[data-color="#34C759"], 
+.chart-tooltip-unit[data-color="#34C759"] { color: #34C759; }
+.chart-tooltip-value[data-color="#5AC8FA"], 
+.chart-tooltip-unit[data-color="#5AC8FA"] { color: #5AC8FA; }
+.chart-tooltip-value[data-color="#FF9500"], 
+.chart-tooltip-unit[data-color="#FF9500"] { color: #FF9500; }
+.chart-tooltip-value[data-color="#FF2D55"], 
+.chart-tooltip-unit[data-color="#FF2D55"] { color: #FF2D55; }
+.chart-tooltip-value[data-color="#AF52DE"], 
+.chart-tooltip-unit[data-color="#AF52DE"] { color: #AF52DE; }
+.chart-tooltip-value[data-color="#000000"], 
+.chart-tooltip-unit[data-color="#000000"] { color: #000000; }
+.chart-tooltip-value[data-color="#3b82f6"], 
+.chart-tooltip-unit[data-color="#3b82f6"] { color: #3b82f6; }
+.chart-tooltip-value[data-color="#10b981"], 
+.chart-tooltip-unit[data-color="#10b981"] { color: #10b981; }
+.chart-tooltip-value[data-color="#f59e0b"], 
+.chart-tooltip-unit[data-color="#f59e0b"] { color: #f59e0b; }
+.chart-tooltip-value[data-color="#ef4444"], 
+.chart-tooltip-unit[data-color="#ef4444"] { color: #ef4444; }
+.chart-tooltip-value[data-color="#8b5cf6"], 
+.chart-tooltip-unit[data-color="#8b5cf6"] { color: #8b5cf6; }
+.chart-tooltip-value[data-color="#ec4899"], 
+.chart-tooltip-unit[data-color="#ec4899"] { color: #ec4899; }
+
+/* Dark mode adjustments for better contrast */
+.dark .chart-tooltip-value[data-color="#000000"], 
+.dark .chart-tooltip-unit[data-color="#000000"] { 
+  color: #ffffff; 
+}
+
+/* Chart slider border - matches mobile slider default styling */
+.chart-slider-border {
+  background-color: rgba(120, 120, 128, 0.16) !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  color: rgba(60, 60, 67, 0.85) !important;
+  font-size: 1rem !important;
+  padding: 0.5rem 0.75rem !important;
+  transition: all 0.3s ease !important;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.dark .chart-slider-border {
+  border: none !important;
+}
+
+/* Search bar focus state - subtle enhancement without changing background */
+.chart-slider-border:focus {
+  background-color: rgba(120, 120, 128, 0.20) !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px rgba(120, 120, 128, 0.3) !important;
+}
+
+.dark .chart-slider-border:focus {
+  background-color: rgba(39, 39, 41, 1) !important;
+  box-shadow: 0 0 0 1px rgba(142, 142, 147, 0.5) !important;
+}
+
+/* Fix for category-specific search styling to not override chart-slider-border */
+.chart-slider-border.category-search-border {
+  background-color: rgba(var(--category-color-rgb), 0.12) !important;
+  border: none !important;
+}
+
+.chart-slider-border.category-search-focused {
+  background-color: rgba(var(--category-color-rgb), 0.16) !important;
+  border: none !important;
+  box-shadow: 0 0 0 1px rgba(var(--category-color-rgb), 0.3) !important;
+}
+
+/* Progress dropdown and search container - prevent layout shifts */
+.progress-search-container {
+  min-height: 2.75rem; /* Fixed height to prevent shifts - more compact */
+  display: flex;
+  align-items: flex-start; /* Start alignment to handle different content heights */
+  gap: 1rem;
+}
+
+.progress-dropdown-section {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding-top: 0.125rem; /* Slight offset to visually align with search input baseline */
+}
+
+.search-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.search-input-container {
+  height: 2.25rem; /* Compact height matching mobile slider proportions */
+  display: flex;
+  align-items: center;
+}
+
+.search-results-count {
+  height: 1.25rem; /* Fixed height for results text */
+  display: flex;
+  align-items: center;
+  margin-top: 0.25rem;
+}

@@ -1,0 +1,214 @@
+/* ===== ANIMATION COMPONENT STYLES ===== */
+/* Animated counters, transitions, and keyframe animations */
+
+/* Animated Counter Styles - Robinhood-style number transitions */
+.animated-counter {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  transition: transform 0.2s ease, color 0.3s ease;
+}
+
+.animated-counter.animating-counter {
+  transform: scale(1.02);
+  filter: brightness(1.1);
+}
+
+/* Tabular numbers for consistent digit spacing */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Enhanced number animation styles */
+.counter-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+}
+
+.counter-highlight {
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.counter-highlight.animating-counter {
+  color: var(--category-color, hsl(var(--primary))) !important;
+  font-weight: 700;
+}
+
+/* Smooth number morphing effect */
+@keyframes numberMorph {
+  0% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.05);
+    filter: brightness(1.15);
+  }
+  100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+}
+
+.animated-counter.animating-counter {
+  animation: numberMorph 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Slide-in animation for cards */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.weekly-day-card {
+  animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Stagger the card animations */
+.weekly-day-card:nth-child(1) { animation-delay: 0ms; }
+.weekly-day-card:nth-child(2) { animation-delay: 50ms; }
+.weekly-day-card:nth-child(3) { animation-delay: 100ms; }
+.weekly-day-card:nth-child(4) { animation-delay: 150ms; }
+.weekly-day-card:nth-child(5) { animation-delay: 200ms; }
+.weekly-day-card:nth-child(6) { animation-delay: 250ms; }
+.weekly-day-card:nth-child(7) { animation-delay: 300ms; }
+
+/* Stagger animation for dots */
+.weekly-activity-dot:nth-child(1) { animation-delay: 0ms; }
+.weekly-activity-dot:nth-child(2) { animation-delay: 100ms; }
+.weekly-activity-dot:nth-child(3) { animation-delay: 200ms; }
+
+/* Pulse animation for activity indicators */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: translateX(-50%) scale(1.1);
+  }
+}
+
+.monthly-activity-indicator {
+  animation: pulse 2s infinite;
+}
+
+/* Calendar Day Button Animations */
+.calendar-day-button {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+  touch-action: manipulation;
+}
+
+.calendar-day-button:active {
+  transform: scale(0.95);
+}
+
+.calendar-day-button.selected {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.calendar-day-button.has-workouts {
+  background-color: hsl(var(--primary) / 0.1);
+}
+
+.calendar-day-button.is-today {
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.3);
+}
+
+.calendar-day-button.out-of-month {
+  color: hsl(var(--muted-foreground) / 0.4);
+}
+
+.calendar-day-button.current-month {
+  color: hsl(var(--foreground));
+}
+
+.calendar-day-button.current-month:not(.selected):not(.has-workouts) {
+  background-color: transparent;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .calendar-day-button.current-month:not(.selected):not(.has-workouts):hover {
+    background-color: hsl(var(--muted) / 0.5);
+  }
+}
+
+/* Calendar Activity Indicators */
+.calendar-activity-dot {
+  width: 0.25rem;
+  height: 0.25rem;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+}
+
+.calendar-activity-dot.intensity-1 {
+  opacity: 0.6;
+}
+
+.calendar-activity-dot.intensity-2 {
+  opacity: 0.8;
+}
+
+.calendar-activity-dot.intensity-3 {
+  opacity: 1;
+}
+
+.calendar-activity-dot.selected {
+  background-color: currentColor !important;
+  opacity: 0.7;
+}
+
+.calendar-activity-dot.unselected {
+  background-color: hsl(var(--primary));
+}
+
+/* Weekly Activity Dots - Enhanced */
+.weekly-activity-dot {
+  width: 0.25rem;
+  height: 0.25rem;
+  border-radius: 9999px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  margin-bottom: 0.125rem;
+}
+
+/* Animation timing adjustments for ultra-smooth feel */
+@media (prefers-reduced-motion: no-preference) {
+  .expandable-search-input,
+  .search-icon-button {
+    transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Apple's easeOutQuad */
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .expandable-search-input,
+  .search-icon-button,
+  .expandable-search-field,
+  .search-clear-button {
+    transition-duration: 0.1s !important;
+  }
+  
+  .weekly-day-card,
+  .monthly-day-card,
+  .monthly-nav-button {
+    animation: none;
+    transition: none;
+  }
+  
+  .monthly-activity-indicator {
+    animation: none;
+  }
+}

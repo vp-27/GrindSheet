@@ -30,7 +30,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import '@/components/ui/category-styles.css';
+import '@/styles/index.css';
 
 interface LayoutProps {
   children: React.ReactNode;

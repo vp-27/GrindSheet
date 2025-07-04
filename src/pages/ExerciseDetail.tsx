@@ -16,7 +16,7 @@ import ProgressChart from '@/components/dashboard/ProgressChart';
 import { getProgressChartData, calculateProgress } from '@/utils/progressUtils';
 import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
 import AnimatedCounter from '@/components/ui/animated-counter';
-import '@/components/ui/category-styles.css';
+import '@/styles/index.css';
 
 const ExerciseDetail = () => {
   const { exercises, categories, exerciseLogs, addExerciseLog, updateExerciseLog, deleteExerciseLog } = useAppContext();

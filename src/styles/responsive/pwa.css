@@ -1,0 +1,249 @@
+/* ===== PWA & DEVICE-SPECIFIC STYLES ===== */
+/* iPhone optimizations, safe areas, and PWA-specific responsive breakpoints */
+
+/* iPhone PWA specific optimizations */
+@media screen and (max-width: 430px) {
+  .weekly-day-card {
+    min-height: 95px;
+    padding: 0.375rem 0.125rem;
+    border-radius: 0.75rem;
+  }
+  
+  .weekly-day-number {
+    font-size: 1rem;
+    margin-bottom: 0.125rem;
+  }
+  
+  .weekly-day-label {
+    font-size: 0.5625rem;
+    margin-bottom: 0.125rem;
+  }
+  
+  .weekly-category-badge {
+    padding: 0.125rem 0.25rem;
+    font-size: 0.5625rem;
+    min-height: 16px;
+    margin-bottom: 0.125rem;
+  }
+  
+  .weekly-activity-dot {
+    width: 0.1875rem;
+    height: 0.1875rem;
+  }
+  
+  .weekly-workout-count {
+    font-size: 0.5625rem;
+  }
+  
+  .weekly-rest-indicator {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  
+  .weekly-rest-dot {
+    width: 0.1875rem;
+    height: 0.1875rem;
+  }
+  
+  .weekly-rest-text {
+    font-size: 0.5625rem;
+  }
+  
+  /* Reduce grid gaps even more on very small screens */
+  .grid-cols-7 {
+    gap: 0.25rem !important;
+  }
+  
+  .monthly-calendar-container {
+    padding: 1rem;
+    border-radius: 1.25rem;
+  }
+  
+  .monthly-day-card {
+    padding: 0.25rem;
+  }
+  
+  .monthly-day-number {
+    font-size: 0.8125rem;
+  }
+}
+
+/* iPhone 14/15 Pro optimizations */
+@media screen and (max-width: 393px) {
+  .weekly-day-card {
+    min-height: 90px;
+    padding: 0.25rem 0.0625rem;
+  }
+  
+  .weekly-day-number {
+    font-size: 0.9375rem;
+  }
+  
+  .weekly-category-badge {
+    font-size: 0.5rem;
+    padding: 0.0625rem 0.1875rem;
+    min-height: 14px;
+  }
+  
+  .weekly-workout-count {
+    font-size: 0.5625rem;
+  }
+  
+  .weekly-activity-dot {
+    width: 0.3125rem;
+    height: 0.3125rem;
+  }
+  
+  .weekly-rest-indicator {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  
+  .weekly-rest-text {
+    font-size: 0.5625rem;
+  }
+}
+
+/* iPhone SE and smaller screens */
+@media screen and (max-width: 375px) {
+  .weekly-day-card {
+    min-height: 95px;
+    padding: 0.5rem 0.25rem;
+  }
+  
+  .weekly-day-number {
+    font-size: 1rem;
+  }
+  
+  .weekly-category-badge {
+    padding: 0.1875rem 0.3125rem;
+    font-size: 0.5rem;
+    min-height: 20px;
+  }
+  
+  .weekly-workout-count {
+    font-size: 0.5rem;
+  }
+  
+  .monthly-calendar-container {
+    padding: 0.75rem;
+  }
+}
+
+/* Landscape orientation optimizations */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+  .weekly-day-card {
+    min-height: 80px;
+    padding: 0.5rem 0.25rem;
+  }
+  
+  .weekly-day-number {
+    font-size: 1rem;
+    margin-bottom: 0.125rem;
+  }
+  
+  .weekly-category-badge {
+    padding: 0.1875rem 0.375rem;
+    font-size: 0.5625rem;
+    min-height: 18px;
+    margin-bottom: 0.125rem;
+  }
+  
+  .weekly-rest-indicator {
+    width: 1.25rem;
+    height: 1.25rem;
+    margin-bottom: 0.125rem;
+  }
+}
+
+/* Additional PWA and mobile optimizations */
+@media screen and (max-width: 480px) {
+  /* Ensure proper touch targets */
+  .weekly-day-card,
+  .monthly-day-card,
+  .monthly-nav-button {
+    min-height: 44px; /* Apple's recommended touch target size */
+    min-width: 44px;
+  }
+  
+  /* Optimize weekly grid for mobile */
+  .grid-cols-7 {
+    gap: 0.375rem !important;
+  }
+  
+  /* Improve monthly calendar spacing */
+  .monthly-calendar-grid {
+    gap: 0.25rem;
+  }
+  
+  /* Better font scaling */
+  .monthly-calendar-title {
+    font-size: 1.125rem;
+  }
+  
+  .monthly-weekday-label {
+    font-size: 0.75rem;
+    padding: 0.625rem 0;
+  }
+}
+
+/* Safe area for iPhone notch/dynamic island */
+@supports (padding: max(0px)) {
+  .monthly-calendar-container {
+    padding-left: max(1rem, calc(1rem + env(safe-area-inset-left)));
+    padding-right: max(1rem, calc(1rem + env(safe-area-inset-right)));
+  }
+  
+  .swipe-container .apple-card {
+    padding-left: max(1rem, calc(1rem + env(safe-area-inset-left)));
+    padding-right: max(1rem, calc(1rem + env(safe-area-inset-right)));
+  }
+}
+
+/* Improved dark mode support */
+@media (prefers-color-scheme: dark) {
+  .weekly-day-card,
+  .monthly-day-card {
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.2),
+      0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+  
+  .monthly-calendar-container {
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+}
+
+/* Mobile spacing adjustments to match monthly view */
+@media screen and (max-width: 480px) {
+  .swipe-container .apple-card {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Ensure weekly grid has proper spacing */
+  .grid-cols-7 {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  
+  /* Make monthly calendar match */
+  .monthly-calendar-container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media screen and (max-width: 393px) {
+  .swipe-container .apple-card {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  
+  .monthly-calendar-container {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}

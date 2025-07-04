@@ -17,7 +17,7 @@ import { useAppContext } from '@/context/useAppContext';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
-import '@/components/ui/category-styles.css';
+import '@/styles/index.css';
 
 const History = () => {
   const { exerciseLogs, exercises, categories, updateExerciseLog, deleteExerciseLog } = useAppContext();

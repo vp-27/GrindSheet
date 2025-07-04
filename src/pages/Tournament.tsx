@@ -51,7 +51,7 @@ import {
 } from '@/components/ui/select';
 import { getCategoryChartColors, getCategoryKeyByName, getCategoryColors } from '@/utils/categoryColors';
 import { supabase } from '@/integrations/supabase/client';
-import '@/components/ui/category-styles.css';
+import '@/styles/index.css';
 
 const TournamentPage: React.FC = () => {
   const { profile } = useAuth();

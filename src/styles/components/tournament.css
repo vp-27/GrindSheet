@@ -1,0 +1,125 @@
+/* ===== TOURNAMENT COMPONENT STYLES ===== */
+/* Tournament cards, leaderboards, and competition-related UI */
+
+/* PR Overview Leaderboard Styles */
+.pr-overview-entry {
+  position: relative;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  transition: all 0.3s;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+}
+
+/* Desktop-only hover effects for PR overview entry */
+@media (hover: hover) and (pointer: fine) {
+  .pr-overview-entry:hover {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transform: translateY(-4px);
+  }
+
+  .pr-overview-entry.regular:hover {
+    background: rgba(255, 255, 255, 1);
+  }
+
+  .dark .pr-overview-entry.regular:hover {
+    background: rgba(17, 24, 39, 1);
+  }
+}
+
+/* Mobile active states for PR overview entry */
+.pr-overview-entry:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+.pr-overview-entry.current-user {
+  background: linear-gradient(to right, rgb(16 185 129 / 0.1), rgb(5 150 105 / 0.1));
+  border: 2px solid rgb(16 185 129 / 0.3);
+}
+
+.pr-overview-entry.regular {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(229, 231, 235, 0.5);
+}
+
+.dark .pr-overview-entry.regular {
+  background: rgba(17, 24, 39, 0.8);
+  border: 1px solid rgba(75, 85, 99, 0.5);
+}
+
+.dark .pr-overview-entry.regular:hover {
+  background: rgba(17, 24, 39, 1);
+}
+
+.dark .pr-overview-entry.current-user {
+  background: linear-gradient(to right, rgb(16 185 129 / 0.2), rgb(5 150 105 / 0.2));
+  border: 2px solid rgb(16 185 129 / 0.8);
+}
+
+/* PR Overview Entry - Clean Simple Design for Mobile */
+.pr-overview-entry-clean {
+  position: relative;
+  padding: 1rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 1rem;
+  transition: all 0.3s;
+}
+
+/* Desktop-only hover effects for clean entry */
+@media (hover: hover) and (pointer: fine) {
+  .pr-overview-entry-clean:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
+  }
+}
+
+/* Mobile active state for clean entry */
+.pr-overview-entry-clean:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* Tie indicator - smaller and more subtle */
+.pr-tie-indicator {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.375rem;
+  background-color: rgb(249 115 22);
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+/* Avatar overlap styling for ties */
+.pr-avatars-overlap-clean {
+  display: flex;
+  margin-right: -0.5rem;
+}
+
+.pr-avatars-overlap-clean .pr-avatar-clean {
+  margin-right: -0.5rem;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+/* PR Champion Card Styles */
+.pr-champion-card {
+  background: linear-gradient(to right, rgba(var(--category-color-rgb), 0.06), rgba(var(--category-color-rgb), 0.03)) !important;
+  border-color: rgba(var(--category-color-rgb), 0.25) !important;
+}
+
+.pr-champion-icon {
+  background: linear-gradient(to bottom right, var(--category-color), rgba(var(--category-color-rgb), 0.87)) !important;
+}
+
+.pr-champion-badge {
+  background-color: var(--category-color) !important;
+  color: white !important;
+}
+
+.pr-champion-avatar {
+  background-color: rgba(var(--category-color-rgb), 0.8) !important;
+  color: white !important;
+}

@@ -18,7 +18,7 @@ import { Tournament } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import AnimatedCounter from '@/components/ui/animated-counter';
 import { MobileSlider } from '@/components/ui/mobile-slider';
-import '@/components/ui/category-styles.css';
+import '@/styles/index.css';
 
 const Dashboard = () => {
   const { categories, exercises, exerciseLogs } = useAppContext();
