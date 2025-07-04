@@ -1,7 +1,7 @@
 {
   "name": "GrindSheet",
   "short_name": "GrindSheet", 
-  "description": "Competitive weight tracker app.",
+  "description": "Simple gym logging. Optional Friend Competing",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#1a1a1a",
