@@ -360,19 +360,6 @@ const TournamentPage: React.FC = () => {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground text-xs">Consist:</span>
-                <span className="font-medium bg-green-100/50 dark:bg-green-900/20 px-2 py-0.5 rounded text-xs">
-                  {selectedTournament?.id === currentTournament?.id ? (
-                    <AnimatedCounter
-                      value={participant.pointsBreakdown.consistencyPoints}
-                      duration={600}
-                    />
-                  ) : (
-                    participant.pointsBreakdown.consistencyPoints
-                  )}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">Daily:</span>
                 <span className="font-medium bg-orange-100/50 dark:bg-orange-900/20 px-2 py-0.5 rounded text-xs">
                   {selectedTournament?.id === currentTournament?.id ? (
@@ -382,6 +369,19 @@ const TournamentPage: React.FC = () => {
                     />
                   ) : (
                     participant.pointsBreakdown.participationPoints
+                  )}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground text-xs">Consist:</span>
+                <span className="font-medium bg-green-100/50 dark:bg-green-900/20 px-2 py-0.5 rounded text-xs">
+                  {selectedTournament?.id === currentTournament?.id ? (
+                    <AnimatedCounter
+                      value={participant.pointsBreakdown.consistencyPoints}
+                      duration={600}
+                    />
+                  ) : (
+                    participant.pointsBreakdown.consistencyPoints
                   )}
                 </span>
               </div>
@@ -417,144 +417,152 @@ const TournamentPage: React.FC = () => {
               </div>
             </button>
 
-            {/* Expandable Date Breakdown with smooth animation - More compact spacing */}
+            {/* Expandable Date Breakdown with smooth animation - Clean receipt style */}
             <div className={`overflow-hidden transition-all duration-500 ease-out ${
               isExpanded ? 'max-h-[2000px] opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0'
             }`}>
-              <div className="space-y-3 text-sm">
-                {/* Workout Days */}
-                {participant.workoutDays.length > 0 && (
-                  <div className="rounded-xl p-3">
-                    <h4 className="font-medium text-foreground mb-2 text-sm">Workout Days ({participant.workoutDays.length})</h4>
-                    <div className="flex flex-wrap gap-1">
-                      {participant.workoutDays.map((date, idx) => {
-                        // Parse YYYY-MM-DD format to avoid timezone shifts
-                        const [year, month, day] = date.split('-').map(Number);
-                        const localDate = new Date(year, month - 1, day); // month is 0-indexed
-                        return (
-                          <span key={idx} className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-1 rounded-lg text-xs font-medium">
-                            {localDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-
-                {/* PR Details */}
+              <div className="space-y-4 text-sm">
+                {/* Personal Records Section */}
                 {participant.prDetails.length > 0 && (
-                  <div className="rounded-xl p-3">
-                    <h4 className="font-medium text-foreground mb-2 text-sm">Personal Records ({participant.prDetails.length})</h4>
-                    <div className="space-y-2">
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="bg-yellow-100/50 dark:bg-yellow-900/20 px-2 py-0.5 rounded text-xs font-medium text-yellow-700 dark:text-yellow-300">PRs</span>
+                      <span className="text-xs text-muted-foreground">({participant.prDetails.length})</span>
+                    </div>
+                    <div className="space-y-2 ml-4">
                       {participant.prDetails.map((pr, idx) => (
-                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded-lg p-2">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-medium text-sm text-foreground">{pr.exerciseName}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(pr.achievedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                            </span>
-                          </div>
-                          <div className="flex items-center justify-between text-xs">
-                            <div className="flex gap-2">
-                              <span className="text-muted-foreground">
-                                {pr.previousBest > 0 ? `${pr.previousBest}lbs → ` : 'First time: '}
-                              </span>
-                              <span className="font-bold text-green-600 dark:text-green-400">
-                                {pr.weight}lbs
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2">
+                        <div key={idx} className="flex justify-between items-start text-xs">
+                          <div className="flex-1">
+                            <div className="font-medium text-foreground">{pr.exerciseName}</div>
+                            <div className="text-muted-foreground">
+                              {pr.previousBest > 0 ? `${pr.previousBest}lbs → ${pr.weight}lbs` : `First time: ${pr.weight}lbs`}
                               {pr.improvementPercent > 0 && (
-                                <span className="text-green-600 dark:text-green-400 font-medium">
-                                  +{pr.improvementPercent.toFixed(1)}%
+                                <span className="text-green-600 dark:text-green-400 font-medium ml-1">
+                                  (+{pr.improvementPercent.toFixed(1)}%)
                                 </span>
                               )}
-                              <span className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 px-2 py-0.5 rounded-full font-medium">
-                                +75 pts
-                              </span>
                             </div>
                           </div>
+                          <span className="bg-yellow-100/50 dark:bg-yellow-900/20 px-2 py-0.5 rounded text-xs font-medium text-yellow-700 dark:text-yellow-300">+75 pts</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Competitive Bonuses */}
+                {/* Improvement Section */}
+                {participant.pointsBreakdown.improvementPoints > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="bg-blue-100/50 dark:bg-blue-900/20 px-2 py-0.5 rounded text-xs font-medium text-blue-700 dark:text-blue-300">Improvement</span>
+                    </div>
+                    <div className="space-y-2 ml-4">
+                      {participant.prDetails.filter(pr => pr.improvementPercent > 0).map((pr, idx) => (
+                        <div key={idx} className="flex justify-between items-start text-xs">
+                          <div className="flex-1">
+                            <div className="font-medium text-foreground">{pr.exerciseName}</div>
+                            <div className="text-green-600 dark:text-green-400 font-medium">
+                              {pr.improvementPercent.toFixed(1)}% improvement
+                            </div>
+                          </div>
+                          <span className="bg-blue-100/50 dark:bg-blue-900/20 px-2 py-0.5 rounded text-xs font-medium text-blue-700 dark:text-blue-300">
+                            +{Math.min(Math.floor(pr.improvementPercent * 2), 50)} pts
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Competition Section */}
                 {participant.competitiveDetails && participant.competitiveDetails.length > 0 && (
-                  <div className="rounded-xl p-3">
-                    <h4 className="font-medium text-foreground mb-2 text-sm">Competitive Bonuses</h4>
-                    <div className="space-y-2">
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="bg-purple-100/50 dark:bg-purple-900/20 px-2 py-0.5 rounded text-xs font-medium text-purple-700 dark:text-purple-300">Competition</span>
+                      <span className="text-xs text-muted-foreground">({participant.competitiveDetails.length})</span>
+                    </div>
+                    <div className="space-y-2 ml-4">
                       {participant.competitiveDetails.map((comp, idx) => (
-                        <div key={idx} className="bg-white/10 dark:bg-black/5 rounded-lg p-2 flex items-center justify-between">
-                          <span>
-                            <span className="font-medium text-sm text-foreground">{comp.type}</span>
-                            {comp.exerciseName && (
-                              <span className="ml-2 text-foreground text-xs">({comp.exerciseName})</span>
-                            )}
-                            {comp.targetUser && (
-                              <span className="ml-2 text-muted-foreground text-xs">vs {comp.targetUser}</span>
-                            )}
-                          </span>
-                          <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full text-xs font-medium">
-                            +{comp.points} pts
-                          </span>
+                        <div key={idx} className="flex justify-between items-start text-xs">
+                          <div className="flex-1">
+                            <div className="font-medium text-foreground">{comp.type}</div>
+                            <div className="text-muted-foreground">
+                              {comp.exerciseName}
+                              {comp.targetUser && ` vs ${comp.targetUser}`}
+                            </div>
+                          </div>
+                          <span className="bg-purple-100/50 dark:bg-purple-900/20 px-2 py-0.5 rounded text-xs font-medium text-purple-700 dark:text-purple-300">+{comp.points} pts</span>
                         </div>
                       ))}
                     </div>
                   </div>
                 )}
 
-                {/* Badge Details */}
+                {/* Daily Workouts Section */}
+                {participant.pointsBreakdown.participationPoints > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="bg-orange-100/50 dark:bg-orange-900/20 px-2 py-0.5 rounded text-xs font-medium text-orange-700 dark:text-orange-300">Daily</span>
+                      <span className="text-xs text-muted-foreground">({participant.workoutDays.length} days)</span>
+                    </div>
+                    <div className="space-y-2 ml-4">
+                      <div className="flex justify-between items-center text-xs">
+                        <div>
+                          <div className="font-medium text-foreground">Daily workout points</div>
+                          <div className="text-muted-foreground">{participant.workoutDays.length} days × 15 points</div>
+                        </div>
+                        <span className="bg-orange-100/50 dark:bg-orange-900/20 px-2 py-0.5 rounded text-xs font-medium text-orange-700 dark:text-orange-300">+{participant.pointsBreakdown.participationPoints} pts</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {participant.workoutDays.map((date, idx) => {
+                          const [year, month, day] = date.split('-').map(Number);
+                          const localDate = new Date(year, month - 1, day);
+                          return (
+                            <span key={idx} className="bg-muted/30 text-muted-foreground px-2 py-0.5 rounded text-xs">
+                              {localDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                            </span>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Consistency Section */}
+                {participant.pointsBreakdown.consistencyPoints > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="bg-green-100/50 dark:bg-green-900/20 px-2 py-0.5 rounded text-xs font-medium text-green-700 dark:text-green-300">Consistency</span>
+                    </div>
+                    <div className="ml-4">
+                      <div className="flex justify-between items-center text-xs">
+                        <div>
+                          <div className="font-medium text-foreground">5+ workout days bonus</div>
+                          <div className="text-muted-foreground">Extra points for consistency</div>
+                        </div>
+                        <span className="bg-green-100/50 dark:bg-green-900/20 px-2 py-0.5 rounded text-xs font-medium text-green-700 dark:text-green-300">+{participant.pointsBreakdown.consistencyPoints} pts</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bonus Section (Badges) */}
                 {participant.badges.length > 0 && (
-                  <div className="rounded-xl p-3">
-                    <h4 className="font-medium text-foreground mb-2 text-sm">Badges Earned</h4>
-                    <div className="space-y-2">
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="bg-pink-100/50 dark:bg-pink-900/20 px-2 py-0.5 rounded text-xs font-medium text-pink-700 dark:text-pink-300">Bonus</span>
+                      <span className="text-xs text-muted-foreground">({participant.badges.length} badges)</span>
+                    </div>
+                    <div className="space-y-2 ml-4">
                       {participant.badges.map(badge => (
-                        <div key={badge.id} className="bg-white/10 dark:bg-black/5 rounded-lg p-2">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="font-medium text-sm text-foreground">{badge.name}</span>
-                            <span className="text-xs text-muted-foreground">
-                              {new Date(badge.earnedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                            </span>
+                        <div key={badge.id} className="flex justify-between items-start text-xs">
+                          <div className="flex-1">
+                            <div className="font-medium text-foreground">{badge.name}</div>
+                            <div className="text-muted-foreground">{badge.description}</div>
                           </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-muted-foreground">{badge.description}</span>
-                            <span className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded-full text-xs font-medium">
-                              +{badge.points} pts
-                            </span>
-                          </div>
+                          <span className="bg-pink-100/50 dark:bg-pink-900/20 px-2 py-0.5 rounded text-xs font-medium text-pink-700 dark:text-pink-300">+{badge.points} pts</span>
                         </div>
                       ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Consistency Details */}
-                {(participant.pointsBreakdown.consistencyPoints > 0 || participant.pointsBreakdown.participationPoints > 0) && (
-                  <div className="rounded-lg p-3">
-                    <h4 className="font-medium text-foreground mb-2 text-sm">Activity Points</h4>
-                    <div className="space-y-2">
-                      {participant.pointsBreakdown.participationPoints > 0 && (
-                        <div className="bg-white/10 dark:bg-black/5 rounded-lg p-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-foreground">Daily Workouts ({participant.workoutDays.length} days)</span>
-                            <span className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded-full text-xs font-medium">
-                              +{participant.pointsBreakdown.participationPoints} pts
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                      {participant.pointsBreakdown.consistencyPoints > 0 && (
-                        <div className="bg-white/10 dark:bg-black/5 rounded-lg p-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-sm text-foreground">Consistency Bonus (5+ days)</span>
-                            <span className="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full text-xs font-medium">
-                              +{participant.pointsBreakdown.consistencyPoints} pts
-                            </span>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </div>
                 )}

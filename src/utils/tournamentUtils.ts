@@ -264,8 +264,8 @@ export const calculateTournamentPoints = (
         // Do NOT add to prDetails or count as PR
       }
       // --- COMPETITIVE BONUS LOGIC ---
-      // Only award if achievedPR (true PR this week)
-      if (achievedPR) {
+      // Award if achievedPR OR if it's a newcomer's first time with this exercise
+      if (achievedPR || preTournamentLogs.length === 0) {
         allUsers.forEach(otherUser => {
           if (otherUser.id === user.id) return;
           const otherLogs = exerciseLogs.filter(log => log.userId === otherUser.id && new Date(log.timestamp) <= endDate);
