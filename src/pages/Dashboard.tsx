@@ -17,6 +17,7 @@ import { format } from 'date-fns';
 import { Tournament } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import AnimatedCounter from '@/components/ui/animated-counter';
+import { MobileSlider } from '@/components/ui/mobile-slider';
 import '@/components/ui/category-styles.css';
 
 const Dashboard = () => {
@@ -34,7 +35,7 @@ const Dashboard = () => {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isProgressDropdownOpen, setIsProgressDropdownOpen] = useState(false);
   const [dynamicPercentGain, setDynamicPercentGain] = useState<number | null>(null); // NEW
-  const [chartTimeframe, setChartTimeframe] = useState<'1W' | '2W' | '1M' | 'ALL'>('2W'); // NEW
+  const [chartTimeframe, setChartTimeframe] = useState<'2W' | '1M' | 'ALL'>('2W'); // NEW
 
   // Use the same color system as the rest of the app
   const chartColors = getCategoryChartColors();
@@ -150,9 +151,6 @@ const Dashboard = () => {
         const cutoffDate = new Date();
         
         switch (chartTimeframe) {
-          case '1W':
-            cutoffDate.setDate(now.getDate() - 7);
-            break;
           case '2W':
             cutoffDate.setDate(now.getDate() - 14);
             break;
@@ -295,9 +293,9 @@ const Dashboard = () => {
         <div className="relative flex flex-col gap-4 pb-6 z-10">
           {/* Progress Chart Section - Embedded in background */}
           <div className="relative -mx-4 px-4">
-            {/* Show percentage gain if available */}
+            {/* Show percentage gain if available - with inline chart slider */}
             {dynamicPercentGain !== null && (
-              <div className="mb-4">
+              <div className="mb-4 flex items-center justify-between">
                 <div className={`text-2xl font-bold ${dynamicPercentGain >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
                   {dynamicPercentGain >= 0 ? '+' : ''}
                   <AnimatedCounter 
@@ -305,6 +303,19 @@ const Dashboard = () => {
                     formatValue={(val) => `${val.toFixed(1)}%`}
                     duration={600}
                     className="tabular-nums"
+                  />
+                </div>
+                {/* Inline chart timeframe controls */}
+                <div className="flex-shrink-0">
+                  <MobileSlider
+                    options={[
+                      { id: '2W', label: '2W' },
+                      { id: '1M', label: '1M' },
+                      { id: 'ALL', label: 'ALL' }
+                    ]}
+                    activeOption={chartTimeframe}
+                    onOptionChange={(optionId) => setChartTimeframe(optionId as '2W' | '1M' | 'ALL')}
+                    variant="compact"
                   />
                 </div>
               </div>
@@ -321,10 +332,12 @@ const Dashboard = () => {
                 customColors={chartColors}
                 onHoverData={setChartHoverData}
                 onTimeframeChange={(tf, gain) => {
-                  setChartTimeframe(tf as '1W' | '2W' | '1M' | 'ALL');
+                  setChartTimeframe(tf as '2W' | '1M' | 'ALL');
                   setDynamicPercentGain(gain);
                 }}
                 hideTooltip={true}
+                hideTimeframeControls={true}
+                timeframe={chartTimeframe}
               />
             ) : (
               <div className="text-center text-muted-foreground py-16">

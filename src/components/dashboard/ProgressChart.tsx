@@ -53,6 +53,8 @@ interface ProgressChartProps {
   onHoverData?: (data: any) => void; // New callback for hover data
   hideTooltip?: boolean; // Option to hide traditional tooltip
   defaultTimeframe?: TimeframeOption; // Allow parent to set initial timeframe
+  hideTimeframeControls?: boolean; // New prop to hide timeframe controls
+  timeframe?: TimeframeOption; // Allow parent to control timeframe externally
 }
 
 // Define timeframe options
@@ -243,17 +245,22 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
   onTimeframeChange,
   onHoverData,
   hideTooltip = false,
-  defaultTimeframe = '2W'
+  defaultTimeframe = '2W',
+  hideTimeframeControls = false,
+  timeframe: externalTimeframe
 }) => {
-  const [timeframe, setTimeframe] = useState<TimeframeOption>(defaultTimeframe);
+  const [internalTimeframe, setInternalTimeframe] = useState<TimeframeOption>(defaultTimeframe);
   const [dotVisible, setDotVisible] = useState(false);
   const [disableInitialAnimation, setDisableInitialAnimation] = useState(true);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null); // NEW
 
+  // Use external timeframe if provided, otherwise use internal
+  const currentTimeframe = externalTimeframe || internalTimeframe;
+
   // Filter data based on selected timeframe
   const filteredData = useMemo(() => {
-    return filterDataByTimeframe(data, timeframe);
-  }, [data, timeframe]);
+    return filterDataByTimeframe(data, currentTimeframe);
+  }, [data, currentTimeframe]);
 
   // Calculate percentage gain for current timeframe - using chart start date
   const timeframeGain = useMemo(() => {
@@ -318,15 +325,15 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
       }
     }
     // Default: use last point
-    return calculatePercentageFromChartStart(data, timeframe, multiple, showPercentage);
-  }, [data, timeframe, multiple, showPercentage, hoveredIndex, filteredData]);
+    return calculatePercentageFromChartStart(data, currentTimeframe, multiple, showPercentage);
+  }, [data, currentTimeframe, multiple, showPercentage, hoveredIndex, filteredData]);
 
   // Notify parent component when timeframe or gain changes
   useEffect(() => {
     if (onTimeframeChange) {
-      onTimeframeChange(timeframe, timeframeGain);
+      onTimeframeChange(currentTimeframe, timeframeGain);
     }
-  }, [timeframe, timeframeGain, onTimeframeChange]);
+  }, [currentTimeframe, timeframeGain, onTimeframeChange]);
 
   // Handle chart hover for custom tooltip and percent gain
   const handleChartHover = (data: any) => {
@@ -545,19 +552,29 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
         </ResponsiveContainer>
       </div>
       
-      {/* Apple-style centered timeframe controls */}
-      <div className="flex justify-center mt-4 mb-2">
-        <MobileSlider
-          options={[
-            { id: '2W', label: '2W' },
-            { id: '1M', label: '1M' },
-            { id: 'ALL', label: 'ALL' }
-          ]}
-          activeOption={timeframe}
-          onOptionChange={(optionId) => setTimeframe(optionId as TimeframeOption)}
-          variant="compact"
-        />
-      </div>
+      {/* Apple-style centered timeframe controls - only show if not hidden */}
+      {!hideTimeframeControls && (
+        <div className="flex justify-center mt-4 mb-2">
+          <MobileSlider
+            options={[
+              { id: '2W', label: '2W' },
+              { id: '1M', label: '1M' },
+              { id: 'ALL', label: 'ALL' }
+            ]}
+            activeOption={currentTimeframe}
+            onOptionChange={(optionId) => {
+              const newTimeframe = optionId as TimeframeOption;
+              if (externalTimeframe) {
+                // If timeframe is controlled externally, notify parent instead of updating internal state
+                onTimeframeChange && onTimeframeChange(newTimeframe, null);
+              } else {
+                setInternalTimeframe(newTimeframe);
+              }
+            }}
+            variant="compact"
+          />
+        </div>
+      )}
     </div>
   );
 };
