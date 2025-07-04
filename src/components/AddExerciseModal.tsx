@@ -243,17 +243,6 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                         {category.name}
                       </SelectItem>
                     ))}
-                    <div className="border-t border-border/60 mt-2 pt-2">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        className="w-full justify-start text-sm text-muted-foreground active:text-foreground active:bg-muted/60 transition-colors"
-                        onClick={() => setIsAddCategoryOpen(true)}
-                      >
-                        <Plus className="h-4 w-4 mr-2 text-icon" />
-                        Add New Category
-                      </Button>
-                    </div>
                   </SelectContent>
                 </Select>
                 <Button
@@ -286,43 +275,15 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                   </SelectTrigger>
                   <SelectContent className="apple-card border-border/60 backdrop-blur-md">
                     {filteredExercises.length > 0 ? (
-                      <>
-                        {filteredExercises.map((exercise) => (
-                          <SelectItem key={exercise.id} value={exercise.id} className="rounded-lg">
-                            {exercise.name}
-                          </SelectItem>
-                        ))}
-                        <div className="border-t border-border/60 mt-2 pt-2">
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            className="w-full justify-start text-sm text-muted-foreground active:text-foreground active:bg-muted/60 transition-colors"
-                            onClick={() => setIsAddExerciseOpen(true)}
-                          >
-                            <Plus className="h-4 w-4 mr-2 text-icon" />
-                            Add New Exercise
-                          </Button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <SelectItem value="none" disabled className="rounded-lg">
-                          No exercises found
+                      filteredExercises.map((exercise) => (
+                        <SelectItem key={exercise.id} value={exercise.id} className="rounded-lg">
+                          {exercise.name}
                         </SelectItem>
-                        {selectedCategoryId && (
-                          <div className="border-t border-border/60 mt-2 pt-2">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              className="w-full justify-start text-sm text-muted-foreground active:text-foreground active:bg-muted/60 transition-colors"
-                              onClick={() => setIsAddExerciseOpen(true)}
-                            >
-                              <Plus className="h-4 w-4 mr-2 text-icon" />
-                              Add New Exercise
-                            </Button>
-                          </div>
-                        )}
-                      </>
+                      ))
+                    ) : (
+                      <SelectItem value="none" disabled className="rounded-lg">
+                        No exercises found
+                      </SelectItem>
                     )}
                   </SelectContent>
                 </Select>
