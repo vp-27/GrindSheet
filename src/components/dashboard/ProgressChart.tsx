@@ -56,7 +56,7 @@ interface ProgressChartProps {
 }
 
 // Define timeframe options
-type TimeframeOption = '1W' | '2W' | '1M' | 'ALL';
+type TimeframeOption = '2W' | '1M' | 'ALL';
 
 // Helper function to filter data based on timeframe
 const filterDataByTimeframe = (data: any[], timeframe: TimeframeOption) => {
@@ -66,9 +66,6 @@ const filterDataByTimeframe = (data: any[], timeframe: TimeframeOption) => {
   const cutoffDate = new Date();
   
   switch (timeframe) {
-    case '1W':
-      cutoffDate.setDate(now.getDate() - 7);
-      break;
     case '2W':
       cutoffDate.setDate(now.getDate() - 14);
       break;
@@ -552,7 +549,6 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
       <div className="flex justify-center mt-4 mb-2">
         <MobileSlider
           options={[
-            { id: '1W', label: '1W' },
             { id: '2W', label: '2W' },
             { id: '1M', label: '1M' },
             { id: 'ALL', label: 'ALL' }
