@@ -113,7 +113,16 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] max-w-[95vw] w-full rounded-2xl backdrop-blur-sm bg-card/95 border-border/50 mobile-dialog">
+      <DialogContent 
+        className="sm:max-w-[425px] max-w-[95vw] w-full rounded-2xl backdrop-blur-sm bg-card/95 border-border/50 mobile-dialog"
+        style={{
+          position: 'fixed',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          margin: '0',
+        }}
+      >
         <form onSubmit={form.handleSubmit(handleSubmit)}>
           <DialogHeader>
             <DialogTitle className="text-foreground mobile-dialog-title">
@@ -259,7 +268,16 @@ export const ExerciseDialog: React.FC<ExerciseDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] max-w-[95vw] w-full rounded-2xl backdrop-blur-sm bg-card/95 border-border/50 mobile-dialog">
+      <DialogContent 
+        className="sm:max-w-[425px] max-w-[95vw] w-full rounded-2xl backdrop-blur-sm bg-card/95 border-border/50 mobile-dialog"
+        style={{
+          position: 'fixed',
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+          margin: '0',
+        }}
+      >
         <form onSubmit={form.handleSubmit(handleSubmit)}>
           <DialogHeader>
             <DialogTitle className="text-foreground mobile-dialog-title">
