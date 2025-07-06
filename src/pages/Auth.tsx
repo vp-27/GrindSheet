@@ -150,9 +150,6 @@ const Auth = () => {
       <div className="auth-card">
         {/* Header */}
         <div className="auth-header">
-          <div className="auth-logo">
-            <img src="/logo.svg" alt="GrindSheet Logo" />
-          </div>
           <h1 className="auth-title">
             {isLogin ? 'Welcome back' : signupStep === 1 ? 'Create account' : signupStep === 2 ? 'Tell us about you' : 'Secure your account'}
           </h1>
@@ -160,7 +157,7 @@ const Auth = () => {
             {isLogin 
               ? 'Continue your strength journey' 
               : signupStep === 1 
-                ? 'Join thousands of athletes tracking progress'
+                ? 'Simply track weights, compete with friends'
                 : signupStep === 2
                   ? 'Personalize your experience'
                   : 'Choose a strong password'

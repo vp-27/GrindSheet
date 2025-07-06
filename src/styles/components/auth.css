@@ -511,13 +511,13 @@
   }
   
   .auth-header {
-    padding: 4rem 2rem 2rem; /* More top padding, less bottom */
+    padding: 2rem 2rem 1rem; /* Reduced bottom padding to bring closer to form */
     flex-shrink: 0;
     text-align: center;
   }
   
   .auth-form-container {
-    padding: 1rem 2rem 2rem;
+    padding: 0.5rem 2rem 2rem; /* Reduced top padding */
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -525,19 +525,21 @@
   }
   
   .auth-logo {
-    width: 56px;
-    height: 56px;
+    width: 80px;
+    height: 80px;
     background: none;
     box-shadow: none;
-    border: none; /* Remove border completely on mobile */
+    border: none;
+    border-radius: 20px;
     margin-bottom: 1.5rem;
-    padding: 8px; /* Add padding for better touch target */
+    padding: 12px; /* Add padding for better touch target */
+    animation: none; /* Remove floating animation on mobile */
   }
   
   .auth-logo svg,
   .auth-logo img {
-    width: 40px;
-    height: 40px;
+    width: 56px;
+    height: 56px;
   }
   
   .auth-title {
