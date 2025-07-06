@@ -409,7 +409,7 @@ const Dashboard = () => {
           {/* Exercise Progress Grid */}
         <div className="relative exercise-grid-container">
           {/* Progress Title with Inline Dropdown + Expandable Search */}
-          <div className="mb-6 progress-search-container">
+          <div className="mb-0 progress-search-container">
             {/* Progress Dropdown */}
             <div className="relative progress-dropdown-container progress-dropdown-section">
               <button
