@@ -1,30 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useTheme } from '@/context/ThemeContext';
 import { useToast } from '@/components/ui/use-toast';
+import { Dumbbell, ChevronRight, Check, Mail, Lock, User, ArrowRight } from 'lucide-react';
+import '@/styles/components/auth.css';
 
 const Auth = () => {
   const { signIn, signUp, session } = useAuth();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [username, setUsername] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [signupStep, setSignupStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [showSignIn, setShowSignIn] = useState(true);
-  
-  // Focus states for floating label animation
-  const [focusedField, setFocusedField] = useState<string | null>(null);
-
-  // Check if fields have values (for floating label effect)
-  const emailHasValue = email.trim() !== '';
-  const passwordHasValue = password.trim() !== '';
-  const nameHasValue = name.trim() !== '';
-  const usernameHasValue = username.trim() !== '';
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -33,301 +28,327 @@ const Auth = () => {
     }
   }, [session, navigate]);
 
-  const handleSignIn = async (e: React.FormEvent) => {
+  // Reset form when switching between login/signup
+  useEffect(() => {
+    setEmail('');
+    setPassword('');
+    setName('');
+    setUsername('');
+    setConfirmPassword('');
+    setSignupStep(1); // Reset to step 1 when switching to signup
+  }, [isLogin]);
+
+  // Force re-render of progress bar when step changes
+  useEffect(() => {
+    // This ensures the CSS class is properly applied
+    const progressLine = document.querySelector('.progress-line');
+    if (progressLine && !isLogin) {
+      progressLine.className = `progress-line step-${signupStep}`;
+    }
+  }, [signupStep, isLogin]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    const { error } = await signIn(email, password);
-
-    setIsLoading(false);
-
-    if (error) {
+    try {
+      if (isLogin) {
+        const { error } = await signIn(email, password);
+        if (error) {
+          toast({
+            title: 'Authentication failed',
+            description: error.message || 'Please check your credentials',
+            variant: 'destructive',
+          });
+        } else {
+          toast({
+            title: 'Welcome back!',
+            description: 'Successfully signed in',
+          });
+          navigate('/');
+        }
+      } else {
+        if (signupStep === 1) {
+          // Validate email and move to step 2
+          if (email && email.includes('@')) {
+            setSignupStep(2);
+          } else {
+            toast({
+              title: 'Invalid email',
+              description: 'Please enter a valid email address',
+              variant: 'destructive',
+            });
+          }
+        } else if (signupStep === 2) {
+          // Validate name/username and move to step 3
+          if (name.trim() && username.trim()) {
+            setSignupStep(3);
+          } else {
+            toast({
+              title: 'Missing information',
+              description: 'Please provide both name and username',
+              variant: 'destructive',
+            });
+          }
+        } else {
+          // Complete signup
+          if (password !== confirmPassword) {
+            toast({
+              title: 'Passwords don\'t match',
+              description: 'Please make sure your passwords match',
+              variant: 'destructive',
+            });
+            return;
+          }
+          
+          const { error } = await signUp(email, password, { name, username });
+          if (error) {
+            toast({
+              title: 'Sign up failed',
+              description: error.message || 'Please try again',
+              variant: 'destructive',
+            });
+          } else {
+            toast({
+              title: 'Welcome to GrindSheet!',
+              description: 'Your account has been created successfully',
+            });
+            navigate('/');
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Auth error:', error);
       toast({
-        title: 'Sign in failed',
-        description: error.message || 'Please check your credentials and try again.',
+        title: 'Something went wrong',
+        description: 'Please try again',
         variant: 'destructive',
       });
-    } else {
-      toast({
-        title: 'Signed in successfully',
-        description: 'Welcome back!',
-      });
-      navigate('/');
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const getStepStatus = (step: number) => {
+    if (signupStep > step) return 'completed';
+    if (signupStep === step) return 'active';
+    return '';
+  };
 
-    if (!name || !username) {
-      toast({
-        title: 'Missing information',
-        description: 'Please provide a name and username.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    setIsLoading(true);
-
-    const { error, user } = await signUp(email, password, { name, username });
-
-    setIsLoading(false);
-
-    if (error) {
-      toast({
-        title: 'Sign up failed',
-        description: error.message || 'Please check your information and try again.',
-        variant: 'destructive',
-      });
-    } else if (user) {
-      toast({
-        title: 'Account created',
-        description: 'Your account has been successfully created!',
-      });
-      navigate('/');
+  const goBackStep = () => {
+    if (signupStep > 1) {
+      setSignupStep(signupStep - 1);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-foreground mb-2">
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-green-600">
-              GrindSheet
-            </span>
+    <div className={`auth-container ${isDark ? 'dark' : 'light'}`}>
+      {/* Animated Background */}
+      <div className="auth-background" />
+      
+      {/* Main Card */}
+      <div className="auth-card">
+        {/* Header */}
+        <div className="auth-header">
+          <div className="auth-logo">
+            <img src="/logo.svg" alt="GrindSheet Logo" />
+          </div>
+          <h1 className="auth-title">
+            {isLogin ? 'Welcome back' : signupStep === 1 ? 'Create account' : signupStep === 2 ? 'Tell us about you' : 'Secure your account'}
           </h1>
-          <p className="text-sm text-muted-foreground">Track your progress. Achieve your goals.</p>
+          <p className="auth-subtitle">
+            {isLogin 
+              ? 'Continue your strength journey' 
+              : signupStep === 1 
+                ? 'Join thousands of athletes tracking progress'
+                : signupStep === 2
+                  ? 'Personalize your experience'
+                  : 'Choose a strong password'
+            }
+          </p>
         </div>
 
-        <div className="bg-card rounded-2xl shadow-xl p-6 sm:p-8">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-foreground">
-              {showSignIn ? 'Welcome back' : 'Create account'}
-            </h2>
-            <button
-              type="button"
-              onClick={() => setShowSignIn(!showSignIn)}
-              className="text-sm font-medium text-green-600 active:text-green-700 transition-colors"
-            >
-              {showSignIn ? 'Sign up' : 'Sign in'}
-            </button>
-          </div>
+        {/* Form Container */}
+        <div className="auth-form-container">
+          {/* Signup Progress */}
+          {!isLogin && (
+            <div className="signup-progress">
+              <div className="progress-steps">
+                <div 
+                  className={`progress-line step-${signupStep}`}
+                />
+                <div className={`progress-step ${getStepStatus(1)}`}>
+                  {signupStep > 1 ? <Check size={12} /> : <Mail size={12} />}
+                </div>
+                <div className={`progress-step ${getStepStatus(2)}`}>
+                  {signupStep > 2 ? <Check size={12} /> : <User size={12} />}
+                </div>
+                <div className={`progress-step ${getStepStatus(3)}`}>
+                  <Lock size={12} />
+                </div>
+              </div>
+              <div className="progress-labels">
+                <span className={`progress-label ${signupStep === 1 ? 'active' : ''}`}>
+                  Email
+                </span>
+                <span className={`progress-label ${signupStep === 2 ? 'active' : ''}`}>
+                  Profile
+                </span>
+                <span className={`progress-label ${signupStep === 3 ? 'active' : ''}`}>
+                  Password
+                </span>
+              </div>
+            </div>
+          )}
 
-          {showSignIn ? (
-            <form onSubmit={handleSignIn} className="space-y-6">
-              <div className="relative">
-                <div className="relative border-b-2 border-border focus-within:border-green-500 transition-colors group">
-                  <Input
-                    id="signin-email"
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="auth-form">
+            {/* Login Form */}
+            {isLogin && (
+              <>
+                <div className="input-group">
+                  <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    onFocus={() => setFocusedField('signin-email')}
-                    onBlur={() => setFocusedField(null)}
+                    placeholder="Email address"
+                    className="auth-input"
                     required
-                    className="block w-full border-0 bg-transparent pt-6 pb-2 px-0 text-foreground focus:ring-0 focus:outline-none"
                   />
-                  <Label
-                    htmlFor="signin-email"
-                    className={`absolute top-4 left-0 text-muted-foreground pointer-events-none transition-all duration-200 ease-in-out ${
-                      focusedField === 'signin-email' || emailHasValue 
-                        ? 'transform -translate-y-4 scale-85 text-green-600'
-                        : ''
-                    }`}
-                  >
-                    Email
-                  </Label>
                 </div>
-              </div>
-
-              <div className="relative">
-                <div className="relative border-b-2 border-border focus-within:border-green-500 transition-colors group">
-                  <Input
-                    id="signin-password"
+                <div className="input-group">
+                  <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    onFocus={() => setFocusedField('signin-password')}
-                    onBlur={() => setFocusedField(null)}
+                    placeholder="Password"
+                    className="auth-input"
                     required
-                    className="block w-full border-0 bg-transparent pt-6 pb-2 px-0 text-foreground focus:ring-0 focus:outline-none"
                   />
-                  <Label
-                    htmlFor="signin-password"
-                    className={`absolute top-4 left-0 text-muted-foreground pointer-events-none transition-all duration-200 ease-in-out ${
-                      focusedField === 'signin-password' || passwordHasValue 
-                        ? 'transform -translate-y-4 scale-85 text-green-600'
-                        : ''
-                    }`}
-                  >
-                    Password
-                  </Label>
                 </div>
-              </div>
+              </>
+            )}
 
-              <div className="pt-4">
-                <Button
-                  type="submit"
-                  className="w-full rounded-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 shadow-md active:shadow-lg transition-all duration-200 ease-in-out active:translate-y-[-1px]"
-                  disabled={isLoading}
-                  aria-label="Sign In"
-                >
-                  {isLoading ? (
-                    <div className="flex items-center justify-center">
-                      <svg className="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Signing in...
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center">
-                      Sign in
-                      <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                      </svg>
-                    </div>
-                  )}
-                </Button>
+            {/* Signup Form - Step 1: Email */}
+            {!isLogin && signupStep === 1 && (
+              <div className="input-group">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email address"
+                  className="auth-input"
+                  required
+                />
               </div>
-            </form>
-          ) : (
-            <form onSubmit={handleSignUp} className="space-y-5">
-              <div className="relative">
-                <div className="relative border-b-2 border-border focus-within:border-green-500 transition-colors group">
-                  <Input
-                    id="signup-name"
+            )}
+
+            {/* Signup Form - Step 2: Profile */}
+            {!isLogin && signupStep === 2 && (
+              <>
+                <div className="input-group">
+                  <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    onFocus={() => setFocusedField('signup-name')}
-                    onBlur={() => setFocusedField(null)}
+                    placeholder="Your full name"
+                    className="auth-input"
                     required
-                    className="block w-full border-0 bg-transparent pt-6 pb-2 px-0 text-foreground focus:ring-0 focus:outline-none"
                   />
-                  <Label
-                    htmlFor="signup-name"
-                    className={`absolute top-4 left-0 text-muted-foreground pointer-events-none transition-all duration-200 ease-in-out ${
-                      focusedField === 'signup-name' || nameHasValue 
-                        ? 'transform -translate-y-4 scale-85 text-green-600'
-                        : ''
-                    }`}
-                  >
-                    Name
-                  </Label>
                 </div>
-              </div>
-
-              <div className="relative">
-                <div className="relative border-b-2 border-border focus-within:border-green-500 transition-colors group">
-                  <Input
-                    id="signup-username"
+                <div className="input-group">
+                  <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    onFocus={() => setFocusedField('signup-username')}
-                    onBlur={() => setFocusedField(null)}
+                    placeholder="Choose a username"
+                    className="auth-input"
                     required
-                    className="block w-full border-0 bg-transparent pt-6 pb-2 px-0 text-foreground focus:ring-0 focus:outline-none"
                   />
-                  <Label
-                    htmlFor="signup-username"
-                    className={`absolute top-4 left-0 text-muted-foreground pointer-events-none transition-all duration-200 ease-in-out ${
-                      focusedField === 'signup-username' || usernameHasValue 
-                        ? 'transform -translate-y-4 scale-85 text-green-600'
-                        : ''
-                    }`}
-                  >
-                    Username
-                  </Label>
                 </div>
-              </div>
+              </>
+            )}
 
-              <div className="relative">
-                <div className="relative border-b-2 border-border focus-within:border-green-500 transition-colors group">
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    onFocus={() => setFocusedField('signup-email')}
-                    onBlur={() => setFocusedField(null)}
-                    required
-                    className="block w-full border-0 bg-transparent pt-6 pb-2 px-0 text-foreground focus:ring-0 focus:outline-none"
-                  />
-                  <Label
-                    htmlFor="signup-email"
-                    className={`absolute top-4 left-0 text-muted-foreground pointer-events-none transition-all duration-200 ease-in-out ${
-                      focusedField === 'signup-email' || emailHasValue 
-                        ? 'transform -translate-y-4 scale-85 text-green-600'
-                        : ''
-                    }`}
-                  >
-                    Email
-                  </Label>
-                </div>
-              </div>
-
-              <div className="relative">
-                <div className="relative border-b-2 border-border focus-within:border-green-500 transition-colors group">
-                  <Input
-                    id="signup-password"
+            {/* Signup Form - Step 3: Password */}
+            {!isLogin && signupStep === 3 && (
+              <>
+                <div className="input-group">
+                  <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    onFocus={() => setFocusedField('signup-password')}
-                    onBlur={() => setFocusedField(null)}
+                    placeholder="Create a strong password"
+                    className="auth-input"
                     required
-                    className="block w-full border-0 bg-transparent pt-6 pb-2 px-0 text-foreground focus:ring-0 focus:outline-none"
                   />
-                  <Label
-                    htmlFor="signup-password"
-                    className={`absolute top-4 left-0 text-muted-foreground pointer-events-none transition-all duration-200 ease-in-out ${
-                      focusedField === 'signup-password' || passwordHasValue 
-                        ? 'transform -translate-y-4 scale-85 text-green-600'
-                        : ''
-                    }`}
-                  >
-                    Password
-                  </Label>
                 </div>
-              </div>
+                <div className="input-group">
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm your password"
+                    className="auth-input"
+                    required
+                  />
+                </div>
+              </>
+            )}
 
-              <div className="pt-4">
-                <Button
-                  type="submit"
-                  className="w-full rounded-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 shadow-md active:shadow-lg transition-all duration-200 ease-in-out active:translate-y-[-1px]"
-                  disabled={isLoading}
-                  aria-label="Sign Up"
+            {/* Navigation Buttons */}
+            <div className="auth-nav-buttons">
+              {/* Back Button for Signup */}
+              {!isLogin && signupStep > 1 && (
+                <button 
+                  type="button"
+                  onClick={goBackStep}
+                  className="auth-submit-btn auth-back-btn"
                 >
-                  {isLoading ? (
-                    <div className="flex items-center justify-center">
-                      <svg className="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Creating account...
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center">
-                      Create account
-                      <svg xmlns="http://www.w3.org/2000/svg" className="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                      </svg>
-                    </div>
-                  )}
-                </Button>
-              </div>
-            </form>
-          )}
-          
-          <div className="mt-8 pt-4 border-t border-border">
-            <p className="text-xs text-center text-muted-foreground">
-              By using GrindSheet, you agree to our Terms of Service and Privacy Policy.
-            </p>
-          </div>
+                  ←
+                </button>
+              )}
+
+              {/* Submit Button */}
+              <button 
+                type="submit" 
+                className="auth-submit-btn primary"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Loading...
+                  </div>
+                ) : isLogin ? (
+                  <div className="flex items-center justify-center gap-2">
+                    Sign in <ArrowRight size={18} />
+                  </div>
+                ) : signupStep < 3 ? (
+                  <div className="flex items-center justify-center gap-2">
+                    Continue <ChevronRight size={18} />
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center gap-2">
+                    Create account <Check size={18} />
+                  </div>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Toggle Section */}
+        <div className="auth-toggle">
+          <p className="auth-toggle-text">
+            {isLogin ? "Don't have an account?" : "Already have an account?"}
+          </p>
+          <button 
+            type="button"
+            onClick={() => setIsLogin(!isLogin)}
+            className="auth-toggle-btn"
+          >
+            {isLogin ? 'Create account' : 'Sign in instead'}
+          </button>
         </div>
       </div>
     </div>

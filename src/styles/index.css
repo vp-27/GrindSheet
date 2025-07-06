@@ -8,6 +8,7 @@
 @import './components/calendar.css';
 @import './components/tournament.css';
 @import './components/page-transitions.css';
+@import './components/auth.css';
 
 /* Animation Styles */
 @import './animations/counters.css';
