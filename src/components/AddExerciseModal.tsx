@@ -191,7 +191,7 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
         {/* Backdrop - only covers the main content area, not navbar */}
         <div 
           className={cn(
-            "absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 bottom-16 rounded-t-3xl border-t border-border/16",
+            "absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity duration-300 bottom-16 rounded-t-3xl border-t border-border/30 dark:border-white/20",
             isOpen ? "opacity-100" : "opacity-0"
           )}
           onClick={() => onOpenChange(false)}
@@ -202,7 +202,7 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
           className={cn(
             "absolute bottom-20 left-0 right-0 bg-background rounded-t-3xl transition-transform duration-500 ease-out",
             "mx-2 sm:mx-auto sm:max-w-md",
-            "border-t border-border/20",
+            "border-t border-l border-r border-border/40 dark:border-white/20",
             isOpen ? "translate-y-0" : "translate-y-full"
           )}
           style={categoryColors ? {
@@ -216,7 +216,7 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
         >
           {/* Handle bar for visual feedback and swipe area */}
           <div className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing">
-            <div className="w-12 h-1 bg-muted-foreground/30 rounded-full" />
+            <div className="w-12 h-1 bg-muted-foreground/30 dark:bg-white/40 rounded-full" />
           </div>
           
           {/* Modal header */}
@@ -234,10 +234,10 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
               <Label htmlFor="category">Category</Label>
               <div className="flex gap-2">
                 <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
-                  <SelectTrigger className="flex-1 rounded-lg border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 h-10 text-sm">
+                  <SelectTrigger className="flex-1 rounded-lg border-border/60 dark:border-white/30 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 h-10 text-sm">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
-                  <SelectContent className="apple-card border-border/60 backdrop-blur-md">
+                  <SelectContent className="apple-card border-border/60 dark:border-white/30 backdrop-blur-md">
                     {localCategories.map((category) => (
                       <SelectItem key={category.id} value={category.id} className="rounded-lg">
                         {category.name}
@@ -266,14 +266,14 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                   onValueChange={setSelectedExerciseId}
                   disabled={!selectedCategoryId}
                 >
-                  <SelectTrigger className="flex-1 rounded-lg border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 h-10 text-sm">
+                  <SelectTrigger className="flex-1 rounded-lg border-border/60 dark:border-white/30 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 h-10 text-sm">
                     <SelectValue placeholder={
                       selectedCategoryId 
                         ? "Select exercise" 
                         : "Category first"
                     } />
                   </SelectTrigger>
-                  <SelectContent className="apple-card border-border/60 backdrop-blur-md">
+                  <SelectContent className="apple-card border-border/60 dark:border-white/30 backdrop-blur-md">
                     {filteredExercises.length > 0 ? (
                       filteredExercises.map((exercise) => (
                         <SelectItem key={exercise.id} value={exercise.id} className="rounded-lg">
@@ -324,7 +324,7 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                   }
                 }}
                 placeholder="Enter weight"
-                className="w-full rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 text-lg h-12"
+                className="w-full rounded-xl border-border/60 dark:border-white/30 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 text-lg h-12"
               />
             </div>
 
@@ -336,7 +336,7 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Add any notes about your set..."
-                className="resize-none h-20 rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0"
+                className="resize-none h-20 rounded-xl border-border/60 dark:border-white/30 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0"
               />
             </div>
 
