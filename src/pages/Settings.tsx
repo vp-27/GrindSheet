@@ -490,29 +490,6 @@ const Settings: React.FC = () => {
             </div>
           </div>
 
-          {/* Dev: Toast Demo Link */}
-          <div className="apple-card shadow-sm">
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                    <Dumbbell className="h-5 w-5 text-blue-500" />
-                  </div>
-                  <div className="min-w-0 text-left">
-                    <h3 className="text-lg font-semibold text-foreground">Toast Demo</h3>
-                    <p className="text-sm text-muted-foreground">Test the redesigned toast notifications</p>
-                  </div>
-                </div>
-                <Button
-                  onClick={() => navigate('/toast-demo')}
-                  className="bg-blue-500 hover:bg-blue-600 text-white rounded-xl"
-                >
-                  Test Toasts
-                </Button>
-              </div>
-            </div>
-          </div>
-
           {/* Categories Management - Collapsible */}
           <Collapsible open={categoriesOpen} onOpenChange={handleCategoriesToggle} className="collapsible-root">
             <div className="apple-card shadow-sm">
