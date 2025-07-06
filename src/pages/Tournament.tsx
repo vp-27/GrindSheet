@@ -124,7 +124,7 @@ const TournamentPage: React.FC = () => {
     }
   }, [users, allExerciseLogs, exercises, categories]);
 
-  // Badge icon mapping
+  // Badge icon and short name mapping
   const getBadgeIcon = (badgeType: BadgeType) => {
     switch (badgeType) {
       case BadgeType.FIRST_PR:
@@ -143,6 +143,50 @@ const TournamentPage: React.FC = () => {
         return <Flame className="h-3 w-3" />;
       default:
         return <Award className="h-3 w-3" />;
+    }
+  };
+
+  // Badge short names for compact display
+  const getBadgeShortName = (badgeType: BadgeType) => {
+    switch (badgeType) {
+      case BadgeType.FIRST_PR:
+        return 'PR';
+      case BadgeType.CONSISTENCY_KING:
+        return '7d';
+      case BadgeType.IMPROVEMENT_STAR:
+        return 'Star';
+      case BadgeType.WEEKEND_WARRIOR:
+        return 'Weekend';
+      case BadgeType.CATEGORY_MASTER:
+        return 'Master';
+      case BadgeType.NEWCOMER_BONUS:
+        return 'New';
+      case BadgeType.PERFECT_WEEK:
+        return 'Perfect';
+      default:
+        return 'Badge';
+    }
+  };
+
+  // Badge color scheme for consistent styling
+  const getBadgeStyles = (badgeType: BadgeType) => {
+    switch (badgeType) {
+      case BadgeType.FIRST_PR:
+        return 'bg-amber-100/80 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700/50';
+      case BadgeType.CONSISTENCY_KING:
+        return 'bg-blue-100/80 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700/50';
+      case BadgeType.IMPROVEMENT_STAR:
+        return 'bg-purple-100/80 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700/50';
+      case BadgeType.WEEKEND_WARRIOR:
+        return 'bg-orange-100/80 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-700/50';
+      case BadgeType.CATEGORY_MASTER:
+        return 'bg-green-100/80 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700/50';
+      case BadgeType.NEWCOMER_BONUS:
+        return 'bg-teal-100/80 text-teal-700 border-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-700/50';
+      case BadgeType.PERFECT_WEEK:
+        return 'bg-red-100/80 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700/50';
+      default:
+        return 'bg-gray-100/80 text-gray-700 border-gray-200 dark:bg-gray-900/30 dark:text-gray-300 dark:border-gray-700/50';
     }
   };
 
@@ -256,45 +300,33 @@ const TournamentPage: React.FC = () => {
                   </h3>
                 </div>
                 
-                {/* All badges together - Compact for mobile */}
+                {/* All badges together - Show all badges with consistent styling */}
                 <div className="flex gap-1 mt-1 flex-wrap">
                   {/* You badge */}
                   {isCurrentUser && (
-                    <Badge className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-full border border-blue-200 dark:border-blue-800 flex-shrink-0">
+                    <Badge className="text-xs px-2 py-0.5 bg-blue-100/80 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-full border border-blue-200 dark:border-blue-700/50 flex-shrink-0">
                       You
                     </Badge>
                   )}
                   
                   {/* Winning streak badge */}
                   {participant.rank === 1 && winningStreak >= 2 && (
-                    <Badge className="text-xs bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 dark:from-orange-900/30 dark:to-red-900/30 dark:text-orange-300 px-2 py-0.5 rounded-full border border-orange-200 dark:border-orange-800 flex-shrink-0 flex items-center gap-1">
+                    <Badge className="text-xs bg-gradient-to-r from-orange-100/80 to-red-100/80 text-orange-700 dark:from-orange-900/30 dark:to-red-900/30 dark:text-orange-300 px-2 py-0.5 rounded-full border border-orange-200 dark:border-orange-700/50 flex-shrink-0 flex items-center gap-1">
                       <Flame className="w-2.5 h-2.5" />
                       <span>{winningStreak}x</span>
                     </Badge>
                   )}
                   
-                  {/* Regular badges */}
-                  {participant.badges.slice(0, isCurrentUser || (participant.rank === 1 && winningStreak >= 2) ? 1 : 2).map(badge => (
+                  {/* Regular badges - Show ALL badges with consistent styling */}
+                  {participant.badges.map(badge => (
                     <Badge 
                       key={badge.id} 
-                      variant="secondary" 
-                      className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 rounded-full border-0"
+                      className={`text-xs px-2 py-0.5 rounded-full border flex-shrink-0 flex items-center gap-1 ${getBadgeStyles(badge.type)}`}
                     >
                       {getBadgeIcon(badge.type)}
-                      <span className="ml-1 hidden sm:inline">{badge.name}</span>
+                      <span className="font-medium">{getBadgeShortName(badge.type)}</span>
                     </Badge>
                   ))}
-                  
-                  {/* Show count of remaining badges */}
-                  {(() => {
-                    const visibleBadgeCount = isCurrentUser || (participant.rank === 1 && winningStreak >= 2) ? 1 : 2;
-                    const remainingBadges = participant.badges.length - visibleBadgeCount;
-                    return remainingBadges > 0 ? (
-                      <Badge variant="outline" className="text-xs rounded-full px-2 py-0.5">
-                        +{remainingBadges}
-                      </Badge>
-                    ) : null;
-                  })()}
                 </div>
               </div>
             </div>
@@ -321,7 +353,7 @@ const TournamentPage: React.FC = () => {
             <div className="grid grid-cols-3 gap-2 text-sm">
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">PRs:</span>
-                <span className="font-medium bg-yellow-100/50 dark:bg-yellow-900/20 px-2 py-0.5 rounded text-xs">
+                <span className="font-medium bg-amber-100/80 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded text-xs border border-amber-200 dark:border-amber-700/50">
                   {selectedTournament?.id === currentTournament?.id ? (
                     <AnimatedCounter
                       value={participant.pointsBreakdown.prPoints}
@@ -334,7 +366,7 @@ const TournamentPage: React.FC = () => {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">Improve:</span>
-                <span className="font-medium bg-blue-100/50 dark:bg-blue-900/20 px-2 py-0.5 rounded text-xs">
+                <span className="font-medium bg-blue-100/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs border border-blue-200 dark:border-blue-700/50">
                   {selectedTournament?.id === currentTournament?.id ? (
                     <AnimatedCounter
                       value={participant.pointsBreakdown.improvementPoints}
@@ -347,7 +379,7 @@ const TournamentPage: React.FC = () => {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">Comp:</span>
-                <span className="font-medium bg-purple-100/50 dark:bg-purple-900/20 px-2 py-0.5 rounded text-xs">
+                <span className="font-medium bg-purple-100/80 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded text-xs border border-purple-200 dark:border-purple-700/50">
                   {selectedTournament?.id === currentTournament?.id ? (
                     <AnimatedCounter
                       value={participant.pointsBreakdown.competitivePoints || 0}
@@ -360,7 +392,7 @@ const TournamentPage: React.FC = () => {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">Daily:</span>
-                <span className="font-medium bg-orange-100/50 dark:bg-orange-900/20 px-2 py-0.5 rounded text-xs">
+                <span className="font-medium bg-orange-100/80 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded text-xs border border-orange-200 dark:border-orange-700/50">
                   {selectedTournament?.id === currentTournament?.id ? (
                     <AnimatedCounter
                       value={participant.pointsBreakdown.participationPoints}
@@ -373,7 +405,7 @@ const TournamentPage: React.FC = () => {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">Consist:</span>
-                <span className="font-medium bg-green-100/50 dark:bg-green-900/20 px-2 py-0.5 rounded text-xs">
+                <span className="font-medium bg-green-100/80 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded text-xs border border-green-200 dark:border-green-700/50">
                   {selectedTournament?.id === currentTournament?.id ? (
                     <AnimatedCounter
                       value={participant.pointsBreakdown.consistencyPoints}
@@ -386,7 +418,7 @@ const TournamentPage: React.FC = () => {
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">Bonus:</span>
-                <span className="font-medium bg-pink-100/50 dark:bg-pink-900/20 px-2 py-0.5 rounded text-xs">
+                <span className="font-medium bg-pink-100/80 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 px-2 py-0.5 rounded text-xs border border-pink-200 dark:border-pink-700/50">
                   {selectedTournament?.id === currentTournament?.id ? (
                     <AnimatedCounter
                       value={participant.pointsBreakdown.bonusPoints}
@@ -425,7 +457,7 @@ const TournamentPage: React.FC = () => {
                 {participant.prDetails.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="bg-yellow-100/50 dark:bg-yellow-900/20 px-2 py-0.5 rounded text-xs font-medium text-yellow-700 dark:text-yellow-300">PRs</span>
+                      <span className="bg-amber-100/80 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded text-xs font-medium border border-amber-200 dark:border-amber-700/50">PRs</span>
                       <span className="text-xs text-muted-foreground">({participant.prDetails.length})</span>
                     </div>
                     <div className="space-y-2 ml-4">
@@ -442,7 +474,7 @@ const TournamentPage: React.FC = () => {
                               )}
                             </div>
                           </div>
-                          <span className="bg-yellow-100/50 dark:bg-yellow-900/20 px-2 py-0.5 rounded text-xs font-medium text-yellow-700 dark:text-yellow-300">+75 pts</span>
+                          <span className="bg-amber-100/80 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded text-xs font-medium border border-amber-200 dark:border-amber-700/50">+75pts</span>
                         </div>
                       ))}
                     </div>
@@ -453,7 +485,7 @@ const TournamentPage: React.FC = () => {
                 {participant.pointsBreakdown.improvementPoints > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="bg-blue-100/50 dark:bg-blue-900/20 px-2 py-0.5 rounded text-xs font-medium text-blue-700 dark:text-blue-300">Improvement</span>
+                      <span className="bg-blue-100/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs font-medium border border-blue-200 dark:border-blue-700/50">Improvement</span>
                     </div>
                     <div className="space-y-2 ml-4">
                       {participant.prDetails.filter(pr => pr.improvementPercent > 0).map((pr, idx) => (
@@ -464,8 +496,8 @@ const TournamentPage: React.FC = () => {
                               {pr.improvementPercent.toFixed(1)}% improvement
                             </div>
                           </div>
-                          <span className="bg-blue-100/50 dark:bg-blue-900/20 px-2 py-0.5 rounded text-xs font-medium text-blue-700 dark:text-blue-300">
-                            +{Math.min(Math.floor(pr.improvementPercent * 2), 50)} pts
+                          <span className="bg-blue-100/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs font-medium border border-blue-200 dark:border-blue-700/50">
+                            +{Math.min(Math.floor(pr.improvementPercent * 2), 50)}pts
                           </span>
                         </div>
                       ))}
@@ -477,7 +509,7 @@ const TournamentPage: React.FC = () => {
                 {participant.competitiveDetails && participant.competitiveDetails.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="bg-purple-100/50 dark:bg-purple-900/20 px-2 py-0.5 rounded text-xs font-medium text-purple-700 dark:text-purple-300">Competition</span>
+                      <span className="bg-purple-100/80 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded text-xs font-medium border border-purple-200 dark:border-purple-700/50">Competition</span>
                       <span className="text-xs text-muted-foreground">({participant.competitiveDetails.length})</span>
                     </div>
                     <div className="space-y-2 ml-4">
@@ -490,7 +522,7 @@ const TournamentPage: React.FC = () => {
                               {comp.targetUser && ` vs ${comp.targetUser}`}
                             </div>
                           </div>
-                          <span className="bg-purple-100/50 dark:bg-purple-900/20 px-2 py-0.5 rounded text-xs font-medium text-purple-700 dark:text-purple-300">+{comp.points} pts</span>
+                          <span className="bg-purple-100/80 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded text-xs font-medium border border-purple-200 dark:border-purple-700/50">+{comp.points}pts</span>
                         </div>
                       ))}
                     </div>
@@ -501,7 +533,7 @@ const TournamentPage: React.FC = () => {
                 {participant.pointsBreakdown.participationPoints > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="bg-orange-100/50 dark:bg-orange-900/20 px-2 py-0.5 rounded text-xs font-medium text-orange-700 dark:text-orange-300">Daily</span>
+                      <span className="bg-orange-100/80 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded text-xs font-medium border border-orange-200 dark:border-orange-700/50">Daily</span>
                       <span className="text-xs text-muted-foreground">({participant.workoutDays.length} days)</span>
                     </div>
                     <div className="space-y-2 ml-4">
@@ -510,14 +542,14 @@ const TournamentPage: React.FC = () => {
                           <div className="font-medium text-foreground">Daily workout points</div>
                           <div className="text-muted-foreground">{participant.workoutDays.length} days × 15 points</div>
                         </div>
-                        <span className="bg-orange-100/50 dark:bg-orange-900/20 px-2 py-0.5 rounded text-xs font-medium text-orange-700 dark:text-orange-300">+{participant.pointsBreakdown.participationPoints} pts</span>
+                        <span className="bg-orange-100/80 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded text-xs font-medium border border-orange-200 dark:border-orange-700/50">+{participant.pointsBreakdown.participationPoints}pts</span>
                       </div>
                       <div className="flex flex-wrap gap-1 mt-2">
                         {participant.workoutDays.map((date, idx) => {
                           const [year, month, day] = date.split('-').map(Number);
                           const localDate = new Date(year, month - 1, day);
                           return (
-                            <span key={idx} className="bg-muted/30 text-muted-foreground px-2 py-0.5 rounded text-xs">
+                            <span key={idx} className="bg-muted/50 text-muted-foreground px-2 py-0.5 rounded text-xs border border-border/30">
                               {localDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                             </span>
                           );
@@ -531,7 +563,7 @@ const TournamentPage: React.FC = () => {
                 {participant.pointsBreakdown.consistencyPoints > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="bg-green-100/50 dark:bg-green-900/20 px-2 py-0.5 rounded text-xs font-medium text-green-700 dark:text-green-300">Consistency</span>
+                      <span className="bg-green-100/80 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded text-xs font-medium border border-green-200 dark:border-green-700/50">Consistency</span>
                     </div>
                     <div className="ml-4">
                       <div className="flex justify-between items-center text-xs">
@@ -539,27 +571,41 @@ const TournamentPage: React.FC = () => {
                           <div className="font-medium text-foreground">5+ workout days bonus</div>
                           <div className="text-muted-foreground">Extra points for consistency</div>
                         </div>
-                        <span className="bg-green-100/50 dark:bg-green-900/20 px-2 py-0.5 rounded text-xs font-medium text-green-700 dark:text-green-300">+{participant.pointsBreakdown.consistencyPoints} pts</span>
+                        <span className="bg-green-100/80 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded text-xs font-medium border border-green-200 dark:border-green-700/50">+{participant.pointsBreakdown.consistencyPoints}pts</span>
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* Bonus Section (Badges) */}
+                {/* Bonus Section (Badges) - Enhanced with clearer display */}
                 {participant.badges.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="bg-pink-100/50 dark:bg-pink-900/20 px-2 py-0.5 rounded text-xs font-medium text-pink-700 dark:text-pink-300">Bonus</span>
-                      <span className="text-xs text-muted-foreground">({participant.badges.length} badges)</span>
+                      <span className="bg-gradient-to-r from-pink-100/80 to-purple-100/80 dark:from-pink-900/30 dark:to-purple-900/30 text-pink-700 dark:text-pink-300 px-2 py-0.5 rounded text-xs font-medium border border-pink-200 dark:border-pink-700/50">
+                        Bonus
+                      </span>
+                      <span className="text-xs text-muted-foreground">({participant.badges.length} badge{participant.badges.length !== 1 ? 's' : ''})</span>
                     </div>
                     <div className="space-y-2 ml-4">
                       {participant.badges.map(badge => (
                         <div key={badge.id} className="flex justify-between items-start text-xs">
-                          <div className="flex-1">
-                            <div className="font-medium text-foreground">{badge.name}</div>
-                            <div className="text-muted-foreground">{badge.description}</div>
+                          <div className="flex items-start gap-2 flex-1">
+                            <div className={`p-1 rounded-lg border ${getBadgeStyles(badge.type)}`}>
+                              {getBadgeIcon(badge.type)}
+                            </div>
+                            <div className="flex-1">
+                              <div className="font-medium text-foreground flex items-center gap-2">
+                                {badge.name}
+                                <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${getBadgeStyles(badge.type)}`}>
+                                  {getBadgeShortName(badge.type)}
+                                </span>
+                              </div>
+                              <div className="text-muted-foreground text-[11px] mt-0.5">{badge.description}</div>
+                            </div>
                           </div>
-                          <span className="bg-pink-100/50 dark:bg-pink-900/20 px-2 py-0.5 rounded text-xs font-medium text-pink-700 dark:text-pink-300">+{badge.points} pts</span>
+                          <span className="bg-gradient-to-r from-pink-100/80 to-purple-100/80 dark:from-pink-900/30 dark:to-purple-900/30 text-pink-700 dark:text-pink-300 px-2 py-0.5 rounded text-xs font-medium border border-pink-200 dark:border-pink-700/50 ml-2">
+                            +{badge.points}pts
+                          </span>
                         </div>
                       ))}
                     </div>
