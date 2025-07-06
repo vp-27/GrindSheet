@@ -237,17 +237,30 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
       if (!roastStorage.secondPlaceRoast) {
         const secondPlaceRoasts = [
           "First place but make it fancy",
-          "Second place: forever the bridesmaid, never the bride.",
-          "You’re so close, but {name} is still flexing on you.",
-          "Silver medal, golden disappointment.",
-          "You peaked at 'almost good enough'.",
-          "Second place: the best at losing.",
-          "Maybe if you trained as hard as {name}, you'd be on top.",
-          "First place is using your effort as a warmup.",
-          "Second place: the king of 'not quite'.",
-          "Silver looks good on you, but gold would look better—on someone else.",
           "You’re the sequel nobody asked for.",
-          "You’re the plot twist where the hero almost wins."
+          "You’re the plot twist where the hero almost wins.",
+          "Second place: the shadow of greatness.",
+          "You’re the warm-up act for the real champion.",
+          "Almost there, but almost doesn’t count in fitness.",
+          "Second place: where effort meets reality.",
+          "You’re the runner-up in a one-person race.",
+          "Second place: the silver lining of losing.",
+          "You’re the backup plan for victory.",
+          "Second place: the art of being nearly unstoppable.",
+          "You’re the reason first place looks so good.",
+          "Second place: the ultimate motivator for next time.",
+          "You’re the benchmark for everyone else’s success.",
+          "Second place: the proof that you’re almost elite.",
+          "You’re the NPC in someone else’s fitness journey.",
+          "Second place: the influencer of mediocrity.",
+          "You’re the Spotify ad between first place’s PRs.",
+          "Second place: the plot twist no one saw coming, but no one cared about either.",
+          "You’re the TikTok trend that peaked too soon.",
+          "{name} is writing your fitness obituary.",
+          "Second place: {name} is using your effort as a warm-up.",
+          "You’re the reason {name} sleeps easy at night.",
+          "{name} called—they said thanks for the easy win.",
+          "Second place: {name} is the main character, and you’re the side quest."
         ];
         let roast = secondPlaceRoasts[Math.floor(Math.random() * secondPlaceRoasts.length)];
         if (roast.includes('{name}')) {
@@ -260,8 +273,21 @@ const TournamentStatusCard: React.FC<TournamentStatusCardProps> = ({
     }
     
     if (rank === 3) {
-      if (pointsGap <= 20) return "Bronze is just warm-up 🥉";
-      return "Podium's getting cold 🧊";
+      const thirdPlaceRoasts = [
+        "Bronze is just warm-up 🥉",
+        "Podium's getting cold 🧊",
+        "Third place: the consolation prize of effort.",
+        "You’re the reason second place feels better about themselves.",
+        "{name} and second place are sharing a laugh at your expense.",
+        "Third place: the participation trophy of podiums.",
+        "You’re the buffer between greatness and mediocrity.",
+        "{name} is using your effort as a cooldown.",
+        "Third place: the sidekick of the sidekick.",
+        "You’re the reason the podium has three steps.",
+        "{name} called—they said thanks for keeping the podium warm."
+      ];
+      const roast = thirdPlaceRoasts[Math.floor(Math.random() * thirdPlaceRoasts.length)];
+      return roast.replace('{name}', topPerformer?.user?.name || 'first place');
     }
     
     if (rank <= totalParticipants / 2) {
