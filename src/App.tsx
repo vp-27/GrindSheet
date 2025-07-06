@@ -13,6 +13,7 @@ import Tournament from "./pages/Tournament";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
+import ToastDemo from "./pages/ToastDemo";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +33,7 @@ const App = () => (
                 <Route path="/tournament" element={<Tournament />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/toast-demo" element={<ToastDemo />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AppProvider>

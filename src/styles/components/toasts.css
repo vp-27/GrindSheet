@@ -1,0 +1,168 @@
+/* Enhanced Toast Animations */
+@keyframes toast-slide-in-from-top {
+  from {
+    opacity: 0;
+    transform: translateY(-100%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-slide-in-from-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(100%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-slide-out-to-right {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%) scale(0.95);
+  }
+}
+
+@keyframes toast-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes toast-fade-out {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+/* Success toast specific animation */
+@keyframes toast-success-bounce {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(0) scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Error toast specific animation */
+@keyframes toast-error-shake {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px) scale(0.9);
+  }
+  25% {
+    opacity: 1;
+    transform: translateX(10px) scale(1);
+  }
+  50% {
+    transform: translateX(-5px) scale(1);
+  }
+  75% {
+    transform: translateX(5px) scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Custom animations for our apple-style toasts */
+[data-state="open"][data-variant="success"] {
+  animation: toast-success-bounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+[data-state="open"][data-variant="destructive"] {
+  animation: toast-error-shake 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+[data-state="open"][data-variant="default"] {
+  animation: toast-fade-in 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Enhanced close button hover effect */
+[toast-close]:hover {
+  background-color: rgba(0, 0, 0, 0.1) !important;
+  transform: scale(1.1);
+}
+
+.dark [toast-close]:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Progress indicator for auto-dismiss */
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 0 0 1rem 1rem;
+  overflow: hidden;
+}
+
+.toast-progress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+  border-radius: inherit;
+  animation: toast-progress-fill var(--toast-duration, 4000ms) linear forwards;
+}
+
+.toast-progress.success::after {
+  background: linear-gradient(90deg, #10b981, #059669);
+}
+
+.toast-progress.destructive::after {
+  background: linear-gradient(90deg, #ef4444, #dc2626);
+}
+
+@keyframes toast-progress-fill {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* Mobile responsive improvements */
+@media (max-width: 640px) {
+  .toast-viewport {
+    padding: 1rem !important;
+  }
+  
+  [data-radix-toast-viewport] {
+    padding: 1rem !important;
+    max-width: 100% !important;
+  }
+}

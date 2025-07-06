@@ -9,6 +9,7 @@
 @import './components/tournament.css';
 @import './components/page-transitions.css';
 @import './components/auth.css';
+@import './components/toasts.css';
 
 /* Animation Styles */
 @import './animations/counters.css';

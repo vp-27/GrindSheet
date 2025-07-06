@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/lib/toast-utils';
 import { supabase } from '@/integrations/supabase/client';
 
 interface CategoryFormData {
@@ -42,7 +42,6 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
   categories,
   onSuccess
 }) => {
-  const { toast } = useToast();
   const form = useForm<CategoryFormData>({
     defaultValues: {
       name: editingCategory?.name || '',
@@ -89,12 +88,14 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
       
       if (response.error) throw response.error;
       
-      toast({
-        title: editingCategory ? 'Category updated' : 'Category added',
-        description: editingCategory 
-          ? 'Your category has been updated successfully.' 
-          : 'Your new category has been added successfully.',
-      });
+      if (editingCategory) {
+        toast.success({
+          title: 'Category updated',
+          description: 'Your category has been updated successfully.',
+        });
+      } else {
+        toast.categoryAdded(data.name);
+      }
       
       form.reset({ name: '', description: '' });
       onOpenChange(false);
@@ -103,10 +104,9 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
         onSuccess(response.data[0]);
       }
     } catch (error: any) {
-      toast({
+      toast.error({
         title: 'Error',
         description: error.message || 'An error occurred.',
-        variant: 'destructive',
       });
     }
   };
@@ -180,7 +180,6 @@ export const ExerciseDialog: React.FC<ExerciseDialogProps> = ({
   selectedCategoryId,
   onSuccess
 }) => {
-  const { toast } = useToast();
   const form = useForm<ExerciseFormData>({
     defaultValues: {
       name: editingExercise?.name || '',
@@ -235,12 +234,14 @@ export const ExerciseDialog: React.FC<ExerciseDialogProps> = ({
       
       if (response.error) throw response.error;
       
-      toast({
-        title: editingExercise ? 'Exercise updated' : 'Exercise added',
-        description: editingExercise 
-          ? 'Your exercise has been updated successfully.' 
-          : 'Your new exercise has been added successfully.',
-      });
+      if (editingExercise) {
+        toast.success({
+          title: 'Exercise updated',
+          description: 'Your exercise has been updated successfully.',
+        });
+      } else {
+        toast.exerciseAdded(data.name);
+      }
       
       form.reset({ name: '', description: '', categoryId: selectedCategoryId || '' });
       onOpenChange(false);
@@ -249,10 +250,9 @@ export const ExerciseDialog: React.FC<ExerciseDialogProps> = ({
         onSuccess(response.data[0]);
       }
     } catch (error: any) {
-      toast({
+      toast.error({
         title: 'Error',
         description: error.message || 'An error occurred.',
-        variant: 'destructive',
       });
     }
   };
