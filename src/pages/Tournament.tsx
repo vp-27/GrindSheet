@@ -674,108 +674,186 @@ const TournamentPage: React.FC = () => {
               </Button>
             </div>
 
-            {/* Streamlined Points Guide */}
+            {/* Enhanced Points Guide with Clear Structure */}
             {showPointsGuide && (
               <Card className="apple-card">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-2 text-lg">
-                    <Target className="h-4 w-4" />
-                    How Points Are Earned
+                <CardHeader className="pb-6">
+                  <CardTitle className="flex items-center gap-2 text-xl">
+                    <Target className="h-5 w-5 text-blue-600" />
+                    Tournament Scoring Guide
                   </CardTitle>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Earn points through various activities. Most points wins the weekly tournament!
+                  </p>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Trophy className="h-4 w-4 text-yellow-500" />
-                        <span className="text-sm font-semibold">Personal Record</span>
+                <CardContent className="space-y-6">
+                  {/* Main Point Categories */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                      <Trophy className="h-4 w-4 text-amber-500" />
+                      Core Activities
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Personal Records */}
+                      <div className="bg-amber-100/80 dark:bg-amber-900/30 rounded-xl p-4 border border-amber-200 dark:border-amber-700/50">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="p-1.5 rounded-lg bg-amber-200/80 dark:bg-amber-800/50">
+                            <Trophy className="h-4 w-4 text-amber-700 dark:text-amber-300" />
+                          </div>
+                          <span className="font-semibold text-amber-800 dark:text-amber-200">Personal Record (PR)</span>
+                        </div>
+                        <div className="mb-2">
+                          <span className="text-3xl font-bold text-amber-700 dark:text-amber-300">{POINTS_CONFIG.PR_ACHIEVEMENT.points}</span>
+                          <span className="text-sm text-amber-600 dark:text-amber-400 ml-2">points</span>
+                        </div>
+                        <p className="text-sm text-amber-700 dark:text-amber-300">
+                          Beat your previous best weight on any exercise
+                        </p>
                       </div>
-                      <div className="mb-2">
-                        <span className="text-2xl font-bold text-yellow-600">{POINTS_CONFIG.PR_ACHIEVEMENT.points}</span>
-                        <span className="text-sm text-muted-foreground ml-1">points</span>
+
+                      {/* Daily Workouts */}
+                      <div className="bg-orange-100/80 dark:bg-orange-900/30 rounded-xl p-4 border border-orange-200 dark:border-orange-700/50">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="p-1.5 rounded-lg bg-orange-200/80 dark:bg-orange-800/50">
+                            <CheckCircle className="h-4 w-4 text-orange-700 dark:text-orange-300" />
+                          </div>
+                          <span className="font-semibold text-orange-800 dark:text-orange-200">Daily Workout</span>
+                        </div>
+                        <div className="mb-2">
+                          <span className="text-3xl font-bold text-orange-700 dark:text-orange-300">{POINTS_CONFIG.DAILY_WORKOUT.points}</span>
+                          <span className="text-sm text-orange-600 dark:text-orange-400 ml-2">points</span>
+                        </div>
+                        <p className="text-sm text-orange-700 dark:text-orange-300">
+                          Log at least one exercise on any day
+                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        Beat your previous best weight on any exercise
-                      </p>
-                    </div>
-                    <div className="bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <TrendingUp className="h-4 w-4 text-blue-500" />
-                        <span className="text-sm font-semibold">Improvement</span>
+
+                      {/* Improvement Points */}
+                      <div className="bg-blue-100/80 dark:bg-blue-900/30 rounded-xl p-4 border border-blue-200 dark:border-blue-700/50">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="p-1.5 rounded-lg bg-blue-200/80 dark:bg-blue-800/50">
+                            <TrendingUp className="h-4 w-4 text-blue-700 dark:text-blue-300" />
+                          </div>
+                          <span className="font-semibold text-blue-800 dark:text-blue-200">Improvement Bonus</span>
+                        </div>
+                        <div className="mb-2">
+                          <span className="text-3xl font-bold text-blue-700 dark:text-blue-300">2</span>
+                          <span className="text-sm text-blue-600 dark:text-blue-400 ml-2">per 1% improvement</span>
+                        </div>
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                          Extra points for % improvement on PRs (max 50 per exercise)
+                        </p>
                       </div>
-                      <div className="mb-2">
-                        <span className="text-2xl font-bold text-blue-600">2</span>
-                        <span className="text-sm text-muted-foreground ml-1">points per 1% improvement (max 50 per exercise)</span>
+
+                      {/* Consistency Bonus */}
+                      <div className="bg-green-100/80 dark:bg-green-900/30 rounded-xl p-4 border border-green-200 dark:border-green-700/50">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="p-1.5 rounded-lg bg-green-200/80 dark:bg-green-800/50">
+                            <Calendar className="h-4 w-4 text-green-700 dark:text-green-300" />
+                          </div>
+                          <span className="font-semibold text-green-800 dark:text-green-200">Consistency Bonus</span>
+                        </div>
+                        <div className="mb-2">
+                          <span className="text-3xl font-bold text-green-700 dark:text-green-300">{POINTS_CONFIG.CONSISTENCY_BONUS.points}</span>
+                          <span className="text-sm text-green-600 dark:text-green-400 ml-2">points</span>
+                        </div>
+                        <p className="text-sm text-green-700 dark:text-green-300">
+                          Work out 5+ days in a week
+                        </p>
                       </div>
-                      <p className="text-xs text-muted-foreground">
-                        Earn points for every percent you improve your PR in a week
-                      </p>
-                    </div>
-                    <div className="bg-pink-50 dark:bg-pink-900/20 rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Award className="h-4 w-4 text-pink-500" />
-                        <span className="text-sm font-semibold">Competitive Bonuses</span>
-                      </div>
-                      <div className="mb-2">
-                        <span className="text-2xl font-bold text-pink-600">20</span>
-                        <span className="text-sm text-muted-foreground ml-1">Takeover</span>
-                        <span className="text-2xl font-bold text-pink-600 ml-4">10</span>
-                        <span className="text-sm text-muted-foreground ml-1">Close Win</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Takeover: Beat a friend’s PR in a shared exercise. Close Win: Beat a friend’s PR by less than 5%.
-                      </p>
-                    </div>
-                    <div className="bg-purple-50 dark:bg-purple-900/20 rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Star className="h-4 w-4 text-purple-500" />
-                        <span className="text-sm font-semibold">Special Badges</span>
-                      </div>
-                      <div className="mb-2">
-                        <span className="text-2xl font-bold text-purple-600">5-25</span>
-                        <span className="text-sm text-muted-foreground ml-1">points</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Weekend Warrior, First PR, Perfect Week, etc.
-                      </p>
-                    </div>
-                    <div className="bg-green-50 dark:bg-green-900/20 rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-sm font-semibold">Daily Workout</span>
-                      </div>
-                      <div className="mb-2">
-                        <span className="text-2xl font-bold text-green-600">{POINTS_CONFIG.DAILY_WORKOUT.points}</span>
-                        <span className="text-sm text-muted-foreground ml-1">points</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Log at least one exercise on any day
-                      </p>
-                    </div>
-                    <div className="bg-orange-50 dark:bg-orange-900/20 rounded-xl p-4">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Flame className="h-4 w-4 text-orange-500" />
-                        <span className="text-sm font-semibold">First Time PR</span>
-                      </div>
-                      <div className="mb-2">
-                        <span className="text-2xl font-bold text-orange-600">10</span>
-                        <span className="text-sm text-muted-foreground ml-1">points</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        First time logging an exercise (not as much as a true PR)
-                      </p>
                     </div>
                   </div>
-                  
-                  <div className="border-t border-border/50 pt-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Crown className="h-4 w-4 text-amber-500" />
-                      <span className="text-sm font-semibold text-foreground">Weekly Tournament</span>
+
+                  {/* Special Features */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                      <Zap className="h-4 w-4 text-purple-500" />
+                      Special Features
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {/* Competitive Bonuses */}
+                      <div className="bg-purple-100/80 dark:bg-purple-900/30 rounded-xl p-4 border border-purple-200 dark:border-purple-700/50">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="p-1.5 rounded-lg bg-purple-200/80 dark:bg-purple-800/50">
+                            <Users className="h-4 w-4 text-purple-700 dark:text-purple-300" />
+                          </div>
+                          <span className="font-semibold text-purple-800 dark:text-purple-200">Competitive Bonuses</span>
+                        </div>
+                        <div className="space-y-1 mb-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl font-bold text-purple-700 dark:text-purple-300">20</span>
+                            <span className="text-sm text-purple-600 dark:text-purple-400">Takeover</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xl font-bold text-purple-700 dark:text-purple-300">10</span>
+                            <span className="text-sm text-purple-600 dark:text-purple-400">Close Win (&lt;5%)</span>
+                          </div>
+                        </div>
+                        <p className="text-sm text-purple-700 dark:text-purple-300">
+                          Beat friends' PRs for extra points
+                        </p>
+                      </div>
+
+                      {/* Achievement Badges */}
+                      <div className="bg-pink-100/80 dark:bg-pink-900/30 rounded-xl p-4 border border-pink-200 dark:border-pink-700/50">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="p-1.5 rounded-lg bg-pink-200/80 dark:bg-pink-800/50">
+                            <Star className="h-4 w-4 text-pink-700 dark:text-pink-300" />
+                          </div>
+                          <span className="font-semibold text-pink-800 dark:text-pink-200">Achievement Badges</span>
+                        </div>
+                        <div className="mb-2">
+                          <span className="text-2xl font-bold text-pink-700 dark:text-pink-300">5-100</span>
+                          <span className="text-sm text-pink-600 dark:text-pink-400 ml-2">points</span>
+                        </div>
+                        <div className="space-y-1 text-sm text-pink-700 dark:text-pink-300">
+                          <div className="flex items-center gap-2">
+                            <Zap className="h-3 w-3" />
+                            <span>Weekend Warrior (20pts)</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Crown className="h-3 w-3" />
+                            <span>Consistency King (50pts)</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Flame className="h-3 w-3" />
+                            <span>Perfect Week (100pts)</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                      Compete with friends every week (Monday-Sunday). Most points wins! 
-                      Tournament resets automatically each Monday.
-                    </p>
+                  </div>
+
+                  {/* Tournament Info */}
+                  <div className="border-t border-border/30 pt-6">
+                    <div className="bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-xl p-4 border border-blue-200/50 dark:border-blue-700/30">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Crown className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        <span className="text-lg font-semibold text-foreground">Weekly Tournament</span>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">Schedule: Monday - Sunday</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Trophy className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">Winner: Most total points</span>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center gap-2">
+                            <Timer className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">Auto-resets every Monday</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Users className="h-4 w-4 text-muted-foreground" />
+                            <span className="font-medium">Compete with friends</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
