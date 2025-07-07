@@ -52,14 +52,32 @@ export const calculateProgress = (logs: ExerciseLog[], exerciseId: string, exerc
     log.weightUnit === 'kg' ? convertWeight(log.weight, 'kg') : log.weight
   ));
   
-  // Calculate percentage gains
-  const percentGainFromPrevious = previousWeight 
-    ? ((currentWeight - previousWeight) / previousWeight) * 100
-    : undefined;
+  // Calculate percentage gains with special handling for bodyweight exercises
+  let percentGainFromPrevious = undefined;
+  if (previousWeight !== undefined) {
+    if (previousWeight > 0) {
+      percentGainFromPrevious = ((currentWeight - previousWeight) / previousWeight) * 100;
+    } else if (previousWeight === 0 && currentWeight > 0) {
+      percentGainFromPrevious = currentWeight * 10; // 10% per lb when starting from bodyweight
+    } else if (previousWeight === 0 && currentWeight === 0) {
+      percentGainFromPrevious = 0; // No change in bodyweight
+    } else if (previousWeight > 0 && currentWeight === 0) {
+      percentGainFromPrevious = -100; // Back to bodyweight
+    }
+  }
     
-  const percentGainFromStart = startingWeight 
-    ? ((currentWeight - startingWeight) / startingWeight) * 100
-    : undefined;
+  let percentGainFromStart = undefined;
+  if (startingWeight !== undefined) {
+    if (startingWeight > 0) {
+      percentGainFromStart = ((currentWeight - startingWeight) / startingWeight) * 100;
+    } else if (startingWeight === 0 && currentWeight > 0) {
+      percentGainFromStart = currentWeight * 10; // 10% per lb when starting from bodyweight
+    } else if (startingWeight === 0 && currentWeight === 0) {
+      percentGainFromStart = 0; // No change in bodyweight
+    } else if (startingWeight > 0 && currentWeight === 0) {
+      percentGainFromStart = -100; // Back to bodyweight
+    }
+  }
 
   return {
     exercise,
@@ -85,8 +103,23 @@ export const getProgressChartData = (logs: ExerciseLog[], exerciseId: string): P
   const startingWeight = exerciseLogs[0].weight;
   
   return exerciseLogs.map(log => {
-    const percentGain = ((log.weight - startingWeight) / startingWeight) * 100;
-    
+    // Handle percentage calculation for bodyweight exercises
+    let percentGain = 0;
+    if (startingWeight > 0) {
+      // Standard percentage calculation for weighted exercises
+      percentGain = ((log.weight - startingWeight) / startingWeight) * 100;
+    } else if (startingWeight === 0 && log.weight > 0) {
+      // When transitioning from bodyweight (0) to weighted, show meaningful progress
+      percentGain = log.weight * 10; // 10% gain per lb when starting from bodyweight
+    } else if (startingWeight === 0 && log.weight === 0) {
+      // Bodyweight to bodyweight stays at 0% change
+      percentGain = 0;
+    }
+    // If starting weight > 0 but current is 0, calculate normal percentage
+    else if (startingWeight > 0 && log.weight === 0) {
+      percentGain = -100; // Complete loss back to bodyweight
+    }
+
     return {
       date: new Date(log.timestamp).toLocaleDateString(),
       weight: log.weight,
@@ -217,7 +250,23 @@ export const getOverallProgressChartData = (
       };
     }
     const startWeight = exerciseStartWeights.get(exerciseId) || log.weight;
-    const percentGain = startWeight > 0 ? ((log.weight - startWeight) / startWeight) * 100 : 0;
+    // Handle percentage calculation for bodyweight exercises (starting weight = 0)
+    let percentGain = 0;
+    if (startWeight > 0) {
+      // Standard percentage calculation for weighted exercises
+      percentGain = ((log.weight - startWeight) / startWeight) * 100;
+    } else if (startWeight === 0 && log.weight > 0) {
+      // When transitioning from bodyweight (0) to weighted, show the weight as progress
+      // Use a base value for percentage calculation (e.g., treat 0->X as 100% gain per X lbs)
+      percentGain = log.weight * 10; // 10% gain per lb when starting from bodyweight
+    } else if (startWeight === 0 && log.weight === 0) {
+      // Bodyweight to bodyweight stays at 0% change
+      percentGain = 0;
+    }
+    // If current weight goes back to 0 from a positive start weight, calculate normal percentage
+    else if (startWeight > 0 && log.weight === 0) {
+      percentGain = -100; // Complete loss of weight (back to bodyweight)
+    }
     const isFirstLogForExercise = exerciseStartWeights.get(exerciseId) === log.weight && 
       !sortedLogs.some(prevLog => 
         prevLog.exerciseId === exerciseId && 

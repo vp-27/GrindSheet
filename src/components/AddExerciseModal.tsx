@@ -144,10 +144,10 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
     }
 
     const weightValue = parseFloat(weight);
-    if (isNaN(weightValue) || weightValue <= 0) {
+    if (isNaN(weightValue) || weightValue < 0) {
       toast({
         title: 'Invalid weight',
-        description: 'Please enter a valid weight value.',
+        description: 'Please enter a valid weight value (0 for bodyweight exercises).',
         variant: 'destructive',
       });
       return;

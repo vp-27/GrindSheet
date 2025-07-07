@@ -178,10 +178,10 @@ const Dashboard = () => {
     relevantExercises.forEach(exercise => {
       const progress = calculateProgress(exerciseLogs, exercise.id, exercise);
       
-      // Only include exercises with data
-      if (progress.currentWeight > 0) {
+      // Only include exercises with actual logs (check for exercise logs rather than weight > 0)
+      const exerciseLogsForThis = exerciseLogs.filter(log => log.exerciseId === exercise.id);
+      if (exerciseLogsForThis.length > 0) {
         // Add the most recent log timestamp for sorting
-        const exerciseLogsForThis = exerciseLogs.filter(log => log.exerciseId === exercise.id);
         const mostRecentLog = exerciseLogsForThis.reduce((latest, log) => 
           new Date(log.timestamp) > new Date(latest.timestamp) ? log : latest
         );

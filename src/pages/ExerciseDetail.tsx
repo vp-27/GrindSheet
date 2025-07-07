@@ -116,12 +116,12 @@ const ExerciseDetail = () => {
       return;
     }
     
-    // Validate weight is a valid positive number
+    // Validate weight is a valid number (0 allowed for bodyweight)
     const weightValue = parseFloat(weight);
-    if (isNaN(weightValue) || weightValue <= 0) {
+    if (isNaN(weightValue) || weightValue < 0) {
       toast({
         title: 'Invalid weight',
-        description: 'Please enter a valid weight value.',
+        description: 'Please enter a valid weight value (0 for bodyweight exercises).',
         variant: 'destructive',
       });
       return;
@@ -182,12 +182,12 @@ const ExerciseDetail = () => {
     e.preventDefault();
     if (!editLog) return;
     
-    // Validate weight is a valid positive number
+    // Validate weight is a valid number (0 allowed for bodyweight)
     const weightValue = parseFloat(editForm.weight);
-    if (!editForm.weight || isNaN(weightValue) || weightValue <= 0) {
+    if (!editForm.weight || isNaN(weightValue) || weightValue < 0) {
       toast({
         title: 'Invalid weight',
-        description: 'Please enter a valid weight value.',
+        description: 'Please enter a valid weight value (0 for bodyweight exercises).',
         variant: 'destructive',
       });
       return;

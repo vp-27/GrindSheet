@@ -22,7 +22,7 @@ const ProgressCard: React.FC<ProgressCardProps> = ({ progress, onClick }) => {
 
   const isGain = percentGainFromPrevious && percentGainFromPrevious > 0;
   const isLoss = percentGainFromPrevious && percentGainFromPrevious < 0;
-  const isPR = personalRecord === currentWeight && currentWeight > 0;
+  const isPR = personalRecord === currentWeight && personalRecord !== undefined;
 
   return (
     <Card 
