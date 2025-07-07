@@ -86,12 +86,21 @@ export interface TournamentParticipant {
     participationPoints: number;
     bonusPoints: number;
     competitivePoints?: number; // NEW: for competitive bonuses
+    exercisePoints?: number; // NEW: for individual exercise points
+    varietyPoints?: number; // NEW: for exercise variety bonuses
   };
   rank: number;
   badges: TournamentBadge[];
   workoutDays: string[]; // ISO date strings of days they worked out
   prDetails: PRDetail[]; // Detailed PR achievements
   competitiveDetails?: { exerciseId: string; exerciseName: string; type: string; targetUser?: string; points: number }[]; // Add exerciseName
+  exerciseStats?: { // NEW: exercise statistics
+    totalExercises: number;
+    uniqueExercises: number;
+    averageExercisesPerDay: number;
+    coreExercises: number;
+    varietyDays: { date: string; exerciseCount: number; bonus: number }[];
+  };
 }
 
 export interface PRDetail {
@@ -126,11 +135,13 @@ export enum BadgeType {
   WEEKEND_WARRIOR = 'weekend_warrior',
   CATEGORY_MASTER = 'category_master',
   NEWCOMER_BONUS = 'newcomer_bonus',
-  PERFECT_WEEK = 'perfect_week'
+  PERFECT_WEEK = 'perfect_week',
+  VOLUME_CRUSHER = 'volume_crusher', // NEW: for high exercise volume
+  CORE_DESTROYER = 'core_destroyer' // NEW: for core focus
 }
 
 export interface PointsRule {
-  type: 'pr_achievement' | 'daily_workout' | 'improvement_percent' | 'consistency_bonus' | 'weekend_bonus' | 'category_completion';
+  type: 'pr_achievement' | 'daily_workout' | 'exercise_completed' | 'daily_workout_base' | 'exercise_variety_bonus' | 'improvement_percent' | 'consistency_bonus' | 'weekend_bonus' | 'category_completion' | 'core_focus_bonus';
   points: number;
   description: string;
   multiplier?: number;

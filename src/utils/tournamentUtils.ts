@@ -13,7 +13,7 @@ import {
 } from '../types';
 import { calculateProgress } from './progressUtils';
 
-// --- Revamped Point System ---
+// --- Balanced Point System for Muscle Growth & Plateau Breaking ---
 // Points configuration for different actions
 export const POINTS_CONFIG: Record<string, PointsRule> = {
   PR_ACHIEVEMENT: {
@@ -21,10 +21,20 @@ export const POINTS_CONFIG: Record<string, PointsRule> = {
     points: 75,
     description: 'New personal record'
   },
-  DAILY_WORKOUT: {
-    type: 'daily_workout', 
-    points: 15,
-    description: 'Complete a workout'
+  EXERCISE_COMPLETED: {
+    type: 'exercise_completed',
+    points: 8,
+    description: 'Points per exercise completed'
+  },
+  DAILY_WORKOUT_BASE: {
+    type: 'daily_workout_base', 
+    points: 6,
+    description: 'Base points for working out (min 2 exercises)'
+  },
+  EXERCISE_VARIETY_BONUS: {
+    type: 'exercise_variety_bonus',
+    points: 4,
+    description: 'Bonus per exercise beyond the first 2'
   },
   IMPROVEMENT_PERCENT: {
     type: 'improvement_percent',
@@ -39,14 +49,18 @@ export const POINTS_CONFIG: Record<string, PointsRule> = {
   },
   WEEKEND_BONUS: {
     type: 'weekend_bonus',
-    points: 10,
-    description: 'Extra points for weekend workouts',
-    multiplier: 2
+    points: 8,
+    description: 'Extra points for weekend workouts'
   },
   CATEGORY_COMPLETION: {
     type: 'category_completion',
-    points: 40,
+    points: 50,
     description: 'Work all muscle groups in a week'
+  },
+  CORE_FOCUS_BONUS: {
+    type: 'core_focus_bonus',
+    points: 15,
+    description: 'Extra points for core exercises'
   }
 };
 
@@ -86,6 +100,16 @@ export const BADGE_DEFINITIONS: Record<BadgeType, { name: string; description: s
     name: 'Perfect Week',
     description: 'Achieved PRs and perfect consistency',
     points: 100
+  },
+  [BadgeType.VOLUME_CRUSHER]: {
+    name: 'Volume Crusher',
+    description: 'Averaged 3.5+ exercises per workout',
+    points: 35
+  },
+  [BadgeType.CORE_DESTROYER]: {
+    name: 'Core Destroyer',
+    description: 'Completed 6+ core exercises this week',
+    points: 30
   }
 };
 
@@ -170,14 +194,16 @@ export const calculateTournamentPoints = (
            logDate <= endDate;
   });
 
-  // Initialize points breakdown
+  // Initialize points breakdown with new categories
   let pointsBreakdown = {
     prPoints: 0,
     consistencyPoints: 0,
     improvementPoints: 0,
     participationPoints: 0,
     bonusPoints: 0,
-    competitivePoints: 0
+    competitivePoints: 0,
+    exercisePoints: 0,
+    varietyPoints: 0
   };
 
   let badges: TournamentBadge[] = [];
@@ -193,8 +219,52 @@ export const calculateTournamentPoints = (
   }));
   workoutDays = Array.from(workoutDates);
 
-  // 1. Daily workout points
-  pointsBreakdown.participationPoints = workoutDates.size * POINTS_CONFIG.DAILY_WORKOUT.points;
+  // NEW: Calculate exercise-based points
+  let totalExercises = 0;
+  let uniqueExercises = new Set<string>();
+  let coreExercises = 0;
+  let exercisesPerDay = new Map<string, number>();
+  let varietyDays: { date: string; exerciseCount: number; bonus: number }[] = [];
+
+  // Count exercises per day and track variety
+  userLogs.forEach(log => {
+    totalExercises++;
+    uniqueExercises.add(log.exerciseId);
+    
+    // Track exercises per day
+    const logDate = new Date(log.timestamp);
+    const dateKey = `${logDate.getFullYear()}-${String(logDate.getMonth() + 1).padStart(2, '0')}-${String(logDate.getDate()).padStart(2, '0')}`;
+    exercisesPerDay.set(dateKey, (exercisesPerDay.get(dateKey) || 0) + 1);
+    
+    // Check for core exercises (exercises with "core", "abs", "plank" in name)
+    const exercise = exercises.find(ex => ex.id === log.exerciseId);
+    if (exercise && /core|abs|plank|crunch|russian twist|mountain climber/i.test(exercise.name)) {
+      coreExercises++;
+      pointsBreakdown.bonusPoints += POINTS_CONFIG.CORE_FOCUS_BONUS.points;
+    }
+  });
+
+  // Calculate exercise points (5 points per exercise)
+  pointsBreakdown.exercisePoints = totalExercises * POINTS_CONFIG.EXERCISE_COMPLETED.points;
+
+  // Calculate daily workout and variety points
+  exercisesPerDay.forEach((exerciseCount, date) => {
+    if (exerciseCount >= 2) {
+      // Base daily workout points (minimum 2 exercises required)
+      pointsBreakdown.participationPoints += POINTS_CONFIG.DAILY_WORKOUT_BASE.points;
+      
+      // Variety bonus for exercises beyond the first 2
+      if (exerciseCount > 2) {
+        const varietyBonus = (exerciseCount - 2) * POINTS_CONFIG.EXERCISE_VARIETY_BONUS.points;
+        pointsBreakdown.varietyPoints += varietyBonus;
+        varietyDays.push({
+          date,
+          exerciseCount,
+          bonus: varietyBonus
+        });
+      }
+    }
+  });
 
   // 2. Weekend bonus points
   let weekendWorkouts = 0;
@@ -214,7 +284,7 @@ export const calculateTournamentPoints = (
   // 4. PR points, improvement points, and competitive bonuses
   const exerciseProgress = new Map<string, { hadPR: boolean; improvementPercent: number }>();
   const prDetails: PRDetail[] = [];
-  const competitiveDetails: { exerciseId: string; type: string; targetUser?: string; points: number; }[] = [];
+  const competitiveDetails: { exerciseId: string; exerciseName: string; type: string; targetUser?: string; points: number; }[] = [];
   exercises.forEach(exercise => {
     const exerciseLogs = logs.filter(log => log.exerciseId === exercise.id);
     const userExerciseLogs = exerciseLogs.filter(log => log.userId === user.id);
@@ -298,20 +368,23 @@ export const calculateTournamentPoints = (
     pointsBreakdown.bonusPoints += POINTS_CONFIG.CATEGORY_COMPLETION.points;
   }
 
-  // 6. Calculate badges
-  badges = calculateBadges(user, userLogs, exerciseProgress, workoutDates, categoriesWorked, categories, allParticipantLogs, tournamentStart);
+  // Calculate exercise statistics
+  const exerciseStats = {
+    totalExercises,
+    uniqueExercises: uniqueExercises.size,
+    averageExercisesPerDay: workoutDates.size > 0 ? totalExercises / workoutDates.size : 0,
+    coreExercises,
+    varietyDays
+  };
+
+  // 6. Calculate badges (after exerciseStats is defined)
+  badges = calculateBadges(user, userLogs, exerciseProgress, workoutDates, categoriesWorked, categories, allParticipantLogs, tournamentStart, exerciseStats);
   // Add badge points to bonus
   pointsBreakdown.bonusPoints += badges.reduce((sum, badge) => sum + badge.points, 0);
-  // Calculate total points (include competitivePoints)
+  
+  // Calculate total points (include all new point categories)
   const totalPoints = Object.values(pointsBreakdown).reduce((sum, points) => sum + points, 0);
-  // Ensure all competitiveDetails have exerciseName (for type safety)
-  const competitiveDetailsWithName = competitiveDetails.map(cd => ({
-    exerciseId: cd.exerciseId,
-    exerciseName: cd.exerciseName || (exercises.find(e => e.id === cd.exerciseId)?.name ?? ''),
-    type: cd.type,
-    targetUser: cd.targetUser,
-    points: cd.points
-  }));
+  
   return {
     userId: user.id,
     user,
@@ -321,7 +394,8 @@ export const calculateTournamentPoints = (
     badges,
     workoutDays,
     prDetails,
-    competitiveDetails: competitiveDetailsWithName
+    competitiveDetails: competitiveDetails,
+    exerciseStats
   };
 };
 
@@ -336,7 +410,8 @@ const calculateBadges = (
   categoriesWorked: Set<string>,
   allCategories: Category[],
   allParticipantLogs: ExerciseLog[],
-  tournamentStart: string
+  tournamentStart: string,
+  exerciseStats: { totalExercises: number; uniqueExercises: number; averageExercisesPerDay: number; coreExercises: number; varietyDays: { date: string; exerciseCount: number; bonus: number }[] }
 ): TournamentBadge[] => {
   const badges: TournamentBadge[] = [];
   const now = new Date().toISOString();
@@ -409,6 +484,26 @@ const calculateBadges = (
       id: `${user.id}-newcomer-bonus`,
       type: BadgeType.NEWCOMER_BONUS,
       ...BADGE_DEFINITIONS[BadgeType.NEWCOMER_BONUS],
+      earnedAt: now
+    });
+  }
+
+  // Volume Crusher (averaged 3.5+ exercises per workout - more achievable)
+  if (exerciseStats.averageExercisesPerDay >= 3.5) {
+    badges.push({
+      id: `${user.id}-volume-crusher`,
+      type: BadgeType.VOLUME_CRUSHER,
+      ...BADGE_DEFINITIONS[BadgeType.VOLUME_CRUSHER],
+      earnedAt: now
+    });
+  }
+
+  // Core Destroyer (6+ core exercises this week - more achievable)
+  if (exerciseStats.coreExercises >= 6) {
+    badges.push({
+      id: `${user.id}-core-destroyer`,
+      type: BadgeType.CORE_DESTROYER,
+      ...BADGE_DEFINITIONS[BadgeType.CORE_DESTROYER],
       earnedAt: now
     });
   }

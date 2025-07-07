@@ -23,7 +23,9 @@ import {
   CheckCircle,
   Timer,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Activity,
+  Plus
 } from 'lucide-react';
 import { 
   Tournament, 
@@ -141,6 +143,10 @@ const TournamentPage: React.FC = () => {
         return <CheckCircle className="h-3 w-3" />;
       case BadgeType.PERFECT_WEEK:
         return <Flame className="h-3 w-3" />;
+      case BadgeType.VOLUME_CRUSHER:
+        return <Activity className="h-3 w-3" />;
+      case BadgeType.CORE_DESTROYER:
+        return <Target className="h-3 w-3" />;
       default:
         return <Award className="h-3 w-3" />;
     }
@@ -163,6 +169,10 @@ const TournamentPage: React.FC = () => {
         return 'New';
       case BadgeType.PERFECT_WEEK:
         return 'Perfect';
+      case BadgeType.VOLUME_CRUSHER:
+        return 'Volume';
+      case BadgeType.CORE_DESTROYER:
+        return 'Core';
       default:
         return 'Badge';
     }
@@ -185,6 +195,10 @@ const TournamentPage: React.FC = () => {
         return 'bg-teal-100/80 text-teal-700 border-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-700/50';
       case BadgeType.PERFECT_WEEK:
         return 'bg-red-100/80 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700/50';
+      case BadgeType.VOLUME_CRUSHER:
+        return 'bg-indigo-100/80 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700/50';
+      case BadgeType.CORE_DESTROYER:
+        return 'bg-emerald-100/80 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700/50';
       default:
         return 'bg-gray-100/80 text-gray-700 border-gray-200 dark:bg-gray-900/30 dark:text-gray-300 dark:border-gray-700/50';
     }
@@ -348,7 +362,7 @@ const TournamentPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Points Breakdown (always visible) - More compact */}
+          {/* Points Breakdown (always visible) - More compact with NEW system */}
           <div className="mt-3 pt-3 border-t border-border/30 transition-all duration-300">
             <div className="grid grid-cols-3 gap-2 text-sm">
               <div className="flex justify-between items-center">
@@ -365,8 +379,21 @@ const TournamentPage: React.FC = () => {
                 </span>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground text-xs">Improve:</span>
+                <span className="text-muted-foreground text-xs">Volume:</span>
                 <span className="font-medium bg-blue-100/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs border border-blue-200 dark:border-blue-700/50">
+                  {selectedTournament?.id === currentTournament?.id ? (
+                    <AnimatedCounter
+                      value={participant.pointsBreakdown.exercisePoints || 0}
+                      duration={600}
+                    />
+                  ) : (
+                    participant.pointsBreakdown.exercisePoints || 0
+                  )}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground text-xs">Improve:</span>
+                <span className="font-medium bg-indigo-100/80 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded text-xs border border-indigo-200 dark:border-indigo-700/50">
                   {selectedTournament?.id === currentTournament?.id ? (
                     <AnimatedCounter
                       value={participant.pointsBreakdown.improvementPoints}
@@ -374,19 +401,6 @@ const TournamentPage: React.FC = () => {
                     />
                   ) : (
                     participant.pointsBreakdown.improvementPoints
-                  )}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground text-xs">Comp:</span>
-                <span className="font-medium bg-purple-100/80 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded text-xs border border-purple-200 dark:border-purple-700/50">
-                  {selectedTournament?.id === currentTournament?.id ? (
-                    <AnimatedCounter
-                      value={participant.pointsBreakdown.competitivePoints || 0}
-                      duration={600}
-                    />
-                  ) : (
-                    participant.pointsBreakdown.competitivePoints || 0
                   )}
                 </span>
               </div>
@@ -400,6 +414,32 @@ const TournamentPage: React.FC = () => {
                     />
                   ) : (
                     participant.pointsBreakdown.participationPoints
+                  )}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground text-xs">Variety:</span>
+                <span className="font-medium bg-purple-100/80 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded text-xs border border-purple-200 dark:border-purple-700/50">
+                  {selectedTournament?.id === currentTournament?.id ? (
+                    <AnimatedCounter
+                      value={participant.pointsBreakdown.varietyPoints || 0}
+                      duration={600}
+                    />
+                  ) : (
+                    participant.pointsBreakdown.varietyPoints || 0
+                  )}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-muted-foreground text-xs">Comp:</span>
+                <span className="font-medium bg-teal-100/80 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2 py-0.5 rounded text-xs border border-teal-200 dark:border-teal-700/50">
+                  {selectedTournament?.id === currentTournament?.id ? (
+                    <AnimatedCounter
+                      value={participant.pointsBreakdown.competitivePoints || 0}
+                      duration={600}
+                    />
+                  ) : (
+                    participant.pointsBreakdown.competitivePoints || 0
                   )}
                 </span>
               </div>
@@ -505,11 +545,44 @@ const TournamentPage: React.FC = () => {
                   </div>
                 )}
 
+                {/* Variety Bonus Section */}
+                {(participant.pointsBreakdown.varietyPoints || 0) > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="bg-purple-100/80 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded text-xs font-medium border border-purple-200 dark:border-purple-700/50">Variety</span>
+                    </div>
+                    <div className="space-y-2 ml-4">
+                      <div className="flex justify-between items-center text-xs">
+                        <div>
+                          <div className="font-medium text-foreground">Exercise variety bonus</div>
+                          <div className="text-muted-foreground">+3 pts for each exercise beyond 2nd per day</div>
+                        </div>
+                        <span className="bg-purple-100/80 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded text-xs font-medium border border-purple-200 dark:border-purple-700/50">+{participant.pointsBreakdown.varietyPoints || 0}pts</span>
+                      </div>
+                      {participant.exerciseStats?.varietyDays && participant.exerciseStats.varietyDays.length > 0 && (
+                        <div className="text-xs text-muted-foreground mt-2">
+                          <div className="font-medium mb-1">🎯 High-volume days:</div>
+                          {participant.exerciseStats.varietyDays.map((day, idx) => {
+                            const [year, month, dayNum] = day.date.split('-').map(Number);
+                            const date = new Date(year, month - 1, dayNum);
+                            return (
+                              <div key={idx} className="flex justify-between items-center">
+                                <span>{date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}: {day.exerciseCount} exercises</span>
+                                <span className="text-purple-600 dark:text-purple-400 font-medium">+{day.bonus}pts</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {/* Competition Section */}
                 {participant.competitiveDetails && participant.competitiveDetails.length > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-3">
-                      <span className="bg-purple-100/80 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded text-xs font-medium border border-purple-200 dark:border-purple-700/50">Competition</span>
+                      <span className="bg-teal-100/80 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2 py-0.5 rounded text-xs font-medium border border-teal-200 dark:border-teal-700/50">Competition</span>
                       <span className="text-xs text-muted-foreground">({participant.competitiveDetails.length})</span>
                     </div>
                     <div className="space-y-2 ml-4">
@@ -529,7 +602,59 @@ const TournamentPage: React.FC = () => {
                   </div>
                 )}
 
-                {/* Daily Workouts Section */}
+                {/* Exercise Volume Section */}
+                {(participant.pointsBreakdown.exercisePoints || 0) > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="bg-blue-100/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs font-medium border border-blue-200 dark:border-blue-700/50">Volume</span>
+                      <span className="text-xs text-muted-foreground">({participant.exerciseStats?.totalExercises || 0} total)</span>
+                    </div>
+                    <div className="space-y-2 ml-4">
+                      <div className="flex justify-between items-center text-xs">
+                        <div>
+                          <div className="font-medium text-foreground">Exercise volume points</div>
+                          <div className="text-muted-foreground">{participant.exerciseStats?.totalExercises || 0} exercises × 5 points</div>
+                        </div>
+                        <span className="bg-blue-100/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs font-medium border border-blue-200 dark:border-blue-700/50">+{participant.pointsBreakdown.exercisePoints || 0}pts</span>
+                      </div>
+                      {participant.exerciseStats && (
+                        <div className="text-xs text-muted-foreground">
+                          <div>• {participant.exerciseStats.uniqueExercises} unique exercises</div>
+                          <div>• {participant.exerciseStats.averageExercisesPerDay.toFixed(1)} avg per workout</div>
+                          {participant.exerciseStats.coreExercises > 0 && (
+                            <div>• {participant.exerciseStats.coreExercises} core exercises 🔥</div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* Competition Section */}
+                {participant.competitiveDetails && participant.competitiveDetails.length > 0 && (
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="bg-teal-100/80 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2 py-0.5 rounded text-xs font-medium border border-teal-200 dark:border-teal-700/50">Competition</span>
+                      <span className="text-xs text-muted-foreground">({participant.competitiveDetails.length})</span>
+                    </div>
+                    <div className="space-y-2 ml-4">
+                      {participant.competitiveDetails.map((comp, idx) => (
+                        <div key={idx} className="flex justify-between items-start text-xs">
+                          <div className="flex-1">
+                            <div className="font-medium text-foreground">{comp.type}</div>
+                            <div className="text-muted-foreground">
+                              {comp.exerciseName}
+                              {comp.targetUser && ` vs ${comp.targetUser}`}
+                            </div>
+                          </div>
+                          <span className="bg-teal-100/80 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2 py-0.5 rounded text-xs font-medium border border-teal-200 dark:border-teal-700/50">+{comp.points}pts</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Daily Workouts Section - Updated */}
                 {participant.pointsBreakdown.participationPoints > 0 && (
                   <div>
                     <div className="flex items-center gap-2 mb-3">
@@ -539,8 +664,8 @@ const TournamentPage: React.FC = () => {
                     <div className="space-y-2 ml-4">
                       <div className="flex justify-between items-center text-xs">
                         <div>
-                          <div className="font-medium text-foreground">Daily workout points</div>
-                          <div className="text-muted-foreground">{participant.workoutDays.length} days × 15 points</div>
+                          <div className="font-medium text-foreground">Daily workout base</div>
+                          <div className="text-muted-foreground">8 points per day (min 2 exercises required)</div>
                         </div>
                         <span className="bg-orange-100/80 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded text-xs font-medium border border-orange-200 dark:border-orange-700/50">+{participant.pointsBreakdown.participationPoints}pts</span>
                       </div>
@@ -711,6 +836,23 @@ const TournamentPage: React.FC = () => {
                         </p>
                       </div>
 
+                      {/* Exercise Points */}
+                      <div className="bg-blue-100/80 dark:bg-blue-900/30 rounded-xl p-4 border border-blue-200 dark:border-blue-700/50">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="p-1.5 rounded-lg bg-blue-200/80 dark:bg-blue-800/50">
+                            <Activity className="h-4 w-4 text-blue-700 dark:text-blue-300" />
+                          </div>
+                          <span className="font-semibold text-blue-800 dark:text-blue-200">Per Exercise</span>
+                        </div>
+                        <div className="mb-2">
+                          <span className="text-3xl font-bold text-blue-700 dark:text-blue-300">{POINTS_CONFIG.EXERCISE_COMPLETED.points}</span>
+                          <span className="text-sm text-blue-600 dark:text-blue-400 ml-2">points each</span>
+                        </div>
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                          Every exercise you complete gives points
+                        </p>
+                      </div>
+
                       {/* Daily Workouts */}
                       <div className="bg-orange-100/80 dark:bg-orange-900/30 rounded-xl p-4 border border-orange-200 dark:border-orange-700/50">
                         <div className="flex items-center gap-2 mb-3">
@@ -720,11 +862,28 @@ const TournamentPage: React.FC = () => {
                           <span className="font-semibold text-orange-800 dark:text-orange-200">Daily Workout</span>
                         </div>
                         <div className="mb-2">
-                          <span className="text-3xl font-bold text-orange-700 dark:text-orange-300">{POINTS_CONFIG.DAILY_WORKOUT.points}</span>
-                          <span className="text-sm text-orange-600 dark:text-orange-400 ml-2">points</span>
+                          <span className="text-3xl font-bold text-orange-700 dark:text-orange-300">{POINTS_CONFIG.DAILY_WORKOUT_BASE.points}</span>
+                          <span className="text-sm text-orange-600 dark:text-orange-400 ml-2">base points</span>
                         </div>
                         <p className="text-sm text-orange-700 dark:text-orange-300">
-                          Log at least one exercise on any day
+                          Complete 2+ exercises in a day (prevents lazy 1-exercise days!)
+                        </p>
+                      </div>
+
+                      {/* Exercise Variety */}
+                      <div className="bg-purple-100/80 dark:bg-purple-900/30 rounded-xl p-4 border border-purple-200 dark:border-purple-700/50">
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="p-1.5 rounded-lg bg-purple-200/80 dark:bg-purple-800/50">
+                            <Plus className="h-4 w-4 text-purple-700 dark:text-purple-300" />
+                          </div>
+                          <span className="font-semibold text-purple-800 dark:text-purple-200">Variety Bonus</span>
+                        </div>
+                        <div className="mb-2">
+                          <span className="text-3xl font-bold text-purple-700 dark:text-purple-300">{POINTS_CONFIG.EXERCISE_VARIETY_BONUS.points}</span>
+                          <span className="text-sm text-purple-600 dark:text-purple-400 ml-2">per extra exercise</span>
+                        </div>
+                        <p className="text-sm text-purple-700 dark:text-purple-300">
+                          3rd, 4th, 5th+ exercises get bonus points
                         </p>
                       </div>
 
@@ -816,6 +975,14 @@ const TournamentPage: React.FC = () => {
                             <span>Consistency King (50pts)</span>
                           </div>
                           <div className="flex items-center gap-2">
+                            <Activity className="h-3 w-3" />
+                            <span>Volume Crusher (35pts) - 3.5+ avg exercises/workout</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Target className="h-3 w-3" />
+                            <span>Core Destroyer (30pts) - 6+ core exercises/week</span>
+                          </div>
+                          <div className="flex items-center gap-2">
                             <Flame className="h-3 w-3" />
                             <span>Perfect Week (100pts)</span>
                           </div>
@@ -852,6 +1019,15 @@ const TournamentPage: React.FC = () => {
                             <span className="font-medium">Compete with friends</span>
                           </div>
                         </div>
+                      </div>
+                      <div className="mt-4 p-3 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 rounded-lg border border-emerald-200/50 dark:border-emerald-700/30">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Target className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                          <span className="font-semibold text-emerald-800 dark:text-emerald-200 text-sm">Core Focus Bonus</span>
+                        </div>
+                        <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                          Get <strong>+{POINTS_CONFIG.CORE_FOCUS_BONUS.points} extra points</strong> for each core exercise (abs, planks, etc.) to help tackle those beer bellies! 🍺➡️💪
+                        </p>
                       </div>
                     </div>
                   </div>
