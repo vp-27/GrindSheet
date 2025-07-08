@@ -71,6 +71,35 @@ const TournamentPage: React.FC = () => {
     timeLeft: number;
   }>({ text: '', urgency: 'low', timeLeft: 0 });
 
+  // Helper function to handle section clicks with scroll and highlight
+  const handleSectionClick = (participantId: string, section: 'performance' | 'volume' | 'bonuses') => {
+    // Expand the participant if not already expanded
+    const isExpanded = expandedParticipant === participantId;
+    if (!isExpanded) {
+      setExpandedParticipant(participantId);
+    }
+    
+    // Set highlight effect immediately
+    setHighlightedSection(section);
+    
+    // After a brief delay to allow expansion animation, scroll to the section
+    setTimeout(() => {
+      const sectionId = `${section}-section-${participantId}`;
+      const element = document.getElementById(sectionId);
+      if (element) {
+        element.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }
+      
+      // Remove highlight after 2 seconds
+      setTimeout(() => {
+        setHighlightedSection(null);
+      }, 2000);
+    }, isExpanded ? 100 : 600); // Longer delay if we need to wait for expansion
+  };
+
   // Fetch data on mount
   useEffect(() => {
     const fetchData = async () => {
@@ -461,13 +490,7 @@ const TournamentPage: React.FC = () => {
             <div className="grid grid-cols-3 gap-3 text-sm">
               <div 
                 className="flex flex-col items-center text-center cursor-pointer p-2 rounded-lg transition-all duration-200 hover:bg-amber-50/50 dark:hover:bg-amber-950/20"
-                onClick={() => {
-                  const isExpanded = expandedParticipant === participant.userId;
-                  if (!isExpanded) {
-                    setExpandedParticipant(participant.userId);
-                  }
-                  setHighlightedSection(highlightedSection === 'performance' ? null : 'performance');
-                }}
+                onClick={() => handleSectionClick(participant.userId, 'performance')}
               >
                 <span className="text-xs text-muted-foreground mb-1">Performance</span>
                 <span className="font-bold text-lg bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
@@ -477,13 +500,7 @@ const TournamentPage: React.FC = () => {
               </div>
               <div 
                 className="flex flex-col items-center text-center cursor-pointer p-2 rounded-lg transition-all duration-200 hover:bg-blue-50/50 dark:hover:bg-blue-950/20"
-                onClick={() => {
-                  const isExpanded = expandedParticipant === participant.userId;
-                  if (!isExpanded) {
-                    setExpandedParticipant(participant.userId);
-                  }
-                  setHighlightedSection(highlightedSection === 'volume' ? null : 'volume');
-                }}
+                onClick={() => handleSectionClick(participant.userId, 'volume')}
               >
                 <span className="text-xs text-muted-foreground mb-1">Volume</span>
                 <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
@@ -493,13 +510,7 @@ const TournamentPage: React.FC = () => {
               </div>
               <div 
                 className="flex flex-col items-center text-center cursor-pointer p-2 rounded-lg transition-all duration-200 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20"
-                onClick={() => {
-                  const isExpanded = expandedParticipant === participant.userId;
-                  if (!isExpanded) {
-                    setExpandedParticipant(participant.userId);
-                  }
-                  setHighlightedSection(highlightedSection === 'bonuses' ? null : 'bonuses');
-                }}
+                onClick={() => handleSectionClick(participant.userId, 'bonuses')}
               >
                 <span className="text-xs text-muted-foreground mb-1">Bonuses</span>
                 <span className="font-bold text-lg bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
@@ -528,7 +539,7 @@ const TournamentPage: React.FC = () => {
 
             {/* Expandable Detail Section - Unified Single Card */}
             <div className={`overflow-hidden transition-all duration-500 ease-out ${
-              isExpanded ? 'max-h-[1000px] opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0'
+              isExpanded ? 'max-h-[2000px] opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0'
             }`}>
               <div className="space-y-3 text-sm">
                 {/* Unified Point Breakdown - Single Cohesive Card */}
@@ -541,7 +552,10 @@ const TournamentPage: React.FC = () => {
                   <div className="space-y-4">
                     {/* Performance Items */}
                     {(participant.prDetails.length > 0 || participant.pointsBreakdown.improvementPoints > 0 || (participant.pointsBreakdown.competitivePoints || 0) > 0) && (
-                      <div className={`transition-all duration-300 ${highlightedSection === 'performance' ? 'ring-2 ring-amber-400/50 bg-amber-50/30 dark:bg-amber-950/20 p-3 rounded-xl' : ''}`}>
+                      <div 
+                        id={`performance-section-${participant.userId}`}
+                        className={`transition-all duration-300 ${highlightedSection === 'performance' ? 'ring-2 ring-amber-400/50 bg-amber-50/30 dark:bg-amber-950/20 p-3 rounded-xl' : ''}`}
+                      >
                         <div className="flex items-center gap-2 mb-3">
                           <div className="w-3 h-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-500"></div>
                           <span className="font-semibold text-amber-800 dark:text-amber-200 text-sm">Performance</span>
@@ -602,7 +616,10 @@ const TournamentPage: React.FC = () => {
                     )}
 
                     {/* Volume & Consistency Items */}
-                    <div className={`transition-all duration-300 ${highlightedSection === 'volume' ? 'ring-2 ring-blue-400/50 bg-blue-50/30 dark:bg-blue-950/20 p-3 rounded-xl' : ''}`}>
+                    <div 
+                      id={`volume-section-${participant.userId}`}
+                      className={`transition-all duration-300 ${highlightedSection === 'volume' ? 'ring-2 ring-blue-400/50 bg-blue-50/30 dark:bg-blue-950/20 p-3 rounded-xl' : ''}`}
+                    >
                       <div className="flex items-center gap-2 mb-3">
                         <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
                         <span className="font-semibold text-blue-800 dark:text-blue-200 text-sm">Volume & Consistency</span>
@@ -684,7 +701,10 @@ const TournamentPage: React.FC = () => {
 
                     {/* Achievement Bonuses */}
                     {participant.badges.length > 0 && (
-                      <div className={`transition-all duration-300 ${highlightedSection === 'bonuses' ? 'ring-2 ring-emerald-400/50 bg-emerald-50/30 dark:bg-emerald-950/20 p-3 rounded-xl' : ''}`}>
+                      <div 
+                        id={`bonuses-section-${participant.userId}`}
+                        className={`transition-all duration-300 ${highlightedSection === 'bonuses' ? 'ring-2 ring-emerald-400/50 bg-emerald-50/30 dark:bg-emerald-950/20 p-3 rounded-xl' : ''}`}
+                      >
                         <div className="border-t border-slate-200/50 dark:border-slate-700/50 pt-3 mt-3"></div>
                         <div className="flex items-center gap-2 mb-3">
                           <div className="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500"></div>
