@@ -28,9 +28,7 @@ import {
   Activity,
   Plus,
   BookOpen,
-  History,
-  Eye,
-  EyeOff
+  History
 } from 'lucide-react';
 import { 
   Tournament, 
@@ -61,6 +59,7 @@ const TournamentPage: React.FC = () => {
   const [expandedParticipant, setExpandedParticipant] = useState<string | null>(null);
   const [contentReady, setContentReady] = useState(false);
   const [showHistoricalWeeks, setShowHistoricalWeeks] = useState(false);
+  const [highlightedSection, setHighlightedSection] = useState<'performance' | 'volume' | 'bonuses' | null>(null);
 
   // Tab state for switching between tournament and PR records
   const [activeTab, setActiveTab] = useState<'tournament' | 'records'>('tournament');
@@ -430,7 +429,16 @@ const TournamentPage: React.FC = () => {
           {/* 3-Category Points Breakdown - Compact Layout */}
           <div className="mt-3 pt-3 border-t border-border/30 transition-all duration-300">
             <div className="grid grid-cols-3 gap-3 text-sm">
-              <div className="flex flex-col items-center text-center">
+              <div 
+                className="flex flex-col items-center text-center cursor-pointer p-2 rounded-lg transition-all duration-200 hover:bg-amber-50/50 dark:hover:bg-amber-950/20"
+                onClick={() => {
+                  const isExpanded = expandedParticipant === participant.userId;
+                  if (!isExpanded) {
+                    setExpandedParticipant(participant.userId);
+                  }
+                  setHighlightedSection(highlightedSection === 'performance' ? null : 'performance');
+                }}
+              >
                 <span className="text-xs text-muted-foreground mb-1">Performance</span>
                 <span className="font-bold text-lg bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
                   <AnimatedCounter
@@ -440,7 +448,16 @@ const TournamentPage: React.FC = () => {
                 </span>
                 <span className="text-xs text-muted-foreground">PRs & Competition</span>
               </div>
-              <div className="flex flex-col items-center text-center">
+              <div 
+                className="flex flex-col items-center text-center cursor-pointer p-2 rounded-lg transition-all duration-200 hover:bg-blue-50/50 dark:hover:bg-blue-950/20"
+                onClick={() => {
+                  const isExpanded = expandedParticipant === participant.userId;
+                  if (!isExpanded) {
+                    setExpandedParticipant(participant.userId);
+                  }
+                  setHighlightedSection(highlightedSection === 'volume' ? null : 'volume');
+                }}
+              >
                 <span className="text-xs text-muted-foreground mb-1">Volume</span>
                 <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   <AnimatedCounter
@@ -450,7 +467,16 @@ const TournamentPage: React.FC = () => {
                 </span>
                 <span className="text-xs text-muted-foreground">Work & Consistency</span>
               </div>
-              <div className="flex flex-col items-center text-center">
+              <div 
+                className="flex flex-col items-center text-center cursor-pointer p-2 rounded-lg transition-all duration-200 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20"
+                onClick={() => {
+                  const isExpanded = expandedParticipant === participant.userId;
+                  if (!isExpanded) {
+                    setExpandedParticipant(participant.userId);
+                  }
+                  setHighlightedSection(highlightedSection === 'bonuses' ? null : 'bonuses');
+                }}
+              >
                 <span className="text-xs text-muted-foreground mb-1">Bonuses</span>
                 <span className="font-bold text-lg bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
                   <AnimatedCounter
@@ -494,7 +520,7 @@ const TournamentPage: React.FC = () => {
                   <div className="space-y-4">
                     {/* Performance Items */}
                     {(participant.prDetails.length > 0 || participant.pointsBreakdown.improvementPoints > 0 || (participant.pointsBreakdown.competitivePoints || 0) > 0) && (
-                      <>
+                      <div className={`transition-all duration-300 ${highlightedSection === 'performance' ? 'ring-2 ring-amber-400/50 bg-amber-50/30 dark:bg-amber-950/20 p-3 rounded-xl' : ''}`}>
                         <div className="flex items-center gap-2 mb-3">
                           <div className="w-3 h-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-500"></div>
                           <span className="font-semibold text-amber-800 dark:text-amber-200 text-sm">Performance</span>
@@ -551,22 +577,26 @@ const TournamentPage: React.FC = () => {
                         ))}
 
                         <div className="border-t border-slate-200/50 dark:border-slate-700/50 pt-3 mt-3"></div>
-                      </>
+                      </div>
                     )}
 
                     {/* Volume & Consistency Items */}
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
-                      <span className="font-semibold text-blue-800 dark:text-blue-200 text-sm">Volume & Consistency</span>
-                      <span className="ml-auto font-bold text-blue-800 dark:text-blue-200 bg-blue-100/60 dark:bg-blue-900/30 px-2 py-1 rounded-lg text-xs">
-                        {pointBreakdown.volume} pts
-                      </span>
-                    </div>
+                    <div className={`transition-all duration-300 ${highlightedSection === 'volume' ? 'ring-2 ring-blue-400/50 bg-blue-50/30 dark:bg-blue-950/20 p-3 rounded-xl' : ''}`}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
+                        <span className="font-semibold text-blue-800 dark:text-blue-200 text-sm">Volume & Consistency</span>
+                        <span className="ml-auto font-bold text-blue-800 dark:text-blue-200 bg-blue-100/60 dark:bg-blue-900/30 px-2 py-1 rounded-lg text-xs">
+                          {pointBreakdown.volume} pts
+                        </span>
+                      </div>
                     
                     {/* Daily Workouts */}
                     {participant.workoutDays.slice(0, 7).map((day, idx) => {
-                      const dayName = new Date(day).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-                      const isWeekend = new Date(day).getDay() === 0 || new Date(day).getDay() === 6;
+                      // Parse the YYYY-MM-DD format to avoid timezone shifts
+                      const [year, month, dayOfMonth] = day.split('-').map(Number);
+                      const workoutDate = new Date(year, month - 1, dayOfMonth); // month is 0-indexed
+                      const dayName = workoutDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                      const isWeekend = workoutDate.getDay() === 0 || workoutDate.getDay() === 6;
                       return (
                         <div key={`workout-${idx}`} className="flex justify-between items-center py-2 px-3 bg-blue-50/30 dark:bg-blue-950/15 rounded-lg border-l-2 border-blue-400 dark:border-blue-600">
                           <div className="flex-1">
@@ -613,7 +643,10 @@ const TournamentPage: React.FC = () => {
 
                     {/* Variety Bonuses */}
                     {(participant.pointsBreakdown.varietyPoints || 0) > 0 && participant.exerciseStats?.varietyDays && participant.exerciseStats.varietyDays.map((day, idx) => {
-                      const dayName = new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                      // Parse the YYYY-MM-DD format to avoid timezone shifts
+                      const [year, month, dayOfMonth] = day.date.split('-').map(Number);
+                      const varietyDate = new Date(year, month - 1, dayOfMonth); // month is 0-indexed
+                      const dayName = varietyDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
                       return (
                         <div key={`variety-${idx}`} className="flex justify-between items-center py-2 px-3 bg-blue-50/30 dark:bg-blue-950/15 rounded-lg border-l-2 border-blue-400 dark:border-blue-600">
                           <div className="flex-1">
@@ -626,10 +659,11 @@ const TournamentPage: React.FC = () => {
                         </div>
                       );
                     })}
+                    </div>
 
                     {/* Achievement Bonuses */}
                     {participant.badges.length > 0 && (
-                      <>
+                      <div className={`transition-all duration-300 ${highlightedSection === 'bonuses' ? 'ring-2 ring-emerald-400/50 bg-emerald-50/30 dark:bg-emerald-950/20 p-3 rounded-xl' : ''}`}>
                         <div className="border-t border-slate-200/50 dark:border-slate-700/50 pt-3 mt-3"></div>
                         <div className="flex items-center gap-2 mb-3">
                           <div className="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500"></div>
@@ -655,7 +689,7 @@ const TournamentPage: React.FC = () => {
                             </div>
                           </div>
                         ))}
-                      </>
+                      </div>
                     )}
                   </div>
 
@@ -769,66 +803,53 @@ const TournamentPage: React.FC = () => {
               </div>
             )}
 
-            {/* Historical Tournaments - Moved to bottom */}
+            {/* Historical Tournaments - Always visible */}
             {(currentTournament || tournamentHistory.length > 0) && (
               <Card className="apple-card mt-8">
                 <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-3">
-                      <History className="h-5 w-5 text-muted-foreground" />
-                      <h3 className="text-lg font-semibold text-foreground">Tournament History</h3>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowHistoricalWeeks(!showHistoricalWeeks)}
-                      className="text-muted-foreground hover:text-foreground"
-                    >
-                      {showHistoricalWeeks ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      <span className="ml-2">{showHistoricalWeeks ? 'Hide' : 'Show'}</span>
-                    </Button>
+                  <div className="flex items-center gap-3 mb-4">
+                    <History className="h-5 w-5 text-muted-foreground" />
+                    <h3 className="text-lg font-semibold text-foreground">Tournament History</h3>
                   </div>
                   
-                  {showHistoricalWeeks && (
-                    <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
-                      {/* Current Tournament Button */}
-                      {currentTournament && (
-                        <Button
-                          variant={selectedTournament?.id === currentTournament?.id ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setSelectedTournament(currentTournament)}
-                          className={`rounded-2xl whitespace-nowrap transition-all duration-300 font-medium px-4 py-2 ${
-                            selectedTournament?.id === currentTournament?.id
-                              ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-md'
-                              : 'border border-muted-foreground/20 text-muted-foreground hover:text-foreground hover:border-foreground/30'
-                          }`}
-                        >
-                          Current Week
-                        </Button>
-                      )}
-                      
-                      {/* Past Tournament Buttons */}
-                      {tournamentHistory
-                        .filter(tournament => tournament.id !== currentTournament?.id)
-                        .slice()
-                        .reverse()
-                        .map(tournament => (
-                        <Button
-                          key={tournament.id}
-                          variant={selectedTournament?.id === tournament.id ? "default" : "outline"}
-                          size="sm"
-                          onClick={() => setSelectedTournament(tournament)}
-                          className={`rounded-2xl whitespace-nowrap transition-all duration-300 font-medium px-4 py-2 ${
-                            selectedTournament?.id === tournament.id
-                              ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-md'
-                              : 'border border-muted-foreground/20 text-muted-foreground hover:text-foreground hover:border-foreground/30 opacity-75'
-                          }`}
-                        >
-                          {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                        </Button>
-                      ))}
-                    </div>
-                  )}
+                  <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
+                    {/* Current Tournament Button */}
+                    {currentTournament && (
+                      <Button
+                        variant={selectedTournament?.id === currentTournament?.id ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setSelectedTournament(currentTournament)}
+                        className={`rounded-2xl whitespace-nowrap transition-all duration-300 font-medium px-4 py-2 ${
+                          selectedTournament?.id === currentTournament?.id
+                            ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-md'
+                            : 'border border-muted-foreground/20 text-muted-foreground hover:text-foreground hover:border-foreground/30'
+                        }`}
+                      >
+                        Current Week
+                      </Button>
+                    )}
+                    
+                    {/* Past Tournament Buttons */}
+                    {tournamentHistory
+                      .filter(tournament => tournament.id !== currentTournament?.id)
+                      .slice()
+                      .reverse()
+                      .map(tournament => (
+                      <Button
+                        key={tournament.id}
+                        variant={selectedTournament?.id === tournament.id ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setSelectedTournament(tournament)}
+                        className={`rounded-2xl whitespace-nowrap transition-all duration-300 font-medium px-4 py-2 ${
+                          selectedTournament?.id === tournament.id
+                            ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-md'
+                            : 'border border-muted-foreground/20 text-muted-foreground hover:text-foreground hover:border-foreground/30 opacity-75'
+                        }`}
+                      >
+                        {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </Button>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             )}
