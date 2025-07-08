@@ -36,7 +36,9 @@ import {
   generateCurrentTournament, 
   generateTournamentHistory,
   POINTS_CONFIG,
-  BADGE_DEFINITIONS 
+  BADGE_DEFINITIONS,
+  getTournamentCountdown,
+  getTournamentProgress
 } from '@/utils/tournamentUtils';
 import { supabase } from '@/integrations/supabase/client';
 import PRRecordsPage, { PRRecordsContent } from './PRRecords';
@@ -57,6 +59,13 @@ const TournamentPage: React.FC = () => {
 
   // Tab state for switching between tournament and PR records
   const [activeTab, setActiveTab] = useState<'tournament' | 'records'>('tournament');
+  
+  // Countdown state
+  const [countdown, setCountdown] = useState<{
+    text: string;
+    urgency: 'low' | 'medium' | 'high' | 'critical' | 'ended';
+    timeLeft: number;
+  }>({ text: '', urgency: 'low', timeLeft: 0 });
 
   // Fetch data on mount
   useEffect(() => {
@@ -111,6 +120,24 @@ const TournamentPage: React.FC = () => {
       setSelectedTournament(current);
     }
   }, [users, allExerciseLogs, exercises, categories]);
+
+  // Update countdown periodically
+  useEffect(() => {
+    const updateCountdown = () => {
+      if (selectedTournament) {
+        const countdownData = getTournamentCountdown(selectedTournament.weekEnd);
+        setCountdown(countdownData);
+      }
+    };
+
+    // Update immediately
+    updateCountdown();
+
+    // Update every minute
+    const interval = setInterval(updateCountdown, 60000);
+
+    return () => clearInterval(interval);
+  }, [selectedTournament]);
 
   // Badge icon and short name mapping
   const getBadgeIcon = (badgeType: BadgeType) => {
@@ -730,6 +757,14 @@ const TournamentPage: React.FC = () => {
     );
   };
 
+  // Get progress class for CSS
+  const getProgressClass = () => {
+    if (!selectedTournament) return 'tournament-progress-0';
+    const progress = getTournamentProgress(selectedTournament.weekStart, selectedTournament.weekEnd);
+    const rounded = Math.round(progress / 10) * 10; // Round to nearest 10
+    return `tournament-progress-${Math.min(100, Math.max(0, rounded))}`;
+  };
+
   return (
     <Layout 
       title={activeTab === 'records' ? 'PR Records' : 'Tournament'}
@@ -751,45 +786,64 @@ const TournamentPage: React.FC = () => {
         {/* Tournament Content */}
         {activeTab === 'tournament' && (
           <>
-            {/* Tournament status and guide button */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {currentTournament && (
-                  <p className="text-sm text-muted-foreground">
-                    {currentTournament.participants.length} competitors
-                  </p>
-                )}
+            {/* Duolingo-style countdown with progress */}
+            {countdown.text && selectedTournament && (
+              <div className="space-y-3">
+                {/* Countdown text */}
+                <div className="flex items-center justify-center">
+                  <div className={`
+                    px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300
+                    ${countdown.urgency === 'low' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : ''}
+                    ${countdown.urgency === 'medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : ''}
+                    ${countdown.urgency === 'high' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300' : ''}
+                    ${countdown.urgency === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 animate-pulse' : ''}
+                    ${countdown.urgency === 'ended' ? 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300' : ''}
+                  `}>
+                    ⏰ {countdown.text}
+                  </div>
+                </div>
+                
+                {/* Progress bar */}
+                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
+                  <div 
+                    className={`h-full tournament-progress-bar ${getProgressClass()} ${
+                      countdown.urgency === 'low' ? 'tournament-progress-low' :
+                      countdown.urgency === 'medium' ? 'tournament-progress-medium' :
+                      countdown.urgency === 'high' ? 'tournament-progress-high' :
+                      countdown.urgency === 'critical' ? 'tournament-progress-critical' :
+                      'tournament-progress-ended'
+                    }`}
+                  />
+                </div>
               </div>
+            )}
+
+            {/* Floating Rules Button */}
+            <div className="fixed bottom-24 right-4 z-40">
               <Button 
                 variant="outline" 
                 size="sm"
                 onClick={() => setShowPointsGuide(!showPointsGuide)}
-                className="rounded-2xl transition-all duration-200"
+                className="rounded-full w-12 h-12 p-0 shadow-lg border-2 bg-background/95 backdrop-blur-sm transition-all duration-200 hover:scale-105"
               >
                 {showPointsGuide ? (
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs">×</span>
-                    <span>Close</span>
-                  </div>
+                  <span className="text-lg">×</span>
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <Target className="h-4 w-4" />
-                    <span>Guide</span>
-                  </div>
+                  <span className="text-xs font-bold">?</span>
                 )}
               </Button>
             </div>
 
-            {/* Enhanced Points Guide with Clear Structure */}
+            {/* Rules Modal - Duolingo-inspired */}
             {showPointsGuide && (
               <Card className="apple-card">
                 <CardHeader className="pb-6">
                   <CardTitle className="flex items-center gap-2 text-xl">
-                    <Target className="h-5 w-5 text-blue-600" />
-                    Tournament Scoring Guide
+                    <span className="text-2xl">📋</span>
+                    Tournament Rules
                   </CardTitle>
                   <p className="text-sm text-muted-foreground mt-2">
-                    Earn points through various activities. Most points wins the weekly tournament!
+                    How to earn points and win the weekly competition!
                   </p>
                 </CardHeader>
                 <CardContent className="space-y-6">

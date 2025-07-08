@@ -612,3 +612,67 @@ export const generateTournamentHistory = (
   }
   return tournaments.reverse(); // Most recent first
 };
+
+/**
+ * Get Duolingo-style countdown text and urgency level
+ */
+export const getTournamentCountdown = (endDate: string) => {
+  const now = new Date();
+  const end = new Date(endDate);
+  const diffMs = end.getTime() - now.getTime();
+  
+  if (diffMs <= 0) {
+    return {
+      text: "Tournament ended",
+      urgency: "ended" as const,
+      timeLeft: 0
+    };
+  }
+  
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  
+  let text = "";
+  let urgency: "low" | "medium" | "high" | "critical" | "ended" = "low";
+  
+  if (diffDays > 1) {
+    text = `${diffDays} days left`;
+    urgency = "low";
+  } else if (diffDays === 1) {
+    text = "1 day left";
+    urgency = "medium";
+  } else if (diffHours > 1) {
+    text = `${diffHours} hours left`;
+    urgency = diffHours <= 3 ? "high" : "medium";
+  } else if (diffHours === 1) {
+    text = "Final hour!";
+    urgency = "critical";
+  } else {
+    text = `${diffMinutes} minutes left`;
+    urgency = "critical";
+  }
+  
+  return {
+    text,
+    urgency,
+    timeLeft: diffMs
+  };
+};
+
+/**
+ * Get tournament progress percentage (0-100)
+ */
+export const getTournamentProgress = (startDate: string, endDate: string): number => {
+  const now = new Date();
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  
+  if (now <= start) return 0;
+  if (now >= end) return 100;
+  
+  const totalDuration = end.getTime() - start.getTime();
+  const elapsed = now.getTime() - start.getTime();
+  
+  return Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
+};
