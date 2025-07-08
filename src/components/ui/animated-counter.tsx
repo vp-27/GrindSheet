@@ -17,14 +17,20 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
   preserveTrailingZeros = false,
   decimalPlaces = 1
 }) => {
-  const [displayValue, setDisplayValue] = useState(value);
+  // Ensure value is always a valid number
+  const safeValue = React.useMemo(() => {
+    const num = Number(value);
+    return isNaN(num) ? 0 : num;
+  }, [value]);
+  
+  const [displayValue, setDisplayValue] = useState(safeValue);
   const [isAnimating, setIsAnimating] = useState(false);
   const frameRef = useRef<number>();
   const startTimeRef = useRef<number>();
-  const startValueRef = useRef<number>(value);
+  const startValueRef = useRef<number>(safeValue);
 
   useEffect(() => {
-    if (value === displayValue) return;
+    if (safeValue === displayValue) return;
 
     setIsAnimating(true);
     startValueRef.current = displayValue;
@@ -32,7 +38,7 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
 
     // Check if both start and end values are integers
     const startIsInteger = Number.isInteger(startValueRef.current);
-    const endIsInteger = Number.isInteger(value);
+    const endIsInteger = Number.isInteger(safeValue);
     const shouldUseIntegerSteps = startIsInteger && endIsInteger;
 
     const animate = () => {
@@ -43,7 +49,7 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
       // Use easing function for smooth animation (easeOutQuart)
       const easeOutQuart = 1 - Math.pow(1 - progress, 4);
       
-      let currentValue = startValueRef.current + (value - startValueRef.current) * easeOutQuart;
+      let currentValue = startValueRef.current + (safeValue - startValueRef.current) * easeOutQuart;
       
       // If animating between integers, round to nearest integer during animation
       if (shouldUseIntegerSteps && progress < 1) {
@@ -55,7 +61,7 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
       if (progress < 1) {
         frameRef.current = requestAnimationFrame(animate);
       } else {
-        setDisplayValue(value);
+        setDisplayValue(safeValue);
         setIsAnimating(false);
       }
     };
@@ -67,7 +73,7 @@ const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
         cancelAnimationFrame(frameRef.current);
       }
     };
-  }, [value, duration, displayValue]);
+  }, [safeValue, duration, displayValue]);
 
   const formattedValue = React.useMemo(() => {
     if (formatValue) {
