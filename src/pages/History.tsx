@@ -456,14 +456,6 @@ const History = () => {
                 const nameB = categoryB?.name || '';
                 return nameA.localeCompare(nameB); // Alphabetical as tiebreaker
               });
-              
-              const isDominantCategory = sortedCategories.length === 1;
-              const dominantCategoryIndex = isDominantCategory 
-                ? categories.findIndex(cat => cat.id === sortedCategories[0])
-                : -1;
-              const dominantColor = dominantCategoryIndex >= 0 
-                ? getCategoryColor(dominantCategoryIndex) 
-                : null;
 
               // Create gradient colors for the badge (using sorted order)
               const categoryColors = sortedCategories.map(catId => {
