@@ -1,5 +1,4 @@
 import { ExerciseLog, Progress, Exercise, ProgressChartData, LeaderboardEntry, LeaderboardType, User, Category } from '../types';
-import { getExerciseById } from '../data/mockData';
 
 // Helper function to convert weight to lbs (we'll keep this for any legacy kg data)
 export const convertWeight = (weight: number, fromUnit: string = 'kg'): number => {
@@ -462,7 +461,8 @@ export const calculateAllTimeGainLeaderboard = (
   logs: ExerciseLog[], 
   users: User[], 
   exerciseId?: string, 
-  categoryId?: string
+  categoryId?: string,
+  exercises?: Exercise[]
 ): LeaderboardEntry[] => {
   const userGains: Map<string, number> = new Map();
   const userMaxWeights: Map<string, number> = new Map();
@@ -474,8 +474,8 @@ export const calculateAllTimeGainLeaderboard = (
     if (exerciseId && log.exerciseId !== exerciseId) return;
     
     // If filtering by category, check if the exercise is in that category
-    if (categoryId) {
-      const exercise = getExerciseById(log.exerciseId);
+    if (categoryId && exercises) {
+      const exercise = exercises.find(ex => ex.id === log.exerciseId);
       if (!exercise || exercise.categoryId !== categoryId) return;
     }
     
@@ -509,8 +509,8 @@ export const calculateAllTimeGainLeaderboard = (
       if (exerciseId && log.exerciseId !== exerciseId) return;
       
       // If filtering by category, check if the exercise is in that category
-      if (categoryId) {
-        const exercise = getExerciseById(log.exerciseId);
+      if (categoryId && exercises) {
+        const exercise = exercises.find(ex => ex.id === log.exerciseId);
         if (!exercise || exercise.categoryId !== categoryId) return;
       }
       
