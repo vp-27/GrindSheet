@@ -623,7 +623,7 @@ export const getTournamentCountdown = (endDate: string) => {
   
   if (diffMs <= 0) {
     return {
-      text: "Tournament ended",
+      text: "Ended",
       urgency: "ended" as const,
       timeLeft: 0
     };

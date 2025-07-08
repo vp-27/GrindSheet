@@ -145,21 +145,51 @@ const TournamentPage: React.FC = () => {
 
   // 3-category point grouping - more compact and logical
   const getPointBreakdown = (participant: TournamentParticipant) => {
+    // Add debug logging
+    console.log('Participant:', participant.user.name, 'PointsBreakdown:', participant.pointsBreakdown);
+    
+    // Ensure pointsBreakdown exists and has all required properties with proper fallbacks
+    const breakdown = participant.pointsBreakdown || {
+      prPoints: 0,
+      improvementPoints: 0,
+      competitivePoints: 0,
+      consistencyPoints: 0,
+      participationPoints: 0,
+      exercisePoints: 0,
+      varietyPoints: 0,
+      bonusPoints: 0
+    };
+    
+    // Helper function to safely convert to number
+    const safeNumber = (value: any): number => {
+      const num = Number(value);
+      return isNaN(num) ? 0 : num;
+    };
+    
     // Core Performance: PRs, improvements, and competitive
-    const performance = participant.pointsBreakdown.prPoints + 
-                       participant.pointsBreakdown.improvementPoints +
-                       (participant.pointsBreakdown.competitivePoints || 0);
+    const performance = safeNumber(breakdown.prPoints) + 
+                       safeNumber(breakdown.improvementPoints) +
+                       safeNumber(breakdown.competitivePoints);
     
     // Volume & Consistency: daily work and habits
-    const volume = participant.pointsBreakdown.consistencyPoints + 
-                  participant.pointsBreakdown.participationPoints +
-                  (participant.pointsBreakdown.exercisePoints || 0) +
-                  (participant.pointsBreakdown.varietyPoints || 0);
+    const volume = safeNumber(breakdown.consistencyPoints) + 
+                  safeNumber(breakdown.participationPoints) +
+                  safeNumber(breakdown.exercisePoints) +
+                  safeNumber(breakdown.varietyPoints);
     
     // Bonuses: achievements and special rewards
-    const bonuses = participant.pointsBreakdown.bonusPoints;
+    const bonuses = safeNumber(breakdown.bonusPoints);
     
-    return { performance, volume, bonuses };
+    // Ensure all values are valid numbers
+    const result = {
+      performance: Math.max(0, performance),
+      volume: Math.max(0, volume),
+      bonuses: Math.max(0, bonuses)
+    };
+    
+    console.log('Calculated breakdown:', result);
+    
+    return result;
   };
 
   // Smart badge filtering - only show most important badges
@@ -499,7 +529,7 @@ const TournamentPage: React.FC = () => {
                   : 'text-muted-foreground bg-muted/30 hover:bg-muted/50'
               }`}
             >
-              <span className="text-xs">{isExpanded ? 'Hide Details' : 'Show Details'}</span>
+              <span className="text-xs">{isExpanded ? 'Hide Point Breakdown' : 'Show Point Breakdown'}</span>
               <div className={`transition-transform duration-300 ease-out ${isExpanded ? 'rotate-180' : 'rotate-0'}`}>
                 <ChevronDown className="w-3 h-3" />
               </div>
@@ -725,10 +755,41 @@ const TournamentPage: React.FC = () => {
 
   return (
     <Layout 
-      title=""
+      title={activeTab === 'tournament' ? 'Tournament' : 'PR Records'}
       headerSlider={
-        <div className="flex items-center justify-between w-full">
-          {/* Main Navigation Slider */}
+        activeTab === 'tournament' ? (
+          <div className="flex items-center gap-3">
+            {/* Countdown Badge */}
+            {countdown.text && (
+              <div className={`
+                px-3 py-1.5 rounded-full font-medium text-xs border
+                ${countdown.urgency === 'low' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700/50' : ''}
+                ${countdown.urgency === 'medium' ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700/50' : ''}
+                ${countdown.urgency === 'high' ? 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-700/50' : ''}
+                ${countdown.urgency === 'critical' ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700/50' : ''}
+                ${countdown.urgency === 'ended' ? 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/30 dark:text-gray-300 dark:border-gray-700/50' : ''}
+              `}>
+                {countdown.text}
+              </div>
+            )}
+            
+            {/* Rulebook Button */}
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => setShowPointsGuide(true)}
+              className="rounded-full h-9 w-9 p-0"
+            >
+              <BookOpen className="h-4 w-4" />
+            </Button>
+          </div>
+        ) : undefined
+      }
+    >
+      <div className={`space-y-6 relative transition-all duration-500 ease-out ${contentReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+
+        {/* Navigation Slider - Full width, thin and crispy */}
+        <div className="w-full">
           <MobileSlider
             options={[
               { id: 'tournament', label: 'Tournament' },
@@ -736,42 +797,51 @@ const TournamentPage: React.FC = () => {
             ]}
             activeOption={activeTab}
             onOptionChange={(optionId) => setActiveTab(optionId as 'tournament' | 'records')}
-            variant="compact"
-            headerTitle={true}
+            variant="default"
           />
-          
-          {/* Action Buttons - Only for Tournament */}
-          {activeTab === 'tournament' && (
-            <div className="flex items-center gap-2">
-              {/* Countdown Badge */}
-              {countdown.text && (
-                <div className={`
-                  px-3 py-1 rounded-full font-medium text-xs
-                  ${countdown.urgency === 'low' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : ''}
-                  ${countdown.urgency === 'medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : ''}
-                  ${countdown.urgency === 'high' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300' : ''}
-                  ${countdown.urgency === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : ''}
-                  ${countdown.urgency === 'ended' ? 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300' : ''}
-                `}>
-                  {countdown.text}
-                </div>
-              )}
-              
-              {/* Rulebook Button */}
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowPointsGuide(true)}
-                className="rounded-full h-10 w-10 p-0 border-2"
-              >
-                <BookOpen className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
         </div>
-      }
-    >
-      <div className={`space-y-6 relative transition-all duration-500 ease-out ${contentReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+
+        {/* Tournament History Selector - Only for Tournament tab */}
+        {activeTab === 'tournament' && (currentTournament || tournamentHistory.length > 0) && (
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {/* Current Tournament Button */}
+            {currentTournament && (
+              <Button
+                variant={selectedTournament?.id === currentTournament?.id ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedTournament(currentTournament)}
+                className={`rounded-xl whitespace-nowrap transition-all duration-200 font-medium px-4 py-2 text-sm ${
+                  selectedTournament?.id === currentTournament?.id
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0 shadow-sm'
+                    : 'border border-border/40 text-muted-foreground hover:text-foreground hover:border-border hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 dark:hover:from-purple-950/20 dark:hover:to-blue-950/20'
+                }`}
+              >
+                Current Week
+              </Button>
+            )}
+            
+            {/* Past Tournament Buttons */}
+            {tournamentHistory
+              .filter(tournament => tournament.id !== currentTournament?.id)
+              .slice()
+              .reverse()
+              .map(tournament => (
+              <Button
+                key={tournament.id}
+                variant={selectedTournament?.id === tournament.id ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedTournament(tournament)}
+                className={`rounded-xl whitespace-nowrap transition-all duration-200 font-medium px-4 py-2 text-sm ${
+                  selectedTournament?.id === tournament.id
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0 shadow-sm'
+                    : 'border border-border/40 text-muted-foreground hover:text-foreground hover:border-border opacity-75 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 dark:hover:from-purple-950/20 dark:hover:to-blue-950/20'
+                }`}
+              >
+                {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </Button>
+            ))}
+          </div>
+        )}
         
         {/* Tournament Content */}
         {activeTab === 'tournament' && (
@@ -803,56 +873,7 @@ const TournamentPage: React.FC = () => {
               </div>
             )}
 
-            {/* Historical Tournaments - Always visible */}
-            {(currentTournament || tournamentHistory.length > 0) && (
-              <Card className="apple-card mt-8">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <History className="h-5 w-5 text-muted-foreground" />
-                    <h3 className="text-lg font-semibold text-foreground">Tournament History</h3>
-                  </div>
-                  
-                  <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
-                    {/* Current Tournament Button */}
-                    {currentTournament && (
-                      <Button
-                        variant={selectedTournament?.id === currentTournament?.id ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setSelectedTournament(currentTournament)}
-                        className={`rounded-2xl whitespace-nowrap transition-all duration-300 font-medium px-4 py-2 ${
-                          selectedTournament?.id === currentTournament?.id
-                            ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-md'
-                            : 'border border-muted-foreground/20 text-muted-foreground hover:text-foreground hover:border-foreground/30'
-                        }`}
-                      >
-                        Current Week
-                      </Button>
-                    )}
-                    
-                    {/* Past Tournament Buttons */}
-                    {tournamentHistory
-                      .filter(tournament => tournament.id !== currentTournament?.id)
-                      .slice()
-                      .reverse()
-                      .map(tournament => (
-                      <Button
-                        key={tournament.id}
-                        variant={selectedTournament?.id === tournament.id ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => setSelectedTournament(tournament)}
-                        className={`rounded-2xl whitespace-nowrap transition-all duration-300 font-medium px-4 py-2 ${
-                          selectedTournament?.id === tournament.id
-                            ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-md'
-                            : 'border border-muted-foreground/20 text-muted-foreground hover:text-foreground hover:border-foreground/30 opacity-75'
-                        }`}
-                      >
-                        {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                      </Button>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+            {/* Removed Historical Tournaments section since it's now at the top */}
           </>
         )}
 
