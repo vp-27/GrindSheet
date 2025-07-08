@@ -39,7 +39,7 @@ import {
   BADGE_DEFINITIONS 
 } from '@/utils/tournamentUtils';
 import { supabase } from '@/integrations/supabase/client';
-import PRRecordsPage from './PRRecords';
+import PRRecordsPage, { PRRecordsContent } from './PRRecords';
 import '@/styles/index.css';
 
 const TournamentPage: React.FC = () => {
@@ -731,9 +731,9 @@ const TournamentPage: React.FC = () => {
   };
 
   return (
-    <Layout title={activeTab === 'records' ? 'PR Records' : 'Tournament'}>
-      <div className={`space-y-6 relative transition-all duration-500 ease-out ${contentReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-        {/* Tab System */}
+    <Layout 
+      title={activeTab === 'records' ? 'PR Records' : 'Tournament'}
+      headerSlider={
         <MobileSlider
           options={[
             { id: 'tournament', label: 'Tournament' },
@@ -741,29 +741,24 @@ const TournamentPage: React.FC = () => {
           ]}
           activeOption={activeTab}
           onOptionChange={(optionId) => setActiveTab(optionId as 'tournament' | 'records')}
-          variant="default"
-          className="mb-6"
+          variant="compact"
+          className="scale-90"
         />
-
+      }
+    >
+      <div className={`space-y-6 relative transition-all duration-500 ease-out ${contentReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+        
         {/* Tournament Content */}
         {activeTab === 'tournament' && (
           <>
-            {/* Clean Header */}
+            {/* Tournament status and guide button */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center shadow-sm">
-                  <Trophy className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-foreground">
-                    {currentTournament ? currentTournament.name : 'Tournament'}
-                  </h1>
-                  {currentTournament && (
-                    <p className="text-sm text-muted-foreground">
-                      {currentTournament.participants.length} competitors
-                    </p>
-                  )}
-                </div>
+                {currentTournament && (
+                  <p className="text-sm text-muted-foreground">
+                    {currentTournament.participants.length} competitors
+                  </p>
+                )}
               </div>
               <Button 
                 variant="outline" 
@@ -1087,7 +1082,7 @@ const TournamentPage: React.FC = () => {
 
         {/* PR Records Content */}
         {activeTab === 'records' && (
-          <PRRecordsPage />
+          <PRRecordsContent />
         )}
 
       </div>

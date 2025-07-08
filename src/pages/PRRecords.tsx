@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import Layout from '@/components/Layout';
 import { 
   Trophy, 
   Crown, 
@@ -23,7 +24,8 @@ import {
 import { getCategoryChartColors, getCategoryKeyByName, getCategoryColors } from '@/utils/categoryColors';
 import { supabase } from '@/integrations/supabase/client';
 
-const PRRecordsPage: React.FC = () => {
+// Internal component for use within Tournament tab
+export const PRRecordsContent: React.FC = () => {
   const { profile } = useAuth();
   const { categories, exercises } = useAppContext();
   
@@ -308,17 +310,7 @@ const PRRecordsPage: React.FC = () => {
 
   return (
     <div className={`space-y-6 relative transition-all duration-500 ease-out ${contentReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-sm">
-          <Medal className="h-5 w-5 text-white" />
-        </div>
-        <div>
-          <h1 className="text-xl font-bold text-foreground">Personal Records</h1>
-          <p className="text-sm text-muted-foreground">Best lifts across all exercises</p>
-        </div>
-      </div>
-
+      
       {/* Category Filter Buttons */}
       <div className="flex gap-3 overflow-x-auto pb-2 px-1 py-2 scrollbar-hide">
         <Button
@@ -390,6 +382,15 @@ const PRRecordsPage: React.FC = () => {
         )}
       </div>
     </div>
+  );
+};
+
+// Standalone page component with Layout wrapper
+const PRRecordsPage: React.FC = () => {
+  return (
+    <Layout title="PR Records">
+      <PRRecordsContent />
+    </Layout>
   );
 };
 

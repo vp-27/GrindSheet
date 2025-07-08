@@ -36,6 +36,7 @@ interface LayoutProps {
   children: React.ReactNode;
   title?: string;
   categoryColor?: string;
+  headerSlider?: React.ReactNode;
 }
 
 // Icon transition component
@@ -65,7 +66,7 @@ const AnimatedIcon: React.FC<AnimatedIconProps> = ({ outlineIcon: OutlineIcon, s
   );
 };
 
-const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor }) => {
+const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerSlider }) => {
   const { profile, signOut } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isAddExerciseModalOpen, setIsAddExerciseModalOpen] = useState(false);
@@ -93,20 +94,22 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor }) => {
         >
           {title || "Home"}
         </h1>
-        <Button variant="ghost" className="p-0 h-auto" onClick={() => navigate('/settings')}>
-          <Avatar className="h-8 w-8 transition-opacity duration-200">
-            {!avatarImageError && profile?.avatar_url ? (
-              <AvatarImage 
-                src={profile.avatar_url} 
-                alt={profile?.name} 
-                onError={() => setAvatarImageError(true)}
-              />
-            ) : null}
-            <AvatarFallback className="bg-muted text-muted-foreground">
-              {profile?.name?.substring(0, 2).toUpperCase() || 'U'}
-            </AvatarFallback>
-          </Avatar>
-        </Button>
+        {headerSlider || (
+          <Button variant="ghost" className="p-0 h-auto" onClick={() => navigate('/settings')}>
+            <Avatar className="h-8 w-8 transition-opacity duration-200">
+              {!avatarImageError && profile?.avatar_url ? (
+                <AvatarImage 
+                  src={profile.avatar_url} 
+                  alt={profile?.name} 
+                  onError={() => setAvatarImageError(true)}
+                />
+              ) : null}
+              <AvatarFallback className="bg-muted text-muted-foreground">
+                {profile?.name?.substring(0, 2).toUpperCase() || 'U'}
+              </AvatarFallback>
+            </Avatar>
+          </Button>
+        )}
       </header>
       
       {/* Main content */}
