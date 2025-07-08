@@ -8,6 +8,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { MobileSlider } from '@/components/ui/mobile-slider';
 import AnimatedCounter from '@/components/ui/animated-counter';
+import TournamentRulebook from '@/components/TournamentRulebook';
 import { 
   Trophy, 
   Crown, 
@@ -25,7 +26,11 @@ import {
   ChevronDown,
   ChevronUp,
   Activity,
-  Plus
+  Plus,
+  BookOpen,
+  History,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { 
   Tournament, 
@@ -55,6 +60,7 @@ const TournamentPage: React.FC = () => {
   const [showPointsGuide, setShowPointsGuide] = useState(false);
   const [expandedParticipant, setExpandedParticipant] = useState<string | null>(null);
   const [contentReady, setContentReady] = useState(false);
+  const [showHistoricalWeeks, setShowHistoricalWeeks] = useState(false);
 
   // Tab state for switching between tournament and PR records
   const [activeTab, setActiveTab] = useState<'tournament' | 'records'>('tournament');
@@ -138,6 +144,50 @@ const TournamentPage: React.FC = () => {
     return () => clearInterval(interval);
   }, [selectedTournament]);
 
+  // 3-category point grouping - more compact and logical
+  const getPointBreakdown = (participant: TournamentParticipant) => {
+    // Core Performance: PRs, improvements, and competitive
+    const performance = participant.pointsBreakdown.prPoints + 
+                       participant.pointsBreakdown.improvementPoints +
+                       (participant.pointsBreakdown.competitivePoints || 0);
+    
+    // Volume & Consistency: daily work and habits
+    const volume = participant.pointsBreakdown.consistencyPoints + 
+                  participant.pointsBreakdown.participationPoints +
+                  (participant.pointsBreakdown.exercisePoints || 0) +
+                  (participant.pointsBreakdown.varietyPoints || 0);
+    
+    // Bonuses: achievements and special rewards
+    const bonuses = participant.pointsBreakdown.bonusPoints;
+    
+    return { performance, volume, bonuses };
+  };
+
+  // Smart badge filtering - only show most important badges
+  const getRelevantBadges = (badges: any[]) => {
+    // Priority order for badges
+    const priorityOrder = [
+      BadgeType.PERFECT_WEEK,
+      BadgeType.CONSISTENCY_KING, 
+      BadgeType.FIRST_PR,
+      BadgeType.VOLUME_CRUSHER,
+      BadgeType.WEEKEND_WARRIOR,
+      BadgeType.CORE_DESTROYER,
+      BadgeType.CATEGORY_MASTER,
+      BadgeType.IMPROVEMENT_STAR,
+      BadgeType.NEWCOMER_BONUS
+    ];
+    
+    // Sort by priority and take top 3
+    return badges
+      .sort((a, b) => {
+        const aIndex = priorityOrder.indexOf(a.type);
+        const bIndex = priorityOrder.indexOf(b.type);
+        return aIndex - bIndex;
+      })
+      .slice(0, 3);
+  };
+
   // Badge icon and short name mapping
   const getBadgeIcon = (badgeType: BadgeType) => {
     switch (badgeType) {
@@ -170,21 +220,21 @@ const TournamentPage: React.FC = () => {
       case BadgeType.FIRST_PR:
         return 'PR';
       case BadgeType.CONSISTENCY_KING:
-        return '7d';
+        return '7d Streak';
       case BadgeType.IMPROVEMENT_STAR:
-        return 'Star';
+        return 'Top Improver';
       case BadgeType.WEEKEND_WARRIOR:
         return 'Weekend';
       case BadgeType.CATEGORY_MASTER:
-        return 'Master';
+        return 'All Groups';
       case BadgeType.NEWCOMER_BONUS:
         return 'New';
       case BadgeType.PERFECT_WEEK:
         return 'Perfect';
       case BadgeType.VOLUME_CRUSHER:
-        return 'Volume';
+        return 'High Volume';
       case BadgeType.CORE_DESTROYER:
-        return 'Core';
+        return 'Core Focus';
       default:
         return 'Badge';
     }
@@ -275,24 +325,25 @@ const TournamentPage: React.FC = () => {
     return streak;
   };
 
-  // Render participant entry
+  // Render participant entry with simplified design
   const renderParticipant = (participant: TournamentParticipant, index: number) => {
     const isCurrentUser = participant.userId === profile?.id;
     const isExpanded = expandedParticipant === participant.userId;
     const winningStreak = selectedTournament ? getWinningStreakForTournament(participant.userId, selectedTournament) : 0;
+    const pointBreakdown = getPointBreakdown(participant);
+    const relevantBadges = getRelevantBadges(participant.badges);
     
     // Enhanced card styling based on rank
     const getCardStyling = (rank: number, isCurrentUser: boolean) => {
-      // Remove the green override for current user to show rank colors
       switch (rank) {
         case 1:
           return 'bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-950/30 dark:via-yellow-950/30 dark:to-orange-950/30 border-amber-300/50 dark:border-amber-700/50 shadow-lg';
         case 2:
-          return 'apple-card';
+          return 'apple-card border-gray-300/30 dark:border-gray-600/30';
         case 3:
-          return 'apple-card';
+          return 'apple-card border-orange-300/30 dark:border-orange-600/30';
         default:
-          return 'apple-card';
+          return isCurrentUser ? 'apple-card border-blue-300/50 dark:border-blue-600/50' : 'apple-card';
       }
     };
     
@@ -324,17 +375,15 @@ const TournamentPage: React.FC = () => {
                   <h3 className="font-semibold text-sm text-foreground truncate">
                     {participant.user.name}
                   </h3>
-                </div>
-                
-                {/* All badges together - Show all badges with consistent styling */}
-                <div className="flex gap-1 mt-1 flex-wrap">
-                  {/* You badge */}
                   {isCurrentUser && (
                     <Badge className="text-xs px-2 py-0.5 bg-blue-100/80 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-full border border-blue-200 dark:border-blue-700/50 flex-shrink-0">
                       You
                     </Badge>
                   )}
-                  
+                </div>
+                
+                {/* Top 3 badges only */}
+                <div className="flex gap-1 mt-1 flex-wrap">
                   {/* Winning streak badge */}
                   {participant.rank === 1 && winningStreak >= 2 && (
                     <Badge className="text-xs bg-gradient-to-r from-orange-100/80 to-red-100/80 text-orange-700 dark:from-orange-900/30 dark:to-red-900/30 dark:text-orange-300 px-2 py-0.5 rounded-full border border-orange-200 dark:border-orange-700/50 flex-shrink-0 flex items-center gap-1">
@@ -343,8 +392,8 @@ const TournamentPage: React.FC = () => {
                     </Badge>
                   )}
                   
-                  {/* Regular badges - Show ALL badges with consistent styling */}
-                  {participant.badges.map(badge => (
+                  {/* Top 3 relevant badges */}
+                  {relevantBadges.map(badge => (
                     <Badge 
                       key={badge.id} 
                       className={`text-xs px-2 py-0.5 rounded-full border flex-shrink-0 flex items-center gap-1 ${getBadgeStyles(badge.type)}`}
@@ -353,6 +402,13 @@ const TournamentPage: React.FC = () => {
                       <span className="font-medium">{getBadgeShortName(badge.type)}</span>
                     </Badge>
                   ))}
+                  
+                  {/* Show "+X more" if there are additional badges */}
+                  {participant.badges.length > 3 && (
+                    <Badge className="text-xs px-2 py-0.5 bg-gray-100/80 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400 rounded-full border border-gray-200 dark:border-gray-700/50 flex-shrink-0">
+                      +{participant.badges.length - 3} more
+                    </Badge>
+                  )}
                 </div>
               </div>
             </div>
@@ -366,132 +422,55 @@ const TournamentPage: React.FC = () => {
                 />
               </div>
               <div className="text-xs text-muted-foreground">
-                pts
-              </div>
-              <div className="text-xs text-muted-foreground">
-                {participant.workoutDays.length}d
+                pts • {participant.workoutDays.length}d
               </div>
             </div>
           </div>
 
-          {/* Points Breakdown (always visible) - More compact with NEW system */}
+          {/* 3-Category Points Breakdown - Compact Layout */}
           <div className="mt-3 pt-3 border-t border-border/30 transition-all duration-300">
-            <div className="grid grid-cols-3 gap-2 text-sm">
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground text-xs">PRs:</span>
-                <span className="font-medium bg-amber-100/80 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded text-xs border border-amber-200 dark:border-amber-700/50">
-                  {selectedTournament?.id === currentTournament?.id ? (
-                    <AnimatedCounter
-                      value={participant.pointsBreakdown.prPoints}
-                      duration={600}
-                    />
-                  ) : (
-                    participant.pointsBreakdown.prPoints
-                  )}
+            <div className="grid grid-cols-3 gap-3 text-sm">
+              <div className="flex flex-col items-center text-center">
+                <span className="text-xs text-muted-foreground mb-1">Performance</span>
+                <span className="font-bold text-lg bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                  <AnimatedCounter
+                    value={pointBreakdown.performance}
+                    duration={600}
+                  />
                 </span>
+                <span className="text-xs text-muted-foreground">PRs & Competition</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground text-xs">Volume:</span>
-                <span className="font-medium bg-blue-100/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs border border-blue-200 dark:border-blue-700/50">
-                  {selectedTournament?.id === currentTournament?.id ? (
-                    <AnimatedCounter
-                      value={participant.pointsBreakdown.exercisePoints || 0}
-                      duration={600}
-                    />
-                  ) : (
-                    participant.pointsBreakdown.exercisePoints || 0
-                  )}
+              <div className="flex flex-col items-center text-center">
+                <span className="text-xs text-muted-foreground mb-1">Volume</span>
+                <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  <AnimatedCounter
+                    value={pointBreakdown.volume}
+                    duration={600}
+                  />
                 </span>
+                <span className="text-xs text-muted-foreground">Work & Consistency</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground text-xs">Improve:</span>
-                <span className="font-medium bg-indigo-100/80 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded text-xs border border-indigo-200 dark:border-indigo-700/50">
-                  {selectedTournament?.id === currentTournament?.id ? (
-                    <AnimatedCounter
-                      value={participant.pointsBreakdown.improvementPoints}
-                      duration={600}
-                    />
-                  ) : (
-                    participant.pointsBreakdown.improvementPoints
-                  )}
+              <div className="flex flex-col items-center text-center">
+                <span className="text-xs text-muted-foreground mb-1">Bonuses</span>
+                <span className="font-bold text-lg bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                  <AnimatedCounter
+                    value={pointBreakdown.bonuses}
+                    duration={600}
+                  />
                 </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground text-xs">Daily:</span>
-                <span className="font-medium bg-orange-100/80 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded text-xs border border-orange-200 dark:border-orange-700/50">
-                  {selectedTournament?.id === currentTournament?.id ? (
-                    <AnimatedCounter
-                      value={participant.pointsBreakdown.participationPoints}
-                      duration={600}
-                    />
-                  ) : (
-                    participant.pointsBreakdown.participationPoints
-                  )}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground text-xs">Variety:</span>
-                <span className="font-medium bg-purple-100/80 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded text-xs border border-purple-200 dark:border-purple-700/50">
-                  {selectedTournament?.id === currentTournament?.id ? (
-                    <AnimatedCounter
-                      value={participant.pointsBreakdown.varietyPoints || 0}
-                      duration={600}
-                    />
-                  ) : (
-                    participant.pointsBreakdown.varietyPoints || 0
-                  )}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground text-xs">Comp:</span>
-                <span className="font-medium bg-teal-100/80 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2 py-0.5 rounded text-xs border border-teal-200 dark:border-teal-700/50">
-                  {selectedTournament?.id === currentTournament?.id ? (
-                    <AnimatedCounter
-                      value={participant.pointsBreakdown.competitivePoints || 0}
-                      duration={600}
-                    />
-                  ) : (
-                    participant.pointsBreakdown.competitivePoints || 0
-                  )}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground text-xs">Consist:</span>
-                <span className="font-medium bg-green-100/80 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded text-xs border border-green-200 dark:border-green-700/50">
-                  {selectedTournament?.id === currentTournament?.id ? (
-                    <AnimatedCounter
-                      value={participant.pointsBreakdown.consistencyPoints}
-                      duration={600}
-                    />
-                  ) : (
-                    participant.pointsBreakdown.consistencyPoints
-                  )}
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-muted-foreground text-xs">Bonus:</span>
-                <span className="font-medium bg-pink-100/80 dark:bg-pink-900/30 text-pink-700 dark:text-pink-300 px-2 py-0.5 rounded text-xs border border-pink-200 dark:border-pink-700/50">
-                  {selectedTournament?.id === currentTournament?.id ? (
-                    <AnimatedCounter
-                      value={participant.pointsBreakdown.bonusPoints}
-                      duration={600}
-                    />
-                  ) : (
-                    participant.pointsBreakdown.bonusPoints
-                  )}
-                </span>
+                <span className="text-xs text-muted-foreground">Achievements</span>
               </div>
             </div>
           </div>
 
-          {/* Expandable Date Details Toggle - More compact */}
+          {/* Expandable Details Toggle */}
           <div className="mt-3 pt-3 border-t border-border/30">
             <button
               onClick={() => setExpandedParticipant(isExpanded ? null : participant.userId)}
               className={`w-full flex items-center justify-center gap-2 text-sm font-medium transition-all duration-300 ease-out py-2 px-3 rounded-xl ${
                 isExpanded 
                   ? 'text-blue-600 dark:text-blue-400 bg-blue-50/80 dark:bg-blue-900/20' 
-                  : 'text-muted-foreground bg-muted/30 active:bg-muted/50'
+                  : 'text-muted-foreground bg-muted/30 hover:bg-muted/50'
               }`}
             >
               <span className="text-xs">{isExpanded ? 'Hide Details' : 'Show Details'}</span>
@@ -500,254 +479,208 @@ const TournamentPage: React.FC = () => {
               </div>
             </button>
 
-            {/* Expandable Date Breakdown with smooth animation - Clean receipt style */}
+            {/* Expandable Detail Section - Unified Single Card */}
             <div className={`overflow-hidden transition-all duration-500 ease-out ${
-              isExpanded ? 'max-h-[2000px] opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0'
+              isExpanded ? 'max-h-[1000px] opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0'
             }`}>
-              <div className="space-y-4 text-sm">
-                {/* Personal Records Section */}
-                {participant.prDetails.length > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="bg-amber-100/80 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded text-xs font-medium border border-amber-200 dark:border-amber-700/50">PRs</span>
-                      <span className="text-xs text-muted-foreground">({participant.prDetails.length})</span>
-                    </div>
-                    <div className="space-y-2 ml-4">
-                      {participant.prDetails.map((pr, idx) => (
-                        <div key={idx} className="flex justify-between items-start text-xs">
-                          <div className="flex-1">
-                            <div className="font-medium text-foreground">{pr.exerciseName}</div>
-                            <div className="text-muted-foreground">
-                              {pr.previousBest > 0 ? `${pr.previousBest}lbs → ${pr.weight}lbs` : `First time: ${pr.weight}lbs`}
-                              {pr.improvementPercent > 0 && (
-                                <span className="text-green-600 dark:text-green-400 font-medium ml-1">
-                                  (+{pr.improvementPercent.toFixed(1)}%)
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <span className="bg-amber-100/80 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded text-xs font-medium border border-amber-200 dark:border-amber-700/50">+75pts</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Improvement Section */}
-                {participant.pointsBreakdown.improvementPoints > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="bg-blue-100/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs font-medium border border-blue-200 dark:border-blue-700/50">Improvement</span>
-                    </div>
-                    <div className="space-y-2 ml-4">
-                      {participant.prDetails.filter(pr => pr.improvementPercent > 0).map((pr, idx) => (
-                        <div key={idx} className="flex justify-between items-start text-xs">
-                          <div className="flex-1">
-                            <div className="font-medium text-foreground">{pr.exerciseName}</div>
-                            <div className="text-green-600 dark:text-green-400 font-medium">
-                              {pr.improvementPercent.toFixed(1)}% improvement
-                            </div>
-                          </div>
-                          <span className="bg-blue-100/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs font-medium border border-blue-200 dark:border-blue-700/50">
-                            +{Math.min(Math.floor(pr.improvementPercent * 2), 50)}pts
+              <div className="space-y-3 text-sm">
+                {/* Unified Point Breakdown - Single Cohesive Card */}
+                <div className="bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-900/50 dark:to-slate-800/30 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
+                  <h4 className="font-bold text-foreground mb-4 flex items-center gap-2 text-base">
+                    <TrendingUp className="h-5 w-5 text-blue-600" />
+                    Complete Point Breakdown
+                  </h4>
+                  
+                  <div className="space-y-4">
+                    {/* Performance Items */}
+                    {(participant.prDetails.length > 0 || participant.pointsBreakdown.improvementPoints > 0 || (participant.pointsBreakdown.competitivePoints || 0) > 0) && (
+                      <>
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="w-3 h-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-500"></div>
+                          <span className="font-semibold text-amber-800 dark:text-amber-200 text-sm">Performance</span>
+                          <span className="ml-auto font-bold text-amber-800 dark:text-amber-200 bg-amber-100/60 dark:bg-amber-900/30 px-2 py-1 rounded-lg text-xs">
+                            {pointBreakdown.performance} pts
                           </span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Variety Bonus Section */}
-                {(participant.pointsBreakdown.varietyPoints || 0) > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="bg-purple-100/80 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded text-xs font-medium border border-purple-200 dark:border-purple-700/50">Variety</span>
-                    </div>
-                    <div className="space-y-2 ml-4">
-                      <div className="flex justify-between items-center text-xs">
-                        <div>
-                          <div className="font-medium text-foreground">Exercise variety bonus</div>
-                          <div className="text-muted-foreground">+3 pts for each exercise beyond 2nd per day</div>
-                        </div>
-                        <span className="bg-purple-100/80 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded text-xs font-medium border border-purple-200 dark:border-purple-700/50">+{participant.pointsBreakdown.varietyPoints || 0}pts</span>
-                      </div>
-                      {participant.exerciseStats?.varietyDays && participant.exerciseStats.varietyDays.length > 0 && (
-                        <div className="text-xs text-muted-foreground mt-2">
-                          <div className="font-medium mb-1">🎯 High-volume days:</div>
-                          {participant.exerciseStats.varietyDays.map((day, idx) => {
-                            const [year, month, dayNum] = day.date.split('-').map(Number);
-                            const date = new Date(year, month - 1, dayNum);
-                            return (
-                              <div key={idx} className="flex justify-between items-center">
-                                <span>{date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}: {day.exerciseCount} exercises</span>
-                                <span className="text-purple-600 dark:text-purple-400 font-medium">+{day.bonus}pts</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Competition Section */}
-                {participant.competitiveDetails && participant.competitiveDetails.length > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="bg-teal-100/80 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2 py-0.5 rounded text-xs font-medium border border-teal-200 dark:border-teal-700/50">Competition</span>
-                      <span className="text-xs text-muted-foreground">({participant.competitiveDetails.length})</span>
-                    </div>
-                    <div className="space-y-2 ml-4">
-                      {participant.competitiveDetails.map((comp, idx) => (
-                        <div key={idx} className="flex justify-between items-start text-xs">
-                          <div className="flex-1">
-                            <div className="font-medium text-foreground">{comp.type}</div>
-                            <div className="text-muted-foreground">
-                              {comp.exerciseName}
-                              {comp.targetUser && ` vs ${comp.targetUser}`}
-                            </div>
-                          </div>
-                          <span className="bg-purple-100/80 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 px-2 py-0.5 rounded text-xs font-medium border border-purple-200 dark:border-purple-700/50">+{comp.points}pts</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Exercise Volume Section */}
-                {(participant.pointsBreakdown.exercisePoints || 0) > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="bg-blue-100/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs font-medium border border-blue-200 dark:border-blue-700/50">Volume</span>
-                      <span className="text-xs text-muted-foreground">({participant.exerciseStats?.totalExercises || 0} total)</span>
-                    </div>
-                    <div className="space-y-2 ml-4">
-                      <div className="flex justify-between items-center text-xs">
-                        <div>
-                          <div className="font-medium text-foreground">Exercise volume points</div>
-                          <div className="text-muted-foreground">{participant.exerciseStats?.totalExercises || 0} exercises × 5 points</div>
-                        </div>
-                        <span className="bg-blue-100/80 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded text-xs font-medium border border-blue-200 dark:border-blue-700/50">+{participant.pointsBreakdown.exercisePoints || 0}pts</span>
-                      </div>
-                      {participant.exerciseStats && (
-                        <div className="text-xs text-muted-foreground">
-                          <div>• {participant.exerciseStats.uniqueExercises} unique exercises</div>
-                          <div>• {participant.exerciseStats.averageExercisesPerDay.toFixed(1)} avg per workout</div>
-                          {participant.exerciseStats.coreExercises > 0 && (
-                            <div>• {participant.exerciseStats.coreExercises} core exercises 🔥</div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Competition Section */}
-                {participant.competitiveDetails && participant.competitiveDetails.length > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="bg-teal-100/80 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2 py-0.5 rounded text-xs font-medium border border-teal-200 dark:border-teal-700/50">Competition</span>
-                      <span className="text-xs text-muted-foreground">({participant.competitiveDetails.length})</span>
-                    </div>
-                    <div className="space-y-2 ml-4">
-                      {participant.competitiveDetails.map((comp, idx) => (
-                        <div key={idx} className="flex justify-between items-start text-xs">
-                          <div className="flex-1">
-                            <div className="font-medium text-foreground">{comp.type}</div>
-                            <div className="text-muted-foreground">
-                              {comp.exerciseName}
-                              {comp.targetUser && ` vs ${comp.targetUser}`}
-                            </div>
-                          </div>
-                          <span className="bg-teal-100/80 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 px-2 py-0.5 rounded text-xs font-medium border border-teal-200 dark:border-teal-700/50">+{comp.points}pts</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Daily Workouts Section - Updated */}
-                {participant.pointsBreakdown.participationPoints > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="bg-orange-100/80 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded text-xs font-medium border border-orange-200 dark:border-orange-700/50">Daily</span>
-                      <span className="text-xs text-muted-foreground">({participant.workoutDays.length} days)</span>
-                    </div>
-                    <div className="space-y-2 ml-4">
-                      <div className="flex justify-between items-center text-xs">
-                        <div>
-                          <div className="font-medium text-foreground">Daily workout base</div>
-                          <div className="text-muted-foreground">8 points per day (min 2 exercises required)</div>
-                        </div>
-                        <span className="bg-orange-100/80 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-2 py-0.5 rounded text-xs font-medium border border-orange-200 dark:border-orange-700/50">+{participant.pointsBreakdown.participationPoints}pts</span>
-                      </div>
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {participant.workoutDays.map((date, idx) => {
-                          const [year, month, day] = date.split('-').map(Number);
-                          const localDate = new Date(year, month - 1, day);
-                          return (
-                            <span key={idx} className="bg-muted/50 text-muted-foreground px-2 py-0.5 rounded text-xs border border-border/30">
-                              {localDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Consistency Section */}
-                {participant.pointsBreakdown.consistencyPoints > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="bg-green-100/80 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded text-xs font-medium border border-green-200 dark:border-green-700/50">Consistency</span>
-                    </div>
-                    <div className="ml-4">
-                      <div className="flex justify-between items-center text-xs">
-                        <div>
-                          <div className="font-medium text-foreground">5+ workout days bonus</div>
-                          <div className="text-muted-foreground">Extra points for consistency</div>
-                        </div>
-                        <span className="bg-green-100/80 dark:bg-green-900/30 text-green-700 dark:text-green-300 px-2 py-0.5 rounded text-xs font-medium border border-green-200 dark:border-green-700/50">+{participant.pointsBreakdown.consistencyPoints}pts</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Bonus Section (Badges) - Enhanced with clearer display */}
-                {participant.badges.length > 0 && (
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="bg-gradient-to-r from-pink-100/80 to-purple-100/80 dark:from-pink-900/30 dark:to-purple-900/30 text-pink-700 dark:text-pink-300 px-2 py-0.5 rounded text-xs font-medium border border-pink-200 dark:border-pink-700/50">
-                        Bonus
-                      </span>
-                      <span className="text-xs text-muted-foreground">({participant.badges.length} badge{participant.badges.length !== 1 ? 's' : ''})</span>
-                    </div>
-                    <div className="space-y-2 ml-4">
-                      {participant.badges.map(badge => (
-                        <div key={badge.id} className="flex justify-between items-start text-xs">
-                          <div className="flex items-start gap-2 flex-1">
-                            <div className={`p-1 rounded-lg border ${getBadgeStyles(badge.type)}`}>
-                              {getBadgeIcon(badge.type)}
-                            </div>
+                        
+                        {/* Personal Records */}
+                        {participant.prDetails.map((pr, idx) => (
+                          <div key={`pr-${idx}`} className="flex justify-between items-center py-2 px-3 bg-amber-50/30 dark:bg-amber-950/15 rounded-lg border-l-2 border-amber-400 dark:border-amber-600">
                             <div className="flex-1">
-                              <div className="font-medium text-foreground flex items-center gap-2">
-                                {badge.name}
-                                <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${getBadgeStyles(badge.type)}`}>
-                                  {getBadgeShortName(badge.type)}
-                                </span>
+                              <div className="font-medium text-foreground text-sm">{pr.exerciseName} PR</div>
+                              <div className="text-xs text-muted-foreground">
+                                {pr.previousBest > 0 ? `${pr.previousBest}→${pr.weight}lbs` : `${pr.weight}lbs (first time)`}
                               </div>
-                              <div className="text-muted-foreground text-[11px] mt-0.5">{badge.description}</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold text-amber-700 dark:text-amber-300 text-sm">+75pts</div>
                             </div>
                           </div>
-                          <span className="bg-gradient-to-r from-pink-100/80 to-purple-100/80 dark:from-pink-900/30 dark:to-purple-900/30 text-pink-700 dark:text-pink-300 px-2 py-0.5 rounded text-xs font-medium border border-pink-200 dark:border-pink-700/50 ml-2">
-                            +{badge.points}pts
+                        ))}
+
+                        {/* Improvement Gains */}
+                        {participant.prDetails.filter(pr => pr.improvementPercent > 0).map((pr, idx) => (
+                          <div key={`improvement-${idx}`} className="flex justify-between items-center py-2 px-3 bg-amber-50/30 dark:bg-amber-950/15 rounded-lg border-l-2 border-amber-400 dark:border-amber-600">
+                            <div className="flex-1">
+                              <div className="font-medium text-foreground text-sm">{pr.exerciseName} Improvement</div>
+                              <div className="text-xs text-green-600 dark:text-green-400 font-medium">
+                                +{pr.improvementPercent.toFixed(1)}% gain
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold text-amber-700 dark:text-amber-300 text-sm">+{Math.min(Math.floor(pr.improvementPercent * 2), 50)}pts</div>
+                            </div>
+                          </div>
+                        ))}
+
+                        {/* Competitive Bonuses */}
+                        {participant.competitiveDetails && participant.competitiveDetails.map((comp, idx) => (
+                          <div key={`comp-${idx}`} className="flex justify-between items-center py-2 px-3 bg-amber-50/30 dark:bg-amber-950/15 rounded-lg border-l-2 border-amber-400 dark:border-amber-600">
+                            <div className="flex-1">
+                              <div className="font-medium text-foreground text-sm">
+                                Beat {comp.targetUser || 'Friend'}: {comp.exerciseName}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {comp.type} victory
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold text-amber-700 dark:text-amber-300 text-sm">+{comp.points}pts</div>
+                            </div>
+                          </div>
+                        ))}
+
+                        <div className="border-t border-slate-200/50 dark:border-slate-700/50 pt-3 mt-3"></div>
+                      </>
+                    )}
+
+                    {/* Volume & Consistency Items */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
+                      <span className="font-semibold text-blue-800 dark:text-blue-200 text-sm">Volume & Consistency</span>
+                      <span className="ml-auto font-bold text-blue-800 dark:text-blue-200 bg-blue-100/60 dark:bg-blue-900/30 px-2 py-1 rounded-lg text-xs">
+                        {pointBreakdown.volume} pts
+                      </span>
+                    </div>
+                    
+                    {/* Daily Workouts */}
+                    {participant.workoutDays.slice(0, 7).map((day, idx) => {
+                      const dayName = new Date(day).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                      const isWeekend = new Date(day).getDay() === 0 || new Date(day).getDay() === 6;
+                      return (
+                        <div key={`workout-${idx}`} className="flex justify-between items-center py-2 px-3 bg-blue-50/30 dark:bg-blue-950/15 rounded-lg border-l-2 border-blue-400 dark:border-blue-600">
+                          <div className="flex-1">
+                            <div className="font-medium text-foreground text-sm">
+                              {dayName} Workout
+                              {isWeekend && <span className="text-orange-500 ml-2">🌅</span>}
+                            </div>
+                            {isWeekend && <div className="text-xs text-orange-600 dark:text-orange-400">Weekend bonus included</div>}
+                          </div>
+                          <div className="text-right">
+                            <div className="font-bold text-blue-700 dark:text-blue-300 text-sm">
+                              +{6 + (isWeekend ? 8 : 0)}pts
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Exercise Volume */}
+                    {(participant.exerciseStats?.totalExercises || 0) > 0 && (
+                      <div className="flex justify-between items-center py-2 px-3 bg-blue-50/30 dark:bg-blue-950/15 rounded-lg border-l-2 border-blue-400 dark:border-blue-600">
+                        <div className="flex-1">
+                          <div className="font-medium text-foreground text-sm">Exercise Volume</div>
+                          <div className="text-xs text-muted-foreground">{participant.exerciseStats?.totalExercises || 0} exercises • 8pts each</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold text-blue-700 dark:text-blue-300 text-sm">+{(participant.exerciseStats?.totalExercises || 0) * 8}pts</div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Consistency Bonus */}
+                    {participant.pointsBreakdown.consistencyPoints > 0 && (
+                      <div className="flex justify-between items-center py-2 px-3 bg-blue-50/30 dark:bg-blue-950/15 rounded-lg border-l-2 border-blue-400 dark:border-blue-600">
+                        <div className="flex-1">
+                          <div className="font-medium text-foreground text-sm">Consistency Bonus</div>
+                          <div className="text-xs text-green-600 dark:text-green-400">5+ workout days achieved!</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold text-blue-700 dark:text-blue-300 text-sm">+60pts</div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Variety Bonuses */}
+                    {(participant.pointsBreakdown.varietyPoints || 0) > 0 && participant.exerciseStats?.varietyDays && participant.exerciseStats.varietyDays.map((day, idx) => {
+                      const dayName = new Date(day.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+                      return (
+                        <div key={`variety-${idx}`} className="flex justify-between items-center py-2 px-3 bg-blue-50/30 dark:bg-blue-950/15 rounded-lg border-l-2 border-blue-400 dark:border-blue-600">
+                          <div className="flex-1">
+                            <div className="font-medium text-foreground text-sm">{dayName} Variety Bonus</div>
+                            <div className="text-xs text-muted-foreground">{day.exerciseCount} exercises • +4pts per exercise beyond 2nd</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-bold text-blue-700 dark:text-blue-300 text-sm">+{day.bonus}pts</div>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {/* Achievement Bonuses */}
+                    {participant.badges.length > 0 && (
+                      <>
+                        <div className="border-t border-slate-200/50 dark:border-slate-700/50 pt-3 mt-3"></div>
+                        <div className="flex items-center gap-2 mb-3">
+                          <div className="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500"></div>
+                          <span className="font-semibold text-emerald-800 dark:text-emerald-200 text-sm">Achievement Bonuses</span>
+                          <span className="ml-auto font-bold text-emerald-800 dark:text-emerald-200 bg-emerald-100/60 dark:bg-emerald-900/30 px-2 py-1 rounded-lg text-xs">
+                            {pointBreakdown.bonuses} pts
                           </span>
                         </div>
-                      ))}
+                        
+                        {participant.badges.map(badge => (
+                          <div key={badge.id} className="flex justify-between items-center py-2 px-3 bg-emerald-50/30 dark:bg-emerald-950/15 rounded-lg border-l-2 border-emerald-400 dark:border-emerald-600">
+                            <div className="flex items-center gap-3 flex-1">
+                              <div className="flex-shrink-0">
+                                {getBadgeIcon(badge.type)}
+                              </div>
+                              <div>
+                                <div className="font-medium text-foreground text-sm">{BADGE_DEFINITIONS[badge.type].name}</div>
+                                <div className="text-xs text-muted-foreground">{BADGE_DEFINITIONS[badge.type].description}</div>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold text-emerald-700 dark:text-emerald-300 text-sm">+{badge.points}pts</div>
+                            </div>
+                          </div>
+                        ))}
+                      </>
+                    )}
+                  </div>
+
+                  {/* Quick Summary Footer */}
+                  <div className="mt-6 pt-4 border-t border-slate-200/50 dark:border-slate-700/50">
+                    <div className="grid grid-cols-4 gap-4 text-xs text-center">
+                      <div>
+                        <div className="font-semibold text-foreground">{participant.prDetails.length}</div>
+                        <div className="text-muted-foreground">PRs Set</div>
+                      </div>
+                      <div>
+                        <div className="font-semibold text-foreground">{participant.exerciseStats?.totalExercises || 0}</div>
+                        <div className="text-muted-foreground">Exercises</div>
+                      </div>
+                      <div>
+                        <div className="font-semibold text-foreground">{participant.workoutDays.length}/7</div>
+                        <div className="text-muted-foreground">Days</div>
+                      </div>
+                      <div>
+                        <div className="font-semibold text-foreground">{participant.badges.length}</div>
+                        <div className="text-muted-foreground">Badges</div>
+                      </div>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </div>
@@ -761,7 +694,7 @@ const TournamentPage: React.FC = () => {
       title=""
       headerSlider={
         <div className="flex items-center justify-between w-full">
-          {/* Thick Slider as Title */}
+          {/* Main Navigation Slider */}
           <MobileSlider
             options={[
               { id: 'tournament', label: 'Tournament' },
@@ -773,17 +706,32 @@ const TournamentPage: React.FC = () => {
             headerTitle={true}
           />
           
-          {/* Countdown Badge - Only for Tournament */}
-          {activeTab === 'tournament' && countdown.text && (
-            <div className={`
-              px-3 py-1 rounded-full font-medium text-xs
-              ${countdown.urgency === 'low' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : ''}
-              ${countdown.urgency === 'medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : ''}
-              ${countdown.urgency === 'high' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300' : ''}
-              ${countdown.urgency === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : ''}
-              ${countdown.urgency === 'ended' ? 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300' : ''}
-            `}>
-              {countdown.text}
+          {/* Action Buttons - Only for Tournament */}
+          {activeTab === 'tournament' && (
+            <div className="flex items-center gap-2">
+              {/* Countdown Badge */}
+              {countdown.text && (
+                <div className={`
+                  px-3 py-1 rounded-full font-medium text-xs
+                  ${countdown.urgency === 'low' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : ''}
+                  ${countdown.urgency === 'medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : ''}
+                  ${countdown.urgency === 'high' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300' : ''}
+                  ${countdown.urgency === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : ''}
+                  ${countdown.urgency === 'ended' ? 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300' : ''}
+                `}>
+                  {countdown.text}
+                </div>
+              )}
+              
+              {/* Rulebook Button */}
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowPointsGuide(true)}
+                className="rounded-full h-10 w-10 p-0 border-2"
+              >
+                <BookOpen className="h-4 w-4" />
+              </Button>
             </div>
           )}
         </div>
@@ -794,302 +742,15 @@ const TournamentPage: React.FC = () => {
         {/* Tournament Content */}
         {activeTab === 'tournament' && (
           <>
-            {/* Floating Rules Button */}
-            <div className="fixed bottom-24 right-4 z-40">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowPointsGuide(!showPointsGuide)}
-                className="rounded-full w-12 h-12 p-0 shadow-lg border-2 bg-background/95 backdrop-blur-sm transition-all duration-200 hover:scale-105"
-              >
-                {showPointsGuide ? (
-                  <span className="text-lg">×</span>
-                ) : (
-                  <span className="text-xs font-bold">?</span>
-                )}
-              </Button>
-            </div>
+            {/* Dynamic Rulebook Modal */}
+            <TournamentRulebook 
+              isOpen={showPointsGuide} 
+              onClose={() => setShowPointsGuide(false)} 
+            />
 
-            {/* Rules Modal - Duolingo-inspired */}
-            {showPointsGuide && (
-              <Card className="apple-card">
-                <CardHeader className="pb-6">
-                  <CardTitle className="flex items-center gap-2 text-xl">
-                    <span className="text-2xl">📋</span>
-                    Tournament Rules
-                  </CardTitle>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    How to earn points and win the weekly competition!
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {/* Main Point Categories */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                      <Trophy className="h-4 w-4 text-amber-500" />
-                      Core Activities
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Personal Records */}
-                      <div className="bg-amber-100/80 dark:bg-amber-900/30 rounded-xl p-4 border border-amber-200 dark:border-amber-700/50">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="p-1.5 rounded-lg bg-amber-200/80 dark:bg-amber-800/50">
-                            <Trophy className="h-4 w-4 text-amber-700 dark:text-amber-300" />
-                          </div>
-                          <span className="font-semibold text-amber-800 dark:text-amber-200">Personal Record (PR)</span>
-                        </div>
-                        <div className="mb-2">
-                          <span className="text-3xl font-bold text-amber-700 dark:text-amber-300">{POINTS_CONFIG.PR_ACHIEVEMENT.points}</span>
-                          <span className="text-sm text-amber-600 dark:text-amber-400 ml-2">points</span>
-                        </div>
-                        <p className="text-sm text-amber-700 dark:text-amber-300">
-                          Beat your previous best weight on any exercise
-                        </p>
-                      </div>
-
-                      {/* Exercise Points */}
-                      <div className="bg-blue-100/80 dark:bg-blue-900/30 rounded-xl p-4 border border-blue-200 dark:border-blue-700/50">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="p-1.5 rounded-lg bg-blue-200/80 dark:bg-blue-800/50">
-                            <Activity className="h-4 w-4 text-blue-700 dark:text-blue-300" />
-                          </div>
-                          <span className="font-semibold text-blue-800 dark:text-blue-200">Per Exercise</span>
-                        </div>
-                        <div className="mb-2">
-                          <span className="text-3xl font-bold text-blue-700 dark:text-blue-300">{POINTS_CONFIG.EXERCISE_COMPLETED.points}</span>
-                          <span className="text-sm text-blue-600 dark:text-blue-400 ml-2">points each</span>
-                        </div>
-                        <p className="text-sm text-blue-700 dark:text-blue-300">
-                          Every exercise you complete gives points
-                        </p>
-                      </div>
-
-                      {/* Daily Workouts */}
-                      <div className="bg-orange-100/80 dark:bg-orange-900/30 rounded-xl p-4 border border-orange-200 dark:border-orange-700/50">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="p-1.5 rounded-lg bg-orange-200/80 dark:bg-orange-800/50">
-                            <CheckCircle className="h-4 w-4 text-orange-700 dark:text-orange-300" />
-                          </div>
-                          <span className="font-semibold text-orange-800 dark:text-orange-200">Daily Workout</span>
-                        </div>
-                        <div className="mb-2">
-                          <span className="text-3xl font-bold text-orange-700 dark:text-orange-300">{POINTS_CONFIG.DAILY_WORKOUT_BASE.points}</span>
-                          <span className="text-sm text-orange-600 dark:text-orange-400 ml-2">base points</span>
-                        </div>
-                        <p className="text-sm text-orange-700 dark:text-orange-300">
-                          Complete 2+ exercises in a day (prevents lazy 1-exercise days!)
-                        </p>
-                      </div>
-
-                      {/* Exercise Variety */}
-                      <div className="bg-purple-100/80 dark:bg-purple-900/30 rounded-xl p-4 border border-purple-200 dark:border-purple-700/50">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="p-1.5 rounded-lg bg-purple-200/80 dark:bg-purple-800/50">
-                            <Plus className="h-4 w-4 text-purple-700 dark:text-purple-300" />
-                          </div>
-                          <span className="font-semibold text-purple-800 dark:text-purple-200">Variety Bonus</span>
-                        </div>
-                        <div className="mb-2">
-                          <span className="text-3xl font-bold text-purple-700 dark:text-purple-300">{POINTS_CONFIG.EXERCISE_VARIETY_BONUS.points}</span>
-                          <span className="text-sm text-purple-600 dark:text-purple-400 ml-2">per extra exercise</span>
-                        </div>
-                        <p className="text-sm text-purple-700 dark:text-purple-300">
-                          3rd, 4th, 5th+ exercises get bonus points
-                        </p>
-                      </div>
-
-                      {/* Improvement Points */}
-                      <div className="bg-blue-100/80 dark:bg-blue-900/30 rounded-xl p-4 border border-blue-200 dark:border-blue-700/50">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="p-1.5 rounded-lg bg-blue-200/80 dark:bg-blue-800/50">
-                            <TrendingUp className="h-4 w-4 text-blue-700 dark:text-blue-300" />
-                          </div>
-                          <span className="font-semibold text-blue-800 dark:text-blue-200">Improvement Bonus</span>
-                        </div>
-                        <div className="mb-2">
-                          <span className="text-3xl font-bold text-blue-700 dark:text-blue-300">2</span>
-                          <span className="text-sm text-blue-600 dark:text-blue-400 ml-2">per 1% improvement</span>
-                        </div>
-                        <p className="text-sm text-blue-700 dark:text-blue-300">
-                          Extra points for % improvement on PRs (max 50 per exercise)
-                        </p>
-                      </div>
-
-                      {/* Consistency Bonus */}
-                      <div className="bg-green-100/80 dark:bg-green-900/30 rounded-xl p-4 border border-green-200 dark:border-green-700/50">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="p-1.5 rounded-lg bg-green-200/80 dark:bg-green-800/50">
-                            <Calendar className="h-4 w-4 text-green-700 dark:text-green-300" />
-                          </div>
-                          <span className="font-semibold text-green-800 dark:text-green-200">Consistency Bonus</span>
-                        </div>
-                        <div className="mb-2">
-                          <span className="text-3xl font-bold text-green-700 dark:text-green-300">{POINTS_CONFIG.CONSISTENCY_BONUS.points}</span>
-                          <span className="text-sm text-green-600 dark:text-green-400 ml-2">points</span>
-                        </div>
-                        <p className="text-sm text-green-700 dark:text-green-300">
-                          Work out 5+ days in a week
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Special Features */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
-                      <Zap className="h-4 w-4 text-purple-500" />
-                      Special Features
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {/* Competitive Bonuses */}
-                      <div className="bg-purple-100/80 dark:bg-purple-900/30 rounded-xl p-4 border border-purple-200 dark:border-purple-700/50">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="p-1.5 rounded-lg bg-purple-200/80 dark:bg-purple-800/50">
-                            <Users className="h-4 w-4 text-purple-700 dark:text-purple-300" />
-                          </div>
-                          <span className="font-semibold text-purple-800 dark:text-purple-200">Competitive Bonuses</span>
-                        </div>
-                        <div className="space-y-1 mb-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xl font-bold text-purple-700 dark:text-purple-300">20</span>
-                            <span className="text-sm text-purple-600 dark:text-purple-400">Takeover</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xl font-bold text-purple-700 dark:text-purple-300">10</span>
-                            <span className="text-sm text-purple-600 dark:text-purple-400">Close Win (&lt;5%)</span>
-                          </div>
-                        </div>
-                        <p className="text-sm text-purple-700 dark:text-purple-300">
-                          Beat friends' PRs for extra points
-                        </p>
-                      </div>
-
-                      {/* Achievement Badges */}
-                      <div className="bg-pink-100/80 dark:bg-pink-900/30 rounded-xl p-4 border border-pink-200 dark:border-pink-700/50">
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="p-1.5 rounded-lg bg-pink-200/80 dark:bg-pink-800/50">
-                            <Star className="h-4 w-4 text-pink-700 dark:text-pink-300" />
-                          </div>
-                          <span className="font-semibold text-pink-800 dark:text-pink-200">Achievement Badges</span>
-                        </div>
-                        <div className="mb-2">
-                          <span className="text-2xl font-bold text-pink-700 dark:text-pink-300">5-100</span>
-                          <span className="text-sm text-pink-600 dark:text-pink-400 ml-2">points</span>
-                        </div>
-                        <div className="space-y-1 text-sm text-pink-700 dark:text-pink-300">
-                          <div className="flex items-center gap-2">
-                            <Zap className="h-3 w-3" />
-                            <span>Weekend Warrior (20pts)</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Crown className="h-3 w-3" />
-                            <span>Consistency King (50pts)</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Activity className="h-3 w-3" />
-                            <span>Volume Crusher (35pts) - 3.5+ avg exercises/workout</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Target className="h-3 w-3" />
-                            <span>Core Destroyer (30pts) - 6+ core exercises/week</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Flame className="h-3 w-3" />
-                            <span>Perfect Week (100pts)</span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Tournament Info */}
-                  <div className="border-t border-border/30 pt-6">
-                    <div className="bg-gradient-to-r from-blue-50/50 to-purple-50/50 dark:from-blue-950/30 dark:to-purple-950/30 rounded-xl p-4 border border-blue-200/50 dark:border-blue-700/30">
-                      <div className="flex items-center gap-2 mb-3">
-                        <Crown className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                        <span className="text-lg font-semibold text-foreground">Weekly Tournament</span>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium">Schedule: Monday - Sunday</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Trophy className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium">Winner: Most total points</span>
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <div className="flex items-center gap-2">
-                            <Timer className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium">Auto-resets every Monday</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                            <span className="font-medium">Compete with friends</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="mt-4 p-3 bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 rounded-lg border border-emerald-200/50 dark:border-emerald-700/30">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Target className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-                          <span className="font-semibold text-emerald-800 dark:text-emerald-200 text-sm">Core Focus Bonus</span>
-                        </div>
-                        <p className="text-xs text-emerald-700 dark:text-emerald-300">
-                          Get <strong>+{POINTS_CONFIG.CORE_FOCUS_BONUS.points} extra points</strong> for each core exercise (abs, planks, etc.) to help tackle those beer bellies! 🍺➡️💪
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Tournament Week Selection with blue-purple design */}
-            {(currentTournament || tournamentHistory.length > 0) && (
-              <div className="flex gap-3 overflow-x-auto pb-3 px-1 scrollbar-hide">
-                {/* Current Tournament Button */}
-                {currentTournament && (
-                  <Button
-                    variant={selectedTournament?.id === currentTournament?.id ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedTournament(currentTournament)}
-                    className={`rounded-3xl whitespace-nowrap transition-all duration-400 ease-out font-medium px-6 py-3 transform active:scale-95 ${
-                      selectedTournament?.id === currentTournament?.id
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-lg scale-105'
-                        : 'border-2 border-blue-200/60 dark:border-blue-800/60 text-blue-600 dark:text-blue-400 bg-blue-50/30 dark:bg-blue-900/10 backdrop-blur-sm'
-                    }`}
-                  >
-                    Current
-                  </Button>
-                )}
-                
-                {/* Past Tournament Buttons - filter out current tournament to avoid duplicates */}
-                {tournamentHistory
-                  .filter(tournament => tournament.id !== currentTournament?.id)
-                  .slice()
-                  .reverse()
-                  .map(tournament => (
-                  <Button
-                    key={tournament.id}
-                    variant={selectedTournament?.id === tournament.id ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setSelectedTournament(tournament)}
-                    className={`rounded-3xl whitespace-nowrap transition-all duration-400 ease-out font-medium px-6 py-3 transform active:scale-95 ${
-                      selectedTournament?.id === tournament.id
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-lg scale-105'
-                        : 'border-2 border-blue-200/60 dark:border-blue-800/60 text-blue-600 dark:text-blue-400 bg-blue-50/30 dark:bg-blue-900/10 backdrop-blur-sm opacity-75'
-                    }`}
-                  >
-                    {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </Button>
-                ))}
-              </div>            )}
-
-            {/* Tournament Leaderboard */}
+            {/* Current Tournament Leaderboard */}
             {selectedTournament && (
-              <div className="space-y-4 staggered-cards">
+              <div className="space-y-4">
                 {selectedTournament.participants.length > 0 ? (
                   selectedTournament.participants.map((participant, index) => 
                     renderParticipant(participant, index)
@@ -1106,6 +767,70 @@ const TournamentPage: React.FC = () => {
                   </Card>
                 )}
               </div>
+            )}
+
+            {/* Historical Tournaments - Moved to bottom */}
+            {(currentTournament || tournamentHistory.length > 0) && (
+              <Card className="apple-card mt-8">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <History className="h-5 w-5 text-muted-foreground" />
+                      <h3 className="text-lg font-semibold text-foreground">Tournament History</h3>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowHistoricalWeeks(!showHistoricalWeeks)}
+                      className="text-muted-foreground hover:text-foreground"
+                    >
+                      {showHistoricalWeeks ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      <span className="ml-2">{showHistoricalWeeks ? 'Hide' : 'Show'}</span>
+                    </Button>
+                  </div>
+                  
+                  {showHistoricalWeeks && (
+                    <div className="flex gap-3 overflow-x-auto pb-3 scrollbar-hide">
+                      {/* Current Tournament Button */}
+                      {currentTournament && (
+                        <Button
+                          variant={selectedTournament?.id === currentTournament?.id ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setSelectedTournament(currentTournament)}
+                          className={`rounded-2xl whitespace-nowrap transition-all duration-300 font-medium px-4 py-2 ${
+                            selectedTournament?.id === currentTournament?.id
+                              ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-md'
+                              : 'border border-muted-foreground/20 text-muted-foreground hover:text-foreground hover:border-foreground/30'
+                          }`}
+                        >
+                          Current Week
+                        </Button>
+                      )}
+                      
+                      {/* Past Tournament Buttons */}
+                      {tournamentHistory
+                        .filter(tournament => tournament.id !== currentTournament?.id)
+                        .slice()
+                        .reverse()
+                        .map(tournament => (
+                        <Button
+                          key={tournament.id}
+                          variant={selectedTournament?.id === tournament.id ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setSelectedTournament(tournament)}
+                          className={`rounded-2xl whitespace-nowrap transition-all duration-300 font-medium px-4 py-2 ${
+                            selectedTournament?.id === tournament.id
+                              ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white border-0 shadow-md'
+                              : 'border border-muted-foreground/20 text-muted-foreground hover:text-foreground hover:border-foreground/30 opacity-75'
+                          }`}
+                        >
+                          {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </Button>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             )}
           </>
         )}
