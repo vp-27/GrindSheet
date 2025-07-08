@@ -637,19 +637,19 @@ export const getTournamentCountdown = (endDate: string) => {
   let urgency: "low" | "medium" | "high" | "critical" | "ended" = "low";
   
   if (diffDays > 1) {
-    text = `${diffDays} days left`;
+    text = `${diffDays} days`;
     urgency = "low";
   } else if (diffDays === 1) {
-    text = "1 day left";
+    text = "1 day";
     urgency = "medium";
   } else if (diffHours > 1) {
-    text = `${diffHours} hours left`;
+    text = `${diffHours} hours`;
     urgency = diffHours <= 3 ? "high" : "medium";
   } else if (diffHours === 1) {
     text = "Final hour!";
     urgency = "critical";
   } else {
-    text = `${diffMinutes} minutes left`;
+    text = `${diffMinutes} minutes`;
     urgency = "critical";
   }
   
