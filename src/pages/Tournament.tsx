@@ -37,8 +37,7 @@ import {
   generateTournamentHistory,
   POINTS_CONFIG,
   BADGE_DEFINITIONS,
-  getTournamentCountdown,
-  getTournamentProgress
+  getTournamentCountdown
 } from '@/utils/tournamentUtils';
 import { supabase } from '@/integrations/supabase/client';
 import PRRecordsPage, { PRRecordsContent } from './PRRecords';
@@ -757,28 +756,37 @@ const TournamentPage: React.FC = () => {
     );
   };
 
-  // Get progress class for CSS
-  const getProgressClass = () => {
-    if (!selectedTournament) return 'tournament-progress-0';
-    const progress = getTournamentProgress(selectedTournament.weekStart, selectedTournament.weekEnd);
-    const rounded = Math.round(progress / 10) * 10; // Round to nearest 10
-    return `tournament-progress-${Math.min(100, Math.max(0, rounded))}`;
-  };
-
   return (
     <Layout 
-      title={activeTab === 'records' ? 'PR Records' : 'Tournament'}
+      title=""
       headerSlider={
-        <MobileSlider
-          options={[
-            { id: 'tournament', label: 'Tournament' },
-            { id: 'records', label: 'PR Records' }
-          ]}
-          activeOption={activeTab}
-          onOptionChange={(optionId) => setActiveTab(optionId as 'tournament' | 'records')}
-          variant="compact"
-          className="scale-90"
-        />
+        <div className="flex items-center justify-between w-full">
+          {/* Thick Slider as Title */}
+          <MobileSlider
+            options={[
+              { id: 'tournament', label: 'Tournament' },
+              { id: 'records', label: 'PR Records' }
+            ]}
+            activeOption={activeTab}
+            onOptionChange={(optionId) => setActiveTab(optionId as 'tournament' | 'records')}
+            variant="compact"
+            className="text-xl font-bold scale-90"
+          />
+          
+          {/* Countdown Badge - Only for Tournament */}
+          {activeTab === 'tournament' && countdown.text && (
+            <div className={`
+              px-3 py-1 rounded-full font-medium text-xs
+              ${countdown.urgency === 'low' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : ''}
+              ${countdown.urgency === 'medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : ''}
+              ${countdown.urgency === 'high' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300' : ''}
+              ${countdown.urgency === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' : ''}
+              ${countdown.urgency === 'ended' ? 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300' : ''}
+            `}>
+              {countdown.text}
+            </div>
+          )}
+        </div>
       }
     >
       <div className={`space-y-6 relative transition-all duration-500 ease-out ${contentReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
@@ -786,38 +794,6 @@ const TournamentPage: React.FC = () => {
         {/* Tournament Content */}
         {activeTab === 'tournament' && (
           <>
-            {/* Duolingo-style countdown with progress */}
-            {countdown.text && selectedTournament && (
-              <div className="space-y-3">
-                {/* Countdown text */}
-                <div className="flex items-center justify-center">
-                  <div className={`
-                    px-4 py-2 rounded-full font-semibold text-sm transition-all duration-300
-                    ${countdown.urgency === 'low' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : ''}
-                    ${countdown.urgency === 'medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' : ''}
-                    ${countdown.urgency === 'high' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300' : ''}
-                    ${countdown.urgency === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300 animate-pulse' : ''}
-                    ${countdown.urgency === 'ended' ? 'bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-300' : ''}
-                  `}>
-                    ⏰ {countdown.text}
-                  </div>
-                </div>
-                
-                {/* Progress bar */}
-                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
-                  <div 
-                    className={`h-full tournament-progress-bar ${getProgressClass()} ${
-                      countdown.urgency === 'low' ? 'tournament-progress-low' :
-                      countdown.urgency === 'medium' ? 'tournament-progress-medium' :
-                      countdown.urgency === 'high' ? 'tournament-progress-high' :
-                      countdown.urgency === 'critical' ? 'tournament-progress-critical' :
-                      'tournament-progress-ended'
-                    }`}
-                  />
-                </div>
-              </div>
-            )}
-
             {/* Floating Rules Button */}
             <div className="fixed bottom-24 right-4 z-40">
               <Button 

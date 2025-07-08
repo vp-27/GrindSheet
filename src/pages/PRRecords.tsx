@@ -388,7 +388,7 @@ export const PRRecordsContent: React.FC = () => {
 // Standalone page component with Layout wrapper
 const PRRecordsPage: React.FC = () => {
   return (
-    <Layout title="PR Records">
+    <Layout title="Records">
       <PRRecordsContent />
     </Layout>
   );

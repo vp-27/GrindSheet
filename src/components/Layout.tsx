@@ -86,29 +86,54 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Minimal header */}
       <header className="p-4 flex justify-between items-center">
-        <h1 
-          className={categoryColor ? "category-exercise-title" : "text-3xl font-bold text-foreground"}
-          style={categoryColor ? {
-            '--category-color': categoryColor
-          } as React.CSSProperties : undefined}
-        >
-          {title || "Home"}
-        </h1>
-        {headerSlider || (
-          <Button variant="ghost" className="p-0 h-auto" onClick={() => navigate('/settings')}>
-            <Avatar className="h-8 w-8 transition-opacity duration-200">
-              {!avatarImageError && profile?.avatar_url ? (
-                <AvatarImage 
-                  src={profile.avatar_url} 
-                  alt={profile?.name} 
-                  onError={() => setAvatarImageError(true)}
-                />
-              ) : null}
-              <AvatarFallback className="bg-muted text-muted-foreground">
-                {profile?.name?.substring(0, 2).toUpperCase() || 'U'}
-              </AvatarFallback>
-            </Avatar>
-          </Button>
+        {title ? (
+          <>
+            <h1 
+              className={categoryColor ? "category-exercise-title" : "text-3xl font-bold text-foreground"}
+              style={categoryColor ? {
+                '--category-color': categoryColor
+              } as React.CSSProperties : undefined}
+            >
+              {title}
+            </h1>
+            {headerSlider || (
+              <Button variant="ghost" className="p-0 h-auto" onClick={() => navigate('/settings')}>
+                <Avatar className="h-8 w-8 transition-opacity duration-200">
+                  {!avatarImageError && profile?.avatar_url ? (
+                    <AvatarImage 
+                      src={profile.avatar_url} 
+                      alt={profile?.name} 
+                      onError={() => setAvatarImageError(true)}
+                    />
+                  ) : null}
+                  <AvatarFallback className="bg-muted text-muted-foreground">
+                    {profile?.name?.substring(0, 2).toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            )}
+          </>
+        ) : (
+          // Full width header slider when no title
+          headerSlider || (
+            <div className="flex justify-between items-center w-full">
+              <div></div>
+              <Button variant="ghost" className="p-0 h-auto" onClick={() => navigate('/settings')}>
+                <Avatar className="h-8 w-8 transition-opacity duration-200">
+                  {!avatarImageError && profile?.avatar_url ? (
+                    <AvatarImage 
+                      src={profile.avatar_url} 
+                      alt={profile?.name} 
+                      onError={() => setAvatarImageError(true)}
+                    />
+                  ) : null}
+                  <AvatarFallback className="bg-muted text-muted-foreground">
+                    {profile?.name?.substring(0, 2).toUpperCase() || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+              </Button>
+            </div>
+          )
         )}
       </header>
       
