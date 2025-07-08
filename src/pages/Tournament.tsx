@@ -770,7 +770,7 @@ const TournamentPage: React.FC = () => {
             activeOption={activeTab}
             onOptionChange={(optionId) => setActiveTab(optionId as 'tournament' | 'records')}
             variant="compact"
-            className="text-xl font-bold scale-90"
+            headerTitle={true}
           />
           
           {/* Countdown Badge - Only for Tournament */}

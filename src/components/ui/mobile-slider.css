@@ -170,3 +170,42 @@
 .mobile-slider.no-animate .mobile-slider-option {
   transition: none !important;
 }
+
+/* Header title variant - larger text for when used as main navigation/title */
+.mobile-slider-header-title .mobile-slider-option {
+  font-size: 1.25rem !important; /* text-xl equivalent (20px) - better for dual titles */
+  font-weight: 700 !important; /* font-bold equivalent */
+  padding: 0.625rem 1rem !important;
+  min-height: 2.5rem !important;
+}
+
+.mobile-slider-header-title .mobile-slider-option.active {
+  font-weight: 700 !important;
+}
+
+.mobile-slider-header-title .mobile-slider-option.inactive {
+  font-weight: 600 !important;
+}
+
+.mobile-slider-header-title.mobile-slider-compact {
+  min-height: 2.5rem !important;
+}
+
+.mobile-slider-header-title.mobile-slider-compact .mobile-slider-option {
+  font-size: 1.25rem !important; /* text-xl equivalent */
+  padding: 0.625rem 1rem !important;
+  min-height: 2.25rem !important;
+}
+
+/* Responsive improvements for header title */
+@media (max-width: 480px) {
+  .mobile-slider-header-title .mobile-slider-option {
+    font-size: 1.125rem !important; /* text-lg equivalent (18px) for small screens */
+    padding: 0.5rem 0.875rem !important;
+  }
+  
+  .mobile-slider-header-title.mobile-slider-compact .mobile-slider-option {
+    font-size: 1.125rem !important; /* text-lg equivalent */
+    padding: 0.5rem 0.875rem !important;
+  }
+}

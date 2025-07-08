@@ -13,6 +13,7 @@ interface MobileSliderProps {
   onOptionChange: (optionId: string) => void;
   variant?: 'default' | 'compact';
   className?: string;
+  headerTitle?: boolean; // New prop for header title styling
 }
 
 export const MobileSlider: React.FC<MobileSliderProps> = ({
@@ -20,7 +21,8 @@ export const MobileSlider: React.FC<MobileSliderProps> = ({
   activeOption,
   onOptionChange,
   variant = 'default',
-  className = ''
+  className = '',
+  headerTitle = false
 }) => {
   const [sliderStyle, setSliderStyle] = useState({ left: '0px', width: '0px', opacity: 0 });
   const [disableAnimation, setDisableAnimation] = useState(true);
@@ -45,11 +47,12 @@ export const MobileSlider: React.FC<MobileSliderProps> = ({
   }, []);
 
   const isCompact = variant === 'compact';
+  const headerTitleClass = headerTitle ? 'mobile-slider-header-title' : '';
 
   return (
     <div 
       ref={containerRef} 
-      className={`mobile-slider ${isCompact ? 'mobile-slider-compact' : 'mobile-slider-default'} ${className} ${disableAnimation ? 'no-animate' : ''}`}
+      className={`mobile-slider ${isCompact ? 'mobile-slider-compact' : 'mobile-slider-default'} ${headerTitleClass} ${className} ${disableAnimation ? 'no-animate' : ''}`}
     >
       {/* Slider background track */}
       <div 
