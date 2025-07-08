@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Layout from '@/components/Layout';
 import { useAppContext } from '@/context/useAppContext';
 import { useAuth } from '@/context/AuthContext';
@@ -471,10 +471,7 @@ const TournamentPage: React.FC = () => {
               >
                 <span className="text-xs text-muted-foreground mb-1">Performance</span>
                 <span className="font-bold text-lg bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                  <AnimatedCounter
-                    value={pointBreakdown?.performance || 0}
-                    duration={600}
-                  />
+                  {pointBreakdown?.performance || 0}
                 </span>
                 <span className="text-xs text-muted-foreground">PRs & Competition</span>
               </div>
@@ -490,10 +487,7 @@ const TournamentPage: React.FC = () => {
               >
                 <span className="text-xs text-muted-foreground mb-1">Volume</span>
                 <span className="font-bold text-lg bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  <AnimatedCounter
-                    value={pointBreakdown?.volume || 0}
-                    duration={600}
-                  />
+                  {pointBreakdown?.volume || 0}
                 </span>
                 <span className="text-xs text-muted-foreground">Work & Consistency</span>
               </div>
@@ -509,10 +503,7 @@ const TournamentPage: React.FC = () => {
               >
                 <span className="text-xs text-muted-foreground mb-1">Bonuses</span>
                 <span className="font-bold text-lg bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                  <AnimatedCounter
-                    value={pointBreakdown?.bonuses || 0}
-                    duration={600}
-                  />
+                  {pointBreakdown?.bonuses || 0}
                 </span>
                 <span className="text-xs text-muted-foreground">Achievements</span>
               </div>
