@@ -10,6 +10,7 @@ import Dashboard from "./pages/Dashboard";
 import History from "./pages/History";
 import ExerciseDetail from "./pages/ExerciseDetail";
 import Tournament from "./pages/Tournament";
+import PRRecords from "./pages/PRRecords";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
@@ -36,6 +37,7 @@ const App = () => (
                 <Route path="/exercise-detail" element={<ExerciseDetail />} />
                 <Route path="/history" element={<History />} />
                 <Route path="/tournament" element={<Tournament />} />
+                <Route path="/pr-records" element={<PRRecords />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/toast-demo" element={<ToastDemo />} />

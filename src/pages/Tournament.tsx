@@ -30,8 +30,7 @@ import {
 import { 
   Tournament, 
   TournamentParticipant,
-  BadgeType,
-  LeaderboardType 
+  BadgeType
 } from '@/types';
 import { 
   generateCurrentTournament, 
@@ -39,20 +38,8 @@ import {
   POINTS_CONFIG,
   BADGE_DEFINITIONS 
 } from '@/utils/tournamentUtils';
-import { 
-  getLeaderboard, 
-  calculatePRChampionshipSummary, 
-  calculateCategoryProgressLeaders 
-} from '@/utils/progressUtils';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { getCategoryChartColors, getCategoryKeyByName, getCategoryColors } from '@/utils/categoryColors';
 import { supabase } from '@/integrations/supabase/client';
+import PRRecordsPage from './PRRecords';
 import '@/styles/index.css';
 
 const TournamentPage: React.FC = () => {
@@ -68,9 +55,8 @@ const TournamentPage: React.FC = () => {
   const [expandedParticipant, setExpandedParticipant] = useState<string | null>(null);
   const [contentReady, setContentReady] = useState(false);
 
-  // PR Leaderboard state
+  // Tab state for switching between tournament and PR records
   const [activeTab, setActiveTab] = useState<'tournament' | 'records'>('tournament');
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
 
   // Fetch data on mount
   useEffect(() => {
@@ -747,7 +733,7 @@ const TournamentPage: React.FC = () => {
   return (
     <Layout title={activeTab === 'records' ? 'PR Records' : 'Tournament'}>
       <div className={`space-y-6 relative transition-all duration-500 ease-out ${contentReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-        {/* Clean Tab System using MobileSlider */}
+        {/* Tab System */}
         <MobileSlider
           options={[
             { id: 'tournament', label: 'Tournament' },
@@ -759,7 +745,7 @@ const TournamentPage: React.FC = () => {
           className="mb-6"
         />
 
-        {/* Tournament-specific header and controls */}
+        {/* Tournament Content */}
         {activeTab === 'tournament' && (
           <>
             {/* Clean Header */}
@@ -1074,300 +1060,38 @@ const TournamentPage: React.FC = () => {
                     {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </Button>
                 ))}
+              </div>            )}
+
+            {/* Tournament Leaderboard */}
+            {selectedTournament && (
+              <div className="space-y-4 staggered-cards">
+                {selectedTournament.participants.length > 0 ? (
+                  selectedTournament.participants.map((participant, index) => 
+                    renderParticipant(participant, index)
+                  )
+                ) : (
+                  <Card className="apple-card rounded-3xl">
+                    <CardContent className="p-12 text-center">
+                      <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-foreground mb-2">No Participants Yet</h3>
+                      <p className="text-muted-foreground text-sm">
+                        Log a workout to join the tournament!
+                      </p>
+                    </CardContent>
+                  </Card>
+                )}
               </div>
             )}
           </>
         )}
 
-        {/* PR Records-specific header */}
+        {/* PR Records Content */}
         {activeTab === 'records' && (
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-sm">
-              <Medal className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-foreground">Personal Records</h1>
-              <p className="text-sm text-muted-foreground">Best lifts across all exercises</p>
-            </div>
-          </div>
+          <PRRecordsPage />
         )}
 
-          {/* Tournament Leaderboard */}
-          {activeTab === 'tournament' && selectedTournament && (
-            <div className="space-y-4 staggered-cards">
-              {selectedTournament.participants.length > 0 ? (
-                selectedTournament.participants.map((participant, index) => 
-                  renderParticipant(participant, index)
-                )
-              ) : (
-                <Card className="apple-card rounded-3xl">
-                  <CardContent className="p-12 text-center">
-                    <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-foreground mb-2">No Participants Yet</h3>
-                    <p className="text-muted-foreground text-sm">
-                      Log a workout to join the tournament!
-                    </p>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          )}
-
-          {/* PR Records Section with Apple-esque Design */}
-          {activeTab === 'records' && (
-            <div className="space-y-4">
-              {/* Category Filter Buttons */}
-              <div className="flex gap-3 overflow-x-auto pb-2 px-1 py-2 scrollbar-hide">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSelectedCategoryId('all')}
-                  className={`rounded-2xl px-6 py-3 font-medium transition-all duration-300 whitespace-nowrap transform active:scale-95 ${
-                    selectedCategoryId === 'all' 
-                      ? 'all-button-selected' 
-                      : 'all-button-unselected'
-                  }`}
-                >
-                  All
-                </Button>
-                
-                {categories.map((category, index) => {
-                  const categoryColor = getCategoryChartColors()[index % getCategoryChartColors().length];
-                  const isSelected = selectedCategoryId === category.id;
-                  
-                  return (
-                    <Button
-                      key={category.id}
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedCategoryId(category.id)}
-                      className={`rounded-2xl px-6 py-3 font-medium whitespace-nowrap transition-all duration-300 transform active:scale-95 ${
-                        isSelected 
-                          ? 'category-button-selected' 
-                          : 'category-button-unselected'
-                      }`}
-                      style={{
-                        '--category-color': categoryColor,
-                        '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
-                      } as React.CSSProperties}
-                    >
-                      {category.name}
-                    </Button>
-                  );
-                })}
-              </div>
-
-              {/* PR Records Content */}
-              {(() => {
-                const leaderboardData = getLeaderboard(
-                  allExerciseLogs,
-                  users,
-                  LeaderboardType.EXERCISE_PR,
-                  undefined, // Always show all exercises
-                  selectedCategoryId === 'all' ? undefined : selectedCategoryId,
-                  exercises
-                );
-
-                if (leaderboardData.length === 0) {
-                  return (
-                    <Card className="apple-card">
-                      <CardContent className="p-12 text-center">
-                        <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold text-foreground mb-2">No Records Found</h3>
-                        <p className="text-muted-foreground text-sm">
-                          No data available for this selection. Start logging workouts to see PR records!
-                        </p>
-                      </CardContent>
-                    </Card>
-                  );
-                }
-
-                return (
-                  <div className="space-y-3">
-                    {/* PR Championship Summary - Overall or Category-specific */}
-                    {(() => {
-                      if (selectedCategoryId === 'all') {
-                        // Overall PR Champion
-                        const prChampionshipSummary = calculatePRChampionshipSummary(allExerciseLogs, users, exercises);
-                        return prChampionshipSummary && prChampionshipSummary.champion ? (
-                          <Card className="rounded-2xl bg-gradient-to-r from-yellow-50 to-amber-50 dark:from-yellow-900/20 dark:to-amber-900/20 border border-yellow-200 dark:border-yellow-800">
-                            <CardContent className="p-4">
-                              <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-sm">
-                                  <Crown className="h-6 w-6 text-yellow-900" />
-                                </div>
-                                <div className="flex-1">
-                                  <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                                    Overall PR Champion
-                                    <span className="text-xs bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 px-2 py-1 rounded-full font-medium">
-                                      {prChampionshipSummary.championCount} PRs
-                                    </span>
-                                  </h3>
-                                  <div className="flex items-center gap-3 mt-1">
-                                    <Avatar className="h-8 w-8">
-                                      <AvatarImage src={prChampionshipSummary.champion.avatarUrl} alt={prChampionshipSummary.champion.name} />
-                                      <AvatarFallback className="bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300 text-sm">
-                                        {prChampionshipSummary.champion.name?.substring(0, 2).toUpperCase() || 'U'}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <span className="font-semibold text-foreground">{prChampionshipSummary.champion.name}</span>
-                                    <span className="text-sm text-muted-foreground">
-                                      holds {prChampionshipSummary.championCount} of {prChampionshipSummary.totalExercises} exercise records
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ) : null;
-                      } else {
-                        // Category-specific PR Champion
-                        const categoryPRSummary = calculatePRChampionshipSummary(allExerciseLogs, users, exercises, selectedCategoryId);
-                        const selectedCategory = categories.find(cat => cat.id === selectedCategoryId);
-                        const categoryKey = selectedCategory ? getCategoryKeyByName(selectedCategory.name) : 'default';
-                        const categoryColors = getCategoryColors(categoryKey);
-                        
-                        return categoryPRSummary && categoryPRSummary.champion ? (
-                          <Card 
-                            className="rounded-3xl border pr-champion-card"
-                            style={{
-                              '--category-color': categoryColors.primary,
-                              '--category-color-rgb': (categoryColors.primary || '#10b981').replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
-                            } as React.CSSProperties}
-                          >
-                            <CardContent className="p-6">
-                              <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md pr-champion-icon">
-                                  <Crown className="h-6 w-6 text-white" />
-                                </div>
-                                <div className="flex-1">
-                                  <h3 className="text-lg font-bold text-foreground flex items-center gap-3">
-                                    {selectedCategory?.name} PR Champion
-                                    <span className="text-xs px-3 py-1 rounded-full font-medium pr-champion-badge">
-                                      {categoryPRSummary.championCount} PRs
-                                    </span>
-                                  </h3>
-                                  <div className="flex items-center gap-3 mt-2">
-                                    <Avatar className="h-8 w-8">
-                                      <AvatarImage src={categoryPRSummary.champion.avatarUrl} alt={categoryPRSummary.champion.name} />
-                                      <AvatarFallback className="text-sm pr-champion-avatar">
-                                        {categoryPRSummary.champion.name?.substring(0, 2).toUpperCase() || 'U'}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <span className="font-semibold text-foreground">{categoryPRSummary.champion.name}</span>
-                                    <span className="text-sm text-muted-foreground">
-                                      holds {categoryPRSummary.championCount} of {categoryPRSummary.totalExercises} {selectedCategory?.name.toLowerCase()} records
-                                    </span>
-                                  </div>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ) : null;
-                      }
-                    })()}
-                    
-                    {/* PR Records List with Apple Health style cards */}
-                    {leaderboardData.map((entry, index) => {
-                      const position = index + 1;
-                      const user = entry.user || { id: '', name: 'Unknown', username: '', avatarUrl: undefined };
-                      const isCurrentUser = user.id === profile?.id;
-                      const isOverviewMode = true; // Always show overview mode since we removed exercise filtering
-                      
-                      // Get exercise details for overview mode
-                      const exercise = (isOverviewMode && entry.exerciseId) 
-                        ? exercises.find(e => e.id === entry.exerciseId)
-                        : null;
-                      const exerciseName = exercise?.name;
-                      const exerciseCategory = exercise?.categoryId ? categories.find(c => c.id === exercise.categoryId) : null;
-                      
-                      if (isOverviewMode) {
-                        // Apple Health style overview cards
-                        const tiedUsers = entry.users || [user];
-                        const showMultipleAvatars = tiedUsers.length > 1;
-                        
-                        // Get category color for the exercise title
-                        const categoryKey = exerciseCategory ? getCategoryKeyByName(exerciseCategory.name) : 'default';
-                        const categoryColors = getCategoryColors(categoryKey);
-                        
-                        return (
-                          <Card 
-                            key={entry.exerciseId || index}
-                            className="apple-card interactive"
-                            style={{
-                              '--category-color': categoryColors.primary
-                            } as React.CSSProperties}
-                          >
-                            <CardContent className="p-4">
-                              <div className="flex items-center justify-between mb-3">
-                                <div>
-                                  <h3 className="font-bold text-lg apple-health-card-title">
-                                    {exerciseName}
-                                  </h3>
-                                  {exerciseCategory && (
-                                    <span className="text-xs text-muted-foreground font-medium">
-                                      {exerciseCategory.name}
-                                    </span>
-                                  )}
-                                </div>
-                                {entry.isTie && (
-                                  <span className="text-xs bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 px-2 py-1 rounded-full font-medium">
-                                    Tie
-                                  </span>
-                                )}
-                              </div>
-                              
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  {showMultipleAvatars ? (
-                                    <div className="flex -space-x-2">
-                                      {tiedUsers.map((tiedUser, idx) => (
-                                        <Avatar key={tiedUser.id} className="h-8 w-8 border-2 border-white shadow-sm">
-                                          <AvatarImage src={tiedUser.avatarUrl} alt={tiedUser.name} />
-                                          <AvatarFallback className="bg-gray-100 text-gray-700 text-sm font-medium">
-                                            {tiedUser.name?.substring(0, 2).toUpperCase() || 'U'}
-                                          </AvatarFallback>
-                                        </Avatar>
-                                      ))}
-                                    </div>
-                                  ) : (
-                                    <div className="flex items-center gap-3">
-                                      <Avatar className="h-8 w-8">
-                                        <AvatarImage src={user.avatarUrl} alt={user.name} />
-                                        <AvatarFallback className="bg-muted text-muted-foreground text-sm font-medium">
-                                          {user.name?.substring(0, 2).toUpperCase() || 'U'}
-                                        </AvatarFallback>
-                                      </Avatar>
-                                      <span className="font-semibold text-foreground">
-                                        {user.name}
-                                      </span>
-                                    </div>
-                                  )}
-                                </div>
-
-                                <div className="text-right">
-                                  <div className="font-bold text-xl text-foreground">
-                                    {entry.value.toFixed(1)}
-                                    <span className="text-sm font-medium text-muted-foreground ml-1">lbs</span>
-                                  </div>
-                                  <div className="text-xs text-muted-foreground font-medium uppercase tracking-wide">
-                                    Personal Record
-                                  </div>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        );
-                      }
-                    })}
-                  </div>
-                );
-              })()}
-            </div>
-          )}
-
-        </div>
-      </Layout>
+      </div>
+    </Layout>
   );
 };
 
