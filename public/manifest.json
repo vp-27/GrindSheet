@@ -2,13 +2,13 @@
   "name": "GrindSheet",
   "short_name": "GrindSheet", 
   "description": "Simple gym logging. Optional Friend Competing",
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#1a1a1a",
   "theme_color": "#10b981",
   "icons": [
     {
-      "src": "/favicon.ico",
+      "src": "favicon.ico",
       "sizes": "48x48 64x64 96x96 128x128 256x256",
       "type": "image/x-icon"
     }
