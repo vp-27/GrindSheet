@@ -16,6 +16,7 @@ interface ExerciseLogCardProps {
   categoryColor?: string;
   showExerciseName?: boolean;
   showDate?: boolean;
+  showTime?: boolean;
 
   onEdit: (log: any) => void;
   onDelete: (logId: string) => void;
@@ -27,6 +28,7 @@ const ExerciseLogCard: React.FC<ExerciseLogCardProps> = ({
   categoryColor = '#10b981',
   showExerciseName = true,
   showDate = true,
+  showTime = false,
   onEdit,
   onDelete
 }) => {
@@ -52,10 +54,14 @@ const ExerciseLogCard: React.FC<ExerciseLogCardProps> = ({
             <h3 className="apple-health-card-title truncate mb-2">{exerciseName}</h3>
           )}
           
-          {showDate && (
+          {(showDate || showTime) && (
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="w-3 h-3 flex-shrink-0" />
-              <span>{format(new Date(log.timestamp), showExerciseName ? 'h:mm a' : 'EEEE, MMMM d, yyyy \'at\' h:mm a')}</span>
+              <span>
+                {showDate && !showTime && format(new Date(log.timestamp), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}
+                {showTime && !showDate && format(new Date(log.timestamp), 'h:mm a')}
+                {showDate && showTime && format(new Date(log.timestamp), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}
+              </span>
             </div>
           )}
         </div>

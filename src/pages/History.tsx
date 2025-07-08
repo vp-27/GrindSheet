@@ -1,22 +1,21 @@
-/* eslint-disable react/forbid-dom-props, react/no-danger */
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday, addWeeks, subWeeks, startOfMonth, endOfMonth, getDay, addMonths, subMonths, isSameMonth } from 'date-fns';
-import { useDrag } from '@use-gesture/react';
-import { useSpring, animated } from '@react-spring/web';
+import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday, subDays, isThisWeek, isThisMonth, parseISO } from 'date-fns';
 import Layout from '@/components/Layout';
 import ExerciseLogCard from '@/components/ExerciseLogCard';
-import { Calendar, Activity, Pencil, Trash2, Clock, ChevronLeft, ChevronRight, CalendarDays } from 'lucide-react';
+import { Search, Calendar, Activity, Filter, X, TrendingUp, Clock, ChevronDown } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { MobileSlider } from '@/components/ui/mobile-slider';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent } from '@/components/ui/card';
 import { useAppContext } from '@/context/useAppContext';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
+import { getCategoryChartColors } from '@/utils/categoryColors';
 import '@/styles/index.css';
 
 const History = () => {
@@ -24,229 +23,152 @@ const History = () => {
   const { profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // State for filters and search
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [timeFilter, setTimeFilter] = useState('all'); // all, week, month, 3months
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Edit dialog state
   const [editLog, setEditLog] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editForm, setEditForm] = useState({ weight: '', note: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // Weekly view state
-  const [currentWeek, setCurrentWeek] = useState(new Date());
-  const [showFullMonth, setShowFullMonth] = useState(false);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  
-  // Animation state for smooth transitions
-  const [{ x }, api] = useSpring(() => ({ x: 0 }));
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Use the same color system as the rest of the app
+  // Get category colors
   const chartColors = getCategoryChartColors();
-  
-  // Get color for a category based on its index
   const getCategoryColor = (categoryIndex: number) => {
     return chartColors[categoryIndex % chartColors.length];
   };
 
-  // Helper to get category color index for CSS classes
-  const getCategoryColorIndex = (color: string) => {
-    return chartColors.findIndex(c => c === color);
-  };
-
-  // Weekly view helper functions - Start on Monday
-  const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 }); // Start on Monday
-  const weekEnd = endOfWeek(currentWeek, { weekStartsOn: 1 });
-  const weekDays = eachDayOfInterval({ start: weekStart, end: weekEnd });
-  
-  // Full month calendar helpers (for expanded view)
-  const monthStart = startOfMonth(currentMonth);
-  const monthEnd = endOfMonth(currentMonth);
-  const calendarDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
-  
-  const startPadding = getDay(monthStart);
-  const paddingDays = Array.from({ length: startPadding }, (_, i) => {
-    const date = new Date(monthStart);
-    date.setDate(date.getDate() - (startPadding - i));
-    return date;
-  });
-  
-  const allCalendarDays = [...paddingDays, ...calendarDays];
-  
-  // Group logs by date for easy lookup
-  const logsByDate = useMemo(() => {
-    const grouped = {};
-    
-    exerciseLogs.forEach(log => {
-      const logDate = new Date(log.timestamp);
-      const dateKey = format(logDate, 'yyyy-MM-dd');
-      
-      if (!grouped[dateKey]) {
-        grouped[dateKey] = [];
-      }
-      
-      grouped[dateKey].push(log);
-    });
-    
-    return grouped;
-  }, [exerciseLogs]);
-
-  // Get logs for a specific date
-  const getLogsForDate = (date: Date) => {
-    const dateKey = format(date, 'yyyy-MM-dd');
-    return logsByDate[dateKey] || [];
-  };
-
-  // Get dominant category and colors for a day
-  const getDayInfo = (date: Date) => {
-    const logs = getLogsForDate(date);
-    if (logs.length === 0) return null;
-
-    // Count exercises by category
-    const categoryCount = {};
-    logs.forEach(log => {
-      const exercise = exercises.find(ex => ex.id === log.exerciseId);
-      if (exercise) {
-        const category = categories.find(cat => cat.id === exercise.categoryId);
-        if (category) {
-          categoryCount[category.id] = (categoryCount[category.id] || 0) + 1;
-        }
-      }
-    });
-
-    // Find dominant category
-    const dominantCategoryId = Object.keys(categoryCount).reduce((a, b) => 
-      categoryCount[a] > categoryCount[b] ? a : b
-    );
-    
-    const dominantCategory = categories.find(cat => cat.id === dominantCategoryId);
-    const categoryIndex = categories.findIndex(cat => cat.id === dominantCategoryId);
-    const categoryColor = categoryIndex >= 0 ? getCategoryColor(categoryIndex) : '#10b981';
-
-    // Get all unique categories for gradient
-    const uniqueCategories = Object.keys(categoryCount).map(catId => {
-      const category = categories.find(cat => cat.id === catId);
-      const index = categories.findIndex(cat => cat.id === catId);
-      return {
-        category,
-        color: index >= 0 ? getCategoryColor(index) : '#10b981',
-        count: categoryCount[catId]
-      };
-    });
-
-    return {
-      dominantCategory,
-      dominantColor: categoryColor,
-      uniqueCategories,
-      totalLogs: logs.length
-    };
-  };
-
-  // Weekly navigation
-  const goToPreviousWeek = () => {
-    setCurrentWeek(prev => subWeeks(prev, 1));
-    setSelectedDate(null); // Clear selection when changing weeks
-    // Trigger smooth slide animation
-    api.start({ x: 100, config: { tension: 300, friction: 30 } });
-    setTimeout(() => api.start({ x: 0, config: { tension: 300, friction: 30 } }), 150);
-  };
-
-  const goToNextWeek = () => {
-    setCurrentWeek(prev => addWeeks(prev, 1));
-    setSelectedDate(null); // Clear selection when changing weeks
-    // Trigger smooth slide animation
-    api.start({ x: -100, config: { tension: 300, friction: 30 } });
-    setTimeout(() => api.start({ x: 0, config: { tension: 300, friction: 30 } }), 150);
-  };
-
-  // Handle day selection
-  const handleDayClick = (date: Date) => {
-    // If clicking the same date, deselect it
-    if (selectedDate && isSameDay(date, selectedDate)) {
-      setSelectedDate(null);
-    } else {
-      setSelectedDate(date);
-    }
-  };
-
-  // Swipe gesture handling
-  const bind = useDrag(
-    ({ active, movement: [mx], direction: [xDir], velocity: [vx] }) => {
-      // Only trigger on significant swipe (velocity > 0.2 or movement > 50px)
-      if (!active && (Math.abs(vx) > 0.2 || Math.abs(mx) > 50)) {
-        if (xDir > 0) {
-          goToPreviousWeek();
-        } else {
-          goToNextWeek();
-        }
-      } else if (active) {
-        // Smooth follow during drag
-        api.start({ x: mx, immediate: true });
-      } else {
-        // Snap back if not significant enough
-        api.start({ x: 0, config: { tension: 300, friction: 30 } });
-      }
-    },
-    {
-      axis: 'x',
-      filterTaps: true,
-      rubberband: true
-    }
-  );
-
-  // Monthly navigation (for expanded view)
-  const goToPreviousMonth = () => {
-    setCurrentMonth(prev => subMonths(prev, 1));
-  };
-
-  const goToNextMonth = () => {
-    setCurrentMonth(prev => addMonths(prev, 1));
-  };
-
-  // Sort dates in descending order for list view
-  const sortedDates = useMemo(() => {
-    if (selectedDate) {
-      // If a day is selected, only show that day's logs
-      const selectedDateKey = format(selectedDate, 'yyyy-MM-dd');
-      return logsByDate[selectedDateKey] ? [selectedDateKey] : [];
-    }
-    
-    return Object.keys(logsByDate).sort((a, b) => {
-      return new Date(b).getTime() - new Date(a).getTime();
-    });
-  }, [logsByDate, selectedDate]);
-  
-  // Find exercise and category names
-  const getExerciseName = (exerciseId) => {
+  // Helper functions
+  const getExerciseName = (exerciseId: string) => {
     const exercise = exercises.find(e => e.id === exerciseId);
     return exercise?.name || 'Unknown Exercise';
   };
-  
-  const getCategoryForExercise = (exerciseId) => {
+
+  const getCategoryForExercise = (exerciseId: string) => {
     const exercise = exercises.find(e => e.id === exerciseId);
     if (!exercise) return null;
-    
-    const category = categories.find(c => c.id === exercise.categoryId);
-    return category;
+    return categories.find(c => c.id === exercise.categoryId);
   };
 
-  // Handle exercise card click to view detailed progress
-  const handleExerciseClick = (exerciseId) => {
+  // Filter and search logic
+  const filteredLogs = useMemo(() => {
+    let filtered = [...exerciseLogs];
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(log => {
+        const exerciseName = getExerciseName(log.exerciseId).toLowerCase();
+        const category = getCategoryForExercise(log.exerciseId);
+        const categoryName = category?.name.toLowerCase() || '';
+        const note = log.note?.toLowerCase() || '';
+        
+        return exerciseName.includes(query) || 
+               categoryName.includes(query) || 
+               note.includes(query);
+      });
+    }
+
+    // Category filter
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(log => {
+        const category = getCategoryForExercise(log.exerciseId);
+        return category?.id === selectedCategory;
+      });
+    }
+
+    // Time filter
+    if (timeFilter !== 'all') {
+      const now = new Date();
+      const cutoffDate = new Date();
+      
+      switch (timeFilter) {
+        case 'week':
+          cutoffDate.setDate(now.getDate() - 7);
+          break;
+        case 'month':
+          cutoffDate.setMonth(now.getMonth() - 1);
+          break;
+        case '3months':
+          cutoffDate.setMonth(now.getMonth() - 3);
+          break;
+      }
+      
+      filtered = filtered.filter(log => {
+        const logDate = new Date(log.timestamp);
+        return logDate >= cutoffDate;
+      });
+    }
+
+    // Sort
+    filtered.sort((a, b) => {
+      const dateA = new Date(a.timestamp);
+      const dateB = new Date(b.timestamp);
+      return sortOrder === 'newest' 
+        ? dateB.getTime() - dateA.getTime()
+        : dateA.getTime() - dateB.getTime();
+    });
+
+    return filtered;
+  }, [exerciseLogs, searchQuery, selectedCategory, timeFilter, sortOrder, exercises, categories]);
+
+  // Group logs by date
+  const groupedLogs = useMemo(() => {
+    const grouped = {};
+    
+    filteredLogs.forEach(log => {
+      const dateKey = format(new Date(log.timestamp), 'yyyy-MM-dd');
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
+      }
+      grouped[dateKey].push(log);
+    });
+
+    return grouped;
+  }, [filteredLogs]);
+
+  // Get sorted dates
+  const sortedDates = useMemo(() => {
+    return Object.keys(groupedLogs).sort((a, b) => {
+      return sortOrder === 'newest' 
+        ? new Date(b).getTime() - new Date(a).getTime()
+        : new Date(a).getTime() - new Date(b).getTime();
+    });
+  }, [groupedLogs, sortOrder]);
+
+  // Stats for the header
+  const stats = useMemo(() => {
+    const totalWorkouts = filteredLogs.length;
+    const uniqueDays = new Set(filteredLogs.map(log => format(new Date(log.timestamp), 'yyyy-MM-dd'))).size;
+    const recentWorkouts = filteredLogs.filter(log => {
+      const logDate = new Date(log.timestamp);
+      return logDate >= subDays(new Date(), 7);
+    }).length;
+
+    return { totalWorkouts, uniqueDays, recentWorkouts };
+  }, [filteredLogs]);
+
+  // Handle exercise click
+  const handleExerciseClick = (exerciseId: string) => {
     navigate(`/exercise-detail?exercise=${exerciseId}`);
-    // Scroll to top after navigation
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Edit dialog handlers
-  const openEditDialog = (log) => {
+  const openEditDialog = (log: any) => {
     setEditLog(log);
-    setEditForm({ weight: log.weight, note: log.note || '' });
+    setEditForm({ weight: log.weight.toString(), note: log.note || '' });
     setEditDialogOpen(true);
   };
 
-  const handleEditChange = (e) => {
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     
     if (name === 'weight') {
-      // Only allow numeric input (including decimals)
       if (value === '' || /^\d*\.?\d*$/.test(value)) {
         setEditForm({ ...editForm, [name]: value });
       }
@@ -255,16 +177,15 @@ const History = () => {
     }
   };
 
-  const handleEditSubmit = async (e) => {
+  const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editLog) return;
     
-    // Validate weight is a valid number (0 allowed for bodyweight)
     const weightValue = parseFloat(editForm.weight);
     if (!editForm.weight || isNaN(weightValue) || weightValue < 0) {
       toast({
         title: 'Invalid weight',
-        description: 'Please enter a valid weight value (0 for bodyweight exercises).',
+        description: 'Please enter a valid weight value.',
         variant: 'destructive',
       });
       return;
@@ -281,7 +202,7 @@ const History = () => {
       
       toast({
         title: 'Log updated',
-        description: 'Your exercise log has been successfully updated!',
+        description: 'Your exercise log has been updated successfully!',
       });
       
       setEditDialogOpen(false);
@@ -297,13 +218,13 @@ const History = () => {
     }
   };
 
-  const handleDelete = async (logId) => {
+  const handleDelete = async (logId: string) => {
     if (window.confirm('Are you sure you want to delete this log? This action cannot be undone.')) {
       try {
         await deleteExerciseLog(logId);
         toast({
           title: 'Log deleted',
-          description: 'Your exercise log has been successfully deleted.',
+          description: 'Your exercise log has been deleted successfully.',
         });
       } catch (error) {
         toast({
@@ -315,275 +236,278 @@ const History = () => {
     }
   };
 
+  // Clear all filters
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedCategory('all');
+    setTimeFilter('all');
+    setSortOrder('newest');
+  };
+
+  const hasActiveFilters = searchQuery || selectedCategory !== 'all' || timeFilter !== 'all' || sortOrder !== 'newest';
+
   return (
     <Layout title="History">
       <div className="flex flex-col gap-6 pb-6">
-        {/* Weekly Overview Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <CalendarDays className="h-6 w-6 text-primary" />
-            <h1 className="text-xl font-semibold text-foreground">Workout History</h1>
+        {/* Header with Stats */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-sm">
+                <Clock className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  {stats.totalWorkouts} workouts • {stats.uniqueDays} days • {stats.recentWorkouts} this week
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowFilters(!showFilters)}
+                className="rounded-2xl flex items-center gap-2"
+              >
+                <Filter className="h-4 w-4" />
+                {showFilters ? 'Hide' : 'Filter'}
+                {hasActiveFilters && (
+                  <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 text-xs">
+                    !
+                  </Badge>
+                )}
+              </Button>
+              
+              {/* Quick stats badge */}
+              {stats.totalWorkouts > 0 && (
+                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-xl text-xs text-muted-foreground border border-border/50">
+                  <TrendingUp className="h-3 w-3" />
+                  <span>
+                    {Math.round((stats.totalWorkouts / Math.max(stats.uniqueDays, 1)) * 10) / 10} avg/day
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
-          
-          <MobileSlider
-            options={[
-              { id: 'week', label: 'Week' },
-              { id: 'month', label: 'Month' }
-            ]}
-            activeOption={showFullMonth ? 'month' : 'week'}
-            onOptionChange={(option) => setShowFullMonth(option === 'month')}
-            variant="compact"
-            className="history-view-slider"
-          />
+
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search exercises, categories, or notes..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 rounded-2xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 h-12"
+            />
+            {searchQuery && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+
+          {/* Filters Panel */}
+          {showFilters && (
+            <Card>
+              <CardContent className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Category Filter */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Category</Label>
+                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                      <SelectTrigger className="rounded-xl">
+                        <SelectValue placeholder="All categories" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Categories</SelectItem>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={category.id}>
+                            {category.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Time Filter */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Time Period</Label>
+                    <Select value={timeFilter} onValueChange={setTimeFilter}>
+                      <SelectTrigger className="rounded-xl">
+                        <SelectValue placeholder="All time" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Time</SelectItem>
+                        <SelectItem value="week">Past Week</SelectItem>
+                        <SelectItem value="month">Past Month</SelectItem>
+                        <SelectItem value="3months">Past 3 Months</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Sort Order */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Sort By</Label>
+                    <Select value={sortOrder} onValueChange={(value: 'newest' | 'oldest') => setSortOrder(value)}>
+                      <SelectTrigger className="rounded-xl">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="newest">Newest First</SelectItem>
+                        <SelectItem value="oldest">Oldest First</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Clear Filters */}
+                {hasActiveFilters && (
+                  <div className="mt-4 pt-4 border-t border-border/50">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={clearFilters}
+                      className="rounded-xl flex items-center gap-2"
+                    >
+                      <X className="h-4 w-4" />
+                      Clear All Filters
+                    </Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Empty State */}
         {exerciseLogs.length === 0 && (
-          <div className="relative">
-            <div className="apple-card p-12 text-center shadow-sm">
+          <Card>
+            <CardContent className="p-12 text-center">
               <Activity className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">No Workout History Yet</h3>
-              <p className="text-muted-foreground">Start logging exercises to see your complete workout history!</p>
-            </div>
-          </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">No Workout History</h3>
+              <p className="text-muted-foreground">
+                Start logging exercises to see your workout history here!
+              </p>
+            </CardContent>
+          </Card>
         )}
 
-        {/* Weekly View (Default) */}
-        {exerciseLogs.length > 0 && !showFullMonth && (
-          <div className="relative swipe-container">
-            {/* Week Navigation */}
-            <div className="apple-card p-4 shadow-sm mb-6">
-              <div className="flex items-center justify-between mb-4">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={goToPreviousWeek}
-                  className="rounded-xl p-2 transition-all duration-200 active:scale-95"
-                  aria-label="Previous week"
-                  title="Previous week"
-                >
-                  <ChevronLeft className="h-5 w-5" />
-                </Button>
-                
-                <h2 className="text-lg font-semibold text-foreground">
-                  {format(weekStart, 'MMM d')} - {format(weekEnd, 'MMM d, yyyy')}
-                </h2>
-                
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={goToNextWeek}
-                  className="rounded-xl p-2 transition-all duration-200 active:scale-95"
-                  aria-label="Next week"
-                  title="Next week"
-                >
-                  <ChevronRight className="h-5 w-5" />
-                </Button>
-              </div>
-
-              {/* Weekly Day Cards */}
-              <animated.div 
-                {...bind()}
-                ref={containerRef}
-                className="grid grid-cols-7 gap-1 md:gap-1.5 touch-pan-y select-none"
-                style={{ 
-                  x,
-                  cursor: 'grab',
-                  touchAction: 'pan-y'
-                }}
+        {/* No Results */}
+        {exerciseLogs.length > 0 && filteredLogs.length === 0 && (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <Search className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">No Results Found</h3>
+              <p className="text-muted-foreground mb-4">
+                Try adjusting your search or filters to find what you're looking for.
+              </p>
+              <Button
+                variant="outline"
+                onClick={clearFilters}
+                className="rounded-xl"
               >
-                {weekDays.map((date, index) => {
-                  const dayInfo = getDayInfo(date);
-                  const isTodayDate = isToday(date);
-                  const hasWorkouts = dayInfo !== null;
-                  const isSelected = selectedDate && isSameDay(date, selectedDate);
-                  
-                  return (
-                    <div key={index} className="relative">
-                      <div 
-                        className={`
-                          weekly-day-card
-                          ${hasWorkouts ? 'has-workouts' : 'no-workouts'}
-                          ${isTodayDate ? 'is-today' : ''}
-                          ${isSelected ? 'is-selected' : ''}
-                        `}
-                        onClick={() => handleDayClick(date)}
-                      >
-                        {/* Day Header */}
-                        <div className="text-center">
-                          <div className="weekly-day-label">
-                            {format(date, 'EEE')}
-                          </div>
-                          <div className="weekly-day-number">
-                            {format(date, 'd')}
-                          </div>
-                        </div>
-
-                        {/* Workout Badge */}
-                        {hasWorkouts ? (
-                          <div className="flex flex-col items-center space-y-2 flex-1 justify-center">
-                            {/* Category Badge */}
-                            <div 
-                              className="weekly-category-badge"
-                              style={{ backgroundColor: dayInfo.dominantColor }}
-                            >
-                              <span>
-                                {dayInfo.dominantCategory?.name || 'Mixed'}
-                              </span>
-                            </div>
-
-                            {/* Activity Dots */}
-                            <div className="flex justify-center gap-1">
-                              {dayInfo.uniqueCategories.slice(0, 3).map((cat, i) => {
-                                const opacity = 0.7 + (cat.count / dayInfo.totalLogs) * 0.3;
-                                
-                                return (
-                                  <div
-                                    key={i}
-                                    className="weekly-activity-dot"
-                                    style={{ 
-                                      backgroundColor: cat.color,
-                                      opacity: opacity
-                                    }}
-                                  />
-                                );
-                              })}
-                              {dayInfo.uniqueCategories.length > 3 && (
-                                <div className="text-xs text-muted-foreground">
-                                  +{dayInfo.uniqueCategories.length - 3}
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Workout Count */}
-                            <div className="text-center">
-                              <span className="weekly-workout-count">
-                                {dayInfo.totalLogs} workout{dayInfo.totalLogs > 1 ? 's' : ''}
-                              </span>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center flex-1">
-                            <div className="weekly-rest-indicator">
-                              <div className="weekly-rest-dot" />
-                            </div>
-                            <span className="weekly-rest-text">Rest</span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </animated.div>
-            </div>
-          </div>
+                Clear Filters
+              </Button>
+            </CardContent>
+          </Card>
         )}
 
-        {/* Full Month View (Expanded) */}
-        {exerciseLogs.length > 0 && showFullMonth && (
-          <div className="relative">
-            {/* Month Navigation */}
-            <div className="monthly-calendar-container">
-              <div className="monthly-calendar-header">
-                <button
-                  onClick={goToPreviousMonth}
-                  className="monthly-nav-button"
-                  aria-label="Previous month"
-                  title="Previous month"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                
-                <h2 className="monthly-calendar-title">
-                  {format(currentMonth, 'MMMM yyyy')}
-                </h2>
-                
-                <button
-                  onClick={goToNextMonth}
-                  className="monthly-nav-button"
-                  aria-label="Next month"
-                  title="Next month"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-
-              {/* Calendar Grid */}
-              <div className="space-y-4">
-                {/* Weekday Headers */}
-                <div className="monthly-weekday-header">
-                  {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(day => (
-                    <div key={day} className="monthly-weekday-label">
-                      {day}
-                    </div>
-                  ))}
-                </div>
-
-                {/* Calendar Days */}
-                <div className="monthly-calendar-grid">
-                  {allCalendarDays.map((date, index) => {
-                    const isCurrentMonth = isSameMonth(date, currentMonth);
-                    const isTodayDate = isToday(date);
-                    const dayInfo = getDayInfo(date);
-                    const hasWorkouts = dayInfo !== null;
-                    
-                    return (
-                      <div
-                        key={index}
-                        className={`
-                          monthly-day-card
-                          ${isCurrentMonth ? 'current-month' : 'out-of-month'}
-                          ${hasWorkouts ? 'has-workouts' : 'no-workouts'}
-                          ${isTodayDate ? 'is-today' : ''}
-                        `}
-                      >
-                        <span className="monthly-day-number">
-                          {format(date, 'd')}
-                        </span>
-                        
-                        {/* Activity Indicator */}
-                        {hasWorkouts && isCurrentMonth && (
-                          <div className="monthly-activity-indicator bg-primary" />
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* List View - Always Visible Below */}
-        {exerciseLogs.length > 0 && (
+        {/* Workout History */}
+        {filteredLogs.length > 0 && (
           <div className="space-y-8">
-            {sortedDates.length === 0 && selectedDate && (
-              <div className="text-center py-8">
-                <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">No workouts on this day</h3>
-                <p className="text-muted-foreground">Click the selected day again to view all workouts</p>
-              </div>
-            )}
-            
-            {sortedDates.map(date => {
-              const dayLogs = logsByDate[date];
-              const firstLogDate = new Date(dayLogs[0].timestamp);
+            {sortedDates.map(dateKey => {
+              const dayLogs = groupedLogs[dateKey];
+              // Fix date parsing - use the first log's timestamp to avoid timezone issues
+              const date = new Date(dayLogs[0].timestamp);
+              const isToday = new Date().toDateString() === date.toDateString();
+              const isThisWeekDate = isThisWeek(date);
+              
+              // Fixed category priority weights
+              const categoryWeights = {
+                'chest': 3,
+                'back': 3,
+                'legs': 3,
+                'shoulders': 2,
+                'arms': 1,
+                'core': 0
+              };
+
+              // Get unique categories for this day
+              const dayCategories = [...new Set(dayLogs.map(log => {
+                const category = getCategoryForExercise(log.exerciseId);
+                return category?.id;
+              }).filter(Boolean))];
+
+              // Sort categories by fixed weight (descending), then alphabetically
+              const sortedCategories = dayCategories.sort((a, b) => {
+                const categoryA = categories.find(cat => cat.id === a);
+                const categoryB = categories.find(cat => cat.id === b);
+                const weightA = categoryWeights[categoryA?.name?.toLowerCase()] || 0;
+                const weightB = categoryWeights[categoryB?.name?.toLowerCase()] || 0;
+                
+                if (weightB !== weightA) return weightB - weightA; // Higher weight first
+                const nameA = categoryA?.name || '';
+                const nameB = categoryB?.name || '';
+                return nameA.localeCompare(nameB); // Alphabetical as tiebreaker
+              });
+              
+              const isDominantCategory = sortedCategories.length === 1;
+              const dominantCategoryIndex = isDominantCategory 
+                ? categories.findIndex(cat => cat.id === sortedCategories[0])
+                : -1;
+              const dominantColor = dominantCategoryIndex >= 0 
+                ? getCategoryColor(dominantCategoryIndex) 
+                : null;
+
+              // Create gradient colors for the badge (using sorted order)
+              const categoryColors = sortedCategories.map(catId => {
+                const categoryIndex = categories.findIndex(cat => cat.id === catId);
+                return categoryIndex >= 0 ? getCategoryColor(categoryIndex) : '#10b981';
+              });
+
+              // Get category names for badge text (prioritized by fixed weights)
+              const categoryNames = sortedCategories.map(catId => 
+                categories.find(cat => cat.id === catId)?.name
+              ).filter(Boolean);
+              
+              // Create display text with +X after 3 categories
+              const badgeText = categoryNames.length > 3 
+                ? `${categoryNames.slice(0, 3).join('/')}+${categoryNames.length - 3}`
+                : categoryNames.join('/');
+
+              // Create gradient string
+              const gradientBackground = categoryColors.length > 1 
+                ? `linear-gradient(45deg, ${categoryColors.join(', ')})`
+                : categoryColors[0] || 'transparent';
               
               return (
-                <div key={date} className="relative">
-                  {/* Date Header */}
-                  <div className="mb-4">
+                <div key={dateKey} className="space-y-4">
+                  {/* Date Header with category hint */}
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Calendar className="h-5 w-5 text-primary" />
                       <h2 className="text-lg font-semibold text-foreground">
-                        {format(firstLogDate, 'EEEE, MMMM d, yyyy')}
+                        {isToday ? 'Today' : isThisWeekDate ? format(date, 'EEEE') : format(date, 'EEEE, MMM d, yyyy')}
                       </h2>
                     </div>
+                    <div 
+                      className="px-3 py-1 rounded-full text-xs font-medium text-white shadow-sm"
+                      // eslint-disable-next-line react/forbid-dom-props
+                      style={{ background: gradientBackground }}
+                      title={`${dayLogs.length} workout${dayLogs.length !== 1 ? 's' : ''} • Categories: ${categoryNames.join(', ')}`}
+                    >
+                      {badgeText}
+                    </div>
                   </div>
-                  
-                  {/* Day's Workouts Container */}
+
+                  {/* Workout Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {dayLogs.map((log, index) => {
+                    {dayLogs.map(log => {
                       const exerciseName = getExerciseName(log.exerciseId);
                       const category = getCategoryForExercise(log.exerciseId);
                       const categoryIndex = categories.findIndex(cat => cat.id === category?.id);
@@ -600,13 +524,21 @@ const History = () => {
                             exerciseName={exerciseName}
                             categoryColor={categoryColor}
                             showExerciseName={true}
-                            showDate={true}
-                            onEdit={openEditDialog}
-                            onDelete={handleDelete}
+                            showDate={false}
+                            showTime={true}
+                            onEdit={() => openEditDialog(log)}
+                            onDelete={() => handleDelete(log.id)}
                           />
                         </div>
                       );
                     })}
+                  </div>
+
+                  {/* Workout Count at Bottom */}
+                  <div className="text-center">
+                    <div className="text-xs text-muted-foreground">
+                      {dayLogs.length} workout{dayLogs.length !== 1 ? 's' : ''}
+                    </div>
                   </div>
                 </div>
               );
@@ -614,22 +546,20 @@ const History = () => {
           </div>
         )}
 
-        {/* Edit Exercise Log Dialog */}
+        {/* Edit Dialog */}
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
           <DialogContent className="sm:max-w-md">
             <form onSubmit={handleEditSubmit}>
-              <DialogHeader className="pb-4">
-                <DialogTitle className="text-xl font-semibold">Edit Exercise Log</DialogTitle>
-                <DialogDescription className="text-muted-foreground">
+              <DialogHeader>
+                <DialogTitle>Edit Exercise Log</DialogTitle>
+                <DialogDescription>
                   Update the weight or note for this workout entry.
                 </DialogDescription>
               </DialogHeader>
               
-              <div className="space-y-6 py-4">
+              <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="weight" className="text-sm font-medium text-gray-700">
-                    Weight (lbs)
-                  </Label>
+                  <Label htmlFor="weight">Weight (lbs)</Label>
                   <Input
                     id="weight"
                     name="weight"
@@ -638,22 +568,13 @@ const History = () => {
                     min="0"
                     value={editForm.weight}
                     onChange={handleEditChange}
-                    onKeyDown={(e) => {
-                      // Prevent non-numeric characters except for allowed keys
-                      if (!/[0-9.]/.test(e.key) && 
-                          !['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
-                        e.preventDefault();
-                      }
-                    }}
-                    className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0 text-lg h-12"
+                    className="rounded-xl"
                     required
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="note" className="text-sm font-medium text-gray-700">
-                    Note (optional)
-                  </Label>
+                  <Label htmlFor="note">Note (optional)</Label>
                   <Textarea
                     id="note"
                     name="note"
@@ -661,19 +582,21 @@ const History = () => {
                     onChange={handleEditChange}
                     placeholder="Add a note about this workout..."
                     rows={3}
-                    className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0 resize-none"
+                    className="rounded-xl resize-none"
                   />
                 </div>
                 
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">Date & Time</Label>
-                  <div className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-xl">
-                    {editLog && format(new Date(editLog.timestamp), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}
+                {editLog && (
+                  <div className="space-y-2">
+                    <Label>Date & Time</Label>
+                    <div className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-xl">
+                      {format(new Date(editLog.timestamp), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
               
-              <DialogFooter className="pt-4">
+              <DialogFooter>
                 <Button
                   type="button"
                   variant="outline"
@@ -684,17 +607,10 @@ const History = () => {
                 </Button>
                 <Button 
                   type="submit" 
-                  className="rounded-xl bg-primary active:bg-primary/90 text-primary-foreground shadow-lg transition-all duration-200 active:shadow-xl"
+                  className="rounded-xl"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Updating...
-                    </div>
-                  ) : (
-                    'Update Log'
-                  )}
+                  {isSubmitting ? 'Updating...' : 'Update Log'}
                 </Button>
               </DialogFooter>
             </form>
