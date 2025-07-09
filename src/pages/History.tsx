@@ -394,7 +394,7 @@ const History = () => {
         {/* Workout History */}
         {filteredLogs.length > 0 && (
           <div className="space-y-8">
-            {sortedDates.map(dateKey => {
+            {sortedDates.map((dateKey, idx) => {
               const dayLogs = groupedLogs[dateKey];
               // Fix date parsing - use the first log's timestamp to avoid timezone issues
               const date = new Date(dayLogs[0].timestamp);
@@ -505,6 +505,11 @@ const History = () => {
                       {dayLogs.length} exercise{dayLogs.length !== 1 ? 's' : ''}
                     </div>
                   </div>
+
+                  {/* Add extra space between days */}
+                  {idx < sortedDates.length - 1 && (
+                    <div className="h-8 md:h-12" />
+                  )}
                 </div>
               );
             })}
