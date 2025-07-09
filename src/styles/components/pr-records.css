@@ -28,7 +28,7 @@
 }
 
 .pr-entry-card.category-arms .apple-health-card-title {
-  color: #3b82f6;
+  color: #3b82f6 !important;
 }
 
 .pr-entry-card.category-back {
@@ -36,7 +36,7 @@
 }
 
 .pr-entry-card.category-back .apple-health-card-title {
-  color: #10b981;
+  color: #10b981 !important;
 }
 
 .pr-entry-card.category-chest {
@@ -44,7 +44,7 @@
 }
 
 .pr-entry-card.category-chest .apple-health-card-title {
-  color: #f59e0b;
+  color: #f59e0b !important;
 }
 
 .pr-entry-card.category-core {
@@ -52,7 +52,7 @@
 }
 
 .pr-entry-card.category-core .apple-health-card-title {
-  color: #ef4444;
+  color: #ef4444 !important;
 }
 
 .pr-entry-card.category-legs {
@@ -60,7 +60,7 @@
 }
 
 .pr-entry-card.category-legs .apple-health-card-title {
-  color: #8b5cf6;
+  color: #8b5cf6 !important;
 }
 
 .pr-entry-card.category-shoulders {
@@ -68,7 +68,7 @@
 }
 
 .pr-entry-card.category-shoulders .apple-health-card-title {
-  color: #ec4899;
+  color: #ec4899 !important;
 }
 
 /* Mobile touch feedback - NO HOVER EFFECTS */
@@ -129,4 +129,148 @@
 
 .dark .pr-entry-card.category-tinted.category-shoulders {
   background: linear-gradient(135deg, rgba(236, 72, 153, 0.05) 0%, rgba(236, 72, 153, 0.02) 100%);
+}
+
+/* Category-based section backgrounds when a category is selected */
+.pr-leaderboard-section.category-arms {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.03) 0%, rgba(59, 130, 246, 0.01) 100%);
+}
+
+.pr-leaderboard-section.category-back {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.03) 0%, rgba(16, 185, 129, 0.01) 100%);
+}
+
+.pr-leaderboard-section.category-chest {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.03) 0%, rgba(245, 158, 11, 0.01) 100%);
+}
+
+.pr-leaderboard-section.category-core {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.03) 0%, rgba(239, 68, 68, 0.01) 100%);
+}
+
+.pr-leaderboard-section.category-legs {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.03) 0%, rgba(139, 92, 246, 0.01) 100%);
+}
+
+.pr-leaderboard-section.category-shoulders {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.03) 0%, rgba(236, 72, 153, 0.01) 100%);
+}
+
+.dark .pr-leaderboard-section.category-arms {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.02) 0%, rgba(59, 130, 246, 0.005) 100%);
+}
+
+.dark .pr-leaderboard-section.category-back {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.02) 0%, rgba(16, 185, 129, 0.005) 100%);
+}
+
+.dark .pr-leaderboard-section.category-chest {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.02) 0%, rgba(245, 158, 11, 0.005) 100%);
+}
+
+.dark .pr-leaderboard-section.category-core {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.02) 0%, rgba(239, 68, 68, 0.005) 100%);
+}
+
+.dark .pr-leaderboard-section.category-legs {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.02) 0%, rgba(139, 92, 246, 0.005) 100%);
+}
+
+.dark .pr-leaderboard-section.category-shoulders {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.02) 0%, rgba(236, 72, 153, 0.005) 100%);
+}
+
+/* Category-colored crown icons for section headers */
+.section-crown.category-arms {
+  color: #3b82f6 !important;
+}
+
+.section-crown.category-back {
+  color: #10b981 !important;
+}
+
+.section-crown.category-chest {
+  color: #f59e0b !important;
+}
+
+.section-crown.category-core {
+  color: #ef4444 !important;
+}
+
+.section-crown.category-legs {
+  color: #8b5cf6 !important;
+}
+
+.section-crown.category-shoulders {
+  color: #ec4899 !important;
+}
+
+/* Mobile-optimized toggle button */
+.mobile-toggle-button {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.dark .mobile-toggle-button {
+  background: rgba(28, 28, 30, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.mobile-toggle-button:active {
+  transform: scale(0.96);
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+.dark .mobile-toggle-button:active {
+  background: rgba(28, 28, 30, 0.95);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Challenge section button - full width interactive */
+.mobile-toggle-button.w-full {
+  text-align: left;
+  justify-content: space-between;
+  min-height: 64px;
+}
+
+.mobile-toggle-button.w-full:active {
+  transform: scale(0.98);
+}
+
+/* Category Filter Button Styles */
+.category-filter-arms {
+  --category-color: #3b82f6;
+  --category-color-rgb: 59, 130, 246;
+}
+
+.category-filter-back {
+  --category-color: #10b981;
+  --category-color-rgb: 16, 185, 129;
+}
+
+.category-filter-chest {
+  --category-color: #f59e0b;
+  --category-color-rgb: 245, 158, 11;
+}
+
+.category-filter-core {
+  --category-color: #ef4444;
+  --category-color-rgb: 239, 68, 68;
+}
+
+.category-filter-legs {
+  --category-color: #8b5cf6;
+  --category-color-rgb: 139, 92, 246;
+}
+
+.category-filter-shoulders {
+  --category-color: #ec4899;
+  --category-color-rgb: 236, 72, 153;
 }

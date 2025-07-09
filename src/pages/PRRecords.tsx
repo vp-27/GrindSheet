@@ -277,26 +277,32 @@ export const PRRecordsContent: React.FC = () => {
   const renderFriendsSoloPRs = () => {
     if (friendsSoloPRs.length === 0) return null;
     
+    // Get selected category for styling
+    const selectedCategory = selectedCategoryId !== 'all' ? categories.find(cat => cat.id === selectedCategoryId) : null;
+    const categoryClass = selectedCategory ? getCategoryKeyByName(selectedCategory.name) : '';
+    
     return (
-      <div className="space-y-3">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-            <h2 className="text-lg font-bold text-foreground">Friends' PRs to Beat</h2>
-            <Badge variant="secondary">{friendsSoloPRs.length} challenges</Badge>
+      <div className="mb-6">
+        <Button
+          variant="outline"
+          size="lg"
+          onClick={() => setShowSoloPRs(!showSoloPRs)}
+          className={`w-full mobile-toggle-button flex items-center justify-between p-4 h-auto ${categoryClass}`}
+        >
+          <div className="flex items-center gap-3">
+            <Zap className={`h-5 w-5 text-orange-600 dark:text-orange-400 ${selectedCategory ? `section-crown ${categoryClass}` : ''}`} />
+            <div className="text-left">
+              <div className="font-semibold">Friends' PRs to Beat</div>
+              <div className="text-sm text-muted-foreground">{friendsSoloPRs.length} challenges available</div>
+            </div>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowSoloPRs(!showSoloPRs)}
-            className="text-sm"
-          >
-            {showSoloPRs ? 'Hide' : 'Show'} Challenges
-          </Button>
-        </div>
+          <Badge variant="secondary" className="ml-2">
+            {showSoloPRs ? 'Hide' : 'Show'}
+          </Badge>
+        </Button>
         
         {showSoloPRs && (
-          <div className="space-y-3">
+          <div className="space-y-3 mt-4">
             {friendsSoloPRs.slice(0, 10).map((challenge, index) => (
               <div 
                 key={`${challenge.exerciseId}-${challenge.friend.id}`}
@@ -451,6 +457,7 @@ export const PRRecordsContent: React.FC = () => {
         {categories.map((category, index) => {
           const categoryColor = getCategoryChartColors()[index % getCategoryChartColors().length];
           const isSelected = selectedCategoryId === category.id;
+          const categoryFilterClass = `category-filter-${getCategoryKeyByName(category.name)}`;
           
           return (
             <Button
@@ -458,15 +465,11 @@ export const PRRecordsContent: React.FC = () => {
               variant="outline"
               size="sm"
               onClick={() => setSelectedCategoryId(category.id)}
-              className={`rounded-2xl px-6 py-3 font-medium whitespace-nowrap transition-all duration-300 transform active:scale-95 ${
+              className={`rounded-2xl px-6 py-3 font-medium whitespace-nowrap transition-all duration-300 transform active:scale-95 ${categoryFilterClass} ${
                 isSelected 
                   ? 'category-button-selected' 
                   : 'category-button-unselected'
               }`}
-              style={{
-                '--category-color': categoryColor,
-                '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
-              } as React.CSSProperties}
             >
               {category.name}
             </Button>
@@ -481,14 +484,9 @@ export const PRRecordsContent: React.FC = () => {
       {friendsSoloPRs.length > 0 && renderFriendsSoloPRs()}
 
       {/* PR Leaderboard */}
-      <div className="space-y-3">
+      <div className={`space-y-3 pr-leaderboard-section ${selectedCategoryId !== 'all' ? getCategoryKeyByName(getCategoryName(selectedCategoryId)) : ''}`}>
         {prLeaderboard.length > 0 ? (
           <>
-            <div className="flex items-center gap-2 mb-4">
-              <Trophy className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              <h2 className="text-lg font-bold text-foreground">Exercise PR Leaders</h2>
-              <Badge variant="secondary">{prLeaderboard.length} exercises</Badge>
-            </div>
             {prLeaderboard.map((entry, index) => renderPREntry(entry, index))}
           </>
         ) : (
