@@ -1,0 +1,132 @@
+/* ===== PR RECORDS STYLES ===== */
+/* PR Records unified card design matching Dashboard and History */
+
+/* PR Champion Card Styling */
+.pr-champion-card {
+  --category-color: #f59e0b;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+}
+
+.dark .pr-champion-card {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.05) 0%, rgba(245, 158, 11, 0.02) 100%);
+}
+
+/* Challenge Cards - Orange theme for beatable PRs */
+.challenge-card {
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.05) 0%, rgba(234, 88, 12, 0.02) 100%);
+}
+
+.dark .challenge-card {
+  border: 1px solid rgba(249, 115, 22, 0.15);
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.03) 0%, rgba(234, 88, 12, 0.01) 100%);
+}
+
+/* PR Entry Cards with Category Colors and Title Coloring */
+.pr-entry-card.category-arms {
+  --category-color: #3b82f6;
+}
+
+.pr-entry-card.category-arms .apple-health-card-title {
+  color: #3b82f6;
+}
+
+.pr-entry-card.category-back {
+  --category-color: #10b981;
+}
+
+.pr-entry-card.category-back .apple-health-card-title {
+  color: #10b981;
+}
+
+.pr-entry-card.category-chest {
+  --category-color: #f59e0b;
+}
+
+.pr-entry-card.category-chest .apple-health-card-title {
+  color: #f59e0b;
+}
+
+.pr-entry-card.category-core {
+  --category-color: #ef4444;
+}
+
+.pr-entry-card.category-core .apple-health-card-title {
+  color: #ef4444;
+}
+
+.pr-entry-card.category-legs {
+  --category-color: #8b5cf6;
+}
+
+.pr-entry-card.category-legs .apple-health-card-title {
+  color: #8b5cf6;
+}
+
+.pr-entry-card.category-shoulders {
+  --category-color: #ec4899;
+}
+
+.pr-entry-card.category-shoulders .apple-health-card-title {
+  color: #ec4899;
+}
+
+/* Mobile touch feedback - NO HOVER EFFECTS */
+.pr-entry-card:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+.challenge-card:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* Category-specific background tinting for current user cards */
+.pr-entry-card.category-tinted.category-arms {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.03) 100%);
+}
+
+.pr-entry-card.category-tinted.category-back {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.03) 100%);
+}
+
+.pr-entry-card.category-tinted.category-chest {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(245, 158, 11, 0.03) 100%);
+}
+
+.pr-entry-card.category-tinted.category-core {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(239, 68, 68, 0.03) 100%);
+}
+
+.pr-entry-card.category-tinted.category-legs {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(139, 92, 246, 0.03) 100%);
+}
+
+.pr-entry-card.category-tinted.category-shoulders {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.08) 0%, rgba(236, 72, 153, 0.03) 100%);
+}
+
+.dark .pr-entry-card.category-tinted.category-arms {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05) 0%, rgba(59, 130, 246, 0.02) 100%);
+}
+
+.dark .pr-entry-card.category-tinted.category-back {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0.02) 100%);
+}
+
+.dark .pr-entry-card.category-tinted.category-chest {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.05) 0%, rgba(245, 158, 11, 0.02) 100%);
+}
+
+.dark .pr-entry-card.category-tinted.category-core {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.05) 0%, rgba(239, 68, 68, 0.02) 100%);
+}
+
+.dark .pr-entry-card.category-tinted.category-legs {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(139, 92, 246, 0.02) 100%);
+}
+
+.dark .pr-entry-card.category-tinted.category-shoulders {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.05) 0%, rgba(236, 72, 153, 0.02) 100%);
+}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '@/context/useAppContext';
 import { useAuth } from '@/context/AuthContext';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -23,11 +23,13 @@ import {
 } from '@/utils/progressUtils';
 import { getCategoryChartColors, getCategoryKeyByName, getCategoryColors } from '@/utils/categoryColors';
 import { supabase } from '@/integrations/supabase/client';
+import '@/styles/components/pr-records.css';
 
 // Internal component for use within Tournament tab
 export const PRRecordsContent: React.FC = () => {
   const { profile } = useAuth();
   const { categories, exercises } = useAppContext();
+  const navigate = useNavigate();
   
   const [users, setUsers] = useState<any[]>([]);
   const [allExerciseLogs, setAllExerciseLogs] = useState<any[]>([]);
@@ -40,6 +42,13 @@ export const PRRecordsContent: React.FC = () => {
     totalExercises: 0,
     summary: []
   });
+  const [friendsSoloPRs, setFriendsSoloPRs] = useState<any[]>([]);
+  const [showSoloPRs, setShowSoloPRs] = useState(false);
+
+  // Handle exercise click navigation
+  const handleExerciseClick = (exerciseId: string) => {
+    navigate(`/exercise-detail?exercise=${exerciseId}`);
+  };
 
   // Fetch data on mount
   useEffect(() => {
@@ -82,6 +91,73 @@ export const PRRecordsContent: React.FC = () => {
 
     fetchData();
   }, []);
+
+  // Calculate friends' solo PRs that can be beaten
+  const calculateFriendsSoloPRs = () => {
+    if (!profile || users.length === 0 || allExerciseLogs.length === 0) return [];
+    
+    const friendsSoloPRs: any[] = [];
+    const currentUserLogs = allExerciseLogs.filter(log => log.userId === profile.id);
+    const friendsLogs = allExerciseLogs.filter(log => log.userId !== profile.id);
+    
+    // Get friends' PR for each exercise
+    exercises.forEach(exercise => {
+      if (selectedCategoryId !== 'all' && exercise.categoryId !== selectedCategoryId) return;
+      
+      // Get current user's best for this exercise
+      const currentUserBest = currentUserLogs
+        .filter(log => log.exerciseId === exercise.id)
+        .reduce((best, log) => log.weight > best ? log.weight : best, 0);
+      
+      // Get friends' PRs for this exercise
+      const friendsPRs = friendsLogs
+        .filter(log => log.exerciseId === exercise.id)
+        .reduce((prs: any[], log) => {
+          const existingPR = prs.find(pr => pr.userId === log.userId);
+          if (!existingPR) {
+            prs.push({
+              userId: log.userId,
+              weight: log.weight,
+              timestamp: log.timestamp
+            });
+          } else if (log.weight > existingPR.weight) {
+            existingPR.weight = log.weight;
+            existingPR.timestamp = log.timestamp;
+          }
+          return prs;
+        }, []);
+      
+      // Find beatable PRs (friend's PR > current user's best)
+      friendsPRs.forEach(pr => {
+        if (pr.weight > currentUserBest) {
+          const user = users.find(u => u.id === pr.userId);
+          if (user) {
+            friendsSoloPRs.push({
+              exerciseId: exercise.id,
+              exerciseName: exercise.name,
+              category: categories.find(cat => cat.id === exercise.categoryId),
+              friend: user,
+              friendPR: pr.weight,
+              userBest: currentUserBest,
+              deficit: pr.weight - currentUserBest,
+              timestamp: pr.timestamp
+            });
+          }
+        }
+      });
+    });
+    
+    // Sort by deficit (closest to beat first)
+    return friendsSoloPRs.sort((a, b) => a.deficit - b.deficit);
+  };
+
+  // Update friends' solo PRs when dependencies change
+  useEffect(() => {
+    if (users.length > 0 && allExerciseLogs.length > 0 && exercises.length > 0 && categories.length > 0) {
+      const soloPRs = calculateFriendsSoloPRs();
+      setFriendsSoloPRs(soloPRs);
+    }
+  }, [users, allExerciseLogs, exercises, categories, selectedCategoryId, profile]);
 
   // Update PR data when dependencies change
   useEffect(() => {
@@ -133,8 +209,8 @@ export const PRRecordsContent: React.FC = () => {
   const renderPRChampionSummary = () => {
     if (!prChampionship.champion && prChampionship.summary.length === 0) {
       return (
-        <Card className="mb-6">
-          <CardContent className="p-6 text-center">
+        <div className="apple-health-card mb-6">
+          <div className="text-center p-4">
             <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
             <h3 className="text-lg font-semibold text-muted-foreground mb-2">No PR Records Yet</h3>
             <p className="text-sm text-muted-foreground">
@@ -143,168 +219,214 @@ export const PRRecordsContent: React.FC = () => {
                 : `No PR records in ${getCategoryName(selectedCategoryId)} category yet.`
               }
             </p>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       );
     }
 
     return (
-      <Card className="mb-6 pr-overview-entry regular bg-gradient-to-br from-amber-50/80 to-yellow-50/80 dark:from-amber-950/30 dark:to-yellow-950/30 border-amber-200/50 dark:border-amber-800/50">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-md">
-              <Crown className="h-6 w-6 text-yellow-900" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-amber-800 dark:text-amber-200">
-                PR Champion{prChampionship.champion ? `: ${prChampionship.champion.name}` : 'ship'}
-              </h3>
-              <p className="text-sm text-amber-700 dark:text-amber-300">
+      <div className="apple-health-card mb-6 pr-champion-card">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-md">
+            <Crown className="h-6 w-6 text-yellow-900" />
+          </div>
+          <div className="flex-1">
+            <h3 className="apple-health-card-title text-base font-bold text-amber-800 dark:text-amber-200">
+              PR Champion{prChampionship.champion ? `: ${prChampionship.champion.name}` : 'ship'}
+            </h3>
+            <div className="apple-health-card-time">
+              <span className="apple-health-card-time-text text-amber-700 dark:text-amber-300">
                 {prChampionship.champion 
                   ? `${prChampionship.championCount} PR${prChampionship.championCount !== 1 ? 's' : ''} out of ${prChampionship.totalExercises} exercises`
                   : `${prChampionship.totalExercises} exercises tracked`
                 }
-              </p>
+              </span>
             </div>
           </div>
-          
-          {prChampionship.summary.length > 0 && (
-            <div className="space-y-2">
-              {prChampionship.summary.slice(0, 3).map((item, index) => (
-                <div key={item.user.id} className="flex items-center gap-3 p-2 rounded-lg bg-amber-100/50 dark:bg-amber-900/20">
-                  <div className="flex items-center gap-2">
-                    {index === 0 && <Crown className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />}
-                    {index === 1 && <Medal className="h-4 w-4 text-gray-500" />}
-                    {index === 2 && <Trophy className="h-4 w-4 text-amber-600" />}
-                    {index > 2 && <span className="w-4 h-4 flex items-center justify-center text-xs font-bold text-muted-foreground">#{index + 1}</span>}
-                  </div>
-                  <Avatar className="w-8 h-8">
-                    <AvatarImage src={item.user.avatarUrl} alt={item.user.name} />
-                    <AvatarFallback>{item.user.name.charAt(0).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1">
-                    <div className="font-medium text-sm text-amber-800 dark:text-amber-200">{item.user.name}</div>
-                  </div>
-                  <Badge variant="secondary" className="bg-amber-200/80 dark:bg-amber-800/50 text-amber-800 dark:text-amber-200">
-                    {item.prCount} PR{item.prCount !== 1 ? 's' : ''}
-                  </Badge>
+        </div>
+        
+        {prChampionship.summary.length > 0 && (
+          <div className="space-y-2">
+            {prChampionship.summary.slice(0, 3).map((item, index) => (
+              <div key={item.user.id} className="flex items-center gap-3 p-2 rounded-lg bg-amber-100/50 dark:bg-amber-900/20">
+                <div className="flex items-center gap-2">
+                  {index === 0 && <Crown className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />}
+                  {index === 1 && <Medal className="h-4 w-4 text-gray-500" />}
+                  {index === 2 && <Trophy className="h-4 w-4 text-amber-600" />}
+                  {index > 2 && <span className="w-4 h-4 flex items-center justify-center text-xs font-bold text-muted-foreground">#{index + 1}</span>}
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                <Avatar className="w-8 h-8">
+                  <AvatarImage src={item.user.avatarUrl} alt={item.user.name} />
+                  <AvatarFallback>{item.user.name.charAt(0).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1">
+                  <div className="font-medium text-sm text-amber-800 dark:text-amber-200">{item.user.name}</div>
+                </div>
+                <Badge variant="secondary" className="bg-amber-200/80 dark:bg-amber-800/50 text-amber-800 dark:text-amber-200">
+                  {item.prCount} PR{item.prCount !== 1 ? 's' : ''}
+                </Badge>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     );
   };
 
-  // Render individual PR entry
+  // Render friends' solo PR challenge section
+  const renderFriendsSoloPRs = () => {
+    if (friendsSoloPRs.length === 0) return null;
+    
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Zap className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+            <h2 className="text-lg font-bold text-foreground">Friends' PRs to Beat</h2>
+            <Badge variant="secondary">{friendsSoloPRs.length} challenges</Badge>
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowSoloPRs(!showSoloPRs)}
+            className="text-sm"
+          >
+            {showSoloPRs ? 'Hide' : 'Show'} Challenges
+          </Button>
+        </div>
+        
+        {showSoloPRs && (
+          <div className="space-y-3">
+            {friendsSoloPRs.slice(0, 10).map((challenge, index) => (
+              <div 
+                key={`${challenge.exerciseId}-${challenge.friend.id}`}
+                className={`apple-health-card pr-entry-card ${getCategoryKeyByName(challenge.category?.name || 'back')} challenge-card`}
+                onClick={() => handleExerciseClick(challenge.exerciseId)}
+              >
+                {/* Top row: Exercise name only */}
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="apple-health-card-title truncate mb-1">{challenge.exerciseName}</h3>
+                    <div className="apple-health-card-time">
+                      <span className="apple-health-card-time-text">Beat {challenge.friend.name}'s PR</span>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Bottom row: Friend avatar + PR challenge info */}
+                <div className="flex items-end justify-between">
+                  <div className="flex items-center gap-3">
+                    <Avatar className="w-8 h-8">
+                      <AvatarImage src={challenge.friend.avatarUrl} alt={challenge.friend.name} />
+                      <AvatarFallback>{challenge.friend.name.charAt(0).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                    <div className="text-sm">
+                      <div className="text-muted-foreground">Your best: {challenge.userBest || 0} lbs</div>
+                      <div className="text-xs text-orange-600 dark:text-orange-400 font-medium">
+                        Need +{challenge.deficit} lbs to beat
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Target PR Display */}
+                  <div className="text-right">
+                    <div className="apple-health-weight-display text-orange-600 dark:text-orange-400">
+                      {challenge.friendPR}
+                    </div>
+                    <p className="apple-health-weight-unit">lbs PR</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+            
+            {friendsSoloPRs.length > 10 && (
+              <div className="text-center text-sm text-muted-foreground">
+                And {friendsSoloPRs.length - 10} more challenges...
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
   const renderPREntry = (entry: any, index: number) => {
     const exerciseName = getExerciseName(entry.exerciseId!);
     const category = getExerciseCategory(entry.exerciseId!);
     const isCurrentUser = entry.userId === profile?.id;
     const isTie = entry.isTie;
     
+    // Get category color for this exercise
+    const categoryIndex = category ? categories.findIndex(cat => cat.id === category.id) : -1;
+    const categoryColor = categoryIndex >= 0 ? getCategoryChartColors()[categoryIndex % getCategoryChartColors().length] : '#10b981';
+    
     return (
-      <Card 
+      <div 
         key={`${entry.exerciseId}-${entry.userId}`}
-        className={`pr-overview-entry transition-all duration-300 ${
-          isCurrentUser 
-            ? 'regular bg-gradient-to-br from-blue-50/80 to-indigo-50/80 dark:from-blue-950/30 dark:to-indigo-950/30 border-blue-200/50 dark:border-blue-800/50' 
-            : 'regular'
-        }`}
+        className={`apple-health-card transition-all duration-200 cursor-pointer pr-entry-card ${
+          isCurrentUser ? 'category-tinted user-pr' : ''
+        } ${getCategoryKeyByName(category?.name || 'back')}`}
+        onClick={() => handleExerciseClick(entry.exerciseId!)}
       >
-        <CardContent className="p-4">
-          <div className="flex items-center gap-4">
-            {/* Position Indicator */}
-            <div className="flex items-center gap-2">
-              {index === 0 && (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-md">
-                  <Crown className="h-4 w-4 text-yellow-900" />
-                </div>
-              )}
-              {index === 1 && (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shadow-md">
-                  <Medal className="h-4 w-4 text-gray-700" />
-                </div>
-              )}
-              {index === 2 && (
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center shadow-md">
-                  <Trophy className="h-4 w-4 text-amber-100" />
-                </div>
-              )}
-              {index > 2 && (
-                <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-muted-foreground font-bold text-sm">
-                  {index + 1}
-                </div>
-              )}
-            </div>
-
-            {/* User Info */}
-            <div className="flex items-center gap-3 flex-1">
-              {isTie && entry.users ? (
-                // Render multiple avatars for ties
-                <div className="flex -space-x-2">
-                  {entry.users.slice(0, 3).map((user: any, userIndex: number) => (
-                    <Avatar key={user.id} className="w-10 h-10 border-2 border-background">
-                      <AvatarImage src={user.avatarUrl} alt={user.name} />
-                      <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                  ))}
-                  {entry.users.length > 3 && (
-                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground border-2 border-background">
-                      +{entry.users.length - 3}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <Avatar className="w-10 h-10">
-                  <AvatarImage src={entry.user?.avatarUrl} alt={entry.user?.name} />
-                  <AvatarFallback>{entry.user?.name?.charAt(0).toUpperCase()}</AvatarFallback>
-                </Avatar>
-              )}
-              
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold text-foreground flex items-center gap-2">
-                  {isTie && entry.users ? (
-                    <span>{entry.users.length} users tied</span>
-                  ) : (
-                    <span>{entry.user?.name}</span>
-                  )}
-                  {isCurrentUser && (
-                    <Badge variant="secondary" className="bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300">You</Badge>
-                  )}
-                </div>
-                <div className="text-sm text-muted-foreground truncate">{exerciseName}</div>
-                {category && (
-                  <Badge 
-                    variant="outline" 
-                    className="text-xs mt-1"
-                    style={{
-                      '--category-color': getCategoryColors(getCategoryKeyByName(category.name)).primary
-                    } as React.CSSProperties}
-                  >
-                    {category.name}
-                  </Badge>
+        {/* Top row: Exercise name only */}
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-3 flex-1">
+            <div className="flex-1 min-w-0">
+              <h3 className="apple-health-card-title truncate mb-1">{exerciseName}</h3>
+              <div className="apple-health-card-time">
+                {isTie && entry.users ? (
+                  <span className="apple-health-card-time-text">{entry.users.length} users tied</span>
+                ) : (
+                  <span className="apple-health-card-time-text">{entry.user?.name}</span>
+                )}
+                {isCurrentUser && (
+                  <Badge variant="secondary" className="ml-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs">You</Badge>
                 )}
               </div>
             </div>
-
-            {/* Weight Display */}
-            <div className="text-right">
-              <div className="text-lg font-bold text-foreground">
-                {entry.value > 0 ? `${entry.value}` : '0'}
-                <span className="text-sm font-normal text-muted-foreground ml-1">lbs</span>
-              </div>
-              {isTie && (
-                <div className="text-xs text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1">
-                  <Star className="h-3 w-3" />
-                  <span>Tied</span>
-                </div>
-              )}
-            </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Bottom row: User avatars + Weight display */}
+        <div className="flex items-end justify-between">
+          <div className="flex items-center gap-3">
+            {isTie && entry.users ? (
+              // Render multiple avatars for ties
+              <div className="flex -space-x-2">
+                {entry.users.slice(0, 3).map((user: any, userIndex: number) => (
+                  <Avatar key={user.id} className="w-8 h-8 border-2 border-background">
+                    <AvatarImage src={user.avatarUrl} alt={user.name} />
+                    <AvatarFallback>{user.name.charAt(0).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                ))}
+                {entry.users.length > 3 && (
+                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground border-2 border-background">
+                    +{entry.users.length - 3}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Avatar className="w-8 h-8">
+                <AvatarImage src={entry.user?.avatarUrl} alt={entry.user?.name} />
+                <AvatarFallback>{entry.user?.name?.charAt(0).toUpperCase()}</AvatarFallback>
+              </Avatar>
+            )}
+          </div>
+
+          {/* Weight Display */}
+          <div className="text-right">
+            <div className="apple-health-weight-display">
+              {entry.value > 0 ? `${entry.value}` : '0'}
+            </div>
+            <p className="apple-health-weight-unit">lbs</p>
+            {isTie && (
+              <div className="text-xs text-amber-600 dark:text-amber-400 font-medium flex items-center gap-1 justify-end mt-1">
+                <Star className="h-3 w-3" />
+                <span>Tied</span>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     );
   };
 
@@ -355,6 +477,9 @@ export const PRRecordsContent: React.FC = () => {
       {/* PR Champion Summary */}
       {renderPRChampionSummary()}
 
+      {/* Friends' Solo PRs Challenge Section */}
+      {friendsSoloPRs.length > 0 && renderFriendsSoloPRs()}
+
       {/* PR Leaderboard */}
       <div className="space-y-3">
         {prLeaderboard.length > 0 ? (
@@ -367,8 +492,8 @@ export const PRRecordsContent: React.FC = () => {
             {prLeaderboard.map((entry, index) => renderPREntry(entry, index))}
           </>
         ) : (
-          <Card>
-            <CardContent className="p-8 text-center">
+          <div className="apple-health-card">
+            <div className="text-center p-4">
               <Target className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
               <h3 className="text-lg font-semibold text-muted-foreground mb-2">No PR Records Found</h3>
               <p className="text-sm text-muted-foreground">
@@ -377,8 +502,8 @@ export const PRRecordsContent: React.FC = () => {
                   : `No records found for ${getCategoryName(selectedCategoryId)} exercises.`
                 }
               </p>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
       </div>
     </div>
