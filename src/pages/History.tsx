@@ -258,7 +258,7 @@ const History = () => {
               </div>
               <div>
                 <p className="text-sm text-muted-foreground font-medium">
-                  {stats.totalWorkouts} workout{stats.totalWorkouts !== 1 ? 's' : ''} • {stats.uniqueDays} day{stats.uniqueDays !== 1 ? 's' : ''} • {stats.recentWorkouts} this week
+                  {stats.totalWorkouts} exercise{stats.totalWorkouts !== 1 ? 's' : ''} • {stats.uniqueDays} day{stats.uniqueDays !== 1 ? 's' : ''} • {stats.recentWorkouts} this week
                 </p>
               </div>
             </div>
@@ -328,7 +328,7 @@ const History = () => {
                       <>No results for "{searchQuery}"</>
                     ) : (
                       <>
-                        {filteredLogs.length} workout{filteredLogs.length !== 1 ? 's' : ''} found
+                        {filteredLogs.length} exercise{filteredLogs.length !== 1 ? 's' : ''} found
                       </>
                     )}
                   </span>
@@ -415,9 +415,9 @@ const History = () => {
           <Card>
             <CardContent className="p-12 text-center">
               <Activity className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">No Workout History</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">No Exercise History</h3>
               <p className="text-muted-foreground">
-                Start logging exercises to see your workout history here!
+                Start logging exercises to see your exercise history here!
               </p>
             </CardContent>
           </Card>
@@ -554,7 +554,7 @@ const History = () => {
                   {/* Workout Count at Bottom */}
                   <div className="text-center">
                     <div className="text-xs text-muted-foreground">
-                      {dayLogs.length} workout{dayLogs.length !== 1 ? 's' : ''}
+                      {dayLogs.length} exercise{dayLogs.length !== 1 ? 's' : ''}
                     </div>
                   </div>
                 </div>
@@ -570,7 +570,7 @@ const History = () => {
               <DialogHeader>
                 <DialogTitle>Edit Exercise Log</DialogTitle>
                 <DialogDescription>
-                  Update the weight or note for this workout entry.
+                  Update the weight or note for this exercise entry.
                 </DialogDescription>
               </DialogHeader>
               
