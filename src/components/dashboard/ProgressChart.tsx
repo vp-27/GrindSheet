@@ -55,6 +55,7 @@ interface ProgressChartProps {
   defaultTimeframe?: TimeframeOption; // Allow parent to set initial timeframe
   hideTimeframeControls?: boolean; // New prop to hide timeframe controls
   timeframe?: TimeframeOption; // Allow parent to control timeframe externally
+  disableInternalTimeframeFilter?: boolean; // NEW: disables internal filtering if true
 }
 
 // Define timeframe options
@@ -247,7 +248,8 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
   hideTooltip = false,
   defaultTimeframe = '2W',
   hideTimeframeControls = false,
-  timeframe: externalTimeframe
+  timeframe: externalTimeframe,
+  disableInternalTimeframeFilter = false // NEW
 }) => {
   const [internalTimeframe, setInternalTimeframe] = useState<TimeframeOption>(defaultTimeframe);
   const [dotVisible, setDotVisible] = useState(false);
@@ -259,8 +261,9 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
 
   // Filter data based on selected timeframe
   const filteredData = useMemo(() => {
+    if (disableInternalTimeframeFilter) return data;
     return filterDataByTimeframe(data, currentTimeframe);
-  }, [data, currentTimeframe]);
+  }, [data, currentTimeframe, disableInternalTimeframeFilter]);
 
   // Calculate percentage gain for current timeframe - using chart start date
   const timeframeGain = useMemo(() => {

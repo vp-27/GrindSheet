@@ -142,7 +142,6 @@ const Dashboard = () => {
         // Find the cutoff date for the selected timeframe
         const now = new Date();
         const cutoffDate = new Date();
-        
         switch (chartTimeframe) {
           case '2W':
             cutoffDate.setDate(now.getDate() - 14);
@@ -151,7 +150,6 @@ const Dashboard = () => {
             cutoffDate.setMonth(now.getMonth() - 1);
             break;
         }
-        
         return getOverallProgressChartData(exerciseLogs, exercises, categories, cutoffDate);
       }
       return getOverallProgressChartData(exerciseLogs, exercises, categories);
@@ -161,6 +159,19 @@ const Dashboard = () => {
         e => e.categoryId === selectedCategoryId && exerciseLogs.some(log => log.exerciseId === e.id)
       );
       // Category-specific chart (by exercise) - show percentage growth
+      if (chartTimeframe !== 'ALL') {
+        const now = new Date();
+        const cutoffDate = new Date();
+        switch (chartTimeframe) {
+          case '2W':
+            cutoffDate.setDate(now.getDate() - 14);
+            break;
+          case '1M':
+            cutoffDate.setMonth(now.getMonth() - 1);
+            break;
+        }
+        return getExerciseProgressChartData(exerciseLogs, categoryExercisesWithLogs, selectedCategoryId, cutoffDate);
+      }
       return getExerciseProgressChartData(exerciseLogs, categoryExercisesWithLogs, selectedCategoryId);
     }
   }, [exerciseLogs, exercises, categories, selectedCategoryId, chartTimeframe]);
@@ -331,6 +342,7 @@ const Dashboard = () => {
                 hideTooltip={true}
                 hideTimeframeControls={true}
                 timeframe={chartTimeframe}
+                disableInternalTimeframeFilter={true} // NEW: let parent handle windowing
               />
             ) : (
               <div className="text-center text-muted-foreground py-16">
