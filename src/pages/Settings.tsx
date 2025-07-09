@@ -148,6 +148,10 @@ const Settings: React.FC = () => {
   // Handle exercises section toggle
   const handleExercisesToggle = async (open: boolean) => {
     if (open && !exercisesLoaded) {
+      // Ensure categories are loaded before loading exercises
+      if (!categoriesLoaded && !categoriesLoading) {
+        await fetchCategories(); // Don't set loading state here
+      }
       // Start loading but don't open yet
       setExercisesLoading(true);
       await fetchExercises();
