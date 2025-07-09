@@ -282,21 +282,6 @@ const History = () => {
                   </button>
                 )}
               </div>
-              
-              {/* Search Results Count */}
-              {searchQuery.trim() && (
-                <div className="mt-3 text-center">
-                  <span className="text-xs text-muted-foreground px-3 py-1.5 bg-muted/40 rounded-full border border-border/30">
-                    {filteredLogs.length === 0 ? (
-                      <>No results for "{searchQuery}"</>
-                    ) : (
-                      <>
-                        {filteredLogs.length} exercise{filteredLogs.length !== 1 ? 's' : ''} found
-                      </>
-                    )}
-                  </span>
-                </div>
-              )}
             </div>
           </div>
 
