@@ -249,16 +249,16 @@ const History = () => {
   return (
     <Layout title="History">
       <div className="flex flex-col gap-6 pb-6">
-        {/* Header with Stats */}
+        {/* Clean Header with Stats */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-sm">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-md">
                 <Clock className="h-5 w-5 text-white" />
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">
-                  {stats.totalWorkouts} workouts • {stats.uniqueDays} days • {stats.recentWorkouts} this week
+                <p className="text-sm text-muted-foreground font-medium">
+                  {stats.totalWorkouts} workout{stats.totalWorkouts !== 1 ? 's' : ''} • {stats.uniqueDays} day{stats.uniqueDays !== 1 ? 's' : ''} • {stats.recentWorkouts} this week
                 </p>
               </div>
             </div>
@@ -268,48 +268,73 @@ const History = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setShowFilters(!showFilters)}
-                className="rounded-2xl flex items-center gap-2"
+                className="rounded-xl flex items-center gap-2 h-9"
               >
                 <Filter className="h-4 w-4" />
-                {showFilters ? 'Hide' : 'Filter'}
+                Filter
                 {hasActiveFilters && (
-                  <Badge variant="secondary" className="ml-1 h-5 w-5 p-0 text-xs">
-                    !
-                  </Badge>
+                  <div className="ml-1 h-2 w-2 bg-primary rounded-full" />
                 )}
               </Button>
               
               {/* Quick stats badge */}
               {stats.totalWorkouts > 0 && (
-                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-xl text-xs text-muted-foreground border border-border/50">
-                  <TrendingUp className="h-3 w-3" />
-                  <span>
-                    {Math.round((stats.totalWorkouts / Math.max(stats.uniqueDays, 1)) * 10) / 10} avg/day
+                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-xl text-xs text-muted-foreground">
+                  <TrendingUp className="h-3 w-3 text-emerald-500" />
+                  <span className="font-medium">
+                    {Math.round((stats.totalWorkouts / Math.max(stats.uniqueDays, 1)) * 10) / 10}/day
                   </span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Search Bar */}
+          {/* Apple Health Style Search */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              placeholder="Search exercises, categories, or notes..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 rounded-2xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 h-12"
-            />
-            {searchQuery && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 p-0"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            )}
+            <div className="apple-health-card p-0">
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                  <Search className="h-5 w-5 text-muted-foreground/60" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search exercises, categories, or notes..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full h-12 pl-12 pr-12 text-base bg-transparent border-0 rounded-xl
+                           text-foreground placeholder:text-muted-foreground/60
+                           transition-all duration-200 ease-out
+                           focus:outline-none focus:ring-2 focus:ring-blue-500/30
+                           md:text-sm"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-lg
+                             text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/30
+                             transition-all duration-200 ease-out"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              
+              {/* Search Results Count */}
+              {searchQuery.trim() && (
+                <div className="mt-3 text-center">
+                  <span className="text-xs text-muted-foreground px-3 py-1.5 bg-muted/40 rounded-full border border-border/30">
+                    {filteredLogs.length === 0 ? (
+                      <>No results for "{searchQuery}"</>
+                    ) : (
+                      <>
+                        {filteredLogs.length} workout{filteredLogs.length !== 1 ? 's' : ''} found
+                      </>
+                    )}
+                  </span>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Filters Panel */}
