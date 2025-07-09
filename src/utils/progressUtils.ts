@@ -186,7 +186,9 @@ export const getOverallProgressChartData = (
   const categoryNames = new Map(categories.map(cat => [cat.id, cat.name]));
   const sortedLogs = [...logs].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
-  // First pass: establish starting weights for each exercise
+  console.log(`getOverallProgressChartData called with windowStartDate: ${windowStartDate?.toDateString() || 'none'}`);
+
+  // First pass: establish starting weights for each exercise (always use first ever log)
   sortedLogs.forEach(log => {
     const exercise = exercises.find(e => e.id === log.exerciseId);
     if (!exercise) return;
@@ -196,24 +198,21 @@ export const getOverallProgressChartData = (
     }
   });
 
-  // NEW: If windowStartDate is provided, filter to only include exercises that existed at that date
+  console.log(`Exercise start weights:`, Object.fromEntries(exerciseStartWeights));
+
+  // If windowStartDate is provided, we'll process all data but re-baseline at the end
   let allowedExercises = new Set<string>();
   if (windowStartDate) {
-    // Find exercises that have logs at or before the windowStartDate
+    // Include all exercises that have any data
     sortedLogs.forEach(log => {
-      if (new Date(log.timestamp) <= windowStartDate) {
-        allowedExercises.add(log.exerciseId);
-      }
+      allowedExercises.add(log.exerciseId);
     });
-    console.log(`Baseline locking: Only including ${allowedExercises.size} exercises that existed at ${windowStartDate.toDateString()}`);
+    console.log(`Window mode: Including all ${allowedExercises.size} exercises`);
   }
 
   // Initialize all categories with starting data to ensure complete coverage
   const allDates = new Set();
   sortedLogs.forEach(log => {
-    // Skip exercises not in allowedExercises if we're doing baseline locking
-    if (windowStartDate && !allowedExercises.has(log.exerciseId)) return;
-    
     const logDate = new Date(log.timestamp);
     const date = `${logDate.getMonth() + 1}/${logDate.getDate()}/${logDate.getFullYear()}`;
     allDates.add(date);
@@ -226,9 +225,6 @@ export const getOverallProgressChartData = (
 
   // Second pass: group logs by date and exercise, then calculate per-exercise percentage gains
   sortedLogs.forEach(log => {
-    // Skip exercises not in allowedExercises if we're doing baseline locking
-    if (windowStartDate && !allowedExercises.has(log.exerciseId)) return;
-    
     const logDate = new Date(log.timestamp);
     const date = `${logDate.getMonth() + 1}/${logDate.getDate()}/${logDate.getFullYear()}`;
     const exercise = exercises.find(e => e.id === log.exerciseId);
@@ -302,12 +298,15 @@ export const getOverallProgressChartData = (
   });
   result = result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+  console.log(`Final result has ${result.length} data points`);
+  if (result.length > 0) {
+    console.log(`First point:`, result[0]);
+    console.log(`Last point:`, result[result.length - 1]);
+  }
+
   // Forward fill missing values to show maintained progress
   const logsOnDate = new Map();
   sortedLogs.forEach(log => {
-    // Skip exercises not in allowedExercises if we're doing baseline locking
-    if (windowStartDate && !allowedExercises.has(log.exerciseId)) return;
-    
     const logDate = new Date(log.timestamp);
     const date = `${logDate.getMonth() + 1}/${logDate.getDate()}/${logDate.getFullYear()}`;
     if (!logsOnDate.has(date)) {
@@ -320,7 +319,6 @@ export const getOverallProgressChartData = (
       const categoryName = category.name;
       const categoryExerciseIds = exercises
         .filter(ex => ex.categoryId === category.id)
-        .filter(ex => !windowStartDate || allowedExercises.has(ex.id)) // Only include allowed exercises
         .map(ex => ex.id);
       const currentDayLogs = logsOnDate.get(result[i].date) || [];
       const hasLogsThisDay = currentDayLogs.some(log => 
@@ -334,18 +332,22 @@ export const getOverallProgressChartData = (
     });
   }
 
-  // --- If windowStartDate is provided, re-baseline all categories to 0% at that date ---
+  // If windowStartDate is provided, filter data to only show the timeframe and re-baseline
   if (windowStartDate) {
-    // Find the first index >= windowStartDate
-    const windowStartIdx = result.findIndex(d => new Date(d.date) >= windowStartDate);
-    if (windowStartIdx !== -1) {
-      // For each category, get the value at windowStartIdx and subtract from all subsequent points
-      categories.forEach(category => {
-        const categoryName = category.name;
-        const baseline = result[windowStartIdx][categoryName];
-        for (let i = windowStartIdx; i < result.length; i++) {
-          result[i][categoryName] = result[i][categoryName] - baseline;
-        }
+    // Filter to only include data from window start date
+    result = result.filter(point => new Date(point.date) >= windowStartDate);
+    
+    // Re-baseline: subtract the first point's values to show relative gains from window start
+    if (result.length > 0) {
+      const baselinePoint = result[0];
+      result = result.map(point => {
+        const adjustedPoint = { date: point.date };
+        categories.forEach(category => {
+          const categoryName = category.name;
+          const baseline = baselinePoint[categoryName] || 0;
+          adjustedPoint[categoryName] = (point[categoryName] || 0) - baseline;
+        });
+        return adjustedPoint;
       });
     }
   }
