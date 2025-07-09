@@ -251,44 +251,7 @@ const History = () => {
       <div className="flex flex-col gap-6 pb-6">
         {/* Clean Header with Stats */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-md">
-                <Clock className="h-5 w-5 text-white" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground font-medium">
-                  {stats.totalWorkouts} exercise{stats.totalWorkouts !== 1 ? 's' : ''} • {stats.uniqueDays} day{stats.uniqueDays !== 1 ? 's' : ''} • {stats.recentWorkouts} this week
-                </p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowFilters(!showFilters)}
-                className="rounded-xl flex items-center gap-2 h-9"
-              >
-                <Filter className="h-4 w-4" />
-                Filter
-                {hasActiveFilters && (
-                  <div className="ml-1 h-2 w-2 bg-primary rounded-full" />
-                )}
-              </Button>
-              
-              {/* Quick stats badge */}
-              {stats.totalWorkouts > 0 && (
-                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-muted/50 rounded-xl text-xs text-muted-foreground">
-                  <TrendingUp className="h-3 w-3 text-emerald-500" />
-                  <span className="font-medium">
-                    {Math.round((stats.totalWorkouts / Math.max(stats.uniqueDays, 1)) * 10) / 10}/day
-                  </span>
-                </div>
-              )}
-            </div>
-          </div>
-
+          {/* Removed header stats and filter button, only keep search and filters below */}
           {/* Apple Health Style Search */}
           <div className="relative">
             <div className="apple-health-card p-0">
