@@ -27,7 +27,7 @@
   --category-color: #3b82f6;
 }
 
-.pr-entry-card.category-arms .apple-health-card-title {
+.apple-health-card.pr-entry-card.category-arms .apple-health-card-title {
   color: #3b82f6 !important;
 }
 
@@ -35,7 +35,7 @@
   --category-color: #10b981;
 }
 
-.pr-entry-card.category-back .apple-health-card-title {
+.apple-health-card.pr-entry-card.category-back .apple-health-card-title {
   color: #10b981 !important;
 }
 
@@ -43,7 +43,7 @@
   --category-color: #f59e0b;
 }
 
-.pr-entry-card.category-chest .apple-health-card-title {
+.apple-health-card.pr-entry-card.category-chest .apple-health-card-title {
   color: #f59e0b !important;
 }
 
@@ -51,7 +51,7 @@
   --category-color: #ef4444;
 }
 
-.pr-entry-card.category-core .apple-health-card-title {
+.apple-health-card.pr-entry-card.category-core .apple-health-card-title {
   color: #ef4444 !important;
 }
 
@@ -59,7 +59,7 @@
   --category-color: #8b5cf6;
 }
 
-.pr-entry-card.category-legs .apple-health-card-title {
+.apple-health-card.pr-entry-card.category-legs .apple-health-card-title {
   color: #8b5cf6 !important;
 }
 
@@ -67,7 +67,32 @@
   --category-color: #ec4899;
 }
 
-.pr-entry-card.category-shoulders .apple-health-card-title {
+.apple-health-card.pr-entry-card.category-shoulders .apple-health-card-title {
+  color: #ec4899 !important;
+}
+
+/* Challenge cards also need category coloring */
+.apple-health-card.challenge-card.category-arms .apple-health-card-title {
+  color: #3b82f6 !important;
+}
+
+.apple-health-card.challenge-card.category-back .apple-health-card-title {
+  color: #10b981 !important;
+}
+
+.apple-health-card.challenge-card.category-chest .apple-health-card-title {
+  color: #f59e0b !important;
+}
+
+.apple-health-card.challenge-card.category-core .apple-health-card-title {
+  color: #ef4444 !important;
+}
+
+.apple-health-card.challenge-card.category-legs .apple-health-card-title {
+  color: #8b5cf6 !important;
+}
+
+.apple-health-card.challenge-card.category-shoulders .apple-health-card-title {
   color: #ec4899 !important;
 }
 
@@ -242,6 +267,32 @@
 
 .mobile-toggle-button.w-full:active {
   transform: scale(0.98);
+}
+
+/* Orange-themed challenges button */
+.challenges-button {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(234, 88, 12, 0.05) 100%);
+  border: 1px solid rgba(249, 115, 22, 0.2);
+  border-radius: 16px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(249, 115, 22, 0.1);
+}
+
+.dark .challenges-button {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.08) 0%, rgba(234, 88, 12, 0.03) 100%);
+  border: 1px solid rgba(249, 115, 22, 0.15);
+}
+
+.challenges-button:active {
+  transform: scale(0.98);
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(234, 88, 12, 0.08) 100%);
+  border-color: rgba(249, 115, 22, 0.3);
+  box-shadow: 0 4px 12px rgba(249, 115, 22, 0.15);
+}
+
+.dark .challenges-button:active {
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.12) 0%, rgba(234, 88, 12, 0.06) 100%);
+  border-color: rgba(249, 115, 22, 0.2);
 }
 
 /* Category Filter Button Styles */

@@ -287,7 +287,7 @@ export const PRRecordsContent: React.FC = () => {
           variant="outline"
           size="lg"
           onClick={() => setShowSoloPRs(!showSoloPRs)}
-          className={`w-full mobile-toggle-button flex items-center justify-between p-4 h-auto ${categoryClass}`}
+          className={`w-full challenges-button flex items-center justify-between p-4 h-auto ${categoryClass}`}
         >
           <div className="flex items-center gap-3">
             <Zap className={`h-5 w-5 text-orange-600 dark:text-orange-400 ${selectedCategory ? `section-crown ${categoryClass}` : ''}`} />
