@@ -28,7 +28,8 @@ import {
   Activity,
   Plus,
   BookOpen,
-  History
+  History,
+  Clock
 } from 'lucide-react';
 import { 
   Tournament, 
@@ -770,20 +771,19 @@ const TournamentPage: React.FC = () => {
       headerSlider={
         activeTab === 'tournament' ? (
           <div className="flex items-center gap-3">
-            {/* Countdown Badge */}
+            {/* Countdown Timer - Plain text with icon and urgency color */}
             {countdown.text && (
-              <div className={`
-                px-3 py-1.5 rounded-full font-medium text-xs border
-                ${countdown.urgency === 'low' ? 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700/50' : ''}
-                ${countdown.urgency === 'medium' ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700/50' : ''}
-                ${countdown.urgency === 'high' ? 'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-700/50' : ''}
-                ${countdown.urgency === 'critical' ? 'bg-red-50 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700/50' : ''}
-                ${countdown.urgency === 'ended' ? 'bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/30 dark:text-gray-300 dark:border-gray-700/50' : ''}
+              <span className={`flex items-center gap-1 font-medium text-xs 
+                ${countdown.urgency === 'low' ? 'text-emerald-700 dark:text-emerald-300' : ''}
+                ${countdown.urgency === 'medium' ? 'text-amber-700 dark:text-amber-300' : ''}
+                ${countdown.urgency === 'high' ? 'text-orange-700 dark:text-orange-300' : ''}
+                ${countdown.urgency === 'critical' ? 'text-red-700 dark:text-red-300' : ''}
+                ${countdown.urgency === 'ended' ? 'text-gray-700 dark:text-gray-300' : ''}
               `}>
+                <Clock className="h-4 w-4 mr-1" />
                 {countdown.text}
-              </div>
+              </span>
             )}
-            
             {/* Rulebook Button */}
             <Button 
               variant="outline" 

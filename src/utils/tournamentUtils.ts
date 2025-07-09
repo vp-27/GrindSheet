@@ -620,7 +620,7 @@ export const getTournamentCountdown = (endDate: string) => {
   const now = new Date();
   const end = new Date(endDate);
   const diffMs = end.getTime() - now.getTime();
-  
+
   if (diffMs <= 0) {
     return {
       text: "Ended",
@@ -628,31 +628,53 @@ export const getTournamentCountdown = (endDate: string) => {
       timeLeft: 0
     };
   }
-  
+
+  // Determine the start of the week (Monday)
+  const weekStart = new Date(end);
+  weekStart.setDate(end.getDate() - ((end.getDay() + 6) % 7)); // Monday of the week
+  weekStart.setHours(0, 0, 0, 0);
+
+  // Get the current day of the week (0=Sunday, 1=Monday, ... 6=Saturday)
+  const nowDay = now.getDay();
+  // Get the day of the week for the end date (should be Sunday for a weekly tournament)
+  const endDay = end.getDay();
+
+  // Calculate the number of days since the start of the week
+  const daysSinceMonday = ((now.getTime() - weekStart.getTime()) / (1000 * 60 * 60 * 24));
+
+  // Set urgency based on the day of the week (color only, keep text as time left)
   const diffMinutes = Math.floor(diffMs / (1000 * 60));
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  
+
+  // Default text logic (numerical)
   let text = "";
-  let urgency: "low" | "medium" | "high" | "critical" | "ended" = "low";
-  
   if (diffDays > 1) {
     text = `${diffDays} days`;
-    urgency = "low";
   } else if (diffDays === 1) {
     text = "1 day";
-    urgency = "medium";
   } else if (diffHours > 1) {
     text = `${diffHours} hours`;
-    urgency = diffHours <= 3 ? "high" : "medium";
   } else if (diffHours === 1) {
     text = "Final hour!";
-    urgency = "critical";
   } else {
     text = `${diffMinutes} minutes`;
+  }
+
+  // Urgency by day of week only (color)
+  let urgency: "low" | "medium" | "high" | "critical" | "ended" = "low";
+  if (now > end) {
+    urgency = "ended";
+  } else if (nowDay === 1) { // Monday
+    urgency = "low";
+  } else if (nowDay === 2 || nowDay === 3) { // Tuesday, Wednesday
+    urgency = "medium";
+  } else if (nowDay === 4 || nowDay === 5) { // Thursday, Friday
+    urgency = "high";
+  } else if (nowDay === 6 || nowDay === 0) { // Saturday, Sunday
     urgency = "critical";
   }
-  
+
   return {
     text,
     urgency,
