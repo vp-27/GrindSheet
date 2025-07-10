@@ -539,6 +539,19 @@ const Dashboard = () => {
                   </span>
                 )}
               </div>
+
+              {/* See All Button */}
+              <div className="mt-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigate('/history')}
+                  className="w-full text-xs"
+                >
+                  <Clock className="h-3 w-3 mr-2" />
+                  See All History
+                </Button>
+              </div>
             </div>
           </div>
           

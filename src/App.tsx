@@ -12,6 +12,7 @@ import ExerciseDetail from "./pages/ExerciseDetail";
 import Tournament from "./pages/Tournament";
 import PRRecords from "./pages/PRRecords";
 import Settings from "./pages/Settings";
+import Goals from "./pages/Goals";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ToastDemo from "./pages/ToastDemo";
@@ -36,6 +37,7 @@ const App = () => (
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/exercise-detail" element={<ExerciseDetail />} />
                 <Route path="/history" element={<History />} />
+                <Route path="/goals" element={<Goals />} />
                 <Route path="/tournament" element={<Tournament />} />
                 <Route path="/pr-records" element={<PRRecords />} />
                 <Route path="/settings" element={<Settings />} />
