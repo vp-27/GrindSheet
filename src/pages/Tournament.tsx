@@ -41,7 +41,8 @@ import {
   generateTournamentHistory,
   POINTS_CONFIG,
   BADGE_DEFINITIONS,
-  getTournamentCountdown
+  getTournamentCountdown,
+  NEW_EXERCISE_BONUS
 } from '@/utils/tournamentUtils';
 import { supabase } from '@/integrations/supabase/client';
 import PRRecordsPage, { PRRecordsContent } from './PRRecords';
@@ -571,11 +572,11 @@ const TournamentPage: React.FC = () => {
                             <div className="flex-1">
                               <div className="font-medium text-foreground text-sm">{pr.exerciseName} PR</div>
                               <div className="text-xs text-muted-foreground">
-                                {pr.previousBest > 0 ? `${pr.previousBest}→${pr.weight}lbs` : `${pr.weight}lbs (first time)`}
+                                {pr.previousBest > 0 ? `${pr.previousBest}\u2192${pr.weight}lbs` : `${pr.weight}lbs (first time)`}
                               </div>
                             </div>
                             <div className="text-right">
-                              <div className="font-bold text-amber-700 dark:text-amber-300 text-sm">+75pts</div>
+                              <div className="font-bold text-amber-700 dark:text-amber-300 text-sm">+{POINTS_CONFIG.PR_ACHIEVEMENT.points}pts</div>
                             </div>
                           </div>
                         ))}
@@ -611,6 +612,17 @@ const TournamentPage: React.FC = () => {
                             </div>
                           </div>
                         ))}
+
+                        {/* PR Bonus Line */}
+                        <div className="flex justify-between items-center py-2 px-3 bg-amber-50/30 dark:bg-amber-950/15 rounded-lg border-l-2 border-amber-400 dark:border-amber-600 mb-2">
+                          <div className="flex-1">
+                            <div className="font-medium text-foreground text-sm">Personal Record Bonus</div>
+                            <div className="text-xs text-muted-foreground">{POINTS_CONFIG.PR_ACHIEVEMENT.points}pts × {participant.prDetails.length} PR{participant.prDetails.length === 1 ? '' : 's'} this week</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-bold text-amber-700 dark:text-amber-300 text-sm">+{POINTS_CONFIG.PR_ACHIEVEMENT.points * participant.prDetails.length}pts</div>
+                          </div>
+                        </div>
 
                         <div className="border-t border-slate-200/50 dark:border-slate-700/50 pt-3 mt-3"></div>
                       </div>
@@ -714,7 +726,17 @@ const TournamentPage: React.FC = () => {
                             {pointBreakdown.bonuses} pts
                           </span>
                         </div>
-                        
+                        {/* New Exercise Bonus Line */}
+                        <div className="flex justify-between items-center py-2 px-3 bg-emerald-50/30 dark:bg-emerald-950/15 rounded-lg border-l-2 border-emerald-400 dark:border-emerald-600 mb-2">
+                          <div className="flex-1">
+                            <div className="font-medium text-foreground text-sm">New Exercise Bonus</div>
+                            <div className="text-xs text-muted-foreground">{NEW_EXERCISE_BONUS.points}pts × {Math.floor((participant.exerciseStats?.newExerciseBonusPoints || 0) / NEW_EXERCISE_BONUS.points)} new unique exercises this week</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-bold text-emerald-700 dark:text-emerald-300 text-sm">+{participant.exerciseStats?.newExerciseBonusPoints || 0}pts</div>
+                          </div>
+                        </div>
+                        {/* Existing badge rendering... */}
                         {participant.badges.map(badge => (
                           <div key={badge.id} className="flex justify-between items-center py-2 px-3 bg-emerald-50/30 dark:bg-emerald-950/15 rounded-lg border-l-2 border-emerald-400 dark:border-emerald-600">
                             <div className="flex items-center gap-3 flex-1">
