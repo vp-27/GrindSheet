@@ -255,13 +255,13 @@ const Dashboard = () => {
   const getProgressDisplayName = (sortType: string) => {
     switch (sortType) {
       case 'recent':
-        return 'Recent Progress';
+        return 'My Excercises';
       case 'pr':
         return 'PR Progress';
       case 'progress':
         return 'Growth Progress';
       default:
-        return 'Recent Progress';
+        return 'My Excercises';
     }
   };
 
@@ -437,7 +437,8 @@ const Dashboard = () => {
                 <div className="absolute top-full left-0 mt-2 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-md z-50 min-w-48 progress-dropdown">
                   <div className="p-2">
                     {[
-                      { id: 'recent', label: 'Recent Progress', icon: Clock },
+
+                      { id: 'recent', label: 'My Excercises', icon: Clock },
                       { id: 'pr', label: 'PR Progress', icon: Trophy },
                       { id: 'progress', label: 'Growth Progress', icon: TrendingUp }
                     ].map((option) => {
