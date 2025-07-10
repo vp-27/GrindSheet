@@ -239,14 +239,14 @@ const TournamentPage: React.FC = () => {
       BadgeType.NEWCOMER_BONUS
     ];
     
-    // Sort by priority and take top 3
+    // Sort by priority and take top 1
     return badges
       .sort((a, b) => {
         const aIndex = priorityOrder.indexOf(a.type);
         const bIndex = priorityOrder.indexOf(b.type);
         return aIndex - bIndex;
       })
-      .slice(0, 3);
+      .slice(0, 1);
   };
 
   // Badge icon and short name mapping
@@ -433,18 +433,16 @@ const TournamentPage: React.FC = () => {
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="font-semibold text-sm text-foreground truncate">
+                  <h3 className={`font-semibold text-sm text-foreground truncate ${isCurrentUser ? 'bg-blue-100/80 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5 rounded-lg' : ''}`}>
                     {participant.user.name}
                   </h3>
-                  {isCurrentUser && (
-                    <Badge className="text-xs px-2 py-0.5 bg-blue-100/80 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-full border border-blue-200 dark:border-blue-700/50 flex-shrink-0">
-                      You
-                    </Badge>
-                  )}
                 </div>
                 
-                {/* Top 3 badges only */}
-                <div className="flex gap-1 mt-1 flex-wrap">
+                {/* Badges, clickable to scroll to details */}
+                <div 
+                  className="flex gap-1 mt-1 flex-wrap cursor-pointer"
+                  onClick={() => handleSectionClick(participant.userId, 'bonuses')}
+                >
                   {/* Winning streak badge */}
                   {participant.rank === 1 && winningStreak >= 2 && (
                     <Badge className="text-xs bg-gradient-to-r from-orange-100/80 to-red-100/80 text-orange-700 dark:from-orange-900/30 dark:to-red-900/30 dark:text-orange-300 px-2 py-0.5 rounded-full border border-orange-200 dark:border-orange-700/50 flex-shrink-0 flex items-center gap-1">
@@ -453,7 +451,7 @@ const TournamentPage: React.FC = () => {
                     </Badge>
                   )}
                   
-                  {/* Top 3 relevant badges */}
+                  {/* Top relevant badge */}
                   {relevantBadges.map(badge => (
                     <Badge 
                       key={badge.id} 
@@ -465,9 +463,9 @@ const TournamentPage: React.FC = () => {
                   ))}
                   
                   {/* Show "+X more" if there are additional badges */}
-                  {participant.badges.length > 3 && (
+                  {participant.badges.length > relevantBadges.length && (
                     <Badge className="text-xs px-2 py-0.5 bg-gray-100/80 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400 rounded-full border border-gray-200 dark:border-gray-700/50 flex-shrink-0">
-                      +{participant.badges.length - 3} more
+                      +{participant.badges.length - relevantBadges.length} more
                     </Badge>
                   )}
                 </div>
