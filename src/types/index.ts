@@ -102,6 +102,19 @@ export interface TournamentParticipant {
     varietyDays: { date: string; exerciseCount: number; bonus: number }[];
     newExerciseBonusPoints?: number; // Add this line
   };
+  progressTrackers?: ProgressTrackers; // NEW: for goal tracking UI
+}
+
+export interface ProgressTrackerData {
+  current: number;
+  goal: number;
+  text: string;
+  points: number;
+  isAchieved: boolean;
+}
+
+export interface ProgressTrackers {
+  [key: string]: ProgressTrackerData;
 }
 
 export interface PRDetail {

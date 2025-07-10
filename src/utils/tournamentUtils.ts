@@ -9,7 +9,8 @@ import {
   User, 
   Exercise, 
   Category,
-  PRDetail
+  PRDetail,
+  ProgressTrackers
 } from '../types';
 import { calculateProgress } from './progressUtils';
 
@@ -226,6 +227,13 @@ export const calculateTournamentPoints = (
   }));
   workoutDays = Array.from(workoutDates);
 
+  // Calculate weekend workout days
+  const weekendWorkoutDays = workoutDays.filter(dateStr => {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    return isWeekend(date);
+  }).length;
+
   // NEW: Calculate exercise-based points
   let totalExercises = 0;
   let uniqueExercises = new Set<string>();
@@ -421,7 +429,96 @@ export const calculateTournamentPoints = (
   badges = calculateBadges(user, userLogs, exerciseProgress, workoutDates, categoriesWorked, categories, allParticipantLogs, tournamentStart, exerciseStats);
   // Add badge points to bonus
   pointsBreakdown.bonusPoints += badges.reduce((sum, badge) => sum + badge.points, 0);
+
+  // 7. NEW: Generate a dynamic list of progress trackers
+  const potentialTrackers: any = {};
+
+  // Easy daily goal
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const exercisesToday = exercisesPerDay.get(todayStr) || 0;
+  potentialTrackers.dailyWorkout = {
+    current: exercisesToday,
+    goal: 2,
+    text: 'Log a workout today (2+ exercises)',
+    points: POINTS_CONFIG.DAILY_WORKOUT_BASE.points,
+    isAchieved: exercisesToday >= 2,
+  };
+
+  // Main goals (from existing logic)
+  potentialTrackers.consistency = {
+    current: workoutDates.size,
+    goal: 5,
+    text: '5 Workout Days',
+    points: POINTS_CONFIG.CONSISTENCY_BONUS.points,
+    isAchieved: workoutDates.size >= 5,
+  };
+  potentialTrackers.categoryCompletion = {
+    current: categoriesWorked.size,
+    goal: categories.length,
+    text: 'Work All Muscle Groups',
+    points: POINTS_CONFIG.CATEGORY_COMPLETION.points,
+    isAchieved: categoriesWorked.size >= categories.length,
+  };
+
+  // Badge-related goals
+  potentialTrackers.weekendWarrior = {
+    current: weekendWorkoutDays,
+    goal: 2,
+    text: 'Weekend Warrior',
+    points: BADGE_DEFINITIONS[BadgeType.WEEKEND_WARRIOR].points,
+    isAchieved: weekendWorkoutDays >= 2,
+  };
+  potentialTrackers.coreDestroyer = {
+    current: exerciseStats.coreExercises,
+    goal: 6,
+    text: '6+ Core Exercises',
+    points: BADGE_DEFINITIONS[BadgeType.CORE_DESTROYER].points,
+    isAchieved: exerciseStats.coreExercises >= 6,
+  };
+  potentialTrackers.volumeCrusher = {
+    current: exerciseStats.averageExercisesPerDay,
+    goal: 3.5,
+    text: 'Avg. 3.5+ Exercises/Day',
+    points: BADGE_DEFINITIONS[BadgeType.VOLUME_CRUSHER].points,
+    isAchieved: exerciseStats.averageExercisesPerDay >= 3.5,
+  };
+
+  // Performance goals
+  potentialTrackers.setPR = {
+    current: prDetails.length,
+    goal: 1,
+    text: 'Set a new Personal Record',
+    points: POINTS_CONFIG.PR_ACHIEVEMENT.points,
+    isAchieved: prDetails.length >= 1,
+  };
+  potentialTrackers.beatFriend = {
+    current: competitiveDetails.length,
+    goal: 1,
+    text: "Beat a friend's record",
+    points: COMPETITIVE_BONUS_CONFIG.TAKEOVER.points,
+    isAchieved: competitiveDetails.length >= 1,
+  };
+
+  // Advanced Volume/Variety goals
+  const maxVarietyInDay = Math.max(0, ...Array.from(exercisesPerDay.values()));
+  potentialTrackers.exerciseVariety = {
+    current: maxVarietyInDay,
+    goal: 4,
+    text: 'Daily Exercise Variety (4+ in one day)',
+    points: 20, // Custom point value for this goal
+    isAchieved: maxVarietyInDay >= 4,
+  };
+  potentialTrackers.totalVolume = {
+    current: exerciseStats.totalExercises,
+    goal: 15,
+    text: 'Complete 15 total exercises',
+    points: 40, // Custom point value
+    isAchieved: exerciseStats.totalExercises >= 15,
+  };
   
+  const progressTrackers: ProgressTrackers = potentialTrackers;
+
   // Calculate total points (include all new point categories)
   const totalPoints = Object.values(pointsBreakdown).reduce((sum, points) => sum + points, 0);
   
@@ -435,7 +532,8 @@ export const calculateTournamentPoints = (
     workoutDays,
     prDetails,
     competitiveDetails: competitiveDetails,
-    exerciseStats
+    exerciseStats,
+    progressTrackers, // Add progress trackers to participant object
   };
 };
 
