@@ -117,7 +117,10 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ progressTrackers }) =
 
   const possibleTrackers = progressTrackers ? Object.entries(progressTrackers)
     .filter(([key, tracker]) => {
-      const todayStr = today.toISOString().substring(0, 10);
+      const year = today.getFullYear();
+      const month = String(today.getMonth() + 1).padStart(2, '0');
+      const day = String(today.getDate()).padStart(2, '0');
+      const todayStr = `${year}-${month}-${day}`;
 
       // If a goal is achieved, only show it on the day it was completed.
       if (tracker.isAchieved) {

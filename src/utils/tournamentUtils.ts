@@ -432,7 +432,13 @@ export const calculateTournamentPoints = (
 
   // 7. NEW: Generate a dynamic list of progress trackers
   const potentialTrackers: any = {};
-  const toYYYYMMDD = (isoDate: string) => isoDate.substring(0, 10);
+  const toLocalYYYYMMDD = (isoDate: string): string => {
+    const date = new Date(isoDate);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
   const sortedUserLogs = [...userLogs].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
   // Easy daily goal
@@ -469,7 +475,7 @@ export const calculateTournamentPoints = (
       if (exercise) {
         workedCats.add(exercise.categoryId);
         if (workedCats.size === categories.length) {
-          categoryCompletionDate = toYYYYMMDD(log.timestamp);
+          categoryCompletionDate = toLocalYYYYMMDD(log.timestamp);
           break;
         }
       }
@@ -488,7 +494,7 @@ export const calculateTournamentPoints = (
   const weekendWarriorAchieved = weekendWorkoutDays >= 2;
   let weekendWarriorCompletionDate: string | null = null;
   if (weekendWarriorAchieved) {
-      const uniqueWeekendDays = new Set(sortedUserLogs.filter(log => isWeekend(new Date(log.timestamp))).map(log => toYYYYMMDD(log.timestamp)));
+      const uniqueWeekendDays = new Set(sortedUserLogs.filter(log => isWeekend(new Date(log.timestamp))).map(log => toLocalYYYYMMDD(log.timestamp)));
       weekendWarriorCompletionDate = Array.from(uniqueWeekendDays).sort()[1];
   }
   potentialTrackers.weekendWarrior = {
@@ -509,7 +515,7 @@ export const calculateTournamentPoints = (
         if (exercise && /core|abs|plank|crunch|russian twist|mountain climber/i.test(exercise.name)) {
             coreCount++;
             if (coreCount === 6) {
-                coreDestroyerCompletionDate = toYYYYMMDD(log.timestamp);
+                coreDestroyerCompletionDate = toLocalYYYYMMDD(log.timestamp);
                 break;
             }
         }
@@ -531,7 +537,7 @@ export const calculateTournamentPoints = (
     text: 'Avg. 3.5+ Exercises/Day',
     points: BADGE_DEFINITIONS[BadgeType.VOLUME_CRUSHER].points,
     isAchieved: volumeCrusherAchieved,
-    completedAt: volumeCrusherAchieved ? toYYYYMMDD(sortedUserLogs[sortedUserLogs.length - 1].timestamp) : null,
+    completedAt: volumeCrusherAchieved ? toLocalYYYYMMDD(sortedUserLogs[sortedUserLogs.length - 1].timestamp) : null,
   };
 
   // Performance goals
@@ -542,7 +548,7 @@ export const calculateTournamentPoints = (
     text: 'Set a new Personal Record',
     points: POINTS_CONFIG.PR_ACHIEVEMENT.points,
     isAchieved: setPRAchieved,
-    completedAt: setPRAchieved ? toYYYYMMDD(prDetails.sort((a,b) => new Date(a.achievedAt).getTime() - new Date(b.achievedAt).getTime())[0].achievedAt) : null,
+    completedAt: setPRAchieved ? toLocalYYYYMMDD(prDetails.sort((a,b) => new Date(a.achievedAt).getTime() - new Date(b.achievedAt).getTime())[0].achievedAt) : null,
   };
 
   const beatFriendAchieved = competitiveDetails.length >= 1;
@@ -553,7 +559,7 @@ export const calculateTournamentPoints = (
           competitiveDetails.some(cd => cd.exerciseId === log.exerciseId)
       );
       if (competitiveWinLog) {
-          beatFriendCompletionDate = toYYYYMMDD(competitiveWinLog.timestamp);
+          beatFriendCompletionDate = toLocalYYYYMMDD(competitiveWinLog.timestamp);
       }
   }
   potentialTrackers.beatFriend = {
@@ -574,7 +580,7 @@ export const calculateTournamentPoints = (
     text: 'Daily Exercise Variety (4+ in one day)',
     points: 20, // Custom point value for this goal
     isAchieved: varietyAchieved,
-    completedAt: varietyAchieved ? toYYYYMMDD(sortedUserLogs[sortedUserLogs.length - 1].timestamp) : null,
+    completedAt: varietyAchieved ? toLocalYYYYMMDD(sortedUserLogs[sortedUserLogs.length - 1].timestamp) : null,
   };
 
   const totalVolumeAchieved = exerciseStats.totalExercises >= 15;
@@ -584,7 +590,7 @@ export const calculateTournamentPoints = (
     text: 'Complete 15 total exercises',
     points: 40, // Custom point value
     isAchieved: totalVolumeAchieved,
-    completedAt: totalVolumeAchieved ? toYYYYMMDD(sortedUserLogs.find(l => {
+    completedAt: totalVolumeAchieved ? toLocalYYYYMMDD(sortedUserLogs.find(l => {
       // This is a bit tricky, we need to find the 15th log
       let count = 0;
       for (let i = 0; i < sortedUserLogs.length; i++) {
