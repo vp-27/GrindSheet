@@ -100,6 +100,7 @@ export interface TournamentParticipant {
     averageExercisesPerDay: number;
     coreExercises: number;
     varietyDays: { date: string; exerciseCount: number; bonus: number }[];
+    newExerciseBonusPoints?: number; // Add this line
   };
 }
 

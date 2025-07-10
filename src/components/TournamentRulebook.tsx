@@ -110,7 +110,7 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
       id: 'bonuses',
       title: "Bonuses",
       subtitle: "Achievements",
-      icon: <Award className="h-4 w-4" />,
+      icon: <Award className="h-4 w-4" />, 
       color: "from-emerald-500 to-teal-500",
       bgColor: "bg-emerald-50/50 dark:bg-emerald-950/20",
       borderColor: "border-emerald-200/50 dark:border-emerald-700/50",
@@ -129,6 +129,11 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
           name: "First Time PR",
           points: COMPETITIVE_BONUS_CONFIG.FIRST_TIME_PR.points,
           description: "First log for any exercise"
+        },
+        {
+          name: "New Exercise Bonus",
+          points: 25,
+          description: "25pts for each new unique exercise per category (up to 10 per category per user, lifetime)"
         }
       ]
     }
@@ -316,6 +321,13 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
                 <div>
                   <span className="font-medium">Diversify your training</span>
                   <div className="text-xs text-muted-foreground">All muscle groups = 50pt bonus</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div>
+                <div>
+                  <span className="font-medium">Try new exercises for bonus points</span>
+                  <div className="text-xs text-muted-foreground">25pts for each new unique exercise per category (max 10 per category, lifetime)</div>
                 </div>
               </div>
             </div>

@@ -18,7 +18,7 @@ import { calculateProgress } from './progressUtils';
 export const POINTS_CONFIG: Record<string, PointsRule> = {
   PR_ACHIEVEMENT: {
     type: 'pr_achievement',
-    points: 75,
+    points: 50, // Increased from 25 to 50 for a more motivating PR reward
     description: 'New personal record'
   },
   EXERCISE_COMPLETED: {
@@ -119,6 +119,13 @@ export const COMPETITIVE_BONUS_CONFIG = {
   CLOSE_WIN: { points: 10, description: 'Close Win: Beat another user by <5%' },
   FIRST_TIME_PR: { points: 10, description: 'First time PR (first log for exercise)' },
   IMPROVEMENT_CAP: 50 // max improvement points per exercise per week
+};
+
+// New exercise bonus config
+export const NEW_EXERCISE_BONUS = {
+  points: 25,
+  capPerCategory: 10,
+  description: 'Bonus for each new unique exercise per category (up to 10 per category, lifetime)'
 };
 
 /**
@@ -305,8 +312,10 @@ export const calculateTournamentPoints = (
       let achievedPR = false;
       if (preTournamentLogs.length > 0) {
         const previousBest = Math.max(...preTournamentLogs.map(log => log.weight));
-        // PR achieved if tournament weight exceeds previous best
-        if (maxTournamentWeight > previousBest) {
+        // Find user's first log for this exercise (all time)
+        const firstLogWeight = userExerciseLogs.length > 0 ? Math.min(...userExerciseLogs.map(log => log.weight)) : previousBest;
+        // PR achieved if tournament weight exceeds previous best AND is meaningful
+        if (maxTournamentWeight > previousBest && isMeaningfulPR({ previousBest, newBest: maxTournamentWeight, firstLogWeight })) {
           achievedPR = true;
           pointsBreakdown.prPoints += POINTS_CONFIG.PR_ACHIEVEMENT.points;
           const improvementPercent = ((maxTournamentWeight - previousBest) / previousBest) * 100;
@@ -368,13 +377,44 @@ export const calculateTournamentPoints = (
     pointsBreakdown.bonusPoints += POINTS_CONFIG.CATEGORY_COMPLETION.points;
   }
 
+  // --- New Exercise Bonus Logic ---
+  // For each category, count user's unique exercises (lifetime)
+  let newExerciseBonusPoints = 0;
+  categories.forEach(category => {
+    // All logs for this user in this category (lifetime)
+    const userCategoryLogs = logs.filter(log => log.userId === user.id && exercises.find(ex => ex.id === log.exerciseId)?.categoryId === category.id);
+    const uniqueExerciseIds = new Set(userCategoryLogs.map(log => log.exerciseId));
+    // All logs for this user in this category BEFORE this tournament
+    const preTournamentLogs = logs.filter(log => {
+      const logDate = new Date(log.timestamp);
+      return log.userId === user.id && logDate < new Date(tournamentStart) && exercises.find(ex => ex.id === log.exerciseId)?.categoryId === category.id;
+    });
+    const preUniqueExerciseIds = new Set(preTournamentLogs.map(log => log.exerciseId));
+    // New unique exercises in this tournament for this category
+    const tournamentLogs = userLogs.filter(log => exercises.find(ex => ex.id === log.exerciseId)?.categoryId === category.id);
+    const tournamentUniqueExerciseIds = new Set(tournamentLogs.map(log => log.exerciseId));
+    // Only count those that are not in preUniqueExerciseIds
+    let newThisTournament = 0;
+    tournamentUniqueExerciseIds.forEach(exId => {
+      if (!preUniqueExerciseIds.has(exId) && preUniqueExerciseIds.size < NEW_EXERCISE_BONUS.capPerCategory) {
+        // Only award if under cap
+        if (preUniqueExerciseIds.size + newThisTournament < NEW_EXERCISE_BONUS.capPerCategory) {
+          newThisTournament++;
+        }
+      }
+    });
+    newExerciseBonusPoints += newThisTournament * NEW_EXERCISE_BONUS.points;
+  });
+  pointsBreakdown.bonusPoints += newExerciseBonusPoints;
+
   // Calculate exercise statistics
   const exerciseStats = {
     totalExercises,
     uniqueExercises: uniqueExercises.size,
     averageExercisesPerDay: workoutDates.size > 0 ? totalExercises / workoutDates.size : 0,
     coreExercises,
-    varietyDays
+    varietyDays,
+    newExerciseBonusPoints // <-- add this property
   };
 
   // 6. Calculate badges (after exerciseStats is defined)
@@ -698,3 +738,21 @@ export const getTournamentProgress = (startDate: string, endDate: string): numbe
   
   return Math.min(100, Math.max(0, (elapsed / totalDuration) * 100));
 };
+
+/**
+ * Helper: Determine if a PR is meaningful for bonus eligibility
+ * - For light exercises (first log < 25 lb): require 20%+ or +2.5 lb
+ * - For mid/heavy (first log >= 25 lb): require 10%+ or +5 lb
+ */
+function isMeaningfulPR({ previousBest, newBest, firstLogWeight }: { previousBest: number, newBest: number, firstLogWeight: number }): boolean {
+  const absGain = newBest - previousBest;
+  const pctGain = previousBest > 0 ? ((newBest - previousBest) / previousBest) * 100 : 0;
+  // Use first log to determine weight class
+  if (firstLogWeight < 25) {
+    // Light: allow high % or +2.5 lb
+    return pctGain >= 20 || absGain >= 2.5;
+  } else {
+    // Mid/Heavy: require 10% or +5 lb
+    return pctGain >= 10 || absGain >= 5;
+  }
+}
