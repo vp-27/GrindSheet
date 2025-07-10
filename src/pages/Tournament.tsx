@@ -60,6 +60,7 @@ const TournamentPage: React.FC = () => {
   const [allExerciseLogs, setAllExerciseLogs] = useState<any[]>([]);
   const [showPointsGuide, setShowPointsGuide] = useState(false);
   const [expandedParticipant, setExpandedParticipant] = useState<string | null>(null);
+  const [expandedBadgesParticipantId, setExpandedBadgesParticipantId] = useState<string | null>(null);
   const [contentReady, setContentReady] = useState(false);
   const [showHistoricalWeeks, setShowHistoricalWeeks] = useState(false);
   const [highlightedSection, setHighlightedSection] = useState<'performance' | 'volume' | 'bonuses' | null>(null);
@@ -222,6 +223,26 @@ const TournamentPage: React.FC = () => {
     console.log('Calculated breakdown:', result);
     
     return result;
+  };
+
+  const getBadgeClickHandler = (badgeType: BadgeType, participantId: string) => {
+    switch (badgeType) {
+      case BadgeType.FIRST_PR:
+      case BadgeType.IMPROVEMENT_STAR:
+        return () => handleSectionClick(participantId, 'performance');
+      
+      case BadgeType.CONSISTENCY_KING:
+      case BadgeType.WEEKEND_WARRIOR:
+      case BadgeType.VOLUME_CRUSHER:
+      case BadgeType.CATEGORY_MASTER:
+      case BadgeType.CORE_DESTROYER:
+        return () => handleSectionClick(participantId, 'volume');
+        
+      case BadgeType.PERFECT_WEEK:
+      case BadgeType.NEWCOMER_BONUS:
+      default:
+        return () => handleSectionClick(participantId, 'bonuses');
+    }
   };
 
   // Smart badge filtering - only show most important badges
@@ -390,9 +411,11 @@ const TournamentPage: React.FC = () => {
   const renderParticipant = (participant: TournamentParticipant, index: number) => {
     const isCurrentUser = participant.userId === profile?.id;
     const isExpanded = expandedParticipant === participant.userId;
+    const areBadgesExpanded = expandedBadgesParticipantId === participant.userId;
     const winningStreak = selectedTournament ? getWinningStreakForTournament(participant.userId, selectedTournament) : 0;
     const pointBreakdown = getPointBreakdown(participant);
     const relevantBadges = getRelevantBadges(participant.badges);
+    const badgesToShow = areBadgesExpanded ? participant.badges : relevantBadges;
     
     // Enhanced card styling based on rank
     const getCardStyling = (rank: number, isCurrentUser: boolean) => {
@@ -439,10 +462,7 @@ const TournamentPage: React.FC = () => {
                 </div>
                 
                 {/* Badges, clickable to scroll to details */}
-                <div 
-                  className="flex gap-1 mt-1 flex-wrap cursor-pointer"
-                  onClick={() => handleSectionClick(participant.userId, 'bonuses')}
-                >
+                <div className="flex gap-1 mt-1 flex-wrap">
                   {/* Winning streak badge */}
                   {participant.rank === 1 && winningStreak >= 2 && (
                     <Badge className="text-xs bg-gradient-to-r from-orange-100/80 to-red-100/80 text-orange-700 dark:from-orange-900/30 dark:to-red-900/30 dark:text-orange-300 px-2 py-0.5 rounded-full border border-orange-200 dark:border-orange-700/50 flex-shrink-0 flex items-center gap-1">
@@ -451,21 +471,31 @@ const TournamentPage: React.FC = () => {
                     </Badge>
                   )}
                   
-                  {/* Top relevant badge */}
-                  {relevantBadges.map(badge => (
+                  {/* Relevant badges (expanded or just top 1) */}
+                  {badgesToShow.map(badge => (
                     <Badge 
                       key={badge.id} 
-                      className={`text-xs px-2 py-0.5 rounded-full border flex-shrink-0 flex items-center gap-1 ${getBadgeStyles(badge.type)}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        getBadgeClickHandler(badge.type, participant.userId)();
+                      }}
+                      className={`text-xs px-2 py-0.5 rounded-full border flex-shrink-0 flex items-center gap-1 cursor-pointer ${getBadgeStyles(badge.type)}`}
                     >
                       {getBadgeIcon(badge.type)}
                       <span className="font-medium">{getBadgeShortName(badge.type)}</span>
                     </Badge>
                   ))}
                   
-                  {/* Show "+X more" if there are additional badges */}
-                  {participant.badges.length > relevantBadges.length && (
-                    <Badge className="text-xs px-2 py-0.5 bg-gray-100/80 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400 rounded-full border border-gray-200 dark:border-gray-700/50 flex-shrink-0">
-                      +{participant.badges.length - relevantBadges.length} more
+                  {/* Show "+X more" or "Less" toggle if there are additional badges */}
+                  {participant.badges.length > 1 && (
+                    <Badge 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setExpandedBadgesParticipantId(areBadgesExpanded ? null : participant.userId);
+                      }}
+                      className="text-xs px-2 py-0.5 bg-gray-100/80 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400 rounded-full border border-gray-200 dark:border-gray-700/50 flex-shrink-0 cursor-pointer"
+                    >
+                      {areBadgesExpanded ? 'Less' : `+${participant.badges.length - 1} more`}
                     </Badge>
                   )}
                 </div>
