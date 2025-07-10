@@ -111,6 +111,7 @@ export interface ProgressTrackerData {
   text: string;
   points: number;
   isAchieved: boolean;
+  completedAt?: string | null;
 }
 
 export interface ProgressTrackers {

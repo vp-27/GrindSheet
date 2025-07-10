@@ -432,89 +432,167 @@ export const calculateTournamentPoints = (
 
   // 7. NEW: Generate a dynamic list of progress trackers
   const potentialTrackers: any = {};
+  const toYYYYMMDD = (isoDate: string) => isoDate.substring(0, 10);
+  const sortedUserLogs = [...userLogs].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
 
   // Easy daily goal
   const today = new Date();
   const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   const exercisesToday = exercisesPerDay.get(todayStr) || 0;
+  const dailyWorkoutAchieved = exercisesToday >= 2;
   potentialTrackers.dailyWorkout = {
     current: exercisesToday,
     goal: 2,
     text: 'Log a workout today (2+ exercises)',
     points: POINTS_CONFIG.DAILY_WORKOUT_BASE.points,
-    isAchieved: exercisesToday >= 2,
+    isAchieved: dailyWorkoutAchieved,
+    completedAt: dailyWorkoutAchieved ? todayStr : null,
   };
 
   // Main goals (from existing logic)
+  const consistencyAchieved = workoutDates.size >= 5;
   potentialTrackers.consistency = {
     current: workoutDates.size,
     goal: 5,
     text: '5 Workout Days',
     points: POINTS_CONFIG.CONSISTENCY_BONUS.points,
-    isAchieved: workoutDates.size >= 5,
+    isAchieved: consistencyAchieved,
+    completedAt: consistencyAchieved ? Array.from(workoutDates).sort()[4] : null,
   };
+
+  const categoryCompletionAchieved = categoriesWorked.size >= categories.length;
+  let categoryCompletionDate: string | null = null;
+  if (categoryCompletionAchieved) {
+    const workedCats = new Set<string>();
+    for (const log of sortedUserLogs) {
+      const exercise = exercises.find(ex => ex.id === log.exerciseId);
+      if (exercise) {
+        workedCats.add(exercise.categoryId);
+        if (workedCats.size === categories.length) {
+          categoryCompletionDate = toYYYYMMDD(log.timestamp);
+          break;
+        }
+      }
+    }
+  }
   potentialTrackers.categoryCompletion = {
     current: categoriesWorked.size,
     goal: categories.length,
     text: 'Work All Muscle Groups',
     points: POINTS_CONFIG.CATEGORY_COMPLETION.points,
-    isAchieved: categoriesWorked.size >= categories.length,
+    isAchieved: categoryCompletionAchieved,
+    completedAt: categoryCompletionDate,
   };
 
   // Badge-related goals
+  const weekendWarriorAchieved = weekendWorkoutDays >= 2;
+  let weekendWarriorCompletionDate: string | null = null;
+  if (weekendWarriorAchieved) {
+      const uniqueWeekendDays = new Set(sortedUserLogs.filter(log => isWeekend(new Date(log.timestamp))).map(log => toYYYYMMDD(log.timestamp)));
+      weekendWarriorCompletionDate = Array.from(uniqueWeekendDays).sort()[1];
+  }
   potentialTrackers.weekendWarrior = {
     current: weekendWorkoutDays,
     goal: 2,
     text: 'Weekend Warrior',
     points: BADGE_DEFINITIONS[BadgeType.WEEKEND_WARRIOR].points,
-    isAchieved: weekendWorkoutDays >= 2,
+    isAchieved: weekendWarriorAchieved,
+    completedAt: weekendWarriorCompletionDate,
   };
+
+  const coreDestroyerAchieved = exerciseStats.coreExercises >= 6;
+  let coreDestroyerCompletionDate: string | null = null;
+  if (coreDestroyerAchieved) {
+    let coreCount = 0;
+    for (const log of sortedUserLogs) {
+        const exercise = exercises.find(ex => ex.id === log.exerciseId);
+        if (exercise && /core|abs|plank|crunch|russian twist|mountain climber/i.test(exercise.name)) {
+            coreCount++;
+            if (coreCount === 6) {
+                coreDestroyerCompletionDate = toYYYYMMDD(log.timestamp);
+                break;
+            }
+        }
+    }
+  }
   potentialTrackers.coreDestroyer = {
     current: exerciseStats.coreExercises,
     goal: 6,
     text: '6+ Core Exercises',
     points: BADGE_DEFINITIONS[BadgeType.CORE_DESTROYER].points,
-    isAchieved: exerciseStats.coreExercises >= 6,
+    isAchieved: coreDestroyerAchieved,
+    completedAt: coreDestroyerCompletionDate,
   };
+
+  const volumeCrusherAchieved = exerciseStats.averageExercisesPerDay >= 3.5;
   potentialTrackers.volumeCrusher = {
     current: exerciseStats.averageExercisesPerDay,
     goal: 3.5,
     text: 'Avg. 3.5+ Exercises/Day',
     points: BADGE_DEFINITIONS[BadgeType.VOLUME_CRUSHER].points,
-    isAchieved: exerciseStats.averageExercisesPerDay >= 3.5,
+    isAchieved: volumeCrusherAchieved,
+    completedAt: volumeCrusherAchieved ? toYYYYMMDD(sortedUserLogs[sortedUserLogs.length - 1].timestamp) : null,
   };
 
   // Performance goals
+  const setPRAchieved = prDetails.length >= 1;
   potentialTrackers.setPR = {
     current: prDetails.length,
     goal: 1,
     text: 'Set a new Personal Record',
     points: POINTS_CONFIG.PR_ACHIEVEMENT.points,
-    isAchieved: prDetails.length >= 1,
+    isAchieved: setPRAchieved,
+    completedAt: setPRAchieved ? toYYYYMMDD(prDetails.sort((a,b) => new Date(a.achievedAt).getTime() - new Date(b.achievedAt).getTime())[0].achievedAt) : null,
   };
+
+  const beatFriendAchieved = competitiveDetails.length >= 1;
+  let beatFriendCompletionDate: string | null = null;
+  if (beatFriendAchieved) {
+      // Find the earliest log that resulted in a competitive victory
+      const competitiveWinLog = sortedUserLogs.find(log => 
+          competitiveDetails.some(cd => cd.exerciseId === log.exerciseId)
+      );
+      if (competitiveWinLog) {
+          beatFriendCompletionDate = toYYYYMMDD(competitiveWinLog.timestamp);
+      }
+  }
   potentialTrackers.beatFriend = {
     current: competitiveDetails.length,
     goal: 1,
     text: "Beat a friend's record",
     points: COMPETITIVE_BONUS_CONFIG.TAKEOVER.points,
-    isAchieved: competitiveDetails.length >= 1,
+    isAchieved: beatFriendAchieved,
+    completedAt: beatFriendCompletionDate,
   };
 
   // Advanced Volume/Variety goals
   const maxVarietyInDay = Math.max(0, ...Array.from(exercisesPerDay.values()));
+  const varietyAchieved = maxVarietyInDay >= 4;
   potentialTrackers.exerciseVariety = {
     current: maxVarietyInDay,
     goal: 4,
     text: 'Daily Exercise Variety (4+ in one day)',
     points: 20, // Custom point value for this goal
-    isAchieved: maxVarietyInDay >= 4,
+    isAchieved: varietyAchieved,
+    completedAt: varietyAchieved ? toYYYYMMDD(sortedUserLogs[sortedUserLogs.length - 1].timestamp) : null,
   };
+
+  const totalVolumeAchieved = exerciseStats.totalExercises >= 15;
   potentialTrackers.totalVolume = {
     current: exerciseStats.totalExercises,
     goal: 15,
     text: 'Complete 15 total exercises',
     points: 40, // Custom point value
-    isAchieved: exerciseStats.totalExercises >= 15,
+    isAchieved: totalVolumeAchieved,
+    completedAt: totalVolumeAchieved ? toYYYYMMDD(sortedUserLogs.find(l => {
+      // This is a bit tricky, we need to find the 15th log
+      let count = 0;
+      for (let i = 0; i < sortedUserLogs.length; i++) {
+        count++;
+        if (count === 15) return sortedUserLogs[i].timestamp;
+      }
+      return null;
+    })?.timestamp || sortedUserLogs[sortedUserLogs.length - 1].timestamp) : null,
   };
   
   const progressTrackers: ProgressTrackers = potentialTrackers;

@@ -117,9 +117,11 @@ const ProgressTracker: React.FC<ProgressTrackerProps> = ({ progressTrackers }) =
 
   const possibleTrackers = progressTrackers ? Object.entries(progressTrackers)
     .filter(([key, tracker]) => {
-      // Always show a goal that has already been achieved.
+      const todayStr = today.toISOString().substring(0, 10);
+
+      // If a goal is achieved, only show it on the day it was completed.
       if (tracker.isAchieved) {
-        return true;
+        return tracker.completedAt === todayStr;
       }
 
       // Filter out Weekend Warrior if it's a weekday.
