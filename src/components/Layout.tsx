@@ -8,14 +8,14 @@ import AddExerciseModal from '@/components/AddExerciseModal';
 import {
   HomeIcon as HomeOutline,
   TrophyIcon as TrophyOutline,
-  ClockIcon as ClockOutline,
+  FlagIcon as FlagOutline,
   CogIcon as CogOutline,
 } from '@heroicons/react/24/outline';
 // Heroicons imports - solid versions
 import {
   HomeIcon as HomeSolid,
   TrophyIcon as TrophySolid,
-  ClockIcon as ClockSolid,
+  FlagIcon as FlagSolid,
   CogIcon as CogSolid,
 } from '@heroicons/react/24/solid';
 import { Card } from '@/components/ui/card';
@@ -166,10 +166,10 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
           </div>
           <div className="flex-1 flex justify-center items-center">
             <NavLink 
-              to="/history" 
-              outlineIcon={ClockOutline}
-              solidIcon={ClockSolid}
-              label="History" 
+              to="/goals" 
+              outlineIcon={FlagOutline}
+              solidIcon={FlagSolid}
+              label="Goals" 
             />
           </div>
           <div className="flex-1 flex justify-center items-center">

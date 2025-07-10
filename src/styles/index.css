@@ -57,3 +57,16 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+/* See All button styling */
+.see-all-button {
+  transition: all 0.2s ease;
+}
+
+.see-all-button:hover {
+  transform: scale(1.05);
+}
+
+.see-all-button:active {
+  transform: scale(0.95);
+}

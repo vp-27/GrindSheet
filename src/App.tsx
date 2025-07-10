@@ -8,6 +8,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
 import Dashboard from "./pages/Dashboard";
 import History from "./pages/History";
+import Goals from "./pages/Goals";
 import ExerciseDetail from "./pages/ExerciseDetail";
 import Tournament from "./pages/Tournament";
 import PRRecords from "./pages/PRRecords";
@@ -36,6 +37,7 @@ const App = () => (
                 <Route path="/" element={<Dashboard />} />
                 <Route path="/exercise-detail" element={<ExerciseDetail />} />
                 <Route path="/history" element={<History />} />
+        <Route path="/goals" element={<Goals />} />
                 <Route path="/tournament" element={<Tournament />} />
                 <Route path="/pr-records" element={<PRRecords />} />
                 <Route path="/settings" element={<Settings />} />
