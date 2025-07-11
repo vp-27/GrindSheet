@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAppContext } from '@/context/useAppContext';
 import { calculateProgress, getOverallProgressChartData, getExerciseProgressChartData } from '@/utils/progressUtils';
 import { generateCurrentTournament } from '@/utils/tournamentUtils';
-import { TrendingUp, Clock, Trophy, ChevronRight, Activity, Zap, Search, X, ChevronDown } from 'lucide-react';
+import { TrendingUp, Clock, Trophy, ChevronRight, Activity, Zap, Search, X, Filter } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
@@ -271,20 +271,6 @@ const Dashboard = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Get progress type display name
-  const getProgressDisplayName = (sortType: string) => {
-    switch (sortType) {
-      case 'recent':
-        return 'My Excercises';
-      case 'pr':
-        return 'PR Progress';
-      case 'progress':
-        return 'Growth Progress';
-      default:
-        return 'My Excercises';
-    }
-  };
-
   // Get selected category info
   const selectedCategory = selectedCategoryId 
     ? categories.find(cat => cat.id === selectedCategoryId) 
@@ -432,54 +418,10 @@ const Dashboard = () => {
 
           {/* Exercise Progress Grid */}
         <div className="relative exercise-grid-container mt-4">
-          {/* Progress Title with Inline Dropdown + Expandable Search */}
-          <div className="mb-4 space-y-4">
-            {/* Progress Dropdown & History Link */}
-            <div className="flex justify-between items-center">
-              <div className="relative progress-dropdown-container">
-                <button
-                  onClick={() => setIsProgressDropdownOpen(!isProgressDropdownOpen)}
-                  className="flex items-center gap-2 text-xl font-bold text-foreground active:scale-95 transition-transform duration-150"
-                >
-                  <span>{getProgressDisplayName(sortBy)}</span>
-                  <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${isProgressDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-                
-                {isProgressDropdownOpen && (
-                  <div className="absolute top-full left-0 mt-2 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-md z-50 min-w-48 progress-dropdown">
-                    <div className="p-2">
-                      {[
-                        { id: 'recent', label: 'My Excercises', icon: Clock },
-                        { id: 'pr', label: 'PR Progress', icon: Trophy },
-                        { id: 'progress', label: 'Growth Progress', icon: TrendingUp }
-                      ].map((option) => {
-                        const Icon = option.icon;
-                        return (
-                          <button
-                            key={option.id}
-                            onClick={() => {
-                              setSortBy(option.id as 'recent' | 'pr' | 'progress');
-                              setIsProgressDropdownOpen(false);
-                            }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-95 ${
-                              sortBy === option.id
-                                ? 'bg-primary text-primary-foreground'
-                                : 'text-foreground active:bg-gray-100 dark:active:bg-gray-800'
-                            }`}
-                          >
-                            <Icon className="h-4 w-4" />
-                            <span className="font-medium">{option.label}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
+          {/* Combined Search and Filter Bar */}
+          <div className="flex items-center gap-2 mb-4">
             {/* Redesigned Search Bar */}
-            <div className="relative search-bar-wrapper">
+            <div className="relative search-bar-wrapper flex-grow">
               <div className="search-bar-icon">
                 <Search className="h-4 w-4" />
               </div>
@@ -498,6 +440,49 @@ const Dashboard = () => {
                 >
                   <X className="h-4 w-4" />
                 </button>
+              )}
+            </div>
+
+            {/* Sort button and dropdown */}
+            <div className="relative progress-dropdown-container">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setIsProgressDropdownOpen(!isProgressDropdownOpen)}
+                className="rounded-full w-10 h-10 flex-shrink-0"
+              >
+                <Filter className="h-4 w-4" />
+              </Button>
+              
+              {isProgressDropdownOpen && (
+                <div className="absolute top-full right-0 mt-2 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-md z-50 min-w-48 progress-dropdown">
+                  <div className="p-2">
+                    {[
+                      { id: 'recent', label: 'Recent', icon: Clock },
+                      { id: 'pr', label: 'PRs', icon: Trophy },
+                      { id: 'progress', label: 'Growth', icon: TrendingUp }
+                    ].map((option) => {
+                      const Icon = option.icon;
+                      return (
+                        <button
+                          key={option.id}
+                          onClick={() => {
+                            setSortBy(option.id as 'recent' | 'pr' | 'progress');
+                            setIsProgressDropdownOpen(false);
+                          }}
+                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-95 ${
+                            sortBy === option.id
+                              ? 'bg-primary text-primary-foreground'
+                              : 'text-foreground active:bg-gray-100 dark:active:bg-gray-800'
+                          }`}
+                        >
+                          <Icon className="h-4 w-4" />
+                          <span className="font-medium">{option.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               )}
             </div>
           </div>
