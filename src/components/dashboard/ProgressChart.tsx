@@ -400,12 +400,24 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
   const handleChartHover = (data: any) => {
     if (onHoverData && data && data.activePayload && data.activePayload.length > 0) {
       const payload = data.activePayload[0].payload;
+      
+      // When showing multiple lines for category exercises, filter out exercises with no data (0 or null)
+      const filteredPayload = { ...payload };
+      if (multiple && !showPercentage && categoryId) {
+        Object.keys(filteredPayload).forEach(key => {
+          if (key !== 'date' && (filteredPayload[key] === null || filteredPayload[key] === 0)) {
+            delete filteredPayload[key];
+          }
+        });
+      }
+
       // Find hovered index in filteredData
       const idx = filteredData.findIndex(d => d.date === payload.date);
       setHoveredIndex(idx);
+
       onHoverData({
         date: payload.date,
-        data: payload,
+        data: filteredPayload, // Use the filtered payload
         label: data.label,
         colors: colors // Pass the actual colors being used by the chart
       });
