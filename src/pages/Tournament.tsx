@@ -765,15 +765,17 @@ const TournamentPage: React.FC = () => {
                           </span>
                         </div>
                         {/* New Exercise Bonus Line */}
-                        <div className="flex justify-between items-center py-2 px-3 bg-emerald-50/30 dark:bg-emerald-950/15 rounded-lg border-l-2 border-emerald-400 dark:border-emerald-600 mb-2">
-                          <div className="flex-1">
-                            <div className="font-medium text-foreground text-sm">New Exercise Bonus</div>
-                            <div className="text-xs text-muted-foreground">{NEW_EXERCISE_BONUS.points}pts × {Math.floor((participant.exerciseStats?.newExerciseBonusPoints || 0) / NEW_EXERCISE_BONUS.points)} new unique exercises this week</div>
+                        {(participant.exerciseStats?.newExerciseBonusPoints || 0) > 0 && (
+                          <div className="flex justify-between items-center py-2 px-3 bg-emerald-50/30 dark:bg-emerald-950/15 rounded-lg border-l-2 border-emerald-400 dark:border-emerald-600 mb-2">
+                            <div className="flex-1">
+                              <div className="font-medium text-foreground text-sm">New Exercise Bonus</div>
+                              <div className="text-xs text-muted-foreground">{NEW_EXERCISE_BONUS.points}pts × {Math.floor((participant.exerciseStats?.newExerciseBonusPoints || 0) / NEW_EXERCISE_BONUS.points)} new unique exercises this week</div>
+                            </div>
+                            <div className="text-right">
+                              <div className="font-bold text-emerald-700 dark:text-emerald-300 text-sm">+{participant.exerciseStats?.newExerciseBonusPoints || 0}pts</div>
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <div className="font-bold text-emerald-700 dark:text-emerald-300 text-sm">+{participant.exerciseStats?.newExerciseBonusPoints || 0}pts</div>
-                          </div>
-                        </div>
+                        )}
                         {/* Existing badge rendering... */}
                         {participant.badges.map(badge => (
                           <div key={badge.id} className="flex justify-between items-center py-2 px-3 bg-emerald-50/30 dark:bg-emerald-950/15 rounded-lg border-l-2 border-emerald-400 dark:border-emerald-600">

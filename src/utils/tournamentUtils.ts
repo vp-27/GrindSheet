@@ -125,8 +125,8 @@ export const COMPETITIVE_BONUS_CONFIG = {
 // New exercise bonus config
 export const NEW_EXERCISE_BONUS = {
   points: 25,
-  capPerCategory: 10,
-  description: 'Bonus for each new unique exercise per category (up to 10 per category, lifetime)'
+  capPerCategory: 5,
+  description: 'Bonus for each new unique exercise per category (up to 5 per category, lifetime)'
 };
 
 /**

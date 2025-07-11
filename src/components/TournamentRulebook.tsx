@@ -133,7 +133,7 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
         {
           name: "New Exercise Bonus",
           points: 25,
-          description: "25pts for each new unique exercise per category (up to 10 per category per user, lifetime)"
+          description: "25pts for each new unique exercise per category (up to 5 per category per user, lifetime)"
         }
       ]
     }
@@ -327,7 +327,7 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div>
                 <div>
                   <span className="font-medium">Try new exercises for bonus points</span>
-                  <div className="text-xs text-muted-foreground">25pts for each new unique exercise per category (max 10 per category, lifetime)</div>
+                  <div className="text-xs text-muted-foreground">25pts for each new unique exercise per category (max 5 per category, lifetime)</div>
                 </div>
               </div>
             </div>
