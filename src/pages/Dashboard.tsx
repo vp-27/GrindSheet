@@ -456,14 +456,6 @@ const Dashboard = () => {
                   </div>
                 )}
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate('/history')}
-                className="text-sm font-medium text-primary"
-              >
-                View Full History
-              </Button>
             </div>
 
             {/* Redesigned Search Bar */}
@@ -687,6 +679,19 @@ const Dashboard = () => {
         
         </div>
       </div>
+      {/* Floating History Button */}
+      <Button
+        onClick={() => navigate('/history')}
+        className="fixed bottom-24 right-4 h-12 w-auto px-5
+                   bg-background/60 backdrop-blur-xl border border-white/10
+                   shadow-xl rounded-full flex items-center gap-2
+                   text-foreground font-semibold
+                   active:scale-95 transition-transform duration-200 ease-out
+                   z-40"
+      >
+        <Clock className="h-5 w-5" />
+        <span>History</span>
+      </Button>
     </Layout>
   );
 };
