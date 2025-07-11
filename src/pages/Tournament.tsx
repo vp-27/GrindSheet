@@ -576,8 +576,8 @@ const TournamentPage: React.FC = () => {
                 {/* Unified Point Breakdown - Single Cohesive Card */}
                 <div className="bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-900/50 dark:to-slate-800/30 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
                   
-                  {/* NEW: Progress Tracker */}
-                  {participant.progressTrackers && (
+                  {/* NEW: Progress Tracker - Only for current user */}
+                  {isCurrentUser && participant.progressTrackers && (
                     <>
                       <ProgressTracker progressTrackers={participant.progressTrackers} />
                       <div className="my-6 border-t border-dashed border-border/50"></div>
