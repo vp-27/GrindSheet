@@ -35,7 +35,6 @@ const Dashboard = () => {
   const [isProgressDropdownOpen, setIsProgressDropdownOpen] = useState(false);
   const [dynamicPercentGain, setDynamicPercentGain] = useState<number | null>(null); // NEW
   const [chartTimeframe, setChartTimeframe] = useState<'2W' | '1M' | 'ALL'>('2W'); // NEW
-  const [isFabVisible, setIsFabVisible] = useState(true);
 
   // Use the same color system as the rest of the app
   const chartColors = getCategoryChartColors();
@@ -101,25 +100,6 @@ const Dashboard = () => {
       generateTournament();
     }
   }, [exercises, categories, tournamentInitialized]);
-
-  // Handle FAB visibility on scroll
-  useEffect(() => {
-    let lastScrollY = window.scrollY;
-
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      // Hide if scrolling down past a certain threshold, show if scrolling up
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        setIsFabVisible(false);
-      } else {
-        setIsFabVisible(true);
-      }
-      lastScrollY = currentScrollY;
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -485,6 +465,16 @@ const Dashboard = () => {
                 </div>
               )}
             </div>
+            
+            {/* History Button */}
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => navigate('/history')}
+              className="rounded-full w-10 h-10 flex-shrink-0"
+            >
+              <Clock className="h-4 w-4" />
+            </Button>
           </div>
           
           {exerciseProgressItems.length > 0 ? (
@@ -684,20 +674,6 @@ const Dashboard = () => {
         
         </div>
       </div>
-      {/* Floating History Button */}
-      <Button
-        onClick={() => navigate('/history')}
-        className={`fixed bottom-24 right-4 h-12 w-auto px-4
-                   bg-background/70 backdrop-blur-xl border border-white/10
-                   shadow-xl rounded-full flex items-center gap-2
-                   text-foreground text-sm font-medium
-                   active:scale-95 transition-all duration-300 ease-out
-                   z-40
-                   ${isFabVisible ? 'translate-y-0 opacity-100' : 'translate-y-24 opacity-0 pointer-events-none'}`}
-      >
-        <Clock className="h-5 w-5" />
-        <span>History</span>
-      </Button>
     </Layout>
   );
 };
