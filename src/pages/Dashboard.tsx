@@ -369,7 +369,7 @@ const Dashboard = () => {
             </div>
           
           {/* Category Filter Buttons */}
-          <div className="relative mt-4">
+          <div className="relative mt-1">
             <div className="flex gap-3 overflow-x-auto pb-2 px-1 py-2 scrollbar-hide">
               <Button
                 variant="outline"
