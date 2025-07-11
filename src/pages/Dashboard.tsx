@@ -10,7 +10,6 @@ import { TrendingUp, Clock, Trophy, ChevronRight, Activity, Zap, Search, X, Chev
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
-import TournamentStatusCard from '@/components/dashboard/TournamentStatusCard';
 import ChartTooltipCard from '@/components/dashboard/ChartTooltipCard';
 import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
 import { format } from 'date-fns';
@@ -354,24 +353,16 @@ const Dashboard = () => {
             )}
           </div>
 
-          {/* Tournament Status Card or Chart Tooltip - Closer to chart */}
-          <div className="tooltip-card-container tournament-status-container -mt-2">
-            {chartHoverData ? (
-              <div className="tooltip-card-enter-active">
+          {/* Chart Tooltip - Closer to chart */}
+          <div className="relative z-20">
+            {chartHoverData && (
+              <div className="tooltip-card-enter-active absolute -top-2 left-1/2 -translate-x-1/2">
                 <ChartTooltipCard 
                   hoverData={chartHoverData}
                   showPercentage={!selectedCategoryId}
                   weightUnit="lbs"
                   multiple={true}
                   customColors={chartColors}
-                />
-              </div>
-            ) : (
-              <div className="tournament-status-visible">
-                <TournamentStatusCard 
-                  tournament={currentTournament}
-                  currentUserId={profile?.id || ''}
-                  initialized={tournamentInitialized}
                 />
               </div>
             )}
@@ -423,39 +414,6 @@ const Dashboard = () => {
         <div className="relative exercise-grid-container">
           {/* Progress Title with Inline Dropdown + Expandable Search */}
           <div className="mb-4 space-y-4">
-            {/* Apple Health Style Search */}
-            <div className="relative">
-              <div className="apple-health-card p-0">
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <Search className="h-5 w-5 text-muted-foreground/60" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search exercises..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full h-12 pl-12 pr-12 text-base bg-transparent border-0 rounded-xl
-                             text-foreground placeholder:text-muted-foreground/60
-                             transition-all duration-200 ease-out
-                             focus:outline-none focus:ring-2 focus:ring-blue-500/30
-                             md:text-sm"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-lg
-                               text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/30
-                               transition-all duration-200 ease-out"
-                      aria-label="Clear search"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-
             {/* Progress Dropdown & History Link */}
             <div className="flex justify-between items-center">
               <div className="relative progress-dropdown-container">
@@ -506,6 +464,39 @@ const Dashboard = () => {
               >
                 View Full History
               </Button>
+            </div>
+
+            {/* Apple Health Style Search */}
+            <div className="relative">
+              <div className="apple-health-card p-0">
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <Search className="h-5 w-5 text-muted-foreground/60" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search exercises..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full h-12 pl-12 pr-12 text-base bg-transparent border-0 rounded-xl
+                             text-foreground placeholder:text-muted-foreground/60
+                             transition-all duration-200 ease-out
+                             focus:outline-none focus:ring-2 focus:ring-blue-500/30
+                             md:text-sm"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-lg
+                               text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/30
+                               transition-all duration-200 ease-out"
+                      aria-label="Clear search"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
           
