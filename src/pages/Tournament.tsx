@@ -573,10 +573,9 @@ const TournamentPage: React.FC = () => {
               isExpanded ? 'max-h-[2000px] opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0'
             }`}>
               <div className="space-y-3 text-sm">
-                {/* Unified Point Breakdown - Single Cohesive Card */}
                 <div className="bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-900/50 dark:to-slate-800/30 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
                   
-                  {/* NEW: Progress Tracker - Only for current user */}
+                  {/* Progress Tracker (Preserved) */}
                   {isCurrentUser && participant.progressTrackers && (
                     <>
                       <ProgressTracker progressTrackers={participant.progressTrackers} />
@@ -589,215 +588,179 @@ const TournamentPage: React.FC = () => {
                     Complete Point Breakdown
                   </h4>
                   
+                  {/* --- NEW VISUAL BREAKDOWN --- */}
                   <div className="space-y-4">
-                    {/* Performance Items */}
-                    {(participant.prDetails.length > 0 || participant.pointsBreakdown.improvementPoints > 0 || (participant.pointsBreakdown.competitivePoints || 0) > 0) && (
+                    {/* --- Performance Card --- */}
+                    {(pointBreakdown.performance > 0) && (
                       <div 
                         id={`performance-section-${participant.userId}`}
-                        className={`transition-all duration-300 ${highlightedSection === 'performance' ? 'ring-2 ring-amber-400/50 bg-amber-50/30 dark:bg-amber-950/20 p-3 rounded-xl' : ''}`}
+                        className={`p-4 rounded-xl transition-all duration-300 ${highlightedSection === 'performance' ? 'ring-2 ring-amber-400/50 bg-amber-50/30 dark:bg-amber-950/20' : 'bg-slate-100/50 dark:bg-slate-800/20'}`}
                       >
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-3 h-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-500"></div>
-                          <span className="font-semibold text-amber-800 dark:text-amber-200 text-sm">Performance</span>
-                          <span className="ml-auto font-bold text-amber-800 dark:text-amber-200 bg-amber-100/60 dark:bg-amber-900/30 px-2 py-1 rounded-lg text-xs">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <Trophy className="h-5 w-5 text-amber-500" />
+                            <h5 className="font-semibold text-foreground">Performance</h5>
+                          </div>
+                          <span className="font-bold text-amber-600 dark:text-amber-400 bg-amber-100/60 dark:bg-amber-900/30 px-2 py-1 rounded-lg text-sm">
                             {pointBreakdown.performance} pts
                           </span>
                         </div>
                         
-                        {/* Personal Records */}
-                        {participant.prDetails.map((pr, idx) => (
-                          <div key={`pr-${idx}`} className="flex justify-between items-center py-2 px-3 bg-amber-50/30 dark:bg-amber-950/15 rounded-lg border-l-2 border-amber-400 dark:border-amber-600">
-                            <div className="flex-1">
-                              <div className="font-medium text-foreground text-sm">{pr.exerciseName} PR</div>
-                              <div className="text-xs text-muted-foreground">
-                                {pr.previousBest > 0 ? `${pr.previousBest}\u2192${pr.weight}lbs` : `${pr.weight}lbs (first time)`}
+                        <div className="space-y-2">
+                          {participant.prDetails.map((pr, idx) => (
+                            <div key={`pr-${idx}`} className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-amber-100/50 dark:hover:bg-amber-900/20">
+                              <div className="flex items-center gap-2">
+                                <Star className="w-4 h-4 text-yellow-500 flex-shrink-0" />
+                                <div>
+                                  <span className="font-medium">{pr.exerciseName} PR</span>
+                                  <div className="text-xs text-muted-foreground">
+                                    {pr.previousBest > 0 ? `${pr.previousBest} → ${pr.weight}lbs` : `${pr.weight}lbs (First Time)`}
+                                  </div>
+                                </div>
                               </div>
+                              <span className="font-semibold text-green-600 dark:text-green-400">+{POINTS_CONFIG.PR_ACHIEVEMENT.points}</span>
                             </div>
-                            <div className="text-right">
-                              <div className="font-bold text-amber-700 dark:text-amber-300 text-sm">+{POINTS_CONFIG.PR_ACHIEVEMENT.points}pts</div>
-                            </div>
-                          </div>
-                        ))}
+                          ))}
 
-                        {/* Improvement Gains */}
-                        {participant.prDetails.filter(pr => pr.improvementPercent > 0).map((pr, idx) => (
-                          <div key={`improvement-${idx}`} className="flex justify-between items-center py-2 px-3 bg-amber-50/30 dark:bg-amber-950/15 rounded-lg border-l-2 border-amber-400 dark:border-amber-600">
-                            <div className="flex-1">
-                              <div className="font-medium text-foreground text-sm">{pr.exerciseName} Improvement</div>
-                              <div className="text-xs text-green-600 dark:text-green-400 font-medium">
-                                +{pr.improvementPercent.toFixed(1)}% gain
+                          {participant.prDetails.filter(pr => pr.improvementPercent > 0).map((pr, idx) => (
+                            <div key={`improvement-${idx}`} className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-amber-100/50 dark:hover:bg-amber-900/20">
+                              <div className="flex items-center gap-2">
+                                <TrendingUp className="w-4 h-4 text-green-500 flex-shrink-0" />
+                                <div>
+                                  <span className="font-medium">{pr.exerciseName} Gain</span>
+                                  <div className="text-xs text-green-600 dark:text-green-400 font-medium">
+                                    +{pr.improvementPercent.toFixed(1)}% Improvement
+                                  </div>
+                                </div>
                               </div>
+                              <span className="font-semibold text-green-600 dark:text-green-400">+{Math.min(Math.floor(pr.improvementPercent * 2), 50)}</span>
                             </div>
-                            <div className="text-right">
-                              <div className="font-bold text-amber-700 dark:text-amber-300 text-sm">+{Math.min(Math.floor(pr.improvementPercent * 2), 50)}pts</div>
-                            </div>
-                          </div>
-                        ))}
+                          ))}
 
-                        {/* Competitive Bonuses */}
-                        {participant.competitiveDetails && participant.competitiveDetails.map((comp, idx) => (
-                          <div key={`comp-${idx}`} className="flex justify-between items-center py-2 px-3 bg-amber-50/30 dark:bg-amber-950/15 rounded-lg border-l-2 border-amber-400 dark:border-amber-600">
-                            <div className="flex-1">
-                              <div className="font-medium text-foreground text-sm">
-                                Beat {comp.targetUser || 'Friend'}: {comp.exerciseName}
+                          {participant.competitiveDetails && participant.competitiveDetails.map((comp, idx) => (
+                            <div key={`comp-${idx}`} className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-amber-100/50 dark:hover:bg-amber-900/20">
+                              <div className="flex items-center gap-2">
+                                <Zap className="w-4 h-4 text-purple-500 flex-shrink-0" />
+                                <div>
+                                  <span className="font-medium">Beat {comp.targetUser || 'Friend'}</span>
+                                  <div className="text-xs text-muted-foreground">
+                                    {comp.exerciseName} ({comp.type})
+                                  </div>
+                                </div>
                               </div>
-                              <div className="text-xs text-muted-foreground">
-                                {comp.type} victory
-                              </div>
+                              <span className="font-semibold text-green-600 dark:text-green-400">+{comp.points}</span>
                             </div>
-                            <div className="text-right">
-                              <div className="font-bold text-amber-700 dark:text-amber-300 text-sm">+{comp.points}pts</div>
-                            </div>
-                          </div>
-                        ))}
-
-                        {/* PR Bonus Line */}
-                        <div className="flex justify-between items-center py-2 px-3 bg-amber-50/30 dark:bg-amber-950/15 rounded-lg border-l-2 border-amber-400 dark:border-amber-600 mb-2">
-                          <div className="flex-1">
-                            <div className="font-medium text-foreground text-sm">Personal Record Bonus</div>
-                            <div className="text-xs text-muted-foreground">{POINTS_CONFIG.PR_ACHIEVEMENT.points}pts × {participant.prDetails.length} PR{participant.prDetails.length === 1 ? '' : 's'} this week</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-bold text-amber-700 dark:text-amber-300 text-sm">+{POINTS_CONFIG.PR_ACHIEVEMENT.points * participant.prDetails.length}pts</div>
-                          </div>
+                          ))}
                         </div>
-
-                        <div className="border-t border-slate-200/50 dark:border-slate-700/50 pt-3 mt-3"></div>
                       </div>
                     )}
-
-                    {/* Volume & Consistency Items */}
-                    <div 
-                      id={`volume-section-${participant.userId}`}
-                      className={`transition-all duration-300 ${highlightedSection === 'volume' ? 'ring-2 ring-blue-400/50 bg-blue-50/30 dark:bg-blue-950/20 p-3 rounded-xl' : ''}`}
-                    >
-                      <div className="flex items-center gap-2 mb-3">
-                        <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500"></div>
-                        <span className="font-semibold text-blue-800 dark:text-blue-200 text-sm">Volume & Consistency</span>
-                        <span className="ml-auto font-bold text-blue-800 dark:text-blue-200 bg-blue-100/60 dark:bg-blue-900/30 px-2 py-1 rounded-lg text-xs">
-                          {pointBreakdown.volume} pts
-                        </span>
-                      </div>
                     
-                    {/* Daily Workouts */}
-                    {participant.workoutDays.slice(0, 7).map((day, idx) => {
-                      // Parse the YYYY-MM-DD format to avoid timezone shifts
-                      const [year, month, dayOfMonth] = day.split('-').map(Number);
-                      const workoutDate = new Date(year, month - 1, dayOfMonth); // month is 0-indexed
-                      const dayName = workoutDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-                      const isWeekend = workoutDate.getDay() === 0 || workoutDate.getDay() === 6;
-                      return (
-                        <div key={`workout-${idx}`} className="flex justify-between items-center py-2 px-3 bg-blue-50/30 dark:bg-blue-950/15 rounded-lg border-l-2 border-blue-400 dark:border-blue-600">
-                          <div className="flex-1">
-                            <div className="font-medium text-foreground text-sm">
-                              {dayName} Workout
-                              {isWeekend && <span className="text-orange-500 ml-2">🌅</span>}
-                            </div>
-                            {isWeekend && <div className="text-xs text-orange-600 dark:text-orange-400">Weekend bonus included</div>}
+                    {/* --- Volume & Consistency Card --- */}
+                    {(pointBreakdown.volume > 0) && (
+                      <div 
+                        id={`volume-section-${participant.userId}`}
+                        className={`p-4 rounded-xl transition-all duration-300 ${highlightedSection === 'volume' ? 'ring-2 ring-blue-400/50 bg-blue-50/30 dark:bg-blue-950/20' : 'bg-slate-100/50 dark:bg-slate-800/20'}`}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <Activity className="h-5 w-5 text-blue-500" />
+                            <h5 className="font-semibold text-foreground">Volume & Consistency</h5>
                           </div>
-                          <div className="text-right">
-                            <div className="font-bold text-blue-700 dark:text-blue-300 text-sm">
-                              +{6 + (isWeekend ? 8 : 0)}pts
-                            </div>
-                          </div>
+                          <span className="font-bold text-blue-600 dark:text-blue-400 bg-blue-100/60 dark:bg-blue-900/30 px-2 py-1 rounded-lg text-sm">
+                            {pointBreakdown.volume} pts
+                          </span>
                         </div>
-                      );
-                    })}
+                        
+                        <div className="space-y-2">
+                          {(participant.pointsBreakdown.participationPoints + participant.pointsBreakdown.varietyPoints) > 0 && (
+                            <div className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20">
+                              <div className="flex items-center gap-2">
+                                <Calendar className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                                <div>
+                                  <span className="font-medium">Daily Workouts</span>
+                                  <div className="text-xs text-muted-foreground">{participant.workoutDays.length} days logged</div>
+                                </div>
+                              </div>
+                              <span className="font-semibold text-green-600 dark:text-green-400">+{participant.pointsBreakdown.participationPoints + participant.pointsBreakdown.varietyPoints}</span>
+                            </div>
+                          )}
 
-                    {/* Exercise Volume */}
-                    {(participant.exerciseStats?.totalExercises || 0) > 0 && (
-                      <div className="flex justify-between items-center py-2 px-3 bg-blue-50/30 dark:bg-blue-950/15 rounded-lg border-l-2 border-blue-400 dark:border-blue-600">
-                        <div className="flex-1">
-                          <div className="font-medium text-foreground text-sm">Exercise Volume</div>
-                          <div className="text-xs text-muted-foreground">{participant.exerciseStats?.totalExercises || 0} exercises • 8pts each</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-bold text-blue-700 dark:text-blue-300 text-sm">+{(participant.exerciseStats?.totalExercises || 0) * 8}pts</div>
+                          {participant.pointsBreakdown.consistencyPoints > 0 && (
+                            <div className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20">
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                                <div>
+                                  <span className="font-medium">Consistency Bonus</span>
+                                  <div className="text-xs text-muted-foreground">5+ workout days</div>
+                                </div>
+                              </div>
+                              <span className="font-semibold text-green-600 dark:text-green-400">+{participant.pointsBreakdown.consistencyPoints}</span>
+                            </div>
+                          )}
+                          
+                          {(participant.exerciseStats?.totalExercises || 0) > 0 && (
+                            <div className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20">
+                              <div className="flex items-center gap-2">
+                                <Award className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                                <div>
+                                  <span className="font-medium">Exercise Volume</span>
+                                  <div className="text-xs text-muted-foreground">{participant.exerciseStats?.totalExercises || 0} exercises</div>
+                                </div>
+                              </div>
+                              <span className="font-semibold text-green-600 dark:text-green-400">+{participant.pointsBreakdown.exercisePoints}</span>
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}
 
-                    {/* Consistency Bonus */}
-                    {participant.pointsBreakdown.consistencyPoints > 0 && (
-                      <div className="flex justify-between items-center py-2 px-3 bg-blue-50/30 dark:bg-blue-950/15 rounded-lg border-l-2 border-blue-400 dark:border-blue-600">
-                        <div className="flex-1">
-                          <div className="font-medium text-foreground text-sm">Consistency Bonus</div>
-                          <div className="text-xs text-green-600 dark:text-green-400">5+ workout days achieved!</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="font-bold text-blue-700 dark:text-blue-300 text-sm">+60pts</div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Variety Bonuses */}
-                    {(participant.pointsBreakdown.varietyPoints || 0) > 0 && participant.exerciseStats?.varietyDays && participant.exerciseStats.varietyDays.map((day, idx) => {
-                      // Parse the YYYY-MM-DD format to avoid timezone shifts
-                      const [year, month, dayOfMonth] = day.date.split('-').map(Number);
-                      const varietyDate = new Date(year, month - 1, dayOfMonth); // month is 0-indexed
-                      const dayName = varietyDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-                      return (
-                        <div key={`variety-${idx}`} className="flex justify-between items-center py-2 px-3 bg-blue-50/30 dark:bg-blue-950/15 rounded-lg border-l-2 border-blue-400 dark:border-blue-600">
-                          <div className="flex-1">
-                            <div className="font-medium text-foreground text-sm">{dayName} Variety Bonus</div>
-                            <div className="text-xs text-muted-foreground">{day.exerciseCount} exercises • +4pts per exercise beyond 2nd</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="font-bold text-blue-700 dark:text-blue-300 text-sm">+{day.bonus}pts</div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                    </div>
-
-                    {/* Achievement Bonuses */}
-                    {participant.badges.length > 0 && (
+                    {/* --- Achievement Bonuses Card --- */}
+                    {(pointBreakdown.bonuses > 0) && (
                       <div 
                         id={`bonuses-section-${participant.userId}`}
-                        className={`transition-all duration-300 ${highlightedSection === 'bonuses' ? 'ring-2 ring-emerald-400/50 bg-emerald-50/30 dark:bg-emerald-950/20 p-3 rounded-xl' : ''}`}
+                        className={`p-4 rounded-xl transition-all duration-300 ${highlightedSection === 'bonuses' ? 'ring-2 ring-emerald-400/50 bg-emerald-50/30 dark:bg-emerald-950/20' : 'bg-slate-100/50 dark:bg-slate-800/20'}`}
                       >
-                        <div className="border-t border-slate-200/50 dark:border-slate-700/50 pt-3 mt-3"></div>
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500"></div>
-                          <span className="font-semibold text-emerald-800 dark:text-emerald-200 text-sm">Achievement Bonuses</span>
-                          <span className="ml-auto font-bold text-emerald-800 dark:text-emerald-200 bg-emerald-100/60 dark:bg-emerald-900/30 px-2 py-1 rounded-lg text-xs">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <Award className="h-5 w-5 text-emerald-500" />
+                            <h5 className="font-semibold text-foreground">Achievement Bonuses</h5>
+                          </div>
+                          <span className="font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100/60 dark:bg-emerald-900/30 px-2 py-1 rounded-lg text-sm">
                             {pointBreakdown.bonuses} pts
                           </span>
                         </div>
-                        {/* New Exercise Bonus Line */}
-                        {(participant.exerciseStats?.newExerciseBonusPoints || 0) > 0 && (
-                          <div className="flex justify-between items-center py-2 px-3 bg-emerald-50/30 dark:bg-emerald-950/15 rounded-lg border-l-2 border-emerald-400 dark:border-emerald-600 mb-2">
-                            <div className="flex-1">
-                              <div className="font-medium text-foreground text-sm">New Exercise Bonus</div>
-                              <div className="text-xs text-muted-foreground">{NEW_EXERCISE_BONUS.points}pts × {Math.floor((participant.exerciseStats?.newExerciseBonusPoints || 0) / NEW_EXERCISE_BONUS.points)} new unique exercises this week</div>
-                            </div>
-                            <div className="text-right">
-                              <div className="font-bold text-emerald-700 dark:text-emerald-300 text-sm">+{participant.exerciseStats?.newExerciseBonusPoints || 0}pts</div>
-                            </div>
-                          </div>
-                        )}
-                        {/* Existing badge rendering... */}
-                        {participant.badges.map(badge => (
-                          <div key={badge.id} className="flex justify-between items-center py-2 px-3 bg-emerald-50/30 dark:bg-emerald-950/15 rounded-lg border-l-2 border-emerald-400 dark:border-emerald-600">
-                            <div className="flex items-center gap-3 flex-1">
-                              <div className="flex-shrink-0">
-                                {getBadgeIcon(badge.type)}
+                        
+                        <div className="space-y-2">
+                          {(participant.exerciseStats?.newExerciseBonusPoints || 0) > 0 && (
+                            <div className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-emerald-100/50 dark:hover:bg-emerald-900/20">
+                              <div className="flex items-center gap-2">
+                                <Plus className="w-4 h-4 text-teal-500 flex-shrink-0" />
+                                <div>
+                                  <span className="font-medium">New Exercise Bonus</span>
+                                  <div className="text-xs text-muted-foreground">{Math.floor((participant.exerciseStats?.newExerciseBonusPoints || 0) / NEW_EXERCISE_BONUS.points)} new exercises</div>
+                                </div>
                               </div>
-                              <div>
-                                <div className="font-medium text-foreground text-sm">{BADGE_DEFINITIONS[badge.type].name}</div>
-                                <div className="text-xs text-muted-foreground">{BADGE_DEFINITIONS[badge.type].description}</div>
+                              <span className="font-semibold text-green-600 dark:text-green-400">+{participant.exerciseStats?.newExerciseBonusPoints || 0}</span>
+                            </div>
+                          )}
+                          
+                          {participant.badges.map(badge => (
+                            <div key={badge.id} className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-emerald-100/50 dark:hover:bg-emerald-900/20">
+                              <div className="flex items-center gap-2">
+                                <div className="flex-shrink-0">{getBadgeIcon(badge.type)}</div>
+                                <div>
+                                  <span className="font-medium">{BADGE_DEFINITIONS[badge.type].name}</span>
+                                </div>
                               </div>
+                              <span className="font-semibold text-green-600 dark:text-green-400">+{badge.points}</span>
                             </div>
-                            <div className="text-right">
-                              <div className="font-bold text-emerald-700 dark:text-emerald-300 text-sm">+{badge.points}pts</div>
-                            </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
 
-                  {/* Quick Summary Footer */}
+                  {/* Quick Summary Footer (Preserved) */}
                   <div className="mt-6 pt-4 border-t border-slate-200/50 dark:border-slate-700/50">
                     <div className="grid grid-cols-4 gap-4 text-xs text-center">
                       <div>
