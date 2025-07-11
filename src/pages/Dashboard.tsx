@@ -381,7 +381,7 @@ const Dashboard = () => {
             </div>
           
           {/* Controls Island */}
-          <div className="controls-island mt-4">
+          <div className="control-panel mt-4">
             {/* Category Filter */}
             <div className="relative bg-muted p-1 rounded-2xl">
               <div 
@@ -422,10 +422,10 @@ const Dashboard = () => {
               </div>
             </div>
             
-            <div className="island-divider" />
+            <div className="panel-divider" />
             
             {/* Bottom row of controls */}
-            <div className="island-bottom-row">
+            <div className="flex items-center gap-2">
               {/* Redesigned Search Bar */}
               <div className="relative search-bar-wrapper flex-grow">
                 <div className="search-bar-icon">
