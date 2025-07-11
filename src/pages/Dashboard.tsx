@@ -466,37 +466,27 @@ const Dashboard = () => {
               </Button>
             </div>
 
-            {/* Apple Health Style Search */}
-            <div className="relative">
-              <div className="apple-health-card p-0">
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <Search className="h-5 w-5 text-muted-foreground/60" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Search exercises..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full h-12 pl-12 pr-12 text-base bg-transparent border-0 rounded-xl
-                             text-foreground placeholder:text-muted-foreground/60
-                             transition-all duration-200 ease-out
-                             focus:outline-none focus:ring-2 focus:ring-blue-500/30
-                             md:text-sm"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={() => setSearchQuery('')}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-lg
-                               text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/30
-                               transition-all duration-200 ease-out"
-                      aria-label="Clear search"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
+            {/* Redesigned Search Bar */}
+            <div className="relative search-bar-wrapper">
+              <div className="search-bar-icon">
+                <Search className="h-4 w-4" />
               </div>
+              <input
+                type="text"
+                placeholder="Search exercises..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="search-bar-input"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="search-bar-clear"
+                  aria-label="Clear search"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
             </div>
           </div>
           

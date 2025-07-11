@@ -252,12 +252,12 @@
 }
 
 .dark .search-clear-button:hover {
+  background: rgba(235, 235, 245, 0.1);
   color: rgba(235, 235, 245, 0.8);
-  background: rgba(39, 39, 41, 0.8);
 }
 
 .search-clear-button:active {
-  transform: translateY(-50%) scale(0.9);
+  transform: translateY(-50%) scale(0.95);
 }
 
 /* Category-specific styling for expanded search */
@@ -308,5 +308,80 @@
   .expandable-search-field,
   .search-clear-button {
     transition-duration: 0.1s !important;
+  }
+}
+
+/* ===== New Dashboard Search Bar ===== */
+
+.search-bar-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-bar-input {
+  width: 100%;
+  height: 2.5rem; /* 40px */
+  padding-left: 2.25rem; /* space for icon */
+  padding-right: 2.25rem; /* space for clear button */
+  border-radius: 1rem; /* 16px to match cards */
+  border: none;
+  outline: none;
+  font-size: 1rem; /* 16px to prevent iOS zoom */
+  background-color: rgba(120, 120, 128, 0.16);
+  color: hsl(var(--foreground));
+  transition: all 0.2s ease-out;
+  -webkit-appearance: none;
+}
+
+.dark .search-bar-input {
+  background-color: rgba(39, 39, 41, 1);
+}
+
+.search-bar-input::placeholder {
+  color: hsl(var(--muted-foreground) / 0.6);
+}
+
+.search-bar-input:focus {
+  background-color: rgba(120, 120, 128, 0.24);
+  box-shadow: none; 
+}
+
+.dark .search-bar-input:focus {
+  background-color: rgba(58, 58, 60, 1);
+}
+
+
+.search-bar-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: hsl(var(--muted-foreground) / 0.7);
+}
+
+.search-bar-clear {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.25rem;
+  border-radius: 9999px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: hsl(var(--muted-foreground) / 0.6);
+  transition: all 0.2s ease-out;
+}
+
+.search-bar-clear:hover {
+  color: hsl(var(--muted-foreground));
+  background-color: hsl(var(--muted) / 0.4);
+}
+
+@media (min-width: 768px) {
+  .search-bar-input {
+    font-size: 0.875rem; /* 14px on desktop */
   }
 }
