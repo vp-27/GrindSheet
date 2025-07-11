@@ -15,6 +15,7 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ToastDemo from "./pages/ToastDemo";
+import GoalsPage from "./pages/Goals";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
                 <Route path="/tournament" element={<Tournament />} />
                 <Route path="/pr-records" element={<PRRecords />} />
                 <Route path="/settings" element={<Settings />} />
+                <Route path="/goals" element={<GoalsPage />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/toast-demo" element={<ToastDemo />} />
                 <Route path="*" element={<NotFound />} />

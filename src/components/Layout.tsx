@@ -10,6 +10,7 @@ import {
   TrophyIcon as TrophyOutline,
   ClockIcon as ClockOutline,
   CogIcon as CogOutline,
+  CheckBadgeIcon as GoalsOutline, // Using CheckBadge for "Goals"
 } from '@heroicons/react/24/outline';
 // Heroicons imports - solid versions
 import {
@@ -17,6 +18,7 @@ import {
   TrophyIcon as TrophySolid,
   ClockIcon as ClockSolid,
   CogIcon as CogSolid,
+  CheckBadgeIcon as GoalsSolid, // Using CheckBadge for "Goals"
 } from '@heroicons/react/24/solid';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -166,10 +168,10 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
           </div>
           <div className="flex-1 flex justify-center items-center">
             <NavLink 
-              to="/history" 
-              outlineIcon={ClockOutline}
-              solidIcon={ClockSolid}
-              label="History" 
+              to="/goals" 
+              outlineIcon={GoalsOutline}
+              solidIcon={GoalsSolid}
+              label="Goals" 
             />
           </div>
           <div className="flex-1 flex justify-center items-center">

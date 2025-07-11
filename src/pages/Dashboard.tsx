@@ -19,6 +19,7 @@ import { supabase } from '@/integrations/supabase/client';
 import AnimatedCounter from '@/components/ui/animated-counter';
 import { MobileSlider } from '@/components/ui/mobile-slider';
 import '@/styles/index.css';
+import { Input } from '@/components/ui/input'; // Import Input
 
 const Dashboard = () => {
   const { categories, exercises, exerciseLogs } = useAppContext();
@@ -421,125 +422,90 @@ const Dashboard = () => {
           {/* Exercise Progress Grid */}
         <div className="relative exercise-grid-container">
           {/* Progress Title with Inline Dropdown + Expandable Search */}
-          <div className="mb-0 progress-search-container">
-            {/* Progress Dropdown */}
-            <div className="relative progress-dropdown-container progress-dropdown-section">
-              <button
-                onClick={() => setIsProgressDropdownOpen(!isProgressDropdownOpen)}
-                className="flex items-center gap-2 text-xl font-bold text-foreground active:scale-95 transition-transform duration-150"
-              >
-                <span>{getProgressDisplayName(sortBy)}</span>
-                <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${isProgressDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
-              
-              {/* Dropdown Menu */}
-              {isProgressDropdownOpen && (
-                <div className="absolute top-full left-0 mt-2 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-md z-50 min-w-48 progress-dropdown">
-                  <div className="p-2">
-                    {[
-
-                      { id: 'recent', label: 'My Excercises', icon: Clock },
-                      { id: 'pr', label: 'PR Progress', icon: Trophy },
-                      { id: 'progress', label: 'Growth Progress', icon: TrendingUp }
-                    ].map((option) => {
-                      const Icon = option.icon;
-                      return (
-                        <button
-                          key={option.id}
-                          onClick={() => {
-                            setSortBy(option.id as 'recent' | 'pr' | 'progress');
-                            setIsProgressDropdownOpen(false);
-                          }}
-                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-95 ${
-                            sortBy === option.id
-                              ? 'bg-primary text-primary-foreground'
-                              : 'text-foreground active:bg-gray-100 dark:active:bg-gray-800'
-                          }`}
-                        >
-                          <Icon className="h-4 w-4" />
-                          <span className="font-medium">{option.label}</span>
-                        </button>
-                      );
-                    })}
+          <div className="mb-4 space-y-4">
+            {/* Apple Health Style Search */}
+            <div className="relative">
+              <div className="apple-health-card p-0">
+                <div className="relative">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <Search className="h-5 w-5 text-muted-foreground/60" />
                   </div>
-                </div>
-              )}
-            </div>
-
-            {/* Expandable Search with Apple-style Animation */}
-            <div 
-              className="search-section"
-              style={selectedCategoryColor ? {
-                '--category-color': selectedCategoryColor,
-                '--category-color-rgb': selectedCategoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
-              } as React.CSSProperties : undefined}
-            >
-              <div className="expandable-search-container">
-                {/* Search Icon Button - Visible when collapsed */}
-                <button
-                  onClick={() => setIsSearchFocused(true)}
-                  className={`search-icon-button ${isSearchFocused || searchQuery ? 'search-hidden' : 'search-visible'}`}
-                  aria-label="Search exercises"
-                >
-                  <Search className="h-4 w-4" />
-                </button>
-
-                {/* Expandable Search Input */}
-                <div className={`expandable-search-input ${isSearchFocused || searchQuery ? 'search-expanded' : 'search-collapsed'}`}>
                   <input
-                    ref={(el) => {
-                      if (el && isSearchFocused && !searchQuery) {
-                        // Small delay to allow animation to start
-                        setTimeout(() => el.focus(), 150);
-                      }
-                    }}
                     type="text"
                     placeholder="Search exercises..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    onBlur={() => {
-                      if (!searchQuery) {
-                        setIsSearchFocused(false);
-                      }
-                    }}
-                    className={`expandable-search-field chart-slider-border
-                      ${selectedCategory && (isSearchFocused || searchQuery)
-                        ? 'category-search-focused'
-                        : selectedCategory && !isSearchFocused
-                          ? 'category-search-border'
-                          : ''
-                      }`}
+                    className="w-full h-12 pl-12 pr-12 text-base bg-transparent border-0 rounded-xl
+                             text-foreground placeholder:text-muted-foreground/60
+                             transition-all duration-200 ease-out
+                             focus:outline-none focus:ring-2 focus:ring-blue-500/30
+                             md:text-sm"
                   />
-                  {/* Clear Button */}
                   {searchQuery && (
                     <button
-                      onClick={() => {
-                        setSearchQuery('');
-                        setIsSearchFocused(false);
-                      }}
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-lg
+                               text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/30
+                               transition-all duration-200 ease-out"
                       aria-label="Clear search"
-                      className="search-clear-button"
                     >
-                      <X className="h-3.5 w-3.5" />
+                      <X className="h-4 w-4" />
                     </button>
                   )}
                 </div>
               </div>
+            </div>
 
-              {/* Search Results Count */}
-              <div className="search-results-count">
-                {searchQuery.trim() && (
-                  <span className="text-xs text-muted-foreground">
-                    {exerciseProgressItems.length === 0 ? (
-                      <>No exercises found for "{searchQuery}"</>
-                    ) : (
-                      <>
-                        {exerciseProgressItems.length} exercise{exerciseProgressItems.length !== 1 ? 's' : ''} found
-                      </>
-                    )}
-                  </span>
+            {/* Progress Dropdown & History Link */}
+            <div className="flex justify-between items-center">
+              <div className="relative progress-dropdown-container">
+                <button
+                  onClick={() => setIsProgressDropdownOpen(!isProgressDropdownOpen)}
+                  className="flex items-center gap-2 text-xl font-bold text-foreground active:scale-95 transition-transform duration-150"
+                >
+                  <span>{getProgressDisplayName(sortBy)}</span>
+                  <ChevronDown className={`h-5 w-5 transition-transform duration-200 ${isProgressDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+                
+                {isProgressDropdownOpen && (
+                  <div className="absolute top-full left-0 mt-2 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-md z-50 min-w-48 progress-dropdown">
+                    <div className="p-2">
+                      {[
+                        { id: 'recent', label: 'My Excercises', icon: Clock },
+                        { id: 'pr', label: 'PR Progress', icon: Trophy },
+                        { id: 'progress', label: 'Growth Progress', icon: TrendingUp }
+                      ].map((option) => {
+                        const Icon = option.icon;
+                        return (
+                          <button
+                            key={option.id}
+                            onClick={() => {
+                              setSortBy(option.id as 'recent' | 'pr' | 'progress');
+                              setIsProgressDropdownOpen(false);
+                            }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-95 ${
+                              sortBy === option.id
+                                ? 'bg-primary text-primary-foreground'
+                                : 'text-foreground active:bg-gray-100 dark:active:bg-gray-800'
+                            }`}
+                          >
+                            <Icon className="h-4 w-4" />
+                            <span className="font-medium">{option.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 )}
               </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/history')}
+                className="text-sm font-medium text-primary"
+              >
+                View Full History
+              </Button>
             </div>
           </div>
           
