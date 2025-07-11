@@ -10,7 +10,7 @@ import {
   TrophyIcon as TrophyOutline,
   ClockIcon as ClockOutline,
   CogIcon as CogOutline,
-  CheckBadgeIcon as GoalsOutline, // Using CheckBadge for "Goals"
+  ClipboardDocumentCheckIcon as GoalsOutline, // Using ClipboardDocumentCheckIcon for "Goals"
 } from '@heroicons/react/24/outline';
 // Heroicons imports - solid versions
 import {
@@ -18,7 +18,7 @@ import {
   TrophyIcon as TrophySolid,
   ClockIcon as ClockSolid,
   CogIcon as CogSolid,
-  CheckBadgeIcon as GoalsSolid, // Using CheckBadge for "Goals"
+  ClipboardDocumentCheckIcon as GoalsSolid, // Using ClipboardDocumentCheckIcon for "Goals"
 } from '@heroicons/react/24/solid';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
