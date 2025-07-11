@@ -14,7 +14,6 @@ import PRRecords from "./pages/PRRecords";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
-import ToastDemo from "./pages/ToastDemo";
 import GoalsPage from "./pages/Goals";
 import ScrollToTop from './utils/ScrollToTop';
 import './styles/index.css';
@@ -46,7 +45,6 @@ const App = () => (
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/goals" element={<GoalsPage />} />
                 <Route path="/auth" element={<Auth />} />
-                <Route path="/toast-demo" element={<ToastDemo />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AppProvider>
