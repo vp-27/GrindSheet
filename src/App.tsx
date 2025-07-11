@@ -16,6 +16,9 @@ import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import ToastDemo from "./pages/ToastDemo";
 import GoalsPage from "./pages/Goals";
+import ScrollToTop from './utils/ScrollToTop';
+import './styles/index.css';
+import './styles/components/page-transitions.css';
 
 const queryClient = new QueryClient();
 
@@ -27,6 +30,7 @@ const App = () => (
         v7_relativeSplatPath: true
       }}
     >
+      <ScrollToTop />
       <TooltipProvider>
         <ThemeProvider>
           <AuthProvider>
