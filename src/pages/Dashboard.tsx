@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ import AnimatedCounter from '@/components/ui/animated-counter';
 import { MobileSlider } from '@/components/ui/mobile-slider';
 import '@/styles/index.css';
 import { Input } from '@/components/ui/input'; // Import Input
+import '@/styles/components/search.css'; // Import search styles
 
 const Dashboard = () => {
   const { categories, exercises, exerciseLogs } = useAppContext();
@@ -36,8 +37,33 @@ const Dashboard = () => {
   const [dynamicPercentGain, setDynamicPercentGain] = useState<number | null>(null); // NEW
   const [chartTimeframe, setChartTimeframe] = useState<'2W' | '1M' | 'ALL'>('2W'); // NEW
 
+  // Refs and state for the animated category filter
+  const [indicatorStyle, setIndicatorStyle] = useState({});
+  const filterContainerRef = useRef<HTMLDivElement>(null);
+  const buttonRefs = useRef<{[key: string]: HTMLButtonElement | null}>({});
+
   // Use the same color system as the rest of the app
   const chartColors = getCategoryChartColors();
+
+  // This effect updates the sliding indicator for the category filter
+  useEffect(() => {
+    const activeId = selectedCategoryId ?? 'all';
+    const activeButton = buttonRefs.current[activeId];
+    
+    if (activeButton) {
+      const activeColor = selectedCategoryId
+        ? getCategoryColor(categories.findIndex(cat => cat.id === selectedCategoryId))
+        : 'hsl(var(--primary))';
+
+      setIndicatorStyle({
+        transform: `translateX(${activeButton.offsetLeft}px)`,
+        width: `${activeButton.offsetWidth}px`,
+        backgroundColor: activeColor,
+      });
+
+      activeButton.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  }, [selectedCategoryId, categories]); // Rerun when selection or categories change
 
   // Generate tournament data with better state management
   useEffect(() => {
@@ -354,128 +380,133 @@ const Dashboard = () => {
               )}
             </div>
           
-          {/* Category Filter Buttons */}
-          <div className="relative mt-1">
-            <div className="flex gap-3 overflow-x-auto pb-2 px-1 py-2 scrollbar-hide">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSelectedCategoryId(null)}
-                className={`rounded-2xl px-6 py-3 font-medium transition-all duration-300 whitespace-nowrap transform active:scale-95 ${
-                  selectedCategoryId === null 
-                    ? 'all-button-selected' 
-                    : 'all-button-unselected'
-                }`}
+          {/* Controls Island */}
+          <div className="controls-island mt-4">
+            {/* Category Filter */}
+            <div className="relative bg-muted p-1 rounded-2xl">
+              <div 
+                ref={filterContainerRef}
+                className="relative flex gap-1 overflow-x-auto scrollbar-hide"
               >
-                All
-              </Button>
-              
-              {categories.map((category, index) => {
-                const categoryColor = getCategoryColor(index);
-                const isSelected = selectedCategoryId === category.id;
-                
-                return (
-                  <Button
-                    key={category.id}
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSelectedCategoryId(category.id)}
-                    className={`rounded-2xl px-6 py-3 font-medium whitespace-nowrap transition-all duration-300 transform active:scale-95 ${
-                      isSelected 
-                        ? 'category-button-selected' 
-                        : 'category-button-unselected'
-                    }`}
-                    style={{
-                      '--category-color': categoryColor,
-                      '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
-                    } as React.CSSProperties}
-                  >
-                  {category.name}
+                <div className="category-filter-indicator" style={indicatorStyle} />
+                <Button
+                  ref={(el) => (buttonRefs.current['all'] = el)}
+                  onClick={() => setSelectedCategoryId(null)}
+                  variant="ghost"
+                  size="sm"
+                  className={`category-filter-button px-5 py-2.5 ${
+                    selectedCategoryId === null ? 'selected' : ''
+                  }`}
+                >
+                  All
                 </Button>
-              );              })}
+                {categories.map((category, index) => {
+                  const isSelected = selectedCategoryId === category.id;
+                  const categoryColor = getCategoryColor(index);
+                  return (
+                    <Button
+                      ref={(el) => (buttonRefs.current[category.id] = el)}
+                      key={category.id}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedCategoryId(category.id)}
+                      className={`category-filter-button px-5 py-2.5 ${
+                        isSelected ? 'selected' : ''
+                      }`}
+                      style={!isSelected ? { color: categoryColor } : {}}
+                    >
+                      {category.name}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+            
+            <div className="island-divider" />
+            
+            {/* Bottom row of controls */}
+            <div className="island-bottom-row">
+              {/* Redesigned Search Bar */}
+              <div className="relative search-bar-wrapper flex-grow">
+                <div className="search-bar-icon">
+                  <Search className="h-4 w-4" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search exercises..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="search-bar-input"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="search-bar-clear"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+
+              {/* Sort button and dropdown */}
+              <div className="relative progress-dropdown-container">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsProgressDropdownOpen(!isProgressDropdownOpen)}
+                  className="rounded-full w-10 h-10 flex-shrink-0 text-muted-foreground"
+                >
+                  <Filter className="h-4 w-4" />
+                </Button>
+                
+                {isProgressDropdownOpen && (
+                  <div className="absolute top-full right-0 mt-2 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-md z-50 min-w-48 progress-dropdown">
+                    <div className="p-2">
+                      {[
+                        { id: 'recent', label: 'Recent', icon: Clock },
+                        { id: 'pr', label: 'PRs', icon: Trophy },
+                        { id: 'progress', label: 'Growth', icon: TrendingUp }
+                      ].map((option) => {
+                        const Icon = option.icon;
+                        return (
+                          <button
+                            key={option.id}
+                            onClick={() => {
+                              setSortBy(option.id as 'recent' | 'pr' | 'progress');
+                              setIsProgressDropdownOpen(false);
+                            }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-95 ${
+                              sortBy === option.id
+                                ? 'bg-primary text-primary-foreground'
+                                : 'text-foreground active:bg-gray-100 dark:active:bg-gray-800'
+                            }`}
+                          >
+                            <Icon className="h-4 w-4" />
+                            <span className="font-medium">{option.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* History Button */}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/history')}
+                className="rounded-full w-10 h-10 flex-shrink-0 text-muted-foreground"
+              >
+                <Clock className="h-4 w-4" />
+              </Button>
             </div>
           </div>
 
           {/* Exercise Progress Grid */}
         <div className="relative exercise-grid-container mt-4">
-          {/* Combined Search and Filter Bar */}
-          <div className="flex items-center gap-2 mb-4">
-            {/* Redesigned Search Bar */}
-            <div className="relative search-bar-wrapper flex-grow">
-              <div className="search-bar-icon">
-                <Search className="h-4 w-4" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search exercises..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-bar-input"
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="search-bar-clear"
-                  aria-label="Clear search"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              )}
-            </div>
-
-            {/* Sort button and dropdown */}
-            <div className="relative progress-dropdown-container">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setIsProgressDropdownOpen(!isProgressDropdownOpen)}
-                className="rounded-full w-10 h-10 flex-shrink-0"
-              >
-                <Filter className="h-4 w-4" />
-              </Button>
-              
-              {isProgressDropdownOpen && (
-                <div className="absolute top-full right-0 mt-2 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-md z-50 min-w-48 progress-dropdown">
-                  <div className="p-2">
-                    {[
-                      { id: 'recent', label: 'Recent', icon: Clock },
-                      { id: 'pr', label: 'PRs', icon: Trophy },
-                      { id: 'progress', label: 'Growth', icon: TrendingUp }
-                    ].map((option) => {
-                      const Icon = option.icon;
-                      return (
-                        <button
-                          key={option.id}
-                          onClick={() => {
-                            setSortBy(option.id as 'recent' | 'pr' | 'progress');
-                            setIsProgressDropdownOpen(false);
-                          }}
-                          className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-95 ${
-                            sortBy === option.id
-                              ? 'bg-primary text-primary-foreground'
-                              : 'text-foreground active:bg-gray-100 dark:active:bg-gray-800'
-                          }`}
-                        >
-                          <Icon className="h-4 w-4" />
-                          <span className="font-medium">{option.label}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
-            
-            {/* History Button */}
-            <Button
-              variant="outline"
-              size="icon"
-              onClick={() => navigate('/history')}
-              className="rounded-full w-10 h-10 flex-shrink-0"
-            >
-              <Clock className="h-4 w-4" />
-            </Button>
-          </div>
+          {/* Combined Search and Filter Bar -- THIS IS NOW MOVED */}
           
           {exerciseProgressItems.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 staggered-cards">

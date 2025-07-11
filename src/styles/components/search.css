@@ -366,18 +366,52 @@
   right: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
-  padding: 0.25rem;
+  background: hsl(var(--muted));
+  color: hsl(var(--muted-foreground));
   border-radius: 9999px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: hsl(var(--muted-foreground) / 0.6);
-  transition: all 0.2s ease-out;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .search-bar-clear:hover {
-  color: hsl(var(--muted-foreground));
-  background-color: hsl(var(--muted) / 0.4);
+  background: hsl(var(--accent));
+}
+
+/* ===== NEW: Control Island Styles ===== */
+.controls-island {
+  background-color: hsl(var(--muted));
+  border-radius: 1.5rem; /* 24px */
+  padding: 0.5rem; /* 8px */
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+  border: 1px solid hsl(var(--border));
+}
+
+.dark .controls-island {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.island-divider {
+  height: 1px;
+  background-color: hsl(var(--border));
+  margin: 0.25rem 0.5rem; /* 4px top/bottom, 8px left/right */
+}
+
+.island-bottom-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem; /* 8px */
+}
+
+/* Make search bar blend into the island */
+.controls-island .search-bar-wrapper .search-bar-input {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  padding-left: 2.25rem; /* Keep space for icon */
 }
 
 @media (min-width: 768px) {
