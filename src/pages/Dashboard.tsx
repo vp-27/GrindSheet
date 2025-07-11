@@ -294,82 +294,82 @@ const Dashboard = () => {
             } as React.CSSProperties}
           />
         )}
-        <div className="relative flex flex-col gap-4 pb-6 z-10">
+        <div className="relative flex flex-col pb-6 z-10">
           {/* Progress Chart Section - Embedded in background */}
           <div className="relative -mx-4 px-4">
             {/* Show percentage gain if available - with inline chart slider */}
             {dynamicPercentGain !== null && (
               <div className="mb-4 flex items-center justify-between">
-                <div className={`text-2xl font-bold ${dynamicPercentGain >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
-                  {dynamicPercentGain >= 0 ? '+' : ''}
-                  <AnimatedCounter 
-                    value={dynamicPercentGain} 
-                    formatValue={(val) => `${val.toFixed(1)}%`}
-                    duration={600}
-                    className="tabular-nums"
-                  />
+                  <div className={`text-2xl font-bold ${dynamicPercentGain >= 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                    {dynamicPercentGain >= 0 ? '+' : ''}
+                    <AnimatedCounter 
+                      value={dynamicPercentGain} 
+                      formatValue={(val) => `${val.toFixed(1)}%`}
+                      duration={600}
+                      className="tabular-nums"
+                    />
+                  </div>
+                  {/* Inline chart timeframe controls */}
+                  <div className="flex-shrink-0">
+                    <MobileSlider
+                      options={[
+                        { id: '2W', label: '2W' },
+                        { id: '1M', label: '1M' },
+                        { id: 'ALL', label: 'ALL' }
+                      ]}
+                      activeOption={chartTimeframe}
+                      onOptionChange={(optionId) => setChartTimeframe(optionId as '2W' | '1M' | 'ALL')}
+                      variant="compact"
+                    />
+                  </div>
                 </div>
-                {/* Inline chart timeframe controls */}
-                <div className="flex-shrink-0">
-                  <MobileSlider
-                    options={[
-                      { id: '2W', label: '2W' },
-                      { id: '1M', label: '1M' },
-                      { id: 'ALL', label: 'ALL' }
-                    ]}
-                    activeOption={chartTimeframe}
-                    onOptionChange={(optionId) => setChartTimeframe(optionId as '2W' | '1M' | 'ALL')}
-                    variant="compact"
-                  />
-                </div>
-              </div>
-            )}
-            {chartData.length > 0 ? (
-              <ProgressChart 
-                data={chartData} 
-                multiple={true}
-                categoryId={selectedCategoryId || undefined}
-                weightUnit="lbs"
-                showPercentage={!selectedCategoryId}
-                appleStyle={true}
-                blendWithBackground={true}
-                customColors={chartColors}
-                onHoverData={setChartHoverData}
-                onTimeframeChange={(tf, gain) => {
-                  setChartTimeframe(tf as '2W' | '1M' | 'ALL');
-                  setDynamicPercentGain(gain);
-                }}
-                hideTooltip={true}
-                hideTimeframeControls={true}
-                timeframe={chartTimeframe}
-                disableInternalTimeframeFilter={true} // NEW: let parent handle windowing
-              />
-            ) : (
-              <div className="text-center text-muted-foreground py-16">
-                <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-lg font-medium mb-2">No data available yet</p>
-                <p>Start logging exercises to see your progress!</p>
-              </div>
-            )}
-          </div>
-
-          {/* Chart Tooltip - Closer to chart */}
-          <div className="relative z-20">
-            {chartHoverData && (
-              <div className="tooltip-card-enter-active absolute -top-2 left-1/2 -translate-x-1/2">
-                <ChartTooltipCard 
-                  hoverData={chartHoverData}
-                  showPercentage={!selectedCategoryId}
-                  weightUnit="lbs"
+              )}
+              {chartData.length > 0 ? (
+                <ProgressChart 
+                  data={chartData} 
                   multiple={true}
+                  categoryId={selectedCategoryId || undefined}
+                  weightUnit="lbs"
+                  showPercentage={!selectedCategoryId}
+                  appleStyle={true}
+                  blendWithBackground={true}
                   customColors={chartColors}
+                  onHoverData={setChartHoverData}
+                  onTimeframeChange={(tf, gain) => {
+                    setChartTimeframe(tf as '2W' | '1M' | 'ALL');
+                    setDynamicPercentGain(gain);
+                  }}
+                  hideTooltip={true}
+                  hideTimeframeControls={true}
+                  timeframe={chartTimeframe}
+                  disableInternalTimeframeFilter={true} // NEW: let parent handle windowing
                 />
-              </div>
-            )}
-          </div>
+              ) : (
+                <div className="text-center text-muted-foreground py-16">
+                  <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-lg font-medium mb-2">No data available yet</p>
+                  <p>Start logging exercises to see your progress!</p>
+                </div>
+              )}
+            </div>
+
+            {/* Chart Tooltip - Closer to chart */}
+            <div className="relative z-20">
+              {chartHoverData && (
+                <div className="tooltip-card-enter-active absolute -top-2 left-1/2 -translate-x-1/2">
+                  <ChartTooltipCard 
+                    hoverData={chartHoverData}
+                    showPercentage={!selectedCategoryId}
+                    weightUnit="lbs"
+                    multiple={true}
+                    customColors={chartColors}
+                  />
+                </div>
+              )}
+            </div>
           
           {/* Category Filter Buttons */}
-          <div className="relative">
+          <div className="relative mt-4">
             <div className="flex gap-3 overflow-x-auto pb-2 px-1 py-2 scrollbar-hide">
               <Button
                 variant="outline"
@@ -411,7 +411,7 @@ const Dashboard = () => {
           </div>
 
           {/* Exercise Progress Grid */}
-        <div className="relative exercise-grid-container">
+        <div className="relative exercise-grid-container mt-4">
           {/* Progress Title with Inline Dropdown + Expandable Search */}
           <div className="mb-4 space-y-4">
             {/* Progress Dropdown & History Link */}
