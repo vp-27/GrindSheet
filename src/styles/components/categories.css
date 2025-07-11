@@ -51,9 +51,9 @@
   }
 
   .category-button-unselected:hover {
-    background-color: var(--category-color) !important;
-    color: white !important;
-    box-shadow: 0 4px 12px rgba(var(--category-color-rgb), 0.3);
+    background-color: rgba(var(--category-color-rgb), 0.25) !important;
+    color: var(--category-color) !important;
+    box-shadow: 0 4px 12px rgba(var(--category-color-rgb), 0.1);
   }
 }
 
@@ -64,13 +64,13 @@
 }
 
 .category-button-unselected {
-  background-color: transparent !important;
+  background-color: rgba(var(--category-color-rgb), 0.15) !important;
   color: var(--category-color) !important;
-  border-color: var(--category-color) !important;
+  border-color: transparent !important;
 }
 
 .category-button-unselected:active {
-  background-color: rgba(var(--category-color-rgb), 0.2) !important;
+  background-color: rgba(var(--category-color-rgb), 0.25) !important;
   transform: scale(0.98);
   transition: transform 0.1s ease;
 }
@@ -92,17 +92,17 @@
   }
 
   .all-button-unselected:hover {
-    background-color: hsl(var(--primary) / 0.1) !important;
+    background-color: hsl(var(--primary) / 0.2) !important;
     color: hsl(var(--primary)) !important;
-    border-color: hsl(var(--primary)) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-color: transparent !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   }
 }
 
 .all-button-unselected {
-  background-color: transparent !important;
-  color: hsl(var(--muted-foreground)) !important;
-  border-color: hsl(var(--border)) !important;
+  background-color: hsl(var(--primary) / 0.1) !important;
+  color: hsl(var(--primary)) !important;
+  border-color: transparent !important;
 }
 
 /* Mobile active states for "All" button */
