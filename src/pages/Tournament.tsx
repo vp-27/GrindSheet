@@ -46,7 +46,6 @@ import {
 } from '@/utils/tournamentUtils';
 import { supabase } from '@/integrations/supabase/client';
 import PRRecordsPage, { PRRecordsContent } from './PRRecords';
-import ProgressTracker from '@/components/ProgressTracker'; // NEW: Import ProgressTracker
 import '@/styles/index.css';
 
 const TournamentPage: React.FC = () => {
@@ -575,14 +574,6 @@ const TournamentPage: React.FC = () => {
               <div className="space-y-3 text-sm">
                 <div className="bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-900/50 dark:to-slate-800/30 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
                   
-                  {/* Progress Tracker (Preserved) */}
-                  {isCurrentUser && participant.progressTrackers && (
-                    <>
-                      <ProgressTracker progressTrackers={participant.progressTrackers} />
-                      <div className="my-6 border-t border-dashed border-border/50"></div>
-                    </>
-                  )}
-
                   <h4 className="font-bold text-foreground mb-4 flex items-center gap-2 text-base">
                     <TrendingUp className="h-5 w-5 text-blue-600" />
                     Complete Point Breakdown

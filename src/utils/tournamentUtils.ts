@@ -938,3 +938,257 @@ function isMeaningfulPR({ previousBest, newBest, firstLogWeight }: { previousBes
     return pctGain >= 10 || absGain >= 5;
   }
 }
+
+/**
+ * Generate a dynamic list of progress trackers for a user for the current week.
+ */
+export const getGoalProgressTrackersForUser = (
+  user: User,
+  logs: ExerciseLog[],
+  exercises: Exercise[],
+  categories: Category[],
+): ProgressTrackers | null => {
+  const weekDates = getCurrentWeekDates();
+  const startDate = new Date(weekDates.start);
+  const endDate = new Date(weekDates.end);
+
+  const userLogs = logs.filter(log => {
+    const logDate = new Date(log.timestamp);
+    return log.userId === user.id && logDate >= startDate && logDate <= endDate;
+  });
+
+  if (userLogs.length === 0) {
+    return {};
+  }
+
+  const workoutDates = new Set(userLogs.map(log => {
+    const logDate = new Date(log.timestamp);
+    const year = logDate.getFullYear();
+    const month = String(logDate.getMonth() + 1).padStart(2, '0');
+    const day = String(logDate.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }));
+
+  const weekendWorkoutDays = Array.from(workoutDates).filter(dateStr => {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    return isWeekend(date);
+  }).length;
+  
+  let totalExercises = 0;
+  let exercisesPerDay = new Map<string, number>();
+  userLogs.forEach(log => {
+    totalExercises++;
+    const logDate = new Date(log.timestamp);
+    const dateKey = `${logDate.getFullYear()}-${String(logDate.getMonth() + 1).padStart(2, '0')}-${String(logDate.getDate()).padStart(2, '0')}`;
+    exercisesPerDay.set(dateKey, (exercisesPerDay.get(dateKey) || 0) + 1);
+  });
+  
+  const prDetails: PRDetail[] = [];
+  exercises.forEach(exercise => {
+    const exerciseLogs = logs.filter(log => log.exerciseId === exercise.id && log.userId === user.id);
+    if (exerciseLogs.length === 0) return;
+
+    const tournamentExerciseLogs = exerciseLogs.filter(log => {
+      const logDate = new Date(log.timestamp);
+      return logDate >= startDate && logDate <= endDate;
+    });
+
+    if (tournamentExerciseLogs.length > 0) {
+      const maxTournamentWeight = Math.max(...tournamentExerciseLogs.map(log => log.weight));
+      const preTournamentLogs = exerciseLogs.filter(log => new Date(log.timestamp) < startDate);
+
+      if (preTournamentLogs.length > 0) {
+        const previousBest = Math.max(...preTournamentLogs.map(log => log.weight));
+        const firstLogWeight = Math.min(...exerciseLogs.map(log => log.weight));
+
+        if (maxTournamentWeight > previousBest && isMeaningfulPR({ previousBest, newBest: maxTournamentWeight, firstLogWeight })) {
+          const prLog = tournamentExerciseLogs.find(log => log.weight === maxTournamentWeight);
+          prDetails.push({
+            exerciseId: exercise.id,
+            exerciseName: exercise.name,
+            weight: maxTournamentWeight,
+            previousBest,
+            achievedAt: prLog?.timestamp || tournamentExerciseLogs[0].timestamp,
+            improvementPercent: ((maxTournamentWeight - previousBest) / previousBest) * 100
+          });
+        }
+      }
+    }
+  });
+
+  const competitiveDetails: { exerciseId: string; exerciseName: string; type: string; targetUser?: string; points: number; }[] = [];
+
+  const categoriesWorked = new Set(
+    userLogs.map(log => {
+      const exercise = exercises.find(ex => ex.id === log.exerciseId);
+      return exercise?.categoryId;
+    }).filter(Boolean)
+  );
+  
+  let coreExercises = 0;
+  userLogs.forEach(log => {
+    const exercise = exercises.find(ex => ex.id === log.exerciseId);
+    if (exercise && /core|abs|plank|crunch|russian twist|mountain climber/i.test(exercise.name)) {
+      coreExercises++;
+    }
+  });
+
+  const exerciseStats = {
+    totalExercises,
+    uniqueExercises: new Set(userLogs.map(l => l.exerciseId)).size,
+    averageExercisesPerDay: workoutDates.size > 0 ? totalExercises / workoutDates.size : 0,
+    coreExercises,
+    varietyDays: [], 
+    newExerciseBonusPoints: 0
+  };
+  
+  const potentialTrackers: any = {};
+  const toLocalYYYYMMDD = (isoDate: string): string => {
+    const date = new Date(isoDate);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+  const sortedUserLogs = [...userLogs].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+
+  const today = new Date();
+  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  const exercisesToday = exercisesPerDay.get(todayStr) || 0;
+  const dailyWorkoutAchieved = exercisesToday >= 2;
+  potentialTrackers.dailyWorkout = {
+    current: exercisesToday,
+    goal: 2,
+    text: 'Log a workout today (2+ exercises)',
+    points: POINTS_CONFIG.DAILY_WORKOUT_BASE.points,
+    isAchieved: dailyWorkoutAchieved,
+    completedAt: dailyWorkoutAchieved ? todayStr : null,
+  };
+
+  const consistencyAchieved = workoutDates.size >= 5;
+  potentialTrackers.consistency = {
+    current: workoutDates.size,
+    goal: 5,
+    text: '5 Workout Days',
+    points: POINTS_CONFIG.CONSISTENCY_BONUS.points,
+    isAchieved: consistencyAchieved,
+    completedAt: consistencyAchieved ? Array.from(workoutDates).sort()[4] : null,
+  };
+
+  const categoryCompletionAchieved = categoriesWorked.size >= categories.length;
+  let categoryCompletionDate: string | null = null;
+  if (categoryCompletionAchieved) {
+    const workedCats = new Set<string>();
+    for (const log of sortedUserLogs) {
+      const exercise = exercises.find(ex => ex.id === log.exerciseId);
+      if (exercise) {
+        workedCats.add(exercise.categoryId);
+        if (workedCats.size === categories.length) {
+          categoryCompletionDate = toLocalYYYYMMDD(log.timestamp);
+          break;
+        }
+      }
+    }
+  }
+  potentialTrackers.categoryCompletion = {
+    current: categoriesWorked.size,
+    goal: categories.length,
+    text: 'Work All Muscle Groups',
+    points: POINTS_CONFIG.CATEGORY_COMPLETION.points,
+    isAchieved: categoryCompletionAchieved,
+    completedAt: categoryCompletionDate,
+  };
+  
+  const weekendWarriorAchieved = weekendWorkoutDays >= 2;
+  let weekendWarriorCompletionDate: string | null = null;
+  if (weekendWarriorAchieved) {
+      const uniqueWeekendDays = new Set(sortedUserLogs.filter(log => isWeekend(new Date(log.timestamp))).map(log => toLocalYYYYMMDD(log.timestamp)));
+      weekendWarriorCompletionDate = Array.from(uniqueWeekendDays).sort()[1];
+  }
+  potentialTrackers.weekendWarrior = {
+    current: weekendWorkoutDays,
+    goal: 2,
+    text: 'Weekend Warrior',
+    points: BADGE_DEFINITIONS[BadgeType.WEEKEND_WARRIOR].points,
+    isAchieved: weekendWarriorAchieved,
+    completedAt: weekendWarriorCompletionDate,
+  };
+
+  const coreDestroyerAchieved = exerciseStats.coreExercises >= 6;
+  let coreDestroyerCompletionDate: string | null = null;
+  if (coreDestroyerAchieved) {
+    let coreCount = 0;
+    for (const log of sortedUserLogs) {
+        const exercise = exercises.find(ex => ex.id === log.exerciseId);
+        if (exercise && /core|abs|plank|crunch|russian twist|mountain climber/i.test(exercise.name)) {
+            coreCount++;
+            if (coreCount === 6) {
+                coreDestroyerCompletionDate = toLocalYYYYMMDD(log.timestamp);
+                break;
+            }
+        }
+    }
+  }
+  potentialTrackers.coreDestroyer = {
+    current: exerciseStats.coreExercises,
+    goal: 6,
+    text: '6+ Core Exercises',
+    points: BADGE_DEFINITIONS[BadgeType.CORE_DESTROYER].points,
+    isAchieved: coreDestroyerAchieved,
+    completedAt: coreDestroyerCompletionDate,
+  };
+
+  const volumeCrusherAchieved = exerciseStats.averageExercisesPerDay >= 3.5;
+  potentialTrackers.volumeCrusher = {
+    current: exerciseStats.averageExercisesPerDay,
+    goal: 3.5,
+    text: 'Avg. 3.5+ Exercises/Day',
+    points: BADGE_DEFINITIONS[BadgeType.VOLUME_CRUSHER].points,
+    isAchieved: volumeCrusherAchieved,
+    completedAt: volumeCrusherAchieved ? toLocalYYYYMMDD(sortedUserLogs[sortedUserLogs.length - 1].timestamp) : null,
+  };
+
+  const setPRAchieved = prDetails.length >= 1;
+  potentialTrackers.setPR = {
+    current: prDetails.length,
+    goal: 1,
+    text: 'Set a new Personal Record',
+    points: POINTS_CONFIG.PR_ACHIEVEMENT.points,
+    isAchieved: setPRAchieved,
+    completedAt: setPRAchieved ? toLocalYYYYMMDD(prDetails.sort((a,b) => new Date(a.achievedAt).getTime() - new Date(b.achievedAt).getTime())[0].achievedAt) : null,
+  };
+  
+  const beatFriendAchieved = competitiveDetails.length >= 1;
+  potentialTrackers.beatFriend = {
+    current: competitiveDetails.length,
+    goal: 1,
+    text: "Beat a friend's record",
+    points: COMPETITIVE_BONUS_CONFIG.TAKEOVER.points,
+    isAchieved: beatFriendAchieved,
+    completedAt: null,
+  };
+
+  const maxVarietyInDay = Math.max(0, ...Array.from(exercisesPerDay.values()));
+  const varietyAchieved = maxVarietyInDay >= 4;
+  potentialTrackers.exerciseVariety = {
+    current: maxVarietyInDay,
+    goal: 4,
+    text: 'Daily Exercise Variety (4+ in one day)',
+    points: 20,
+    isAchieved: varietyAchieved,
+    completedAt: varietyAchieved ? toLocalYYYYMMDD(sortedUserLogs[sortedUserLogs.length - 1].timestamp) : null,
+  };
+
+  const totalVolumeAchieved = exerciseStats.totalExercises >= 15;
+  potentialTrackers.totalVolume = {
+    current: exerciseStats.totalExercises,
+    goal: 15,
+    text: 'Complete 15 total exercises',
+    points: 40,
+    isAchieved: totalVolumeAchieved,
+    completedAt: totalVolumeAchieved ? toLocalYYYYMMDD(sortedUserLogs.find((l, i) => i === 14)?.timestamp || sortedUserLogs[sortedUserLogs.length - 1].timestamp) : null,
+  };
+
+  return potentialTrackers as ProgressTrackers;
+};
