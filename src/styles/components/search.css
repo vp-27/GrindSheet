@@ -390,10 +390,16 @@
   border: 1px solid hsl(var(--border));
 }
 
+
 .panel-divider {
   height: 1px;
   background-color: hsl(var(--border));
   margin: 0.25rem 0.5rem; /* 4px top/bottom, 8px left/right */
+  border-radius: 9999px;
+}
+
+.dark .panel-divider {
+  background-color: #3b3b3b;
 }
 
 /* Make search bar blend into the panel */
