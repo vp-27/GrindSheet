@@ -380,7 +380,7 @@ const Dashboard = () => {
               )}
             </div>
           
-          {/* The Controls Island */}
+          {/* Controls Island */}
           <div className="control-panel mt-4">
             {/* Category Filter */}
             <div className="relative bg-muted p-1 rounded-2xl">
