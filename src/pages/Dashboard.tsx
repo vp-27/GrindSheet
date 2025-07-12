@@ -551,7 +551,7 @@ const Dashboard = () => {
                 
                 return (
                   <div 
-                    key={progress.exercise.id}
+                    key={`${selectedCategoryId || 'all'}-${progress.exercise.id}`}
                     className="group cursor-pointer"
                     onClick={() => handleExerciseClick(progress.exercise.id)}
                   >
