@@ -110,32 +110,32 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
     // Special indicators for top 3 positions using consistent icons
     if (rank === 1) {
       return (
-        <div className="w-4 h-4 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-sm">
-          <Crown className="w-2.5 h-2.5 text-yellow-900" />
+        <div className="w-3 h-3 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-sm">
+          <Crown className="w-2 h-2 text-yellow-900" />
         </div>
       );
     }
     
     if (rank === 2) {
       return (
-        <div className="w-4 h-4 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shadow-sm">
-          <Medal className="w-2.5 h-2.5 text-gray-700" />
+        <div className="w-3 h-3 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shadow-sm">
+          <Medal className="w-2 h-2 text-gray-700" />
         </div>
       );
     }
     
     if (rank === 3) {
       return (
-        <div className="w-4 h-4 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center shadow-sm">
-          <Award className="w-2.5 h-2.5 text-amber-100" />
+        <div className="w-3 h-3 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center shadow-sm">
+          <Award className="w-2 h-2 text-amber-100" />
         </div>
       );
     }
 
     // For other positions, show a small red dot with the rank number
     return (
-      <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center shadow-sm">
-        <span className="text-[8px] font-bold text-white">{rank}</span>
+      <div className="w-3 h-3 rounded-full bg-red-500 flex items-center justify-center shadow-sm">
+        <span className="text-[6px] font-bold text-white">{rank}</span>
       </div>
     );
   };
