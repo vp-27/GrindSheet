@@ -1092,7 +1092,7 @@ const TournamentPage: React.FC = () => {
                   >
                     <span className="font-medium text-sm">
                       {selectedTournament?.id === currentTournament?.id 
-                        ? 'Current Week' 
+                        ? 'This Week' 
                         : new Date(selectedTournament?.weekStart || '').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                       }
                     </span>
@@ -1106,7 +1106,7 @@ const TournamentPage: React.FC = () => {
                       onClick={() => setSelectedTournament(currentTournament)}
                       className={`flex items-center justify-between ${selectedTournament?.id === currentTournament?.id ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
                     >
-                      <span className="font-medium">Current Week</span>
+                      <span className="font-medium">This Week</span>
                       {selectedTournament?.id === currentTournament?.id && (
                         <div className="w-2 h-2 bg-blue-500 rounded-full" />
                       )}
