@@ -285,8 +285,11 @@ const AddExerciseButton: React.FC<{
         "rounded-full h-14 w-14 flex items-center justify-center shadow-xl transition-all duration-300 backdrop-blur-lg group hover:scale-105 active:scale-95 focus:outline-none",
         isModalOpen 
           ? "bg-red-500 hover:bg-red-600 text-white shadow-2xl scale-105 shadow-red-500/25" 
-          : "bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-2xl hover:shadow-blue-500/25"
+          : "text-white shadow-2xl hover:shadow-orange-500/25"
       )}
+      style={!isModalOpen ? {
+        background: 'linear-gradient(45deg, #f97316, #ec4899)'
+      } : undefined}
     >
       <Plus className={cn(
         "h-6 w-6 transition-all duration-300 group-hover:scale-110", 
