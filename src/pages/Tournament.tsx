@@ -551,21 +551,15 @@ const TournamentPage: React.FC = () => {
               <div className="space-y-3 text-sm">
                 <div className="bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-900/50 dark:to-slate-800/30 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
                   
-                  <h4 className="font-bold text-foreground mb-4 flex items-center gap-2 text-base">
-                    {(() => {
-                      const TrendingUpIcon = TOURNAMENT_ICONS.IMPROVEMENT_DETAIL;
-                      return <TrendingUpIcon className="h-5 w-5 text-blue-600" />;
-                    })()}
-                    Complete Point Breakdown
-                  </h4>
+
                   
-                  {/* --- NEW VISUAL BREAKDOWN --- */}
-                  <div className="space-y-4">
-                    {/* --- Performance Card --- */}
+                  {/* --- UNIFIED BREAKDOWN WITH DIVIDERS --- */}
+                  <div className="space-y-0">
+                    {/* --- Performance Section --- */}
                     {(pointBreakdown.performance > 0) && (
                       <div 
                         id={`performance-section-${participant.userId}`}
-                        className={`p-4 rounded-xl transition-all duration-300 ${highlightedSection === 'performance' ? 'ring-2 ring-amber-400/50 bg-amber-50/30 dark:bg-amber-950/20' : 'bg-slate-100/50 dark:bg-slate-800/20'}`}
+                        className={`transition-all duration-300 ${highlightedSection === 'performance' ? 'ring-2 ring-amber-400/50 bg-amber-50/30 dark:bg-amber-950/20 rounded-lg' : ''}`}
                       >
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
@@ -576,7 +570,7 @@ const TournamentPage: React.FC = () => {
                           </span>
                         </div>
                         
-                        <div className="space-y-2">
+                        <div className="space-y-2 mb-4">
                           {participant.prDetails.map((pr, idx) => (
                             <div 
                               key={`pr-${idx}`} 
@@ -646,11 +640,16 @@ const TournamentPage: React.FC = () => {
                       </div>
                     )}
                     
-                    {/* --- Volume & Consistency Card --- */}
+                    {/* Divider between sections */}
+                    {(pointBreakdown.performance > 0 && pointBreakdown.volume > 0) && (
+                      <div className="border-t border-slate-300/60 dark:border-slate-600/60 my-6"></div>
+                    )}
+                    
+                    {/* --- Volume & Consistency Section --- */}
                     {(pointBreakdown.volume > 0) && (
                       <div 
                         id={`volume-section-${participant.userId}`}
-                        className={`p-4 rounded-xl transition-all duration-300 ${highlightedSection === 'volume' ? 'ring-2 ring-blue-400/50 bg-blue-50/30 dark:bg-blue-950/20' : 'bg-slate-100/50 dark:bg-slate-800/20'}`}
+                        className={`transition-all duration-300 ${highlightedSection === 'volume' ? 'ring-2 ring-blue-400/50 bg-blue-50/30 dark:bg-blue-950/20 rounded-lg' : ''}`}
                       >
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
@@ -661,7 +660,7 @@ const TournamentPage: React.FC = () => {
                           </span>
                         </div>
                         
-                        <div className="space-y-2">
+                        <div className="space-y-2 mb-4">
                           {(participant.pointsBreakdown.participationPoints + participant.pointsBreakdown.varietyPoints) > 0 && (
                             <div 
                               className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20 cursor-pointer transition-all duration-200"
@@ -722,11 +721,16 @@ const TournamentPage: React.FC = () => {
                       </div>
                     )}
 
-                    {/* --- Achievement Bonuses Card --- */}
+                    {/* Divider between sections */}
+                    {(pointBreakdown.volume > 0 && pointBreakdown.bonuses > 0) && (
+                      <div className="border-t border-slate-300/60 dark:border-slate-600/60 my-6"></div>
+                    )}
+                    
+                    {/* --- Achievement Bonuses Section --- */}
                     {(pointBreakdown.bonuses > 0) && (
                       <div 
                         id={`bonuses-section-${participant.userId}`}
-                        className={`p-4 rounded-xl transition-all duration-300 ${highlightedSection === 'bonuses' ? 'ring-2 ring-emerald-400/50 bg-emerald-50/30 dark:bg-emerald-950/20' : 'bg-slate-100/50 dark:bg-slate-800/20'}`}
+                        className={`transition-all duration-300 ${highlightedSection === 'bonuses' ? 'ring-2 ring-emerald-400/50 bg-emerald-50/30 dark:bg-emerald-950/20 rounded-lg' : ''}`}
                       >
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
@@ -737,7 +741,7 @@ const TournamentPage: React.FC = () => {
                           </span>
                         </div>
                         
-                        <div className="space-y-2">
+                        <div className="space-y-2 mb-4">
                           {(participant.exerciseStats?.newExerciseBonusPoints || 0) > 0 && (
                             <div 
                               className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-emerald-100/50 dark:hover:bg-emerald-900/20 cursor-pointer transition-all duration-200"
