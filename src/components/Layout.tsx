@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Plus, Crown, Medal, Award } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -84,6 +84,16 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
   useEffect(() => {
     setAvatarImageError(false);
   }, [profile?.avatar_url]);
+
+  // Memoize the profile nav link to prevent unnecessary re-renders
+  const profileNavLink = useMemo(() => (
+    <ProfileNavLink 
+      to="/settings" 
+      profile={profile}
+      avatarImageError={avatarImageError}
+      setAvatarImageError={setAvatarImageError}
+    />
+  ), [profile, avatarImageError, setAvatarImageError]);
 
   // Create ranking indicator component
   const RankingIndicator: React.FC<{ rank: number | null; totalParticipants: number }> = ({ rank, totalParticipants }) => {
@@ -191,12 +201,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
             />
           </div>
           <div className="flex-1 flex justify-center items-center">
-            <ProfileNavLink 
-              to="/settings" 
-              profile={profile}
-              avatarImageError={avatarImageError}
-              setAvatarImageError={setAvatarImageError}
-            />
+            {profileNavLink}
           </div>
           {/* Absolutely positioned AddExerciseButton for precise centering */}
           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
@@ -266,8 +271,8 @@ const ProfileNavLink: React.FC<{
   const isActive = currentPath === to || 
                   (to !== '/' && currentPath.startsWith(to));
 
-  // Get user initials for avatar fallback
-  const getUserInitials = () => {
+  // Memoize user initials to prevent recalculation on every render
+  const userInitials = useMemo(() => {
     if (!profile?.name) return '?';
     return profile.name
       .split(' ')
@@ -275,7 +280,16 @@ const ProfileNavLink: React.FC<{
       .join('')
       .toUpperCase()
       .slice(0, 2);
-  };
+  }, [profile?.name]);
+
+  // Memoize the avatar image source to prevent unnecessary re-renders
+  const avatarSrc = useMemo(() => profile?.avatar_url, [profile?.avatar_url]);
+  const avatarAlt = useMemo(() => profile?.name || 'Profile', [profile?.name]);
+
+  // Memoize the error handler to prevent recreation on every render
+  const handleAvatarError = useCallback(() => {
+    setAvatarImageError(true);
+  }, [setAvatarImageError]);
 
   return (
     <Link 
@@ -298,12 +312,12 @@ const ProfileNavLink: React.FC<{
           )}
         >
           <AvatarImage 
-            src={profile?.avatar_url} 
-            alt={profile?.name || 'Profile'}
-            onError={() => setAvatarImageError(true)}
+            src={avatarSrc} 
+            alt={avatarAlt}
+            onError={handleAvatarError}
           />
           <AvatarFallback className="text-xs font-medium bg-muted">
-            {getUserInitials()}
+            {userInitials}
           </AvatarFallback>
         </Avatar>
       </div>
