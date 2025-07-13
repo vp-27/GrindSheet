@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { Plus, Crown, Medal, Award } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -85,15 +85,23 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
     setAvatarImageError(false);
   }, [profile?.avatar_url]);
 
+  // Create a stable profile reference to prevent unnecessary re-renders
+  const stableProfile = useMemo(() => ({
+    id: profile?.id,
+    name: profile?.name,
+    username: profile?.username,
+    avatar_url: profile?.avatar_url
+  }), [profile?.id, profile?.name, profile?.username, profile?.avatar_url]);
+
   // Memoize the profile nav link to prevent unnecessary re-renders
   const profileNavLink = useMemo(() => (
     <ProfileNavLink 
       to="/settings" 
-      profile={profile}
+      profile={stableProfile}
       avatarImageError={avatarImageError}
       setAvatarImageError={setAvatarImageError}
     />
-  ), [profile, avatarImageError, setAvatarImageError]);
+  ), [stableProfile, avatarImageError, setAvatarImageError]);
 
   // Create ranking indicator component
   const RankingIndicator: React.FC<{ rank: number | null; totalParticipants: number }> = ({ rank, totalParticipants }) => {
@@ -260,12 +268,12 @@ const NavLink: React.FC<{
   );
 };
 
-const ProfileNavLink: React.FC<{ 
+const ProfileNavLink = memo<{ 
   to: string; 
   profile: any;
   avatarImageError: boolean;
   setAvatarImageError: (error: boolean) => void;
-}> = ({ to, profile, avatarImageError, setAvatarImageError }) => {
+}>(({ to, profile, avatarImageError, setAvatarImageError }) => {
   // Get current path
   const currentPath = window.location.pathname;
   const isActive = currentPath === to || 
@@ -311,11 +319,14 @@ const ProfileNavLink: React.FC<{
               : "ring-muted-foreground/20 hover:ring-muted-foreground/40"
           )}
         >
-          <AvatarImage 
-            src={avatarSrc} 
-            alt={avatarAlt}
-            onError={handleAvatarError}
-          />
+          {avatarSrc && !avatarImageError ? (
+            <AvatarImage 
+              key={avatarSrc} // Force re-render only when src changes
+              src={avatarSrc} 
+              alt={avatarAlt}
+              onError={handleAvatarError}
+            />
+          ) : null}
           <AvatarFallback className="text-xs font-medium bg-muted">
             {userInitials}
           </AvatarFallback>
@@ -326,7 +337,9 @@ const ProfileNavLink: React.FC<{
       </span>
     </Link>
   );
-};
+});
+
+ProfileNavLink.displayName = 'ProfileNavLink';
 
 const AddExerciseButton: React.FC<{
   isModalOpen: boolean;
