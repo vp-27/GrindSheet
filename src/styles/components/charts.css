@@ -157,6 +157,7 @@
   color: hsl(var(--muted-foreground));
 }
 
+/* Legacy badge styles - kept for backward compatibility but no longer used */
 .apple-health-progress-badge {
   display: flex;
   align-items: center;

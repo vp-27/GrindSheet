@@ -730,28 +730,30 @@ const Dashboard = () => {
                         </div>
                         
                         <div className="flex items-center gap-2">
+                          {isPersonalRecord && (
+                            <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 text-sm font-medium">
+                              <Trophy className="w-3 h-3" />
+                              <span>PR</span>
+                            </div>
+                          )}
+                          {miniChartData.length === 1 && (
+                            <div className="text-muted-foreground text-sm font-medium">
+                              First log
+                            </div>
+                          )}
                           {progress.percentGainFromPrevious !== undefined && progress.percentGainFromPrevious !== 0 && (
-                            <div className={`apple-health-progress-badge ${
-                              progress.percentGainFromPrevious > 0 ? 'positive' : 'negative'
+                            <div className={`flex items-center gap-1 text-sm font-medium ${
+                              progress.percentGainFromPrevious > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
                             }`}>
-                              {progress.percentGainFromPrevious > 0 ? '+' : ''}
+                              <span className="text-xs">
+                                {progress.percentGainFromPrevious > 0 ? '↗' : '↘'}
+                              </span>
                               <AnimatedCounter 
                                 value={progress.percentGainFromPrevious} 
                                 formatValue={(val) => `${val.toFixed(1)}%`}
                                 duration={500}
                                 className="tabular-nums"
                               />
-                            </div>
-                          )}
-                          {isPersonalRecord && (
-                            <div className="apple-health-pr-badge">
-                              <Trophy className="apple-health-pr-badge-icon" />
-                              PR
-                            </div>
-                          )}
-                          {miniChartData.length === 1 && (
-                            <div className="apple-health-first-log-badge">
-                              First log
                             </div>
                           )}
                         </div>
