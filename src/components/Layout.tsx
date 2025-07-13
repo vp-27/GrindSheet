@@ -278,20 +278,21 @@ const AddExerciseButton: React.FC<{
   };
 
   return (
-    <Button 
+    <button 
       onClick={handleClick}
+      aria-label={isModalOpen ? "Close exercise modal" : "Add exercise"}
       className={cn(
-        "rounded-full h-14 w-14 flex items-center justify-center shadow-xl transition-all duration-300 ring-2 backdrop-blur-lg group hover:scale-105 active:scale-95",
+        "rounded-full h-14 w-14 flex items-center justify-center shadow-xl transition-all duration-300 backdrop-blur-lg group hover:scale-105 active:scale-95 focus:outline-none",
         isModalOpen 
-          ? "bg-red-500 hover:bg-red-600 text-white shadow-2xl ring-red-500/40 scale-105 shadow-red-500/25" 
-          : "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-2xl hover:shadow-primary/20 ring-white/20 dark:ring-gray-800/20"
+          ? "bg-red-500 hover:bg-red-600 text-white shadow-2xl scale-105 shadow-red-500/25" 
+          : "bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-2xl hover:shadow-blue-500/25"
       )}
     >
       <Plus className={cn(
         "h-6 w-6 transition-all duration-300 group-hover:scale-110", 
         isModalOpen ? "rotate-45 scale-110" : "group-active:rotate-90"
       )} />
-    </Button>
+    </button>
   );
 };
 
