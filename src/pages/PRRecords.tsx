@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '@/context/useAppContext';
 import { useAuth } from '@/context/AuthContext';
+import { useTheme } from '@/context/ThemeContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +15,14 @@ import {
   Target,
   Users,
   Flame,
-  Zap
+  Zap,
+  ChevronRight,
+  Search,
+  X,
+  Filter,
+  TrendingUp,
+  TrendingDown,
+  Activity
 } from 'lucide-react';
 import { LeaderboardType } from '@/types';
 import { 
@@ -23,17 +31,21 @@ import {
 } from '@/utils/progressUtils';
 import { getCategoryChartColors, getCategoryKeyByName, getCategoryColors } from '@/utils/categoryColors';
 import { supabase } from '@/integrations/supabase/client';
-import '@/styles/components/pr-records.css';
+import AnimatedCounter from '@/components/ui/animated-counter';
+import { MobileSlider } from '@/components/ui/mobile-slider';
+import '@/styles/index.css';
+import '@/styles/components/search.css';
 
 // Internal component for use within Tournament tab
 export const PRRecordsContent: React.FC = () => {
   const { profile } = useAuth();
+  const { isDark } = useTheme();
   const { categories, exercises } = useAppContext();
   const navigate = useNavigate();
   
   const [users, setUsers] = useState<any[]>([]);
   const [allExerciseLogs, setAllExerciseLogs] = useState<any[]>([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [contentReady, setContentReady] = useState(false);
   const [prLeaderboard, setPrLeaderboard] = useState<any[]>([]);
   const [prChampionship, setPrChampionship] = useState<any>({
@@ -44,10 +56,43 @@ export const PRRecordsContent: React.FC = () => {
   });
   const [friendsSoloPRs, setFriendsSoloPRs] = useState<any[]>([]);
   const [showSoloPRs, setShowSoloPRs] = useState(false);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [sortBy, setSortBy] = useState<'weight' | 'recent' | 'exercise'>('weight');
+  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+
+  // Refs and state for the animated category filter
+  const [indicatorStyle, setIndicatorStyle] = useState({});
+  const filterContainerRef = useRef<HTMLDivElement>(null);
+  const buttonRefs = useRef<{[key: string]: HTMLButtonElement | null}>({});
+
+  // Use the same color system as the rest of the app
+  const chartColors = getCategoryChartColors();
+
+  // This effect updates the sliding indicator for the category filter
+  useEffect(() => {
+    const activeId = selectedCategoryId ?? 'all';
+    const activeButton = buttonRefs.current[activeId];
+    
+    if (activeButton) {
+      const activeColor = selectedCategoryId
+        ? getCategoryColor(categories.findIndex(cat => cat.id === selectedCategoryId))
+        : 'hsl(var(--primary))';
+
+      setIndicatorStyle({
+        transform: `translateX(${activeButton.offsetLeft}px)`,
+        width: `${activeButton.offsetWidth}px`,
+        backgroundColor: activeColor,
+      });
+
+      activeButton.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  }, [selectedCategoryId, categories]);
 
   // Handle exercise click navigation
   const handleExerciseClick = (exerciseId: string) => {
     navigate(`/exercise-detail?exercise=${exerciseId}`);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Fetch data on mount
@@ -92,6 +137,11 @@ export const PRRecordsContent: React.FC = () => {
     fetchData();
   }, []);
 
+  // Get color for a category based on its index
+  const getCategoryColor = (categoryIndex: number) => {
+    return chartColors[categoryIndex % chartColors.length];
+  };
+
   // Calculate friends' solo PRs that can be beaten
   const calculateFriendsSoloPRs = () => {
     if (!profile || users.length === 0 || allExerciseLogs.length === 0) return [];
@@ -102,7 +152,7 @@ export const PRRecordsContent: React.FC = () => {
     
     // Get friends' PR for each exercise
     exercises.forEach(exercise => {
-      if (selectedCategoryId !== 'all' && exercise.categoryId !== selectedCategoryId) return;
+      if (selectedCategoryId && exercise.categoryId !== selectedCategoryId) return;
       
       // Get current user's best for this exercise
       const currentUserBest = currentUserLogs
@@ -162,7 +212,7 @@ export const PRRecordsContent: React.FC = () => {
   // Update PR data when dependencies change
   useEffect(() => {
     if (users.length > 0 && allExerciseLogs.length > 0 && exercises.length > 0 && categories.length > 0) {
-      const categoryId = selectedCategoryId === 'all' ? undefined : selectedCategoryId;
+      const categoryId = selectedCategoryId || undefined;
       
       // Get PR leaderboard
       const leaderboard = getLeaderboard(
@@ -205,37 +255,119 @@ export const PRRecordsContent: React.FC = () => {
     return categories.find(cat => cat.id === exercise.categoryId);
   };
 
+  // Filter and sort PR leaderboard
+  const filteredAndSortedPRs = useMemo(() => {
+    let filtered = prLeaderboard;
+    
+    // Filter by search query
+    if (searchQuery.trim()) {
+      filtered = filtered.filter(entry => {
+        const exerciseName = getExerciseName(entry.exerciseId!);
+        const categoryName = getExerciseCategory(entry.exerciseId!)?.name || '';
+        const userName = entry.user?.name || '';
+        
+        return exerciseName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+               categoryName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+               userName.toLowerCase().includes(searchQuery.toLowerCase());
+      });
+    }
+    
+    // Sort based on selected sort method
+    return filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'weight':
+          return b.value - a.value;
+        case 'recent':
+          return new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime();
+        case 'exercise':
+          return getExerciseName(a.exerciseId!).localeCompare(getExerciseName(b.exerciseId!));
+        default:
+          return 0;
+      }
+    });
+  }, [prLeaderboard, searchQuery, sortBy]);
+
+  // Get selected category info
+  const selectedCategory = selectedCategoryId 
+    ? categories.find(cat => cat.id === selectedCategoryId) 
+    : null;
+
+  // Get selected category color for subtle background tinting
+  const selectedCategoryColor = useMemo(() => {
+    if (!selectedCategoryId) return null;
+    const categoryIndex = categories.findIndex(cat => cat.id === selectedCategoryId);
+    return categoryIndex >= 0 ? getCategoryColor(categoryIndex) : null;
+  }, [selectedCategoryId, categories]);
+
+  // Get the header title
+  const headerTitle = selectedCategoryId ? 
+    `${categories.find(c => c.id === selectedCategoryId)?.name} Records` : 
+    "PR Records";
+
   // Render PR champion summary card
   const renderPRChampionSummary = () => {
     if (!prChampionship.champion && prChampionship.summary.length === 0) {
       return (
-        <div className="apple-health-card mb-6">
-          <div className="text-center p-4">
-            <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-            <h3 className="text-lg font-semibold text-muted-foreground mb-2">No PR Records Yet</h3>
-            <p className="text-sm text-muted-foreground">
-              {selectedCategoryId === 'all' 
-                ? 'Start logging workouts to see PR champions!'
-                : `No PR records in ${getCategoryName(selectedCategoryId)} category yet.`
-              }
-            </p>
-          </div>
+        <div className={`glass-card rounded-2xl p-8 text-center ${selectedCategoryId ? 'category-tinted' : ''}`}>
+          <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-foreground mb-2">No PR Records Yet</h3>
+          <p className="text-muted-foreground">
+            {selectedCategoryId 
+              ? `No PR records in ${getCategoryName(selectedCategoryId)} category yet.`
+              : 'Start logging workouts to see PR champions!'
+            }
+          </p>
         </div>
       );
     }
 
+    // Get category color for styling
+    const categoryColor = selectedCategoryId 
+      ? getCategoryColor(categories.findIndex(cat => cat.id === selectedCategoryId))
+      : '#fbbf24'; // Default amber color
+
     return (
-      <div className="apple-health-card mb-6 pr-champion-card">
+      <div 
+        className={`apple-health-card mb-6 ${selectedCategoryId ? 'category-tinted' : ''}`}
+        style={{
+          '--category-color': categoryColor,
+          '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '251, 191, 36'
+        } as React.CSSProperties}
+      >
         <div className="flex items-center gap-4 mb-4">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-md">
-            <Crown className="h-6 w-6 text-yellow-900" />
+          <div 
+            className="w-12 h-12 rounded-full flex items-center justify-center shadow-md"
+            style={{
+              background: selectedCategoryId 
+                ? `linear-gradient(135deg, ${categoryColor}40, ${categoryColor}80)`
+                : 'linear-gradient(135deg, #fbbf24, #f59e0b)'
+            }}
+          >
+            <Crown 
+              className="h-6 w-6" 
+              style={{ color: selectedCategoryId ? categoryColor : '#92400e' }}
+            />
           </div>
           <div className="flex-1">
-            <h3 className="apple-health-card-title text-base font-bold text-amber-800 dark:text-amber-200">
+            <h3 
+              className="apple-health-card-title text-base font-bold"
+              style={{ 
+                color: selectedCategoryId 
+                  ? categoryColor 
+                  : '#92400e'
+              }}
+            >
               PR Champion{prChampionship.champion ? `: ${prChampionship.champion.name}` : 'ship'}
             </h3>
             <div className="apple-health-card-time">
-              <span className="apple-health-card-time-text text-amber-700 dark:text-amber-300">
+              <span 
+                className="apple-health-card-time-text"
+                style={{ 
+                  color: selectedCategoryId 
+                    ? `${categoryColor}cc` 
+                    : '#92400ecc'
+                }}
+              >
                 {prChampionship.champion 
                   ? `${prChampionship.championCount} PR${prChampionship.championCount !== 1 ? 's' : ''} out of ${prChampionship.totalExercises} exercises`
                   : `${prChampionship.totalExercises} exercises tracked`
@@ -248,9 +380,22 @@ export const PRRecordsContent: React.FC = () => {
         {prChampionship.summary.length > 0 && (
           <div className="space-y-2">
             {prChampionship.summary.slice(0, 3).map((item, index) => (
-              <div key={item.user.id} className="flex items-center gap-3 p-2 rounded-lg bg-amber-100/50 dark:bg-amber-900/20">
+              <div 
+                key={item.user.id} 
+                className="flex items-center gap-3 p-3 rounded-xl"
+                style={{
+                  backgroundColor: selectedCategoryId 
+                    ? `${categoryColor}15` 
+                    : 'rgba(251, 191, 36, 0.1)'
+                }}
+              >
                 <div className="flex items-center gap-2">
-                  {index === 0 && <Crown className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />}
+                  {index === 0 && (
+                    <Crown 
+                      className="h-4 w-4" 
+                      style={{ color: selectedCategoryId ? categoryColor : '#d97706' }}
+                    />
+                  )}
                   {index === 1 && <Medal className="h-4 w-4 text-gray-500" />}
                   {index === 2 && <Trophy className="h-4 w-4 text-amber-600" />}
                   {index > 2 && <span className="w-4 h-4 flex items-center justify-center text-xs font-bold text-muted-foreground">#{index + 1}</span>}
@@ -260,9 +405,28 @@ export const PRRecordsContent: React.FC = () => {
                   <AvatarFallback>{item.user.name.charAt(0).toUpperCase()}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
-                  <div className="font-medium text-sm text-amber-800 dark:text-amber-200">{item.user.name}</div>
+                  <div 
+                    className="font-medium text-sm"
+                    style={{ 
+                      color: selectedCategoryId 
+                        ? categoryColor 
+                        : '#92400e'
+                    }}
+                  >
+                    {item.user.name}
+                  </div>
                 </div>
-                <Badge variant="secondary" className="bg-amber-200/80 dark:bg-amber-800/50 text-amber-800 dark:text-amber-200">
+                <Badge 
+                  variant="secondary" 
+                  style={{
+                    backgroundColor: selectedCategoryId 
+                      ? `${categoryColor}30` 
+                      : 'rgba(251, 191, 36, 0.3)',
+                    color: selectedCategoryId 
+                      ? categoryColor 
+                      : '#92400e'
+                  }}
+                >
                   {item.prCount} PR{item.prCount !== 1 ? 's' : ''}
                 </Badge>
               </div>
@@ -277,20 +441,16 @@ export const PRRecordsContent: React.FC = () => {
   const renderFriendsSoloPRs = () => {
     if (friendsSoloPRs.length === 0) return null;
     
-    // Get selected category for styling
-    const selectedCategory = selectedCategoryId !== 'all' ? categories.find(cat => cat.id === selectedCategoryId) : null;
-    const categoryClass = selectedCategory ? getCategoryKeyByName(selectedCategory.name) : '';
-    
     return (
       <div className="mb-6">
         <Button
           variant="outline"
           size="lg"
           onClick={() => setShowSoloPRs(!showSoloPRs)}
-          className={`w-full challenges-button flex items-center justify-between p-4 h-auto ${categoryClass}`}
+          className={`w-full challenges-button flex items-center justify-between p-4 h-auto ${selectedCategoryId ? 'category-tinted' : ''}`}
         >
           <div className="flex items-center gap-3">
-            <Zap className={`h-5 w-5 text-orange-600 dark:text-orange-400 ${selectedCategory ? `section-crown ${categoryClass}` : ''}`} />
+            <Zap className="h-5 w-5 text-orange-600 dark:text-orange-400" />
             <div className="text-left">
               <div className="font-semibold">Friends' PRs to Beat</div>
               <div className="text-sm text-muted-foreground">{friendsSoloPRs.length} challenges available</div>
@@ -303,47 +463,62 @@ export const PRRecordsContent: React.FC = () => {
         
         {showSoloPRs && (
           <div className="space-y-3 mt-4">
-            {friendsSoloPRs.slice(0, 10).map((challenge, index) => (
-              <div 
-                key={`${challenge.exerciseId}-${challenge.friend.id}`}
-                className={`apple-health-card pr-entry-card ${getCategoryKeyByName(challenge.category?.name || 'back')} challenge-card`}
-                onClick={() => handleExerciseClick(challenge.exerciseId)}
-              >
-                {/* Top row: Exercise name only */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="apple-health-card-title truncate mb-1">{challenge.exerciseName}</h3>
-                    <div className="apple-health-card-time">
-                      <span className="apple-health-card-time-text">Beat {challenge.friend.name}'s PR</span>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Bottom row: Friend avatar + PR challenge info */}
-                <div className="flex items-end justify-between">
-                  <div className="flex items-center gap-3">
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src={challenge.friend.avatarUrl} alt={challenge.friend.name} />
-                      <AvatarFallback>{challenge.friend.name.charAt(0).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div className="text-sm">
-                      <div className="text-muted-foreground">Your best: {challenge.userBest || 0} lbs</div>
-                      <div className="text-xs text-orange-600 dark:text-orange-400 font-medium">
-                        Need +{challenge.deficit} lbs to beat
+            {friendsSoloPRs.slice(0, 10).map((challenge, index) => {
+              const categoryColor = getCategoryColor(
+                categories.findIndex(cat => cat.id === challenge.category?.id)
+              );
+              
+              return (
+                <div 
+                  key={`${challenge.exerciseId}-${challenge.friend.id}`}
+                  className={`apple-health-card challenge-card ${selectedCategoryId ? 'category-tinted' : ''}`}
+                  onClick={() => handleExerciseClick(challenge.exerciseId)}
+                  style={{
+                    '--category-color': categoryColor,
+                    '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
+                  } as React.CSSProperties}
+                >
+                  {/* Top row: Exercise name only */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="apple-health-card-title truncate mb-1">{challenge.exerciseName}</h3>
+                      <div className="apple-health-card-time">
+                        <span className="apple-health-card-time-text">Beat {challenge.friend.name}'s PR</span>
                       </div>
                     </div>
                   </div>
                   
-                  {/* Target PR Display */}
-                  <div className="text-right">
-                    <div className="apple-health-weight-display text-orange-600 dark:text-orange-400">
-                      {challenge.friendPR}
+                  {/* Bottom row: Friend avatar + PR challenge info */}
+                  <div className="flex items-end justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar className="w-8 h-8">
+                        <AvatarImage src={challenge.friend.avatarUrl} alt={challenge.friend.name} />
+                        <AvatarFallback>{challenge.friend.name.charAt(0).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                      <div className="text-sm">
+                        <div className="text-muted-foreground">Your best: {challenge.userBest || 0} lbs</div>
+                        <div className="text-xs text-orange-600 dark:text-orange-400 font-medium">
+                          Need +{challenge.deficit} lbs to beat
+                        </div>
+                      </div>
                     </div>
-                    <p className="apple-health-weight-unit">lbs PR</p>
+                    
+                    {/* Target PR Display */}
+                    <div className="text-right">
+                      <div className="apple-health-weight-display text-orange-600 dark:text-orange-400">
+                        <AnimatedCounter 
+                          value={challenge.friendPR} 
+                          formatValue={(val) => val.toString()}
+                          duration={600}
+                          className="tabular-nums"
+                        />
+                      </div>
+                      <p className="apple-health-weight-unit">lbs PR</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             
             {friendsSoloPRs.length > 10 && (
               <div className="text-center text-sm text-muted-foreground">
@@ -355,6 +530,7 @@ export const PRRecordsContent: React.FC = () => {
       </div>
     );
   };
+
   const renderPREntry = (entry: any, index: number) => {
     const exerciseName = getExerciseName(entry.exerciseId!);
     const category = getExerciseCategory(entry.exerciseId!);
@@ -363,33 +539,59 @@ export const PRRecordsContent: React.FC = () => {
     
     // Get category color for this exercise
     const categoryIndex = category ? categories.findIndex(cat => cat.id === category.id) : -1;
-    const categoryColor = categoryIndex >= 0 ? getCategoryChartColors()[categoryIndex % getCategoryChartColors().length] : '#10b981';
+    const categoryColor = categoryIndex >= 0 ? getCategoryColor(categoryIndex) : '#10b981';
+    
+    // Format timestamp
+    const timestamp = entry.timestamp ? new Date(entry.timestamp) : null;
+    let timeDisplay = '';
+    if (timestamp) {
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+      const logDate = new Date(timestamp.getFullYear(), timestamp.getMonth(), timestamp.getDate());
+      
+      if (logDate.getTime() === today.getTime()) {
+        timeDisplay = timestamp.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      } else if (logDate.getTime() === yesterday.getTime()) {
+        timeDisplay = 'Yesterday';
+      } else {
+        timeDisplay = timestamp.toLocaleDateString([], { month: 'short', day: 'numeric' });
+      }
+    }
     
     return (
       <div 
         key={`${entry.exerciseId}-${entry.userId}`}
-        className={`apple-health-card transition-all duration-200 cursor-pointer pr-entry-card ${
-          isCurrentUser ? 'category-tinted user-pr' : ''
-        } ${getCategoryKeyByName(category?.name || 'back')}`}
+        className={`apple-health-card transition-all duration-200 cursor-pointer ${selectedCategoryId ? 'category-tinted' : ''} ${
+          isCurrentUser ? 'user-pr' : ''
+        }`}
         onClick={() => handleExerciseClick(entry.exerciseId!)}
+        style={{
+          '--category-color': categoryColor,
+          '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
+        } as React.CSSProperties}
       >
-        {/* Top row: Exercise name only */}
+        {/* Top row: Exercise name + Time with arrow */}
         <div className="flex items-start justify-between mb-4">
-          <div className="flex items-center gap-3 flex-1">
-            <div className="flex-1 min-w-0">
-              <h3 className="apple-health-card-title truncate mb-1">{exerciseName}</h3>
-              <div className="apple-health-card-time">
-                {isTie && entry.users ? (
-                  <span className="apple-health-card-time-text">{entry.users.length} users tied</span>
-                ) : (
-                  <span className="apple-health-card-time-text">{entry.user?.name}</span>
-                )}
-                {isCurrentUser && (
-                  <Badge variant="secondary" className="ml-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs">You</Badge>
-                )}
-              </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="apple-health-card-title truncate mb-1">{exerciseName}</h3>
+            <div className="apple-health-card-time">
+              {isTie && entry.users ? (
+                <span className="apple-health-card-time-text">{entry.users.length} users tied</span>
+              ) : (
+                <span className="apple-health-card-time-text">{entry.user?.name}</span>
+              )}
+              {isCurrentUser && (
+                <Badge variant="secondary" className="ml-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs">You</Badge>
+              )}
             </div>
           </div>
+          {timeDisplay && (
+            <div className="apple-health-card-time">
+              <span className="apple-health-card-time-text">{timeDisplay}</span>
+              <ChevronRight className="apple-health-card-arrow" />
+            </div>
+          )}
         </div>
 
         {/* Bottom row: User avatars + Weight display */}
@@ -421,7 +623,12 @@ export const PRRecordsContent: React.FC = () => {
           {/* Weight Display */}
           <div className="text-right">
             <div className="apple-health-weight-display">
-              {entry.value > 0 ? `${entry.value}` : '0'}
+              <AnimatedCounter 
+                value={entry.value > 0 ? entry.value : 0} 
+                formatValue={(val) => val.toString()}
+                duration={600}
+                className="tabular-nums"
+              />
             </div>
             <p className="apple-health-weight-unit">lbs</p>
             {isTie && (
@@ -437,81 +644,191 @@ export const PRRecordsContent: React.FC = () => {
   };
 
   return (
-    <div className={`space-y-6 relative transition-all duration-500 ease-out ${contentReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-      
-      {/* Category Filter Buttons */}
-      <div className="flex gap-3 overflow-x-auto pb-2 px-1 py-2 scrollbar-hide">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setSelectedCategoryId('all')}
-          className={`rounded-2xl px-6 py-3 font-medium transition-all duration-300 whitespace-nowrap transform active:scale-95 ${
-            selectedCategoryId === 'all' 
-              ? 'all-button-selected' 
-              : 'all-button-unselected'
-          }`}
-        >
-          All
-        </Button>
-        
-        {categories.map((category, index) => {
-          const categoryColor = getCategoryChartColors()[index % getCategoryChartColors().length];
-          const isSelected = selectedCategoryId === category.id;
-          const categoryFilterClass = `category-filter-${getCategoryKeyByName(category.name)}`;
+    <>
+      {/* Category background tinting - positioned outside Layout for proper viewport positioning */}
+      {selectedCategoryColor && (
+        <div 
+          className={`category-background-tint-bottom ${isDark ? 'dark-mode' : ''}`}
+          style={{
+            '--category-color-rgb': selectedCategoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
+          } as React.CSSProperties}
+        />
+      )}
+      <div className="relative">
+        <div className="relative flex flex-col pb-6 z-10">
           
-          return (
-            <Button
-              key={category.id}
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedCategoryId(category.id)}
-              className={`rounded-2xl px-6 py-3 font-medium whitespace-nowrap transition-all duration-300 transform active:scale-95 ${categoryFilterClass} ${
-                isSelected 
-                  ? 'category-button-selected' 
-                  : 'category-button-unselected'
-              }`}
-            >
-              {category.name}
-            </Button>
-          );
-        })}
-      </div>
+          {/* Controls Island */}
+          <div className="control-panel mt-4 mb-8">
+            {/* Category Filter */}
+            <div className="relative bg-muted p-1 rounded-2xl">
+              <div 
+                ref={filterContainerRef}
+                className="relative flex gap-1 overflow-x-auto scrollbar-hide"
+              >
+                <div className="category-filter-indicator" style={indicatorStyle} />
+                <Button
+                  ref={(el) => (buttonRefs.current['all'] = el)}
+                  onClick={() => setSelectedCategoryId(null)}
+                  variant="ghost"
+                  size="sm"
+                  className={`category-filter-button px-5 py-2.5 ${
+                    selectedCategoryId === null ? 'selected' : ''
+                  }`}
+                >
+                  All
+                </Button>
+                {categories.map((category, index) => {
+                  const isSelected = selectedCategoryId === category.id;
+                  const categoryColor = getCategoryColor(index);
+                  return (
+                    <Button
+                      ref={(el) => (buttonRefs.current[category.id] = el)}
+                      key={category.id}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedCategoryId(category.id)}
+                      className={`category-filter-button px-5 py-2.5 ${
+                        isSelected ? 'selected' : ''
+                      }`}
+                      style={!isSelected ? { color: categoryColor } : {}}
+                    >
+                      {category.name}
+                    </Button>
+                  );
+                })}
+              </div>
+            </div>
+            
+            <div className="panel-divider" />
+            
+            {/* Bottom row of controls */}
+            <div className="flex items-center gap-2">
+              {/* Search Bar */}
+              <div className="relative search-bar-wrapper flex-grow">
+                <div className="search-bar-icon">
+                  <Search className="h-4 w-4" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search records..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="search-bar-input"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="search-bar-clear"
+                    aria-label="Clear search"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
 
-      {/* PR Champion Summary */}
-      {renderPRChampionSummary()}
-
-      {/* Friends' Solo PRs Challenge Section */}
-      {friendsSoloPRs.length > 0 && renderFriendsSoloPRs()}
-
-      {/* PR Leaderboard */}
-      <div className={`space-y-3 pr-leaderboard-section ${selectedCategoryId !== 'all' ? getCategoryKeyByName(getCategoryName(selectedCategoryId)) : ''}`}>
-        {prLeaderboard.length > 0 ? (
-          <>
-            {prLeaderboard.map((entry, index) => renderPREntry(entry, index))}
-          </>
-        ) : (
-          <div className="apple-health-card">
-            <div className="text-center p-4">
-              <Target className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-              <h3 className="text-lg font-semibold text-muted-foreground mb-2">No PR Records Found</h3>
-              <p className="text-sm text-muted-foreground">
-                {selectedCategoryId === 'all' 
-                  ? 'No exercise records found. Start logging workouts to see personal records!'
-                  : `No records found for ${getCategoryName(selectedCategoryId)} exercises.`
-                }
-              </p>
+              {/* Sort button and dropdown */}
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                  className="rounded-full w-10 h-10 flex-shrink-0 text-muted-foreground"
+                >
+                  <Filter className="h-4 w-4" />
+                </Button>
+                
+                {isSortDropdownOpen && (
+                  <div className="absolute top-full right-0 mt-2 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-md z-50 min-w-48">
+                    <div className="p-2">
+                      {[
+                        { id: 'weight', label: 'Weight', icon: TrendingUp },
+                        { id: 'recent', label: 'Recent', icon: Activity },
+                        { id: 'exercise', label: 'Exercise', icon: Target }
+                      ].map((option) => {
+                        const Icon = option.icon;
+                        return (
+                          <button
+                            key={option.id}
+                            onClick={() => {
+                              setSortBy(option.id as 'weight' | 'recent' | 'exercise');
+                              setIsSortDropdownOpen(false);
+                            }}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-95 ${
+                              sortBy === option.id
+                                ? 'bg-primary text-primary-foreground'
+                                : 'text-foreground active:bg-gray-100 dark:active:bg-gray-800'
+                            }`}
+                          >
+                            <Icon className="h-4 w-4" />
+                            <span className="font-medium">{option.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        )}
+
+          {/* Content */}
+          <div className={`space-y-6 relative transition-all duration-500 ease-out ${contentReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+            
+            {/* PR Champion Summary */}
+            {renderPRChampionSummary()}
+
+            {/* Friends' Solo PRs Challenge Section */}
+            {friendsSoloPRs.length > 0 && renderFriendsSoloPRs()}
+
+            {/* PR Leaderboard */}
+            <div className="space-y-3">
+              {filteredAndSortedPRs.length > 0 ? (
+                <>
+                  {filteredAndSortedPRs.map((entry, index) => renderPREntry(entry, index))}
+                </>
+              ) : (
+                <div className={`glass-card rounded-2xl p-12 text-center ${selectedCategoryId ? 'category-tinted' : ''}`}>
+                  {searchQuery.trim() ? (
+                    <>
+                      <Search className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-foreground mb-2">No records found</h3>
+                      <p className="text-muted-foreground mb-4">
+                        No records match "{searchQuery}"
+                      </p>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setSearchQuery('')}
+                        className="mt-2"
+                      >
+                        Clear search
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Target className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-foreground mb-2">No PR Records Found</h3>
+                      <p className="text-muted-foreground">
+                        {selectedCategoryId 
+                          ? `No records found for ${getCategoryName(selectedCategoryId)} exercises.`
+                          : 'No exercise records found. Start logging workouts to see personal records!'
+                        }
+                      </p>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
 // Standalone page component with Layout wrapper
 const PRRecordsPage: React.FC = () => {
   return (
-    <Layout title="Records">
+    <Layout title="PR Records">
       <PRRecordsContent />
     </Layout>
   );
