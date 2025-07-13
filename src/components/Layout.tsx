@@ -364,7 +364,7 @@ const AddExerciseButton: React.FC<{
           ? "bg-red-500 hover:bg-red-600 text-white shadow-2xl scale-105 shadow-red-500/25" 
           : "text-white shadow-2xl hover:shadow-teal-500/25"
       )}
-      style={!isModalOpen ? { backgroundColor: '#14b8a6' } : undefined}
+      style={!isModalOpen ? { backgroundColor: '#f97316' } : undefined}
     >
       <Plus className={cn(
         "h-6 w-6 transition-all duration-300 group-hover:scale-110", 
