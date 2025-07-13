@@ -14,6 +14,7 @@ import {
   Timer,
   ChevronDown,
   ChevronUp,
+  ChevronRight,
   Activity,
   Plus,
   BookOpen,
@@ -61,6 +62,7 @@ export const TOURNAMENT_ICONS = {
   CLOCK: Clock,
   EXPAND: ChevronDown,
   COLLAPSE: ChevronUp,
+  LINK: ChevronRight,
 } as const;
 
 // Gradient color schemes for consistent styling

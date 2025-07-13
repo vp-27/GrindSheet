@@ -47,6 +47,7 @@ const TournamentPage: React.FC = () => {
   const [contentReady, setContentReady] = useState(false);
   const [showHistoricalWeeks, setShowHistoricalWeeks] = useState(false);
   const [highlightedSection, setHighlightedSection] = useState<'performance' | 'volume' | 'bonuses' | null>(null);
+  const [rulebookSection, setRulebookSection] = useState<string | null>(null);
 
   // Tab state for switching between tournament and PR records
   const [activeTab, setActiveTab] = useState<'tournament' | 'records'>('tournament');
@@ -85,6 +86,12 @@ const TournamentPage: React.FC = () => {
         setHighlightedSection(null);
       }, 2000);
     }, isExpanded ? 100 : 600); // Longer delay if we need to wait for expansion
+  };
+
+  // Helper function to open rulebook to specific section
+  const openRulebookToSection = (section: string) => {
+    setRulebookSection(section);
+    setShowPointsGuide(true);
   };
 
   // Fetch data on mount
@@ -571,7 +578,11 @@ const TournamentPage: React.FC = () => {
                         
                         <div className="space-y-2">
                           {participant.prDetails.map((pr, idx) => (
-                            <div key={`pr-${idx}`} className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-amber-100/50 dark:hover:bg-amber-900/20">
+                            <div 
+                              key={`pr-${idx}`} 
+                              className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-amber-100/50 dark:hover:bg-amber-900/20 cursor-pointer transition-all duration-200"
+                              onClick={() => openRulebookToSection('performance')}
+                            >
                               <div className="flex items-center gap-2">
                                 {(() => {
                                   const TrophyIcon = TOURNAMENT_ICONS.PR_DETAIL;
@@ -589,7 +600,11 @@ const TournamentPage: React.FC = () => {
                           ))}
 
                           {participant.prDetails.filter(pr => pr.improvementPercent > 0).map((pr, idx) => (
-                            <div key={`improvement-${idx}`} className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-amber-100/50 dark:hover:bg-amber-900/20">
+                            <div 
+                              key={`improvement-${idx}`} 
+                              className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-amber-100/50 dark:hover:bg-amber-900/20 cursor-pointer transition-all duration-200"
+                              onClick={() => openRulebookToSection('performance')}
+                            >
                               <div className="flex items-center gap-2">
                                 {(() => {
                                   const TrendingUpIcon = TOURNAMENT_ICONS.IMPROVEMENT_DETAIL;
@@ -607,7 +622,11 @@ const TournamentPage: React.FC = () => {
                           ))}
 
                           {participant.competitiveDetails && participant.competitiveDetails.map((comp, idx) => (
-                            <div key={`comp-${idx}`} className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-amber-100/50 dark:hover:bg-amber-900/20">
+                            <div 
+                              key={`comp-${idx}`} 
+                              className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-amber-100/50 dark:hover:bg-amber-900/20 cursor-pointer transition-all duration-200"
+                              onClick={() => openRulebookToSection('performance')}
+                            >
                               <div className="flex items-center gap-2">
                                 {(() => {
                                   const ZapIcon = TOURNAMENT_ICONS.COMPETITIVE_DETAIL;
@@ -644,7 +663,10 @@ const TournamentPage: React.FC = () => {
                         
                         <div className="space-y-2">
                           {(participant.pointsBreakdown.participationPoints + participant.pointsBreakdown.varietyPoints) > 0 && (
-                            <div className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20">
+                            <div 
+                              className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20 cursor-pointer transition-all duration-200"
+                              onClick={() => openRulebookToSection('volume')}
+                            >
                               <div className="flex items-center gap-2">
                                 {(() => {
                                   const CalendarIcon = TOURNAMENT_ICONS.DAILY_WORKOUT;
@@ -660,7 +682,10 @@ const TournamentPage: React.FC = () => {
                           )}
 
                           {participant.pointsBreakdown.consistencyPoints > 0 && (
-                            <div className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20">
+                            <div 
+                              className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20 cursor-pointer transition-all duration-200"
+                              onClick={() => openRulebookToSection('volume')}
+                            >
                               <div className="flex items-center gap-2">
                                 {(() => {
                                   const CheckCircleIcon = TOURNAMENT_ICONS.CONSISTENCY_DETAIL;
@@ -676,7 +701,10 @@ const TournamentPage: React.FC = () => {
                           )}
                           
                           {(participant.exerciseStats?.totalExercises || 0) > 0 && (
-                            <div className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20">
+                            <div 
+                              className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20 cursor-pointer transition-all duration-200"
+                              onClick={() => openRulebookToSection('volume')}
+                            >
                               <div className="flex items-center gap-2">
                                 {(() => {
                                   const AwardIcon = TOURNAMENT_ICONS.EXERCISE_VOLUME;
@@ -711,7 +739,10 @@ const TournamentPage: React.FC = () => {
                         
                         <div className="space-y-2">
                           {(participant.exerciseStats?.newExerciseBonusPoints || 0) > 0 && (
-                            <div className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-emerald-100/50 dark:hover:bg-emerald-900/20">
+                            <div 
+                              className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-emerald-100/50 dark:hover:bg-emerald-900/20 cursor-pointer transition-all duration-200"
+                              onClick={() => openRulebookToSection('bonuses')}
+                            >
                               <div className="flex items-center gap-2">
                                 {(() => {
                                   const PlusIcon = TOURNAMENT_ICONS.NEW_EXERCISE;
@@ -727,7 +758,11 @@ const TournamentPage: React.FC = () => {
                           )}
                           
                           {participant.badges.map(badge => (
-                            <div key={badge.id} className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-emerald-100/50 dark:hover:bg-emerald-900/20">
+                            <div 
+                              key={badge.id} 
+                              className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-emerald-100/50 dark:hover:bg-emerald-900/20 cursor-pointer transition-all duration-200"
+                              onClick={() => openRulebookToSection('bonuses')}
+                            >
                               <div className="flex items-center gap-2">
                                 <div className="flex-shrink-0">{getBadgeIcon(badge.type)}</div>
                                 <div>
@@ -870,7 +905,11 @@ const TournamentPage: React.FC = () => {
             {/* Dynamic Rulebook Modal */}
             <TournamentRulebook 
               isOpen={showPointsGuide} 
-              onClose={() => setShowPointsGuide(false)} 
+              onClose={() => {
+                setShowPointsGuide(false);
+                setRulebookSection(null);
+              }}
+              initialSection={rulebookSection}
             />
 
             {/* Current Tournament Leaderboard */}

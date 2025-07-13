@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -20,10 +20,18 @@ import { BadgeType } from '@/types';
 interface TournamentRulebookProps {
   isOpen: boolean;
   onClose: () => void;
+  initialSection?: string | null;
 }
 
-const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose }) => {
+const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose, initialSection }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>('performance');
+
+  // Handle initial section when rulebook opens
+  useEffect(() => {
+    if (isOpen && initialSection) {
+      setExpandedSection(initialSection);
+    }
+  }, [isOpen, initialSection]);
 
   // Streamlined point categories matching Tournament page design
   const pointCategories = [
