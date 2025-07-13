@@ -380,18 +380,19 @@ const Dashboard = () => {
   );
 
   return (
-    <Layout title={headerTitle} categoryColor={selectedCategoryColor} headerStreak={StreakIndicator}>
-      <div className="relative">
-        {/* Enhanced category background tinting - visible in both light and dark modes */}
-        {selectedCategoryColor && (
-          <div 
-            className={`category-background-tint ${isDark ? 'dark-mode' : ''}`}
-            style={{
-              '--category-color-rgb': selectedCategoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
-            } as React.CSSProperties}
-          />
-        )}
-        <div className="relative flex flex-col pb-6 z-10">
+    <>
+      {/* Category background tinting - positioned outside Layout for proper viewport positioning */}
+      {selectedCategoryColor && (
+        <div 
+          className={`category-background-tint-bottom ${isDark ? 'dark-mode' : ''}`}
+          style={{
+            '--category-color-rgb': selectedCategoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
+          } as React.CSSProperties}
+        />
+      )}
+      <Layout title={headerTitle} categoryColor={selectedCategoryColor} headerStreak={StreakIndicator}>
+        <div className="relative">
+          <div className="relative flex flex-col pb-6 z-10">
           {/* Progress Chart Section - Embedded in background */}
           <div className="relative -mx-4 px-4">
             {/* Show percentage gain if available - with inline chart slider */}
@@ -787,10 +788,10 @@ const Dashboard = () => {
             </div>
           )}
         </div>
-        
+                </div>
         </div>
-      </div>
-    </Layout>
+      </Layout>
+    </>
   );
 };
 

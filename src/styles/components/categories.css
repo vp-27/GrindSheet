@@ -324,3 +324,54 @@
     transparent 100%
   ) !important;
 }
+
+/* Category background tinting at bottom of page for Dashboard */
+.category-background-tint-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 50vh;
+  pointer-events: none;
+  z-index: 0;
+  background: linear-gradient(to top, 
+    rgba(var(--category-color-rgb), 0.15) 0%, 
+    rgba(var(--category-color-rgb), 0.08) 25%,
+    rgba(var(--category-color-rgb), 0.04) 50%,
+    rgba(var(--category-color-rgb), 0.02) 75%,
+    transparent 100%
+  ) !important;
+}
+
+/* Dark mode: Enhanced visibility for better balance */
+.category-background-tint-bottom.dark-mode {
+  background: linear-gradient(to top, 
+    rgba(var(--category-color-rgb), 0.25) 0%, 
+    rgba(var(--category-color-rgb), 0.15) 25%,
+    rgba(var(--category-color-rgb), 0.08) 50%,
+    rgba(var(--category-color-rgb), 0.04) 75%,
+    transparent 100%
+  ) !important;
+}
+
+/* Support for data-theme attribute */
+[data-theme="dark"] .category-background-tint-bottom {
+  background: linear-gradient(to top, 
+    rgba(var(--category-color-rgb), 0.25) 0%, 
+    rgba(var(--category-color-rgb), 0.15) 25%,
+    rgba(var(--category-color-rgb), 0.08) 50%,
+    rgba(var(--category-color-rgb), 0.04) 75%,
+    transparent 100%
+  ) !important;
+}
+
+/* Support for .dark class */
+.dark .category-background-tint-bottom {
+  background: linear-gradient(to top, 
+    rgba(var(--category-color-rgb), 0.25) 0%, 
+    rgba(var(--category-color-rgb), 0.15) 25%,
+    rgba(var(--category-color-rgb), 0.08) 50%,
+    rgba(var(--category-color-rgb), 0.04) 75%,
+    transparent 100%
+  ) !important;
+}
