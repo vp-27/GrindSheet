@@ -718,18 +718,18 @@ const Dashboard = () => {
                       {/* Bottom row: Current weight and stats */}
                       <div className="flex items-end justify-between">
                         <div>
-                          <div className="apple-health-weight-display flex items-center gap-2">
+                          <div className="apple-health-weight-display flex items-baseline gap-2">
                             <AnimatedCounter 
                               value={progress.currentWeight} 
                               formatValue={(val) => val % 1 === 0 ? val.toString() : val.toFixed(1)}
                               duration={600}
                               className="tabular-nums"
                             />
+                            <span className="apple-health-weight-unit">lbs</span>
                             {isPersonalRecord && (
                               <Trophy className="w-4 h-4 flex-shrink-0 text-amber-600 dark:text-amber-400" />
                             )}
                           </div>
-                          <p className="apple-health-weight-unit">lbs</p>
                         </div>
                         
                         <div className="flex items-center gap-2">

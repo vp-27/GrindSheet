@@ -147,13 +147,14 @@
 }
 
 .apple-health-weight-display {
-  font-size: 1.5rem;
+  font-size: 1.875rem;
   font-weight: 700;
   color: hsl(var(--foreground));
 }
 
 .apple-health-weight-unit {
-  font-size: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
   color: hsl(var(--muted-foreground));
 }
 
