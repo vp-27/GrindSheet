@@ -9,7 +9,6 @@ import {
   HomeIcon as HomeOutline,
   TrophyIcon as TrophyOutline,
   ClockIcon as ClockOutline,
-  CogIcon as CogOutline,
   ClipboardDocumentCheckIcon as GoalsOutline, // Using ClipboardDocumentCheckIcon for "Goals"
 } from '@heroicons/react/24/outline';
 // Heroicons imports - solid versions
@@ -17,7 +16,6 @@ import {
   HomeIcon as HomeSolid,
   TrophyIcon as TrophySolid,
   ClockIcon as ClockSolid,
-  CogIcon as CogSolid,
   ClipboardDocumentCheckIcon as GoalsSolid, // Using ClipboardDocumentCheckIcon for "Goals"
 } from '@heroicons/react/24/solid';
 import { Card } from '@/components/ui/card';
@@ -149,11 +147,11 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
             />
           </div>
           <div className="flex-1 flex justify-center items-center">
-            <NavLink 
+            <ProfileNavLink 
               to="/settings" 
-              outlineIcon={CogOutline}
-              solidIcon={CogSolid}
-              label="Settings" 
+              profile={profile}
+              avatarImageError={avatarImageError}
+              setAvatarImageError={setAvatarImageError}
             />
           </div>
           {/* Absolutely positioned AddExerciseButton for precise centering */}
@@ -203,6 +201,65 @@ const NavLink: React.FC<{
         />
       </div>
       {label && <span className={cn("text-center truncate w-full", isActive ? "font-bold" : "font-normal")}>{label}</span>}
+    </Link>
+  );
+};
+
+const ProfileNavLink: React.FC<{ 
+  to: string; 
+  profile: any;
+  avatarImageError: boolean;
+  setAvatarImageError: (error: boolean) => void;
+}> = ({ to, profile, avatarImageError, setAvatarImageError }) => {
+  // Get current path
+  const currentPath = window.location.pathname;
+  const isActive = currentPath === to || 
+                  (to !== '/' && currentPath.startsWith(to));
+
+  // Get user initials for avatar fallback
+  const getUserInitials = () => {
+    if (!profile?.name) return '?';
+    return profile.name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  return (
+    <Link 
+      to={to} 
+      className={cn(
+        "flex flex-col items-center px-3 py-1 rounded text-xs w-full",
+        isActive ? "text-primary font-medium" : "text-muted-foreground"
+      )}
+    >
+      <div className={cn(
+        "mb-0.5 relative transition-all duration-200",
+        isActive ? "text-primary" : "text-icon-muted"
+      )}>
+        <Avatar 
+          className={cn(
+            "h-6 w-6 transition-all duration-200 ring-2",
+            isActive 
+              ? "ring-primary" 
+              : "ring-muted-foreground/20 hover:ring-muted-foreground/40"
+          )}
+        >
+          <AvatarImage 
+            src={profile?.avatar_url} 
+            alt={profile?.name || 'Profile'}
+            onError={() => setAvatarImageError(true)}
+          />
+          <AvatarFallback className="text-xs font-medium bg-muted">
+            {getUserInitials()}
+          </AvatarFallback>
+        </Avatar>
+      </div>
+      <span className={cn("text-center truncate w-full", isActive ? "font-bold" : "font-normal")}>
+        Profile
+      </span>
     </Link>
   );
 };
