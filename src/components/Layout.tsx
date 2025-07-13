@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Crown, Medal, Award } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/context/AuthContext';
+import { useTournamentRanking } from '@/hooks/useTournamentRanking';
 import AddExerciseModal from '@/components/AddExerciseModal';
 // Heroicons imports - outline versions
 import {
@@ -69,6 +70,7 @@ const AnimatedIcon: React.FC<AnimatedIconProps> = ({ outlineIcon: OutlineIcon, s
 
 const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerSlider, headerStreak }) => {
   const { profile, signOut } = useAuth();
+  const { rank: tournamentRank, totalParticipants, isLoading: rankingLoading } = useTournamentRanking();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isAddExerciseModalOpen, setIsAddExerciseModalOpen] = useState(false);
   const [avatarImageError, setAvatarImageError] = useState(false);
@@ -82,6 +84,43 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
   useEffect(() => {
     setAvatarImageError(false);
   }, [profile?.avatar_url]);
+
+  // Create ranking indicator component
+  const RankingIndicator: React.FC<{ rank: number | null; totalParticipants: number }> = ({ rank, totalParticipants }) => {
+    if (!rank || totalParticipants === 0) return null;
+
+    // Special indicators for top 3 positions using consistent icons
+    if (rank === 1) {
+      return (
+        <div className="w-4 h-4 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-sm">
+          <Crown className="w-2.5 h-2.5 text-yellow-900" />
+        </div>
+      );
+    }
+    
+    if (rank === 2) {
+      return (
+        <div className="w-4 h-4 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shadow-sm">
+          <Medal className="w-2.5 h-2.5 text-gray-700" />
+        </div>
+      );
+    }
+    
+    if (rank === 3) {
+      return (
+        <div className="w-4 h-4 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center shadow-sm">
+          <Award className="w-2.5 h-2.5 text-amber-100" />
+        </div>
+      );
+    }
+
+    // For other positions, show a small red dot with the rank number
+    return (
+      <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center shadow-sm">
+        <span className="text-[8px] font-bold text-white">{rank}</span>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
@@ -133,6 +172,11 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
               outlineIcon={TrophyOutline}
               solidIcon={TrophySolid}
               label="Compete" 
+              rankingIndicator={
+                !rankingLoading && tournamentRank ? (
+                  <RankingIndicator rank={tournamentRank} totalParticipants={totalParticipants} />
+                ) : null
+              }
             />
           </div>
           <div className="flex-1 flex justify-center items-center">
@@ -179,7 +223,8 @@ const NavLink: React.FC<{
   outlineIcon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   solidIcon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   label?: string; 
-}> = ({ to, outlineIcon, solidIcon, label }) => {
+  rankingIndicator?: React.ReactNode;
+}> = ({ to, outlineIcon, solidIcon, label, rankingIndicator }) => {
   // Get current path
   const currentPath = window.location.pathname;
   const isActive = currentPath === to || 
@@ -189,16 +234,21 @@ const NavLink: React.FC<{
     <Link 
       to={to} 
       className={cn(
-        "flex flex-col items-center px-3 py-1 rounded text-xs w-full",
+        "flex flex-col items-center px-3 py-1 rounded text-xs w-full relative",
         isActive ? "text-primary font-medium" : "text-muted-foreground"
       )}
     >
-      <div className={cn("mb-0.5", isActive ? "text-primary" : "text-icon-muted")}>
+      <div className={cn("mb-0.5 relative", isActive ? "text-primary" : "text-icon-muted")}>
         <AnimatedIcon 
           outlineIcon={outlineIcon}
           solidIcon={solidIcon}
           isActive={isActive}
         />
+        {rankingIndicator && (
+          <div className="absolute -bottom-1 -right-1">
+            {rankingIndicator}
+          </div>
+        )}
       </div>
       {label && <span className={cn("text-center truncate w-full", isActive ? "font-bold" : "font-normal")}>{label}</span>}
     </Link>
