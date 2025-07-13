@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAppContext } from '@/context/useAppContext';
 import { calculateProgress, getOverallProgressChartData, getExerciseProgressChartData } from '@/utils/progressUtils';
 import { generateCurrentTournament } from '@/utils/tournamentUtils';
-import { TrendingUp, Clock, Trophy, ChevronRight, Activity, Zap, Search, X, Filter } from 'lucide-react';
+import { TrendingUp, Clock, Trophy, ChevronRight, Activity, Zap, Search, X, Filter, TrendingDown } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
@@ -651,7 +651,7 @@ const Dashboard = () => {
                       } as React.CSSProperties}
                     >
                       {/* Top row: Category-colored exercise name + Time with arrow */}
-                      <div className={`flex items-start justify-between ${miniChartData.length <= 1 ? 'mb-6' : 'mb-4'}`}>
+                      <div className={`flex items-start justify-between ${miniChartData.length <= 1 ? 'mb-3' : 'mb-2'}`}>
                         <h3 className="apple-health-card-title">
                           {progress.exercise.name}
                         </h3>
@@ -663,7 +663,7 @@ const Dashboard = () => {
 
                       {/* Mini Progress Chart - Only show if we have trend data */}
                       {miniChartData.length > 1 && (
-                        <div className="apple-health-mini-chart">
+                        <div className="apple-health-mini-chart mb-1">
                           <div className="w-full h-full relative">
                             <svg className="w-full h-full" viewBox="0 0 100 24" preserveAspectRatio="none">
                               <defs>
@@ -718,9 +718,7 @@ const Dashboard = () => {
                       {/* Bottom row: Current weight and stats */}
                       <div className="flex items-end justify-between">
                         <div>
-                          <div className={`apple-health-weight-display flex items-center gap-2 ${
-                            isPersonalRecord ? 'text-amber-600 dark:text-amber-400' : ''
-                          }`}>
+                          <div className="apple-health-weight-display flex items-center gap-2">
                             <AnimatedCounter 
                               value={progress.currentWeight} 
                               formatValue={(val) => val % 1 === 0 ? val.toString() : val.toFixed(1)}
@@ -728,7 +726,7 @@ const Dashboard = () => {
                               className="tabular-nums"
                             />
                             {isPersonalRecord && (
-                              <Trophy className="w-4 h-4 flex-shrink-0" />
+                              <Trophy className="w-4 h-4 flex-shrink-0 text-amber-600 dark:text-amber-400" />
                             )}
                           </div>
                           <p className="apple-health-weight-unit">lbs</p>
@@ -744,9 +742,11 @@ const Dashboard = () => {
                             <div className={`flex items-center gap-1 text-sm font-medium ${
                               progress.percentGainFromPrevious > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
                             }`}>
-                              <span className="text-xs">
-                                {progress.percentGainFromPrevious > 0 ? '↗' : '↘'}
-                              </span>
+                              {progress.percentGainFromPrevious > 0 ? (
+                                <TrendingUp className="w-3 h-3" />
+                              ) : (
+                                <TrendingDown className="w-3 h-3" />
+                              )}
                               <AnimatedCounter 
                                 value={progress.percentGainFromPrevious} 
                                 formatValue={(val) => `${val.toFixed(1)}%`}
