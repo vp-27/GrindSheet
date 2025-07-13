@@ -6,6 +6,33 @@ interface ToastOptions {
   duration?: number
 }
 
+// Toast queue management for mobile optimization
+let toastQueue: Array<() => void> = []
+let isProcessingQueue = false
+
+const processToastQueue = () => {
+  if (isProcessingQueue || toastQueue.length === 0) return
+  
+  isProcessingQueue = true
+  const showToast = toastQueue.shift()
+  
+  if (showToast) {
+    showToast()
+    // Wait a bit before showing next toast to prevent overwhelming
+    setTimeout(() => {
+      isProcessingQueue = false
+      processToastQueue()
+    }, 500)
+  } else {
+    isProcessingQueue = false
+  }
+}
+
+const queueToast = (toastFunction: () => void) => {
+  toastQueue.push(toastFunction)
+  processToastQueue()
+}
+
 export const toast = {
   success: ({ title, description, duration = 4000 }: ToastOptions) => {
     return baseToast({
@@ -34,16 +61,36 @@ export const toast = {
     })
   },
 
+  // Mobile-optimized versions with queuing
+  successQueued: ({ title, description, duration = 4000 }: ToastOptions) => {
+    queueToast(() => baseToast({
+      title,
+      description,
+      variant: "success" as "default" | "destructive" | "success",
+      duration,
+    }))
+  },
+
+  errorQueued: ({ title, description, duration = 6000 }: ToastOptions) => {
+    // Errors are always shown immediately, not queued
+    return baseToast({
+      title,
+      description,
+      variant: "destructive",
+      duration,
+    })
+  },
+
   // Convenient methods for common app actions
   exerciseLogged: (exerciseName?: string) => {
-    return toast.success({
+    return toast.successQueued({
       title: exerciseName ? `${exerciseName} logged! 💪` : "Exercise logged! 💪",
       description: "Your progress has been recorded successfully.",
     })
   },
 
   exerciseAdded: (exerciseName?: string) => {
-    return toast.success({
+    return toast.successQueued({
       title: "Exercise added!",
       description: exerciseName 
         ? `${exerciseName} has been added to your library.`
@@ -52,7 +99,7 @@ export const toast = {
   },
 
   categoryAdded: (categoryName?: string) => {
-    return toast.success({
+    return toast.successQueued({
       title: "Category created!",
       description: categoryName
         ? `${categoryName} has been added to your categories.`

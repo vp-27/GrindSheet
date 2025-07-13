@@ -70,6 +70,27 @@
   }
 }
 
+/* Mobile-optimized toast positioning */
+@media (max-width: 640px) {
+  [data-radix-toast-viewport] {
+    top: env(safe-area-inset-top, 1rem) !important;
+    padding: 1rem !important;
+    max-width: calc(100vw - 2rem) !important;
+  }
+  
+  /* Ensure toasts don't interfere with mobile navigation */
+  [data-radix-toast-viewport] .group {
+    margin-bottom: 0.5rem;
+    min-height: 60px; /* Better touch target */
+  }
+  
+  /* Optimize text size for mobile */
+  [data-radix-toast-viewport] .text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+}
+
 /* Error toast specific animation */
 @keyframes toast-error-shake {
   0% {
@@ -139,7 +160,7 @@
 }
 
 .toast-progress.success::after {
-  background: linear-gradient(90deg, #10b981, #059669);
+  background: linear-gradient(90deg, #14b8a6, #0d9488);
 }
 
 .toast-progress.destructive::after {
@@ -164,5 +185,33 @@
   [data-radix-toast-viewport] {
     padding: 1rem !important;
     max-width: 100% !important;
+  }
+  
+  /* Prevent toasts from interfering with mobile gestures */
+  [data-radix-toast-viewport] .group {
+    touch-action: pan-y pinch-zoom;
+  }
+  
+  /* Optimize for one-handed use */
+  [data-radix-toast-viewport] {
+    top: max(env(safe-area-inset-top), 1rem) !important;
+    left: 1rem !important;
+    right: 1rem !important;
+    width: auto !important;
+  }
+  
+  /* Better visual hierarchy on small screens */
+  [data-radix-toast-viewport] .text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  
+  /* Ensure close button is easily tappable */
+  [toast-close] {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }

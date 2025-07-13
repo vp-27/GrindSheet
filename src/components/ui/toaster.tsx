@@ -17,9 +17,9 @@ export function Toaster() {
       case 'destructive':
         return <XCircle className="h-5 w-5 text-red-600 dark:text-red-400 flex-shrink-0" />
       case 'success':
-        return <CheckCircle className="h-5 w-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+        return <CheckCircle className="h-5 w-5 text-teal-600 dark:text-teal-400 flex-shrink-0" />
       default:
-        return <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+        return <Info className="h-5 w-5 text-teal-600 dark:text-teal-400 flex-shrink-0" />
     }
   }
 

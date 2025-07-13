@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useAppContext } from '@/context/useAppContext';
 import { useAuth } from '@/context/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { mobileToast } from '@/lib/mobile-toast-utils';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -135,21 +136,13 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
     e.preventDefault();
     
     if (!selectedExerciseId || !weight) {
-      toast({
-        title: 'Missing information',
-        description: 'Please select an exercise and enter the weight.',
-        variant: 'destructive',
-      });
+      mobileToast.critical('Missing information', 'Please select an exercise and enter the weight.');
       return;
     }
 
     const weightValue = parseFloat(weight);
     if (isNaN(weightValue) || weightValue < 0) {
-      toast({
-        title: 'Invalid weight',
-        description: 'Please enter a valid weight value (0 for bodyweight exercises).',
-        variant: 'destructive',
-      });
+      mobileToast.critical('Invalid weight', 'Please enter a valid weight value (0 for bodyweight exercises).');
       return;
     }
 
@@ -164,18 +157,11 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
         weightUnit: 'lbs'
       });
       
-      toast({
-        title: 'Exercise logged',
-        description: 'Your exercise has been successfully logged!',
-      });
+      mobileToast.exerciseLogged();
       
       onOpenChange(false);
     } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to log exercise. Please try again.',
-        variant: 'destructive',
-      });
+      mobileToast.genericError('Failed to log exercise. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

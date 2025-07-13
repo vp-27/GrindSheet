@@ -27,11 +27,11 @@ const toastVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-white/85 dark:bg-[rgba(28,28,30,0.85)] text-foreground border border-white/30 dark:border-none shadow-lg shadow-black/8",
+        default: "bg-white/90 dark:bg-[rgba(28,28,30,0.90)] text-foreground border border-white/40 dark:border-gray-700/40 shadow-lg shadow-black/10",
         destructive:
-          "destructive group bg-gradient-to-r from-red-50 via-red-50 to-red-100 dark:from-red-950/30 dark:via-red-950/30 dark:to-red-900/30 text-red-900 dark:text-red-100 border border-red-200/50 dark:border-red-800/50 shadow-lg shadow-red-500/10",
+          "destructive group bg-gradient-to-r from-red-50 via-red-50 to-red-100 dark:from-red-950/40 dark:via-red-950/40 dark:to-red-900/40 text-red-900 dark:text-red-100 border border-red-200/60 dark:border-red-800/60 shadow-lg shadow-red-500/15",
         success:
-          "bg-gradient-to-r from-emerald-50 via-emerald-50 to-emerald-100 dark:from-emerald-950/30 dark:via-emerald-950/30 dark:to-emerald-950/30 text-emerald-900 dark:text-emerald-100 border border-emerald-200/50 dark:border-emerald-800/50 shadow-lg shadow-emerald-500/10",
+          "bg-gradient-to-r from-teal-50 via-teal-50 to-teal-100 dark:from-teal-950/40 dark:via-teal-950/40 dark:to-teal-900/40 text-teal-900 dark:text-teal-100 border border-teal-200/60 dark:border-teal-800/60 shadow-lg shadow-teal-500/15",
       },
     },
     defaultVariants: {
