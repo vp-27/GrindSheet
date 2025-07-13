@@ -294,8 +294,93 @@ const Dashboard = () => {
     `${categories.find(c => c.id === selectedCategoryId)?.name} Progress` : 
     "Overall Progress";
 
+  // --- Streak Calculation ---
+  // Assume exerciseLogs is an array of logs with a 'timestamp' property (ISO string)
+  // Each log is a workout for a day. We'll count unique days with logs.
+  const logDates = Array.from(new Set(
+    exerciseLogs.map(log => {
+      const d = new Date(log.timestamp);
+      // Normalize to YYYY-MM-DD
+      return d.getFullYear() + '-' + (d.getMonth()+1).toString().padStart(2,'0') + '-' + d.getDate().toString().padStart(2,'0');
+    })
+  ));
+
+  // Sort dates descending (most recent first)
+  logDates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
+  // Calculate streak: consecutive days up to today
+  let streak = 0;
+  let streakBroken = false;
+  let prev = new Date(); // today
+  prev.setHours(0,0,0,0);
+  for (let i = 0; i < logDates.length; i++) {
+    const logDate = new Date(logDates[i]);
+    logDate.setHours(0,0,0,0);
+    if (i === 0) {
+      // If last log is today or yesterday, streak can start
+      const diff = (prev.getTime() - logDate.getTime())/(1000*60*60*24);
+      if (diff === 0 || diff === 1) {
+        streak = 1;
+      } else {
+        streak = 0;
+        streakBroken = true;
+        break;
+      }
+    } else {
+      // Check if previous log was exactly 1 day before
+      const lastLogDate = new Date(logDates[i-1]);
+      lastLogDate.setHours(0,0,0,0);
+      const diff = (lastLogDate.getTime() - logDate.getTime())/(1000*60*60*24);
+      if (diff === 1) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+  }
+  // If no logs or last log is not today/yesterday, streak is 0 and broken
+  if (logDates.length === 0) {
+    streak = 0;
+    streakBroken = true;
+  }
+
+  // --- Streak Indicator UI ---
+  // Use a fire emoji or SVG, color if streak > 0, gray if 0
+  const StreakIndicator = (
+    <div className="flex items-center gap-2 group select-none" title={streak > 0 ? `🔥 ${streak} day streak!` : 'No active streak'}>
+      <span
+        className={
+          streak > 0
+            ? 'text-amber-500 drop-shadow-md text-2xl transition-colors'
+            : 'text-gray-400 dark:text-gray-600 text-2xl transition-colors'
+        }
+        style={{ filter: streak > 0 ? 'drop-shadow(0 0 6px #fbbf24)' : 'none' }}
+      >
+        {/* Fire SVG for more control, fallback to emoji */}
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          className="w-7 h-7 align-middle"
+        >
+          <path d="M12.7 2.1a1 1 0 0 0-1.4 0c-2.2 2.1-3.7 4.7-4.3 7.6C6.2 10.2 6 11.1 6 12c0 3.3 2.7 6 6 6s6-2.7 6-6c0-.9-.2-1.8-.4-2.3-.6-2.9-2.1-5.5-4.3-7.6zM12 20c-4.4 0-8-3.6-8-8 0-1.2.3-2.3.7-3.3.2-.5.7-.7 1.2-.5.5.2.7.7.5 1.2C6.1 10.2 6 11.1 6 12c0 3.3 2.7 6 6 6s6-2.7 6-6c0-.9-.1-1.8-.4-2.6-.2-.5 0-1 .5-1.2.5-.2 1 .1 1.2.5.4 1 .7 2.1.7 3.3 0 4.4-3.6 8-8 8z" />
+        </svg>
+      </span>
+      <span
+        className={
+          streak > 0
+            ? 'text-lg font-bold text-amber-600 dark:text-amber-400 drop-shadow-sm'
+            : 'text-lg font-bold text-gray-400 dark:text-gray-600'
+        }
+        style={{ minWidth: 18, textAlign: 'center' }}
+      >
+        {streak}
+      </span>
+    </div>
+  );
+
   return (
-    <Layout title={headerTitle} categoryColor={selectedCategoryColor}>
+    <Layout title={headerTitle} categoryColor={selectedCategoryColor} headerStreak={StreakIndicator}>
       <div className="relative">
         {/* Enhanced category background tinting - visible in both light and dark modes */}
         {selectedCategoryColor && (

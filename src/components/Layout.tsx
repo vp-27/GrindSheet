@@ -39,6 +39,7 @@ interface LayoutProps {
   title?: string;
   categoryColor?: string;
   headerSlider?: React.ReactNode;
+  headerStreak?: React.ReactNode; // New: custom header right-side content
 }
 
 // Icon transition component
@@ -68,7 +69,7 @@ const AnimatedIcon: React.FC<AnimatedIconProps> = ({ outlineIcon: OutlineIcon, s
   );
 };
 
-const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerSlider }) => {
+const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerSlider, headerStreak }) => {
   const { profile, signOut } = useAuth();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isAddExerciseModalOpen, setIsAddExerciseModalOpen] = useState(false);
@@ -98,42 +99,15 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
             >
               {title}
             </h1>
-            {headerSlider || (
-              <Button variant="ghost" className="p-0 h-auto" onClick={() => navigate('/settings')}>
-                <Avatar className="h-8 w-8 transition-opacity duration-200">
-                  {!avatarImageError && profile?.avatar_url ? (
-                    <AvatarImage 
-                      src={profile.avatar_url} 
-                      alt={profile?.name} 
-                      onError={() => setAvatarImageError(true)}
-                    />
-                  ) : null}
-                  <AvatarFallback className="bg-muted text-muted-foreground">
-                    {profile?.name?.substring(0, 2).toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
-            )}
+            {/* Streak indicator or fallback */}
+            {headerStreak || headerSlider}
           </>
         ) : (
           // Full width header slider when no title
           headerSlider || (
             <div className="flex justify-between items-center w-full">
               <div></div>
-              <Button variant="ghost" className="p-0 h-auto" onClick={() => navigate('/settings')}>
-                <Avatar className="h-8 w-8 transition-opacity duration-200">
-                  {!avatarImageError && profile?.avatar_url ? (
-                    <AvatarImage 
-                      src={profile.avatar_url} 
-                      alt={profile?.name} 
-                      onError={() => setAvatarImageError(true)}
-                    />
-                  ) : null}
-                  <AvatarFallback className="bg-muted text-muted-foreground">
-                    {profile?.name?.substring(0, 2).toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-              </Button>
+              {/* Optionally, could show streak here too if needed */}
             </div>
           )
         )}
