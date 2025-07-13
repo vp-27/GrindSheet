@@ -10,9 +10,16 @@ import { MobileSlider } from '@/components/ui/mobile-slider';
 import AnimatedCounter from '@/components/ui/animated-counter';
 import TournamentRulebook from '@/components/TournamentRulebook';
 import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { 
   ChevronDown,
   ChevronUp,
-  Clock
+  Clock,
+  ChevronRight
 } from 'lucide-react';
 import { TOURNAMENT_ICONS, TOURNAMENT_GRADIENTS } from '@/utils/tournamentIcons';
 import { 
@@ -30,7 +37,39 @@ import {
 } from '@/utils/tournamentUtils';
 import { supabase } from '@/integrations/supabase/client';
 import PRRecordsPage, { PRRecordsContent } from './PRRecords';
+import TypewriterText from '@/components/ui/typewriter-text';
 import '@/styles/index.css';
+
+// Harsh roast lines for zero-point users
+const harshRoasts = [
+  "Your gym card is just a keychain accessory at this point.",
+  "You log more rest days than workouts.",
+  "If laziness was a sport, you'd be world champ.",
+  "Your muscles are in witness protection.",
+  "Even your shadow skips leg day.",
+  "You're the reason the dumbbells collect dust.",
+  "Your PR? Personal Retreat.",
+  "The only thing you're lifting is expectations—then dropping them.",
+  "You've got more excuses than reps.",
+  "Your gains are missing—have you checked the lost and found?",
+  "You rest so much, your Fitbit thinks you're dead.",
+  "The treadmill misses you. It told me.",
+  "You're the before photo in every ad.",
+  "Your sweat glands filed for unemployment.",
+  "You're one workout away from a comeback. And you keep missing it.",
+  "If you worked out as much as you talk about it, you'd be in first place.",
+  "Your gym shoes are in mint condition.",
+  "Even the yoga mats are judging you.",
+  "You have more gym memberships than gym visits.",
+  "Your biceps are on a milk carton—missing since January."
+];
+
+// Store roast messages globally to persist across navigation
+const roastStorage = {
+  zeroPointsRoast: null as string | null,
+  secondPlaceRoast: null as string | null,
+  lastTournamentId: null as string | null
+};
 
 const TournamentPage: React.FC = () => {
   const { profile } = useAuth();
@@ -48,6 +87,7 @@ const TournamentPage: React.FC = () => {
   const [showHistoricalWeeks, setShowHistoricalWeeks] = useState(false);
   const [highlightedSection, setHighlightedSection] = useState<'performance' | 'volume' | 'bonuses' | null>(null);
   const [rulebookSection, setRulebookSection] = useState<string | null>(null);
+  const [messageKey, setMessageKey] = useState(0); // Force re-render of typewriter
 
   // Tab state for switching between tournament and PR records
   const [activeTab, setActiveTab] = useState<'tournament' | 'records'>('tournament');
@@ -58,6 +98,16 @@ const TournamentPage: React.FC = () => {
     urgency: 'low' | 'medium' | 'high' | 'critical' | 'ended';
     timeLeft: number;
   }>({ text: '', urgency: 'low', timeLeft: 0 });
+
+  // Reset roast storage when tournament changes
+  useEffect(() => {
+    if (selectedTournament && selectedTournament.id !== roastStorage.lastTournamentId) {
+      roastStorage.zeroPointsRoast = null;
+      roastStorage.secondPlaceRoast = null;
+      roastStorage.lastTournamentId = selectedTournament.id;
+      setMessageKey(prev => prev + 1); // Trigger new typewriter animation
+    }
+  }, [selectedTournament?.id]);
 
   // Helper function to handle section clicks with scroll and highlight
   const handleSectionClick = (participantId: string, section: 'performance' | 'volume' | 'bonuses') => {
@@ -92,6 +142,110 @@ const TournamentPage: React.FC = () => {
   const openRulebookToSection = (section: string) => {
     setRulebookSection(section);
     setShowPointsGuide(true);
+  };
+
+  // Generate contextual witty competition messages based on position and points gap
+  const getCompetitiveMessage = (rank: number, pointsGap: number, totalParticipants: number, topPerformer: any) => {
+    if (rank === 1) {
+      const participantsSorted = [...selectedTournament!.participants].sort((a, b) => b.totalPoints - a.totalPoints);
+      const closeGames = participantsSorted.filter(p => p.totalPoints > 0 && (topPerformer.totalPoints - p.totalPoints) <= 20);
+      if (closeGames.length > 1) return "Crown's getting heavy 👑";
+      return "Untouchable right now";
+    }
+    
+    if (rank === 2) {
+      // Use persistent roast for second place
+      if (!roastStorage.secondPlaceRoast) {
+        const secondPlaceRoasts = [
+          "First place but make it fancy",
+          "You're the sequel nobody asked for.",
+          "You're the plot twist where the hero almost wins.",
+          "Second place: the shadow of greatness.",
+          "You're the warm-up act for the real champion.",
+          "Almost there, but almost doesn't count in fitness.",
+          "Second place: where effort meets reality.",
+          "You're the runner-up in a one-person race.",
+          "Second place: the silver lining of losing.",
+          "You're the backup plan for victory.",
+          "Second place: the art of being nearly unstoppable.",
+          "You're the reason first place looks so good.",
+          "Second place: the ultimate motivator for next time.",
+          "You're the benchmark for everyone else's success.",
+          "Second place: the proof that you're almost elite.",
+          "You're the NPC in someone else's fitness journey.",
+          "Second place: the influencer of mediocrity.",
+          "You're the Spotify ad between first place's PRs.",
+          "Second place: the plot twist no one saw coming, but no one cared about either.",
+          "You're the TikTok trend that peaked too soon.",
+          "{name} is writing your fitness obituary.",
+          "Second place: {name} is using your effort as a warm-up.",
+          "You're the reason {name} sleeps easy at night.",
+          "{name} called—they said thanks for the easy win.",
+          "Second place: {name} is the main character, and you're the side quest."
+        ];
+        let roast = secondPlaceRoasts[Math.floor(Math.random() * secondPlaceRoasts.length)];
+        if (roast.includes('{name}')) {
+          const name = topPerformer?.user?.name || 'first place';
+          roast = roast.replace('{name}', name);
+        }
+        roastStorage.secondPlaceRoast = roast;
+      }
+      return roastStorage.secondPlaceRoast;
+    }
+    
+    if (rank === 3) {
+      const thirdPlaceRoasts = [
+        "Bronze is just warm-up 🥉",
+        "Podium's getting cold 🧊",
+        "Third place: the consolation prize of effort.",
+        "You're the reason second place feels better about themselves.",
+        "{name} and second place are sharing a laugh at your expense.",
+        "Third place: the participation trophy of podiums.",
+        "You're the buffer between greatness and mediocrity.",
+        "{name} is using your effort as a cooldown.",
+        "Third place: the sidekick of the sidekick.",
+        "You're the reason the podium has three steps.",
+        "{name} called—they said thanks for keeping the podium warm."
+      ];
+      const roast = thirdPlaceRoasts[Math.floor(Math.random() * thirdPlaceRoasts.length)];
+      return roast.replace('{name}', topPerformer?.user?.name || 'first place');
+    }
+    
+    if (rank <= totalParticipants / 2) {
+      return "Mediocrity loves company 🤝";
+    }
+    
+    if (rank === totalParticipants && totalParticipants > 1) {
+      return "Rock bottom has great WiFi 📶";
+    }
+    
+    return "Gravity seems stronger for you 🌍";
+  };
+
+  // Get roast message for current user
+  const getCurrentUserRoast = () => {
+    if (!selectedTournament || !profile) return null;
+    
+    const currentParticipant = selectedTournament.participants.find(p => p.userId === profile.id);
+    if (!currentParticipant) return null;
+    
+    // Ensure participants are properly sorted and find the actual rank
+    const participantsSorted = [...selectedTournament.participants].sort((a, b) => b.totalPoints - a.totalPoints);
+    const actualRank = participantsSorted.findIndex(p => p.userId === profile.id) + 1;
+    const displayRank = actualRank > 0 ? actualRank : currentParticipant.rank;
+    const topPerformer = participantsSorted[0];
+    const pointsFromLeader = topPerformer ? topPerformer.totalPoints - currentParticipant.totalPoints : 0;
+    const totalParticipants = selectedTournament.participants.length;
+    
+    // Special handling for users with 0 points
+    if (currentParticipant.totalPoints === 0) {
+      if (!roastStorage.zeroPointsRoast) {
+        roastStorage.zeroPointsRoast = harshRoasts[Math.floor(Math.random() * harshRoasts.length)];
+      }
+      return roastStorage.zeroPointsRoast;
+    }
+    
+    return getCompetitiveMessage(displayRank, pointsFromLeader, totalParticipants, topPerformer);
   };
 
   // Fetch data on mount
@@ -884,46 +1038,109 @@ const TournamentPage: React.FC = () => {
           />
         </div>
 
-        {/* Tournament History Selector - Only for Tournament tab */}
+        {/* Tournament Header with Roast and Week Selector - Only for Tournament tab */}
         {activeTab === 'tournament' && (currentTournament || tournamentHistory.length > 0) && (
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {/* Current Tournament Button */}
-            {currentTournament && (
-              <Button
-                variant={selectedTournament?.id === currentTournament?.id ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedTournament(currentTournament)}
-                className={`rounded-xl whitespace-nowrap transition-all duration-200 font-medium px-4 py-2 text-sm ${
-                  selectedTournament?.id === currentTournament?.id
-                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0 shadow-sm'
-                    : 'border border-border/40 text-muted-foreground hover:text-foreground hover:border-border hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 dark:hover:from-purple-950/20 dark:hover:to-blue-950/20'
-                }`}
-              >
-                Current Week
-              </Button>
-            )}
-            
-            {/* Past Tournament Buttons */}
-            {tournamentHistory
-              .filter(tournament => tournament.id !== currentTournament?.id)
-              .slice()
-              .reverse()
-              .map(tournament => (
-              <Button
-                key={tournament.id}
-                variant={selectedTournament?.id === tournament.id ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedTournament(tournament)}
-                className={`rounded-xl whitespace-nowrap transition-all duration-200 font-medium px-4 py-2 text-sm ${
-                  selectedTournament?.id === tournament.id
-                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white border-0 shadow-sm'
-                    : 'border border-border/40 text-muted-foreground hover:text-foreground hover:border-border opacity-75 hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 dark:hover:from-purple-950/20 dark:hover:to-blue-950/20'
-                }`}
-              >
-                {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-              </Button>
-            ))}
+          <div className="flex items-center justify-between gap-4 p-4 bg-gradient-to-r from-slate-50/50 to-gray-50/50 dark:from-slate-900/30 dark:to-gray-900/30 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
+            {/* Left: Roast Message */}
+            <div className="flex-1 min-w-0">
+              {(() => {
+                const roastMessage = getCurrentUserRoast();
+                if (!roastMessage) {
+                  return (
+                    <div className="text-center">
+                      <span className="font-bold text-lg text-foreground">Join the Competition! 🏆</span>
+                      <div className="text-sm text-muted-foreground mt-1">Log a workout to get roasted</div>
+                    </div>
+                  );
+                }
+                
+                return (
+                  <div className="flex flex-col">
+                    <span className="font-bold text-lg text-foreground leading-tight">
+                      <TypewriterText 
+                        key={messageKey}
+                        text={roastMessage}
+                        speed={40}
+                        delay={600}
+                        className="competitive-message-enter"
+                        showOnce={true}
+                      />
+                    </span>
+                    {(() => {
+                      const currentParticipant = selectedTournament?.participants.find(p => p.userId === profile?.id);
+                      if (currentParticipant && currentParticipant.totalPoints === 0) {
+                        return (
+                          <span className="text-sm text-muted-foreground mt-1">
+                            Time to get those gains 💪
+                          </span>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Right: Week Selector Dropdown */}
+            <div className="flex-shrink-0">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl border-slate-300/50 dark:border-slate-600/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-800"
+                  >
+                    <span className="font-medium text-sm">
+                      {selectedTournament?.id === currentTournament?.id 
+                        ? 'Current Week' 
+                        : new Date(selectedTournament?.weekStart || '').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                      }
+                    </span>
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  {/* Current Tournament */}
+                  {currentTournament && (
+                    <DropdownMenuItem 
+                      onClick={() => setSelectedTournament(currentTournament)}
+                      className={`flex items-center justify-between ${selectedTournament?.id === currentTournament?.id ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
+                    >
+                      <span className="font-medium">Current Week</span>
+                      {selectedTournament?.id === currentTournament?.id && (
+                        <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                      )}
+                    </DropdownMenuItem>
+                  )}
+                  
+                  {/* Past Tournaments */}
+                  {tournamentHistory
+                    .filter(tournament => tournament.id !== currentTournament?.id)
+                    .slice()
+                    .reverse()
+                    .map(tournament => (
+                    <DropdownMenuItem 
+                      key={tournament.id}
+                      onClick={() => setSelectedTournament(tournament)}
+                      className={`flex items-center justify-between ${selectedTournament?.id === tournament.id ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
+                    >
+                      <span className="font-medium">
+                        {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                      </span>
+                      {selectedTournament?.id === tournament.id && (
+                        <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                      )}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
+        )}
+
+        {/* Clear Divider before Rankings */}
+        {activeTab === 'tournament' && selectedTournament && (
+          <div className="border-t border-slate-300/60 dark:border-slate-600/60 my-6"></div>
         )}
         
         {/* Tournament Content */}

@@ -161,3 +161,19 @@
 .tournament-progress-ended {
   background-color: rgb(107 114 128);
 }
+
+/* Typewriter animation for roast messages */
+.competitive-message-enter {
+  animation: competitiveMessageEnter 0.6s ease-out;
+}
+
+@keyframes competitiveMessageEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
