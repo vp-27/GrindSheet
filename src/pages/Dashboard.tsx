@@ -718,24 +718,23 @@ const Dashboard = () => {
                       {/* Bottom row: Current weight and stats */}
                       <div className="flex items-end justify-between">
                         <div>
-                          <div className="apple-health-weight-display">
+                          <div className={`apple-health-weight-display flex items-center gap-2 ${
+                            isPersonalRecord ? 'text-amber-600 dark:text-amber-400' : ''
+                          }`}>
                             <AnimatedCounter 
                               value={progress.currentWeight} 
                               formatValue={(val) => val % 1 === 0 ? val.toString() : val.toFixed(1)}
                               duration={600}
                               className="tabular-nums"
                             />
+                            {isPersonalRecord && (
+                              <Trophy className="w-4 h-4 flex-shrink-0" />
+                            )}
                           </div>
                           <p className="apple-health-weight-unit">lbs</p>
                         </div>
                         
                         <div className="flex items-center gap-2">
-                          {isPersonalRecord && (
-                            <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 text-sm font-medium">
-                              <Trophy className="w-3 h-3" />
-                              <span>PR</span>
-                            </div>
-                          )}
                           {miniChartData.length === 1 && (
                             <div className="text-muted-foreground text-sm font-medium">
                               First log
