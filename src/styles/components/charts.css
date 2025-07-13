@@ -167,8 +167,8 @@
 }
 
 .apple-health-progress-badge.positive {
-  color: rgb(5 150 105);
-  background-color: rgb(236 253 245);
+  color: rgb(5 150 105); /* emerald-600 */
+  background-color: rgb(209 250 229); /* emerald-100 */
 }
 
 .apple-health-progress-badge.negative {
@@ -180,8 +180,8 @@
   display: flex;
   align-items: center;
   gap: 0.25rem;
-  background-color: rgb(254 243 199);
-  color: rgb(180 83 9);
+  background-color: rgb(204 251 241); /* teal-100 */
+  color: rgb(13 148 136); /* teal-600 */
   padding: 0.25rem 0.5rem;
   border-radius: 9999px;
   font-size: 0.75rem;

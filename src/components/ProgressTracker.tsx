@@ -24,7 +24,7 @@ const getTrackerIcon = (key: string) => {
     case 'consistency':
       return <Calendar className="w-6 h-6 text-blue-500" />;
     case 'categoryCompletion':
-      return <Target className="w-6 h-6 text-green-500" />;
+      return <Target className="w-6 h-6 text-emerald-500" />;
     case 'weekendWarrior':
       return <Zap className="w-6 h-6 text-yellow-500" />;
     case 'coreDestroyer':

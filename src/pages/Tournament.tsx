@@ -304,7 +304,7 @@ const TournamentPage: React.FC = () => {
       case BadgeType.WEEKEND_WARRIOR:
         return 'bg-orange-100/80 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-700/50';
       case BadgeType.CATEGORY_MASTER:
-        return 'bg-green-100/80 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700/50';
+        return 'bg-emerald-100/80 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700/50';
       case BadgeType.NEWCOMER_BONUS:
         return 'bg-teal-100/80 text-teal-700 border-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-700/50';
       case BadgeType.PERFECT_WEEK:
@@ -589,7 +589,7 @@ const TournamentPage: React.FC = () => {
                                   </div>
                                 </div>
                               </div>
-                              <span className="font-semibold text-green-600 dark:text-green-400">+{POINTS_CONFIG.PR_ACHIEVEMENT.points}</span>
+                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{POINTS_CONFIG.PR_ACHIEVEMENT.points}</span>
                             </div>
                           ))}
 
@@ -602,16 +602,16 @@ const TournamentPage: React.FC = () => {
                               <div className="flex items-center gap-2">
                                 {(() => {
                                   const TrendingUpIcon = TOURNAMENT_ICONS.IMPROVEMENT_DETAIL;
-                                  return <TrendingUpIcon className="w-4 h-4 text-green-500 flex-shrink-0" />;
+                                  return <TrendingUpIcon className="w-4 h-4 text-emerald-500 flex-shrink-0" />;
                                 })()}
                                 <div>
                                   <span className="font-medium">{pr.exerciseName} Gain</span>
-                                  <div className="text-xs text-green-600 dark:text-green-400 font-medium">
+                                  <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                                     +{pr.improvementPercent.toFixed(1)}% Improvement
                                   </div>
                                 </div>
                               </div>
-                              <span className="font-semibold text-green-600 dark:text-green-400">+{Math.min(Math.floor(pr.improvementPercent * 2), 50)}</span>
+                                                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{Math.min(Math.floor(pr.improvementPercent * 2), 50)}</span>
                             </div>
                           ))}
 
@@ -634,7 +634,7 @@ const TournamentPage: React.FC = () => {
                                   </div>
                                 </div>
                               </div>
-                              <span className="font-semibold text-green-600 dark:text-green-400">+{Math.min(Math.floor(improvement.improvementPercent * 2), 50)}</span>
+                                                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{Math.min(Math.floor(improvement.improvementPercent * 2), 50)}</span>
                             </div>
                           ))}
 
@@ -656,7 +656,7 @@ const TournamentPage: React.FC = () => {
                                   </div>
                                 </div>
                               </div>
-                              <span className="font-semibold text-green-600 dark:text-green-400">+{comp.points}</span>
+                                                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{comp.points}</span>
                             </div>
                           ))}
                         </div>
@@ -699,7 +699,7 @@ const TournamentPage: React.FC = () => {
                                   <div className="text-xs text-muted-foreground">{participant.workoutDays.length} days logged</div>
                                 </div>
                               </div>
-                              <span className="font-semibold text-green-600 dark:text-green-400">+{participant.pointsBreakdown.participationPoints + participant.pointsBreakdown.varietyPoints}</span>
+                                                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{participant.pointsBreakdown.participationPoints + participant.pointsBreakdown.varietyPoints}</span>
                             </div>
                           )}
 
@@ -711,14 +711,14 @@ const TournamentPage: React.FC = () => {
                               <div className="flex items-center gap-2">
                                 {(() => {
                                   const CheckCircleIcon = TOURNAMENT_ICONS.CONSISTENCY_DETAIL;
-                                  return <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0" />;
+                                  return <CheckCircleIcon className="w-4 h-4 text-emerald-500 flex-shrink-0" />;
                                 })()}
                                 <div>
                                   <span className="font-medium">Consistency Bonus</span>
                                   <div className="text-xs text-muted-foreground">5+ workout days</div>
                                 </div>
                               </div>
-                              <span className="font-semibold text-green-600 dark:text-green-400">+{participant.pointsBreakdown.consistencyPoints}</span>
+                                                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{participant.pointsBreakdown.consistencyPoints}</span>
                             </div>
                           )}
                           
@@ -737,7 +737,7 @@ const TournamentPage: React.FC = () => {
                                   <div className="text-xs text-muted-foreground">{participant.exerciseStats?.totalExercises || 0} exercises</div>
                                 </div>
                               </div>
-                              <span className="font-semibold text-green-600 dark:text-green-400">+{participant.pointsBreakdown.exercisePoints}</span>
+                                                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{participant.pointsBreakdown.exercisePoints}</span>
                             </div>
                           )}
                         </div>
@@ -780,7 +780,7 @@ const TournamentPage: React.FC = () => {
                                   <div className="text-xs text-muted-foreground">{Math.floor((participant.exerciseStats?.newExerciseBonusPoints || 0) / NEW_EXERCISE_BONUS.points)} new exercises</div>
                                 </div>
                               </div>
-                              <span className="font-semibold text-green-600 dark:text-green-400">+{participant.exerciseStats?.newExerciseBonusPoints || 0}</span>
+                                                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{participant.exerciseStats?.newExerciseBonusPoints || 0}</span>
                             </div>
                           )}
                           
@@ -796,7 +796,7 @@ const TournamentPage: React.FC = () => {
                                   <span className="font-medium">{BADGE_DEFINITIONS[badge.type].name}</span>
                                 </div>
                               </div>
-                              <span className="font-semibold text-green-600 dark:text-green-400">+{badge.points}</span>
+                                                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{badge.points}</span>
                             </div>
                           ))}
                         </div>

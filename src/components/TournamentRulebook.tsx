@@ -239,7 +239,7 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
                   <div className="flex items-center gap-1 bg-white/60 dark:bg-slate-800/60 px-2 py-1 rounded-lg">
                     {(() => {
                       const UsersIcon = TOURNAMENT_ICONS.USERS;
-                      return <UsersIcon className="h-3 w-3 text-green-500" />;
+                      return <UsersIcon className="h-3 w-3 text-emerald-500" />;
                     })()}
                     <span>Friends</span>
                   </div>

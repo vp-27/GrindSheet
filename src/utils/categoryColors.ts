@@ -19,14 +19,14 @@ export const categoryColorSchemes: Record<string, CategoryColorScheme> = {
     text: 'text-blue-700',
     darkText: 'text-blue-900'
   },
-  // Back - Green
+  // Back - Warm Lime Green (more vibrant for category identification)
   'back': {
-    primary: '#10b981', // green-500
-    light: '#d1fae5',   // green-100
-    gradient: 'from-green-100 to-green-200',
-    shadow: 'shadow-green-200/50',
-    text: 'text-green-700',
-    darkText: 'text-green-900'
+    primary: '#84cc16', // lime-500 (brighter, more distinctive)
+    light: '#f7fee7',   // lime-100
+    gradient: 'from-lime-100 to-lime-200',
+    shadow: 'shadow-lime-200/50',
+    text: 'text-lime-700',
+    darkText: 'text-lime-900'
   },
   // Chest - Yellow
   'chest': {
@@ -63,6 +63,31 @@ export const categoryColorSchemes: Record<string, CategoryColorScheme> = {
     shadow: 'shadow-pink-200/50',
     text: 'text-pink-700',
     darkText: 'text-pink-900'
+  }
+};
+
+// Success indicator color system (separate from categories)
+export const successIndicatorColors = {
+  // Brand/Action: Cool Teal
+  brand: {
+    primary: '#0d9488', // teal-600
+    light: '#ccfbf1',   // teal-100
+    text: 'text-teal-700',
+    darkText: 'text-teal-900'
+  },
+  // Positive Feedback/Progress: Professional Emerald Green
+  positive: {
+    primary: '#059669', // emerald-600 (more professional for success)
+    light: '#d1fae5',   // emerald-100
+    text: 'text-emerald-700',
+    darkText: 'text-emerald-900'
+  },
+  // Negative Feedback: Red
+  negative: {
+    primary: '#ef4444', // red-500
+    light: '#fee2e2',   // red-100
+    text: 'text-red-700',
+    darkText: 'text-red-900'
   }
 };
 
