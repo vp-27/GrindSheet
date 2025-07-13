@@ -55,7 +55,7 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
         {
           name: "Improvement Bonus",
           points: `${POINTS_CONFIG.IMPROVEMENT_PERCENT.points}x`,
-          description: "Extra points per 1% improvement (max 50pts)"
+          description: "Extra points per 1% improvement (max 50pts) - awarded for ANY progress, even if not a PR"
         },
         {
           name: "Beat Friends",
@@ -344,8 +344,8 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
               <div className="flex items-start gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-2 flex-shrink-0"></div>
                 <div>
-                  <span className="font-medium">Target PRs for massive points</span>
-                  <div className="text-xs text-muted-foreground">75pts + improvement bonus</div>
+                  <span className="font-medium">Any progress earns points</span>
+                  <div className="text-xs text-muted-foreground">Improvement bonus for ANY weight gain, PRs get extra 50pts</div>
                 </div>
               </div>
               <div className="flex items-start gap-2">

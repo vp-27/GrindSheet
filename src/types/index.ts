@@ -93,6 +93,7 @@ export interface TournamentParticipant {
   badges: TournamentBadge[];
   workoutDays: string[]; // ISO date strings of days they worked out
   prDetails: PRDetail[]; // Detailed PR achievements
+  improvementDetails?: PRDetail[]; // Detailed improvements that don't qualify as PRs
   competitiveDetails?: { exerciseId: string; exerciseName: string; type: string; targetUser?: string; points: number }[]; // Add exerciseName
   exerciseStats?: { // NEW: exercise statistics
     totalExercises: number;

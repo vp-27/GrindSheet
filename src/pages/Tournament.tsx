@@ -615,6 +615,29 @@ const TournamentPage: React.FC = () => {
                             </div>
                           ))}
 
+                          {/* Show improvements that don't qualify as PRs */}
+                          {participant.improvementDetails && participant.improvementDetails.map((improvement, idx) => (
+                            <div 
+                              key={`non-pr-improvement-${idx}`} 
+                              className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-amber-100/50 dark:hover:bg-amber-900/20 cursor-pointer transition-all duration-200"
+                              onClick={() => openRulebookToSection('performance')}
+                            >
+                              <div className="flex items-center gap-2">
+                                {(() => {
+                                  const TrendingUpIcon = TOURNAMENT_ICONS.IMPROVEMENT_DETAIL;
+                                  return <TrendingUpIcon className="w-4 h-4 text-blue-500 flex-shrink-0" />;
+                                })()}
+                                <div>
+                                  <span className="font-medium">{improvement.exerciseName} Progress</span>
+                                  <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                                    +{improvement.improvementPercent.toFixed(1)}% Improvement
+                                  </div>
+                                </div>
+                              </div>
+                              <span className="font-semibold text-green-600 dark:text-green-400">+{Math.min(Math.floor(improvement.improvementPercent * 2), 50)}</span>
+                            </div>
+                          ))}
+
                           {participant.competitiveDetails && participant.competitiveDetails.map((comp, idx) => (
                             <div 
                               key={`comp-${idx}`} 

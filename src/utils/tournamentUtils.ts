@@ -299,6 +299,7 @@ export const calculateTournamentPoints = (
   // 4. PR points, improvement points, and competitive bonuses
   const exerciseProgress = new Map<string, { hadPR: boolean; improvementPercent: number }>();
   const prDetails: PRDetail[] = [];
+  const improvementDetails: PRDetail[] = []; // Track improvements that don't qualify as PRs
   const competitiveDetails: { exerciseId: string; exerciseName: string; type: string; targetUser?: string; points: number; }[] = [];
   exercises.forEach(exercise => {
     const exerciseLogs = logs.filter(log => log.exerciseId === exercise.id);
@@ -316,34 +317,58 @@ export const calculateTournamentPoints = (
         const logDate = new Date(log.timestamp);
         return logDate < startDate;
       });
-      // --- PR LOGIC ---
+      // --- PR & IMPROVEMENT LOGIC ---
       let achievedPR = false;
+      let improvementPercent = 0;
+      let previousBest = 0; // Declare at higher scope for competitive bonus logic
+      
       if (preTournamentLogs.length > 0) {
-        const previousBest = Math.max(...preTournamentLogs.map(log => log.weight));
+        previousBest = Math.max(...preTournamentLogs.map(log => log.weight));
         // Find user's first log for this exercise (all time)
         const firstLogWeight = userExerciseLogs.length > 0 ? Math.min(...userExerciseLogs.map(log => log.weight)) : previousBest;
-        // PR achieved if tournament weight exceeds previous best AND is meaningful
-        if (maxTournamentWeight > previousBest && isMeaningfulPR({ previousBest, newBest: maxTournamentWeight, firstLogWeight })) {
-          achievedPR = true;
-          pointsBreakdown.prPoints += POINTS_CONFIG.PR_ACHIEVEMENT.points;
-          const improvementPercent = ((maxTournamentWeight - previousBest) / previousBest) * 100;
-          // Cap improvement points per exercise
+        
+        // Calculate improvement percentage (always calculate if there's progress)
+        if (maxTournamentWeight > previousBest) {
+          improvementPercent = ((maxTournamentWeight - previousBest) / previousBest) * 100;
+          
+          // Award improvement points for ANY progress (separate from PR points)
           const improvementPoints = Math.min(
             Math.floor(improvementPercent * POINTS_CONFIG.IMPROVEMENT_PERCENT.points),
             COMPETITIVE_BONUS_CONFIG.IMPROVEMENT_CAP
           );
           pointsBreakdown.improvementPoints += improvementPoints;
-          exerciseProgress.set(exercise.id, { hadPR: true, improvementPercent });
-          // Find the exact log where the PR was achieved
-          const prLog = tournamentExerciseLogs.find(log => log.weight === maxTournamentWeight);
-          prDetails.push({
-            exerciseId: exercise.id,
-            exerciseName: exercise.name,
-            weight: maxTournamentWeight,
-            previousBest,
-            achievedAt: prLog?.timestamp || tournamentExerciseLogs[0].timestamp,
-            improvementPercent
-          });
+          
+          // PR points only awarded if improvement is meaningful (prevents gaming)
+          if (isMeaningfulPR({ previousBest, newBest: maxTournamentWeight, firstLogWeight })) {
+            achievedPR = true;
+            pointsBreakdown.prPoints += POINTS_CONFIG.PR_ACHIEVEMENT.points;
+            exerciseProgress.set(exercise.id, { hadPR: true, improvementPercent });
+            
+            // Find the exact log where the PR was achieved
+            const prLog = tournamentExerciseLogs.find(log => log.weight === maxTournamentWeight);
+            prDetails.push({
+              exerciseId: exercise.id,
+              exerciseName: exercise.name,
+              weight: maxTournamentWeight,
+              previousBest,
+              achievedAt: prLog?.timestamp || tournamentExerciseLogs[0].timestamp,
+              improvementPercent
+            });
+          } else {
+            // Still track improvement for badges/progress, but not as PR
+            exerciseProgress.set(exercise.id, { hadPR: false, improvementPercent });
+            
+            // Add to improvement details for display
+            const improvementLog = tournamentExerciseLogs.find(log => log.weight === maxTournamentWeight);
+            improvementDetails.push({
+              exerciseId: exercise.id,
+              exerciseName: exercise.name,
+              weight: maxTournamentWeight,
+              previousBest,
+              achievedAt: improvementLog?.timestamp || tournamentExerciseLogs[0].timestamp,
+              improvementPercent
+            });
+          }
         }
       } else {
         // First log for this exercise (not a PR)
@@ -351,8 +376,8 @@ export const calculateTournamentPoints = (
         // Do NOT add to prDetails or count as PR
       }
       // --- COMPETITIVE BONUS LOGIC ---
-      // Award if achievedPR OR if it's a newcomer's first time with this exercise
-      if (achievedPR || preTournamentLogs.length === 0) {
+      // Award if achievedPR OR if there's meaningful improvement OR if it's a newcomer's first time with this exercise
+      if (achievedPR || (improvementPercent > 0 && maxTournamentWeight > previousBest) || preTournamentLogs.length === 0) {
         allUsers.forEach(otherUser => {
           if (otherUser.id === user.id) return;
           const otherLogs = exerciseLogs.filter(log => log.userId === otherUser.id && new Date(log.timestamp) <= endDate);
@@ -615,6 +640,7 @@ export const calculateTournamentPoints = (
     badges,
     workoutDays,
     prDetails,
+    improvementDetails, // Add improvement details for non-PR improvements
     competitiveDetails: competitiveDetails,
     exerciseStats,
     progressTrackers, // Add progress trackers to participant object
