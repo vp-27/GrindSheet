@@ -726,13 +726,16 @@ const Dashboard = () => {
                               className="tabular-nums"
                             />
                             <span className="apple-health-weight-unit">lbs</span>
-                            {isPersonalRecord && (
-                              <Trophy className="w-4 h-4 flex-shrink-0 text-amber-600 dark:text-amber-400" />
-                            )}
                           </div>
                         </div>
                         
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-col items-end gap-1">
+                          {isPersonalRecord && (
+                            <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 text-sm font-medium">
+                              <Trophy className="w-3 h-3" />
+                              <span>PR</span>
+                            </div>
+                          )}
                           {miniChartData.length === 1 && (
                             <div className="text-muted-foreground text-sm font-medium">
                               First log
