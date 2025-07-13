@@ -10,27 +10,11 @@ import { MobileSlider } from '@/components/ui/mobile-slider';
 import AnimatedCounter from '@/components/ui/animated-counter';
 import TournamentRulebook from '@/components/TournamentRulebook';
 import { 
-  Trophy, 
-  Crown, 
-  Medal, 
-  Award, 
-  Zap, 
-  Target,
-  TrendingUp,
-  Calendar,
-  Users,
-  Star,
-  Flame,
-  CheckCircle,
-  Timer,
   ChevronDown,
   ChevronUp,
-  Activity,
-  Plus,
-  BookOpen,
-  History,
   Clock
 } from 'lucide-react';
+import { TOURNAMENT_ICONS, TOURNAMENT_GRADIENTS } from '@/utils/tournamentIcons';
 import { 
   Tournament, 
   TournamentParticipant,
@@ -271,28 +255,8 @@ const TournamentPage: React.FC = () => {
 
   // Badge icon and short name mapping
   const getBadgeIcon = (badgeType: BadgeType) => {
-    switch (badgeType) {
-      case BadgeType.FIRST_PR:
-        return <Trophy className="h-3 w-3" />;
-      case BadgeType.CONSISTENCY_KING:
-        return <Crown className="h-3 w-3" />;
-      case BadgeType.IMPROVEMENT_STAR:
-        return <Star className="h-3 w-3" />;
-      case BadgeType.WEEKEND_WARRIOR:
-        return <Zap className="h-3 w-3" />;
-      case BadgeType.CATEGORY_MASTER:
-        return <Target className="h-3 w-3" />;
-      case BadgeType.NEWCOMER_BONUS:
-        return <CheckCircle className="h-3 w-3" />;
-      case BadgeType.PERFECT_WEEK:
-        return <Flame className="h-3 w-3" />;
-      case BadgeType.VOLUME_CRUSHER:
-        return <Activity className="h-3 w-3" />;
-      case BadgeType.CORE_DESTROYER:
-        return <Target className="h-3 w-3" />;
-      default:
-        return <Award className="h-3 w-3" />;
-    }
+    const IconComponent = TOURNAMENT_ICONS[badgeType] || TOURNAMENT_ICONS.BONUSES;
+    return <IconComponent className="h-3 w-3" />;
   };
 
   // Badge short names for compact display
@@ -350,21 +314,24 @@ const TournamentPage: React.FC = () => {
   // Position badge rendering
   const renderPositionBadge = (position: number) => {
     if (position === 1) {
+      const CrownIcon = TOURNAMENT_ICONS.FIRST_PLACE;
       return (
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center shadow-md">
-          <Crown className="h-4 w-4 text-yellow-900" />
+          <CrownIcon className="h-4 w-4 text-yellow-900" />
         </div>
       );
     } else if (position === 2) {
+      const MedalIcon = TOURNAMENT_ICONS.SECOND_PLACE;
       return (
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shadow-md">
-          <Medal className="h-4 w-4 text-gray-700" />
+          <MedalIcon className="h-4 w-4 text-gray-700" />
         </div>
       );
     } else if (position === 3) {
+      const AwardIcon = TOURNAMENT_ICONS.THIRD_PLACE;
       return (
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center shadow-md">
-          <Award className="h-4 w-4 text-amber-100" />
+          <AwardIcon className="h-4 w-4 text-amber-100" />
         </div>
       );
     } else {
@@ -465,7 +432,10 @@ const TournamentPage: React.FC = () => {
                   {/* Winning streak badge */}
                   {participant.rank === 1 && winningStreak >= 2 && (
                     <Badge className="text-xs bg-gradient-to-r from-orange-100/80 to-red-100/80 text-orange-700 dark:from-orange-900/30 dark:to-red-900/30 dark:text-orange-300 px-2 py-0.5 rounded-full border border-orange-200 dark:border-orange-700/50 flex-shrink-0 flex items-center gap-1">
-                      <Flame className="w-2.5 h-2.5" />
+                      {(() => {
+                        const FlameIcon = TOURNAMENT_ICONS.WINNING_STREAK;
+                        return <FlameIcon className="w-2.5 h-2.5" />;
+                      })()}
                       <span>{winningStreak}x</span>
                     </Badge>
                   )}
@@ -575,7 +545,10 @@ const TournamentPage: React.FC = () => {
                 <div className="bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-900/50 dark:to-slate-800/30 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
                   
                   <h4 className="font-bold text-foreground mb-4 flex items-center gap-2 text-base">
-                    <TrendingUp className="h-5 w-5 text-blue-600" />
+                    {(() => {
+                      const TrendingUpIcon = TOURNAMENT_ICONS.IMPROVEMENT_DETAIL;
+                      return <TrendingUpIcon className="h-5 w-5 text-blue-600" />;
+                    })()}
                     Complete Point Breakdown
                   </h4>
                   
@@ -589,10 +562,9 @@ const TournamentPage: React.FC = () => {
                       >
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
-                            <Trophy className="h-5 w-5 text-amber-500" />
                             <h5 className="font-semibold text-foreground">Performance</h5>
                           </div>
-                          <span className="font-bold text-amber-600 dark:text-amber-400 bg-amber-100/60 dark:bg-amber-900/30 px-2 py-1 rounded-lg text-sm">
+                          <span className="font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent px-2 py-1 rounded-lg text-sm">
                             {pointBreakdown.performance} pts
                           </span>
                         </div>
@@ -601,7 +573,10 @@ const TournamentPage: React.FC = () => {
                           {participant.prDetails.map((pr, idx) => (
                             <div key={`pr-${idx}`} className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-amber-100/50 dark:hover:bg-amber-900/20">
                               <div className="flex items-center gap-2">
-                                <Star className="w-4 h-4 text-yellow-500 flex-shrink-0" />
+                                {(() => {
+                                  const TrophyIcon = TOURNAMENT_ICONS.PR_DETAIL;
+                                  return <TrophyIcon className="w-4 h-4 text-yellow-500 flex-shrink-0" />;
+                                })()}
                                 <div>
                                   <span className="font-medium">{pr.exerciseName} PR</span>
                                   <div className="text-xs text-muted-foreground">
@@ -616,7 +591,10 @@ const TournamentPage: React.FC = () => {
                           {participant.prDetails.filter(pr => pr.improvementPercent > 0).map((pr, idx) => (
                             <div key={`improvement-${idx}`} className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-amber-100/50 dark:hover:bg-amber-900/20">
                               <div className="flex items-center gap-2">
-                                <TrendingUp className="w-4 h-4 text-green-500 flex-shrink-0" />
+                                {(() => {
+                                  const TrendingUpIcon = TOURNAMENT_ICONS.IMPROVEMENT_DETAIL;
+                                  return <TrendingUpIcon className="w-4 h-4 text-green-500 flex-shrink-0" />;
+                                })()}
                                 <div>
                                   <span className="font-medium">{pr.exerciseName} Gain</span>
                                   <div className="text-xs text-green-600 dark:text-green-400 font-medium">
@@ -631,7 +609,10 @@ const TournamentPage: React.FC = () => {
                           {participant.competitiveDetails && participant.competitiveDetails.map((comp, idx) => (
                             <div key={`comp-${idx}`} className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-amber-100/50 dark:hover:bg-amber-900/20">
                               <div className="flex items-center gap-2">
-                                <Zap className="w-4 h-4 text-purple-500 flex-shrink-0" />
+                                {(() => {
+                                  const ZapIcon = TOURNAMENT_ICONS.COMPETITIVE_DETAIL;
+                                  return <ZapIcon className="w-4 h-4 text-purple-500 flex-shrink-0" />;
+                                })()}
                                 <div>
                                   <span className="font-medium">Beat {comp.targetUser || 'Friend'}</span>
                                   <div className="text-xs text-muted-foreground">
@@ -654,10 +635,9 @@ const TournamentPage: React.FC = () => {
                       >
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
-                            <Activity className="h-5 w-5 text-blue-500" />
                             <h5 className="font-semibold text-foreground">Volume & Consistency</h5>
                           </div>
-                          <span className="font-bold text-blue-600 dark:text-blue-400 bg-blue-100/60 dark:bg-blue-900/30 px-2 py-1 rounded-lg text-sm">
+                          <span className="font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent px-2 py-1 rounded-lg text-sm">
                             {pointBreakdown.volume} pts
                           </span>
                         </div>
@@ -666,7 +646,10 @@ const TournamentPage: React.FC = () => {
                           {(participant.pointsBreakdown.participationPoints + participant.pointsBreakdown.varietyPoints) > 0 && (
                             <div className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20">
                               <div className="flex items-center gap-2">
-                                <Calendar className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                                {(() => {
+                                  const CalendarIcon = TOURNAMENT_ICONS.DAILY_WORKOUT;
+                                  return <CalendarIcon className="w-4 h-4 text-blue-500 flex-shrink-0" />;
+                                })()}
                                 <div>
                                   <span className="font-medium">Daily Workouts</span>
                                   <div className="text-xs text-muted-foreground">{participant.workoutDays.length} days logged</div>
@@ -679,7 +662,10 @@ const TournamentPage: React.FC = () => {
                           {participant.pointsBreakdown.consistencyPoints > 0 && (
                             <div className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20">
                               <div className="flex items-center gap-2">
-                                <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                                {(() => {
+                                  const CheckCircleIcon = TOURNAMENT_ICONS.CONSISTENCY_DETAIL;
+                                  return <CheckCircleIcon className="w-4 h-4 text-green-500 flex-shrink-0" />;
+                                })()}
                                 <div>
                                   <span className="font-medium">Consistency Bonus</span>
                                   <div className="text-xs text-muted-foreground">5+ workout days</div>
@@ -692,7 +678,10 @@ const TournamentPage: React.FC = () => {
                           {(participant.exerciseStats?.totalExercises || 0) > 0 && (
                             <div className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20">
                               <div className="flex items-center gap-2">
-                                <Award className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                                {(() => {
+                                  const AwardIcon = TOURNAMENT_ICONS.EXERCISE_VOLUME;
+                                  return <AwardIcon className="w-4 h-4 text-indigo-500 flex-shrink-0" />;
+                                })()}
                                 <div>
                                   <span className="font-medium">Exercise Volume</span>
                                   <div className="text-xs text-muted-foreground">{participant.exerciseStats?.totalExercises || 0} exercises</div>
@@ -713,10 +702,9 @@ const TournamentPage: React.FC = () => {
                       >
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-3">
-                            <Award className="h-5 w-5 text-emerald-500" />
                             <h5 className="font-semibold text-foreground">Achievement Bonuses</h5>
                           </div>
-                          <span className="font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100/60 dark:bg-emerald-900/30 px-2 py-1 rounded-lg text-sm">
+                          <span className="font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent px-2 py-1 rounded-lg text-sm">
                             {pointBreakdown.bonuses} pts
                           </span>
                         </div>
@@ -725,7 +713,10 @@ const TournamentPage: React.FC = () => {
                           {(participant.exerciseStats?.newExerciseBonusPoints || 0) > 0 && (
                             <div className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-emerald-100/50 dark:hover:bg-emerald-900/20">
                               <div className="flex items-center gap-2">
-                                <Plus className="w-4 h-4 text-teal-500 flex-shrink-0" />
+                                {(() => {
+                                  const PlusIcon = TOURNAMENT_ICONS.NEW_EXERCISE;
+                                  return <PlusIcon className="w-4 h-4 text-teal-500 flex-shrink-0" />;
+                                })()}
                                 <div>
                                   <span className="font-medium">New Exercise Bonus</span>
                                   <div className="text-xs text-muted-foreground">{Math.floor((participant.exerciseStats?.newExerciseBonusPoints || 0) / NEW_EXERCISE_BONUS.points)} new exercises</div>
@@ -807,7 +798,10 @@ const TournamentPage: React.FC = () => {
               onClick={() => setShowPointsGuide(true)}
               className="rounded-full h-9 w-9 p-0"
             >
-              <BookOpen className="h-4 w-4" />
+              {(() => {
+                const BookOpenIcon = TOURNAMENT_ICONS.RULEBOOK;
+                return <BookOpenIcon className="h-4 w-4" />;
+              })()}
             </Button>
           </div>
         ) : undefined
@@ -889,7 +883,10 @@ const TournamentPage: React.FC = () => {
                 ) : (
                   <Card className="apple-card rounded-3xl">
                     <CardContent className="p-12 text-center">
-                      <Trophy className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                      {(() => {
+                        const TrophyIcon = TOURNAMENT_ICONS.PERFORMANCE;
+                        return <TrophyIcon className="w-16 h-16 text-muted-foreground mx-auto mb-4" />;
+                      })()}
                       <h3 className="text-lg font-semibold text-foreground mb-2">No Participants Yet</h3>
                       <p className="text-muted-foreground text-sm">
                         Log a workout to join the tournament!

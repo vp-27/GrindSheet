@@ -4,24 +4,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { 
-  Trophy, 
-  Crown, 
-  Star, 
-  Zap, 
-  Target,
-  TrendingUp,
-  Calendar,
-  Users,
-  Flame,
-  CheckCircle,
-  Activity,
-  Award,
   X,
-  BookOpen,
   ChevronRight,
   ChevronDown,
   Lightbulb
 } from 'lucide-react';
+import { TOURNAMENT_ICONS, TOURNAMENT_GRADIENTS } from '@/utils/tournamentIcons';
 import { 
   POINTS_CONFIG, 
   BADGE_DEFINITIONS, 
@@ -43,8 +31,11 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
       id: 'performance',
       title: "Performance",
       subtitle: "PRs & Competition",
-      icon: <Trophy className="h-4 w-4" />,
-      color: "from-amber-500 to-orange-500",
+      icon: (() => {
+        const TrophyIcon = TOURNAMENT_ICONS.PERFORMANCE;
+        return <TrophyIcon className="h-4 w-4" />;
+      })(),
+      color: TOURNAMENT_GRADIENTS.PERFORMANCE,
       bgColor: "bg-amber-50/50 dark:bg-amber-950/20",
       borderColor: "border-amber-200/50 dark:border-amber-700/50",
       items: [
@@ -74,8 +65,11 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
       id: 'volume',
       title: "Volume",
       subtitle: "Work & Consistency",
-      icon: <Activity className="h-4 w-4" />,
-      color: "from-blue-500 to-purple-500",
+      icon: (() => {
+        const ActivityIcon = TOURNAMENT_ICONS.VOLUME;
+        return <ActivityIcon className="h-4 w-4" />;
+      })(),
+      color: TOURNAMENT_GRADIENTS.VOLUME,
       bgColor: "bg-blue-50/50 dark:bg-blue-950/20",
       borderColor: "border-blue-200/50 dark:border-blue-700/50",
       items: [
@@ -110,8 +104,11 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
       id: 'bonuses',
       title: "Bonuses",
       subtitle: "Achievements",
-      icon: <Award className="h-4 w-4" />, 
-      color: "from-emerald-500 to-teal-500",
+      icon: (() => {
+        const AwardIcon = TOURNAMENT_ICONS.BONUSES;
+        return <AwardIcon className="h-4 w-4" />;
+      })(), 
+      color: TOURNAMENT_GRADIENTS.BONUSES,
       bgColor: "bg-emerald-50/50 dark:bg-emerald-950/20",
       borderColor: "border-emerald-200/50 dark:border-emerald-700/50",
       items: [
@@ -143,23 +140,35 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
   const keyBadges = [
     {
       type: BadgeType.PERFECT_WEEK,
-      icon: <Flame className="h-4 w-4" />,
-      color: "from-red-500 to-pink-500"
+      icon: (() => {
+        const FlameIcon = TOURNAMENT_ICONS[BadgeType.PERFECT_WEEK];
+        return <FlameIcon className="h-4 w-4" />;
+      })(),
+      color: TOURNAMENT_GRADIENTS[BadgeType.PERFECT_WEEK]
     },
     {
       type: BadgeType.CONSISTENCY_KING,
-      icon: <Crown className="h-4 w-4" />,
-      color: "from-blue-500 to-purple-500"
+      icon: (() => {
+        const CrownIcon = TOURNAMENT_ICONS[BadgeType.CONSISTENCY_KING];
+        return <CrownIcon className="h-4 w-4" />;
+      })(),
+      color: TOURNAMENT_GRADIENTS[BadgeType.CONSISTENCY_KING]
     },
     {
       type: BadgeType.VOLUME_CRUSHER,
-      icon: <Activity className="h-4 w-4" />,
-      color: "from-indigo-500 to-blue-500"
+      icon: (() => {
+        const ActivityIcon = TOURNAMENT_ICONS[BadgeType.VOLUME_CRUSHER];
+        return <ActivityIcon className="h-4 w-4" />;
+      })(),
+      color: TOURNAMENT_GRADIENTS[BadgeType.VOLUME_CRUSHER]
     },
     {
       type: BadgeType.WEEKEND_WARRIOR,
-      icon: <Zap className="h-4 w-4" />,
-      color: "from-orange-500 to-red-500"
+      icon: (() => {
+        const ZapIcon = TOURNAMENT_ICONS[BadgeType.WEEKEND_WARRIOR];
+        return <ZapIcon className="h-4 w-4" />;
+      })(),
+      color: TOURNAMENT_GRADIENTS[BadgeType.WEEKEND_WARRIOR]
     }
   ];
 
@@ -171,7 +180,10 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-                <BookOpen className="h-5 w-5" />
+                {(() => {
+                  const BookOpenIcon = TOURNAMENT_ICONS.RULEBOOK;
+                  return <BookOpenIcon className="h-5 w-5" />;
+                })()}
               </div>
               <div>
                 <DialogTitle className="text-lg font-bold text-foreground">
@@ -198,7 +210,10 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
           <div className="bg-gradient-to-r from-blue-50/80 to-purple-50/80 dark:from-blue-950/20 dark:to-purple-950/20 rounded-2xl p-4 border border-blue-200/30 dark:border-blue-800/30">
             <div className="flex items-start gap-3">
               <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 text-white flex-shrink-0">
-                <Trophy className="h-4 w-4" />
+                {(() => {
+                  const TrophyIcon = TOURNAMENT_ICONS.PERFORMANCE;
+                  return <TrophyIcon className="h-4 w-4" />;
+                })()}
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-foreground mb-1">Weekly Competition</h3>
@@ -207,15 +222,24 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
                 </p>
                 <div className="flex flex-wrap gap-2 text-xs">
                   <div className="flex items-center gap-1 bg-white/60 dark:bg-slate-800/60 px-2 py-1 rounded-lg">
-                    <Calendar className="h-3 w-3 text-blue-500" />
+                    {(() => {
+                      const CalendarIcon = TOURNAMENT_ICONS.DAILY_WORKOUT;
+                      return <CalendarIcon className="h-3 w-3 text-blue-500" />;
+                    })()}
                     <span>Mon-Sun</span>
                   </div>
                   <div className="flex items-center gap-1 bg-white/60 dark:bg-slate-800/60 px-2 py-1 rounded-lg">
-                    <Users className="h-3 w-3 text-green-500" />
+                    {(() => {
+                      const UsersIcon = TOURNAMENT_ICONS.USERS;
+                      return <UsersIcon className="h-3 w-3 text-green-500" />;
+                    })()}
                     <span>Friends</span>
                   </div>
                   <div className="flex items-center gap-1 bg-white/60 dark:bg-slate-800/60 px-2 py-1 rounded-lg">
-                    <TrendingUp className="h-3 w-3 text-purple-500" />
+                    {(() => {
+                      const TrendingUpIcon = TOURNAMENT_ICONS.IMPROVEMENT_DETAIL;
+                      return <TrendingUpIcon className="h-3 w-3 text-purple-500" />;
+                    })()}
                     <span>Progressive</span>
                   </div>
                 </div>
