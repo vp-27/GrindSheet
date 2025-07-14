@@ -737,9 +737,10 @@ const Dashboard = () => {
                         
                         <div className="flex flex-col items-end gap-1">
                           {isPersonalRecord && (
-                            <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 text-sm font-medium">
-                              <Trophy className="w-3 h-3" />
-                              <span>PR</span>
+                            <div className="flex items-center gap-1 text-sm font-medium">
+                              <span className="font-bold bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
+                                PR
+                              </span>
                             </div>
                           )}
                           {miniChartData.length === 1 && (
