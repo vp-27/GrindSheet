@@ -17,6 +17,7 @@ import { getProgressChartData, calculateProgress } from '@/utils/progressUtils';
 import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
 import AnimatedCounter from '@/components/ui/animated-counter';
 import '@/styles/index.css';
+import AddExerciseModal from '@/components/AddExerciseModal';
 
 const ExerciseDetail = () => {
   const { exercises, categories, exerciseLogs, addExerciseLog, updateExerciseLog, deleteExerciseLog } = useAppContext();
@@ -43,6 +44,9 @@ const ExerciseDetail = () => {
   const [currentTimeframe, setCurrentTimeframe] = useState<'1W' | '2W' | '1M' | 'ALL'>('1M');
   const [timeframeGain, setTimeframeGain] = useState<number | null>(null);
   const [chartHoverData, setChartHoverData] = useState<any>(null);
+  
+  // Add state for AddExerciseModal
+  const [isAddExerciseModalOpen, setIsAddExerciseModalOpen] = useState(false);
   
   // Get the exercise details
   const exercise = useMemo(() => {
@@ -394,101 +398,24 @@ const ExerciseDetail = () => {
           </div>
         </div>
       
-        {/* Log New Weight Form */}
-        <div className="relative">
-          {/* Subtle background glow */}
-          <div 
-            className="category-form-glow"
-            // eslint-disable-next-line react/forbid-dom-props
+        {/* Log New Weight Button - Standalone, not in a card */}
+        <div className="flex justify-center mt-4 mb-2">
+          <Button 
+            className="category-submit-button"
             style={{ 
-              '--category-color': categoryColors?.primary || '#10b981'
+              '--category-color': categoryColors?.primary || '#10b981',
+              '--category-color-rgb': (categoryColors?.primary || '#10b981').replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
             } as React.CSSProperties}
+            onClick={() => setIsAddExerciseModalOpen(true)}
+          >
+            Log New Weight
+          </Button>
+          <AddExerciseModal
+            isOpen={isAddExerciseModalOpen}
+            onOpenChange={setIsAddExerciseModalOpen}
+            preselectedExerciseId={exercise?.id}
+            preselectedCategoryId={category?.id}
           />
-          
-          <div className="apple-card p-6 shadow-sm">
-            <div className="mb-4 flex items-start justify-between">
-              <div>
-                <h3 className="text-lg font-semibold text-foreground">Log New Weight</h3>
-                <p className="text-sm text-muted-foreground">Record your latest workout progress</p>
-              </div>
-              {category && categoryColors && (
-                <span 
-                  className="category-header-badge"
-                  // eslint-disable-next-line react/forbid-dom-props
-                  style={{ 
-                    '--category-color': categoryColors.primary,
-                    '--category-color-rgb': (categoryColors.primary || '#10b981').replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
-                  } as React.CSSProperties}
-                >
-                  {category.name}
-                </span>
-              )}
-            </div>
-            
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="weight" className="text-sm font-medium text-foreground">
-                  Weight (lbs)
-                </Label>
-                <Input
-                  id="weight"
-                  type="number"
-                  step="0.5"
-                  min="0"
-                  value={weight}
-                  onChange={e => {
-                    const value = e.target.value;
-                    // Only allow numeric input (including decimals)
-                    if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                      setWeight(value);
-                    }
-                  }}
-                  onKeyDown={(e) => {
-                    // Prevent non-numeric characters except for allowed keys
-                    if (!/[0-9.]/.test(e.key) && 
-                        !['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
-                      e.preventDefault();
-                    }
-                  }}
-                  placeholder="Enter weight"
-                  className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 text-lg h-12"
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="note" className="text-sm font-medium text-foreground">
-                  Note (optional)
-                </Label>
-                <Textarea
-                  id="note"
-                  value={note}
-                  onChange={e => setNote(e.target.value)}
-                  placeholder="Add a note about this set..."
-                  rows={3}
-                  className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 resize-none"
-                />
-              </div>
-              
-              <Button 
-                type="submit" 
-                className="category-submit-button"
-                style={{ 
-                  '--category-color': categoryColors?.primary || '#10b981',
-                  '--category-color-rgb': (categoryColors?.primary || '#10b981').replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
-                } as React.CSSProperties}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Logging...
-                  </div>
-                ) : (
-                  'Log Weight'
-                )}
-              </Button>
-            </form>
-          </div>
         </div>
         
         {/* Recent Logs */}

@@ -22,9 +22,11 @@ import { Plus } from 'lucide-react';
 interface AddExerciseModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
+  preselectedExerciseId?: string;
+  preselectedCategoryId?: string;
 }
 
-const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChange }) => {
+const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChange, preselectedExerciseId, preselectedCategoryId }) => {
   const { categories, exercises, addExerciseLog } = useAppContext();
   const { profile } = useAuth();
   const { toast } = useToast();
@@ -54,15 +56,30 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
     setLocalExercises(exercises);
   }, [exercises]);
 
-  // Reset form when modal closes
+  // Reset form when modal closes or opens, using preselected values if provided
   useEffect(() => {
     if (!isOpen) {
       setSelectedCategoryId('');
       setSelectedExerciseId('');
       setWeight('');
       setNote('');
+    } else {
+      setSelectedCategoryId(preselectedCategoryId || '');
+      setSelectedExerciseId(''); // Set exercise after category
     }
-  }, [isOpen]);
+  }, [isOpen, preselectedCategoryId]);
+
+  // When category changes and preselectedExerciseId is provided, set exercise if it matches
+  useEffect(() => {
+    if (
+      isOpen &&
+      preselectedExerciseId &&
+      selectedCategoryId &&
+      localExercises.some(e => e.id === preselectedExerciseId && e.categoryId === selectedCategoryId)
+    ) {
+      setSelectedExerciseId(preselectedExerciseId);
+    }
+  }, [isOpen, preselectedExerciseId, selectedCategoryId, localExercises]);
 
   // Handle ESC key to close modal
   useEffect(() => {
