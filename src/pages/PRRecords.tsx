@@ -645,15 +645,6 @@ export const PRRecordsContent: React.FC = () => {
 
   return (
     <>
-      {/* Category background tinting - positioned outside Layout for proper viewport positioning */}
-      {selectedCategoryColor && (
-        <div 
-          className={`category-background-tint-bottom ${isDark ? 'dark-mode' : ''}`}
-          style={{
-            '--category-color-rgb': selectedCategoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
-          } as React.CSSProperties}
-        />
-      )}
       <div className="relative">
         <div className="relative flex flex-col pb-6 z-10">
           
