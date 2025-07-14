@@ -476,7 +476,7 @@ export const PRRecordsContent: React.FC = () => {
           style={{ willChange: 'max-height, opacity, transform' }}
         >
           <div className="space-y-3 mt-4">
-            {showSoloPRs && friendsSoloPRs.slice(0, 10).map((challenge, index) => {
+            {friendsSoloPRs.slice(0, 10).map((challenge, index) => {
               const categoryColor = getCategoryColor(
                 categories.findIndex(cat => cat.id === challenge.category?.id)
               );
@@ -533,7 +533,7 @@ export const PRRecordsContent: React.FC = () => {
               );
             })}
             
-            {showSoloPRs && friendsSoloPRs.length > 10 && (
+            {friendsSoloPRs.length > 10 && (
               <div className="text-center text-sm text-muted-foreground">
                 And {friendsSoloPRs.length - 10} more challenges...
               </div>
