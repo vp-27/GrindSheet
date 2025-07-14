@@ -22,7 +22,8 @@ import {
   Filter,
   TrendingUp,
   TrendingDown,
-  Activity
+  Activity,
+  ChevronDown
 } from 'lucide-react';
 import { LeaderboardType } from '@/types';
 import { 
@@ -443,23 +444,32 @@ export const PRRecordsContent: React.FC = () => {
     
     return (
       <div className="mb-6">
-        <Button
-          variant="outline"
-          size="lg"
+        <div
+          className={`w-full challenges-button interactive flex items-center justify-between p-4 h-auto cursor-pointer select-none shadow-sm border border-orange-200 dark:border-orange-800 ${selectedCategoryId ? 'category-tinted' : ''}`}
+          role="button"
+          tabIndex={0}
           onClick={() => setShowSoloPRs(!showSoloPRs)}
-          className={`w-full challenges-button flex items-center justify-between p-4 h-auto ${selectedCategoryId ? 'category-tinted' : ''}`}
+          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setShowSoloPRs(!showSoloPRs); }}
         >
-          <div className="flex items-center gap-3">
-            <Zap className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+          <div className="flex items-center gap-4">
+            <div className="flex items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900 w-10 h-10">
+              <Zap className="h-6 w-6 text-orange-600 dark:text-orange-400" />
+            </div>
             <div className="text-left">
-              <div className="font-semibold">Friends' PRs to Beat</div>
-              <div className="text-sm text-muted-foreground">{friendsSoloPRs.length} challenges available</div>
+              <div className="font-semibold text-base leading-tight">Friends' PRs to Beat</div>
+              <div className="text-sm text-muted-foreground leading-tight">{friendsSoloPRs.length} challenges available</div>
             </div>
           </div>
-          <Badge variant="secondary" className="ml-2">
-            {showSoloPRs ? 'Hide' : 'Show'}
-          </Badge>
-        </Button>
+          <div className="flex items-center gap-2 ml-4">
+            <span className={`px-4 py-1 rounded-full font-semibold text-sm transition bg-orange-50 dark:bg-orange-950 text-orange-700 dark:text-orange-300 border border-orange-200 dark:border-orange-800 shadow-sm`}>
+              {showSoloPRs ? 'Hide' : 'Show'}
+            </span>
+            <ChevronDown 
+              className={`h-5 w-5 text-orange-500 transition-transform duration-300 ${showSoloPRs ? 'rotate-180' : ''}`}
+              aria-hidden="true"
+            />
+          </div>
+        </div>
         
         {showSoloPRs && (
           <div className="space-y-3 mt-4">
