@@ -19,14 +19,14 @@ export const categoryColorSchemes: Record<string, CategoryColorScheme> = {
     text: 'text-blue-700',
     darkText: 'text-blue-900'
   },
-  // Back - Warm Lime Green (more vibrant for category identification)
+  // Back - Emerald Green (reverted from lime)
   'back': {
-    primary: '#84cc16', // lime-500 (brighter, more distinctive)
-    light: '#f7fee7',   // lime-100
-    gradient: 'from-lime-100 to-lime-200',
-    shadow: 'shadow-lime-200/50',
-    text: 'text-lime-700',
-    darkText: 'text-lime-900'
+    primary: '#10b981', // emerald-500
+    light: '#d1fae5',   // emerald-100
+    gradient: 'from-emerald-100 to-emerald-200',
+    shadow: 'shadow-emerald-200/50',
+    text: 'text-emerald-700',
+    darkText: 'text-emerald-900'
   },
   // Chest - Yellow
   'chest': {
@@ -75,12 +75,12 @@ export const successIndicatorColors = {
     text: 'text-teal-700',
     darkText: 'text-teal-900'
   },
-  // Positive Feedback/Progress: Professional Emerald Green
+  // Positive Feedback/Progress: Use Brand Teal
   positive: {
-    primary: '#059669', // emerald-600 (more professional for success)
-    light: '#d1fae5',   // emerald-100
-    text: 'text-emerald-700',
-    darkText: 'text-emerald-900'
+    primary: '#0d9488', // teal-600 (brand color)
+    light: '#ccfbf1',   // teal-100
+    text: 'text-teal-700',
+    darkText: 'text-teal-900'
   },
   // Negative Feedback: Red
   negative: {
