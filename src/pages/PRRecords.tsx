@@ -445,7 +445,7 @@ export const PRRecordsContent: React.FC = () => {
     return (
       <div className="mb-6">
         <div
-          className={`w-full challenges-button interactive flex items-center justify-between p-4 h-auto cursor-pointer select-none shadow-sm border border-orange-200 dark:border-orange-800 ${selectedCategoryId ? 'category-tinted' : ''}`}
+          className={`w-full challenges-button interactive flex items-center justify-between p-4 h-auto cursor-pointer select-none shadow-sm border border-orange-200 dark:border-orange-800 rounded-2xl ${selectedCategoryId ? 'category-tinted' : ''}`}
           role="button"
           tabIndex={0}
           onClick={() => setShowSoloPRs(!showSoloPRs)}
@@ -471,9 +471,12 @@ export const PRRecordsContent: React.FC = () => {
           </div>
         </div>
         
-        {showSoloPRs && (
+        <div
+          className={`transition-all duration-500 ease-out overflow-hidden ${showSoloPRs ? 'max-h-[2000px] opacity-100 translate-y-0' : 'max-h-0 opacity-0 -translate-y-2 pointer-events-none'}`}
+          style={{ willChange: 'max-height, opacity, transform' }}
+        >
           <div className="space-y-3 mt-4">
-            {friendsSoloPRs.slice(0, 10).map((challenge, index) => {
+            {showSoloPRs && friendsSoloPRs.slice(0, 10).map((challenge, index) => {
               const categoryColor = getCategoryColor(
                 categories.findIndex(cat => cat.id === challenge.category?.id)
               );
@@ -530,13 +533,13 @@ export const PRRecordsContent: React.FC = () => {
               );
             })}
             
-            {friendsSoloPRs.length > 10 && (
+            {showSoloPRs && friendsSoloPRs.length > 10 && (
               <div className="text-center text-sm text-muted-foreground">
                 And {friendsSoloPRs.length - 10} more challenges...
               </div>
             )}
           </div>
-        )}
+        </div>
       </div>
     );
   };
