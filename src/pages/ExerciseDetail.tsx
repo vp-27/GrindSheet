@@ -399,7 +399,7 @@ const ExerciseDetail = () => {
         </div>
       
         {/* Log New Weight Button - Standalone, not in a card */}
-        <div className="flex justify-center mt-4 mb-2">
+        <div className="flex justify-center mt-3 mb-6">
           <Button 
             className="category-submit-button rounded-full max-w-md w-full mx-auto"
             style={{ 
