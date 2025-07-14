@@ -401,7 +401,7 @@ const ExerciseDetail = () => {
         {/* Log New Weight Button - Standalone, not in a card */}
         <div className="flex justify-center mt-4 mb-2">
           <Button 
-            className="category-submit-button"
+            className="category-submit-button rounded-full max-w-md w-full mx-auto"
             style={{ 
               '--category-color': categoryColors?.primary || '#10b981',
               '--category-color-rgb': (categoryColors?.primary || '#10b981').replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
