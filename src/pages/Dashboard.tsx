@@ -398,7 +398,13 @@ const Dashboard = () => {
             {/* Show percentage gain if available - with inline chart slider */}
             {dynamicPercentGain !== null && (
               <div className="mb-4 flex items-center justify-between">
-                  <div className="text-2xl font-bold" style={dynamicPercentGain >= 0 ? { color: '#14b8a6' } : { color: '#ef4444' }}>
+                  <div className="text-2xl font-bold" style={
+                    dynamicPercentGain >= 0
+                      ? isDark
+                        ? { color: '#14b8a6' } // dark mode: brand teal
+                        : { color: '#119488' } // light mode: darkened brand teal
+                      : { color: '#ef4444' }
+                  }>
                     {dynamicPercentGain >= 0 ? '+' : ''}
                     <AnimatedCounter 
                       value={dynamicPercentGain} 
@@ -742,7 +748,13 @@ const Dashboard = () => {
                             </div>
                           )}
                           {progress.percentGainFromPrevious !== undefined && progress.percentGainFromPrevious !== 0 && (
-                            <div className="flex items-center gap-1 text-sm font-medium" style={progress.percentGainFromPrevious > 0 ? { color: '#14b8a6' } : { color: '#ef4444' }}>
+                            <div className="flex items-center gap-1 text-sm font-medium" style={
+                              progress.percentGainFromPrevious > 0
+                                ? isDark
+                                  ? { color: '#14b8a6' }
+                                  : { color: '#119488' }
+                                : { color: '#ef4444' }
+                            }>
                               {progress.percentGainFromPrevious > 0 ? (
                                 <TrendingUp className="w-3 h-3" />
                               ) : (
