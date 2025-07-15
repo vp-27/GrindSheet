@@ -254,7 +254,7 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                     variant="outline"
                     size="icon"
                     onClick={() => setIsAddCategoryOpen(true)}
-                    className="shrink-0 border border-[rgba(255,255,255,0.3)] dark:border-[rgba(255,255,255,0.18)] bg-white dark:bg-[#1c1c1e] hover:bg-gray-100 dark:hover:bg-[#232326]"
+                    className="shrink-0 rounded-lg border border-[rgba(200,200,200,0.7)] dark:border-[rgba(80,80,80,0.7)] bg-white dark:bg-[#1c1c1e] hover:bg-gray-100 dark:hover:bg-[#232326] transition-colors"
                   >
                     <Plus className="h-4 w-4 text-muted-foreground dark:text-gray-300" />
                   </Button>
@@ -297,7 +297,7 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                   size="icon"
                   onClick={() => setIsAddExerciseOpen(true)}
                   disabled={!selectedCategoryId}
-                  className="shrink-0 border border-[rgba(255,255,255,0.3)] dark:border-[rgba(255,255,255,0.18)] bg-white dark:bg-[#1c1c1e] hover:bg-gray-100 dark:hover:bg-[#232326]"
+                  className="shrink-0 rounded-lg border border-[rgba(200,200,200,0.7)] dark:border-[rgba(80,80,80,0.7)] bg-white dark:bg-[#1c1c1e] hover:bg-gray-100 dark:hover:bg-[#232326] transition-colors"
                 >
                   <Plus className="h-4 w-4 text-muted-foreground dark:text-gray-300" />
                 </Button>
