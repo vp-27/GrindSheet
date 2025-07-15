@@ -238,10 +238,10 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
               <Label htmlFor="category">Category</Label>
               <div className="flex gap-2">
                 <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
-                  <SelectTrigger className="flex-1 rounded-lg border border-[rgba(255,255,255,0.3)] dark:border-none bg-white dark:bg-[#1c1c1e] focus:border-primary focus:ring-0 h-10 text-sm">
+                  <SelectTrigger className="flex-1 rounded-lg border border-[rgba(200,200,200,0.7)] dark:border-[rgba(80,80,80,0.7)] bg-white dark:bg-[#1c1c1e] focus:border-primary focus:ring-0 h-10 text-sm shadow-sm">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
-                  <SelectContent className="apple-card border border-[rgba(255,255,255,0.3)] dark:border-none bg-white dark:bg-[#1c1c1e] backdrop-blur-md">
+                  <SelectContent className="apple-card border border-[rgba(200,200,200,0.7)] dark:border-[rgba(80,80,80,0.7)] bg-white dark:bg-[#1c1c1e] backdrop-blur-md shadow-md">
                     {localCategories.map((category) => (
                       <SelectItem key={category.id} value={category.id} className="rounded-lg">
                         {category.name}
@@ -270,14 +270,14 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                   onValueChange={setSelectedExerciseId}
                   disabled={!selectedCategoryId}
                 >
-                  <SelectTrigger className="flex-1 rounded-lg border border-[rgba(255,255,255,0.3)] dark:border-none bg-white dark:bg-[#1c1c1e] focus:border-primary focus:ring-0 h-10 text-sm">
+                  <SelectTrigger className="flex-1 rounded-lg border border-[rgba(200,200,200,0.7)] dark:border-[rgba(80,80,80,0.7)] bg-white dark:bg-[#1c1c1e] focus:border-primary focus:ring-0 h-10 text-sm shadow-sm">
                     <SelectValue placeholder={
                       selectedCategoryId 
                         ? "Select exercise" 
                         : "Category first"
                     } />
                   </SelectTrigger>
-                  <SelectContent className="apple-card border border-[rgba(255,255,255,0.3)] dark:border-none bg-white dark:bg-[#1c1c1e] backdrop-blur-md">
+                  <SelectContent className="apple-card border border-[rgba(200,200,200,0.7)] dark:border-[rgba(80,80,80,0.7)] bg-white dark:bg-[#1c1c1e] backdrop-blur-md shadow-md">
                     {filteredExercises.length > 0 ? (
                       filteredExercises.map((exercise) => (
                         <SelectItem key={exercise.id} value={exercise.id} className="rounded-lg">
@@ -328,7 +328,7 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                   }
                 }}
                 placeholder="Enter weight"
-                className="w-full rounded-xl border border-[rgba(255,255,255,0.3)] dark:border-none bg-white dark:bg-[#1c1c1e] focus:border-primary focus:ring-0 text-lg h-12"
+                className="w-full rounded-xl border border-[rgba(200,200,200,0.7)] dark:border-[rgba(80,80,80,0.7)] bg-white dark:bg-[#1c1c1e] focus:border-primary focus:ring-0 text-lg h-12 shadow-sm"
               />
             </div>
 
@@ -340,7 +340,7 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Add any notes about your set..."
-                className="resize-none h-20 rounded-xl border border-[rgba(255,255,255,0.3)] dark:border-none bg-white dark:bg-[#1c1c1e] focus:border-primary focus:ring-0"
+                className="resize-none h-20 rounded-xl border border-[rgba(200,200,200,0.7)] dark:border-[rgba(80,80,80,0.7)] bg-white dark:bg-[#1c1c1e] focus:border-primary focus:ring-0 shadow-sm"
               />
             </div>
 
