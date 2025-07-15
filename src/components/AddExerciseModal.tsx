@@ -203,9 +203,10 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
         {/* Modal content that slides up from bottom, behind navbar */}
         <div 
           className={cn(
-            "absolute bottom-20 left-0 right-0 bg-background rounded-t-3xl transition-transform duration-500 ease-out",
+            "absolute bottom-20 left-0 right-0 rounded-t-3xl transition-transform duration-500 ease-out",
             "mx-2 sm:mx-auto sm:max-w-md",
-            "border-t border-l border-r border-border/40 dark:border-white/20",
+            // Use solid Apple Health card color (no transparency)
+            "bg-white dark:bg-[#1c1c1e] border-t border-l border-r border-[rgba(255,255,255,0.3)] dark:border-none",
             isOpen ? "translate-y-0" : "translate-y-full"
           )}
           style={categoryColors ? {
@@ -237,10 +238,10 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
               <Label htmlFor="category">Category</Label>
               <div className="flex gap-2">
                 <Select value={selectedCategoryId} onValueChange={setSelectedCategoryId}>
-                  <SelectTrigger className="flex-1 rounded-lg border-border/60 dark:border-white/30 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 h-10 text-sm">
+                  <SelectTrigger className="flex-1 rounded-lg border border-[rgba(255,255,255,0.3)] dark:border-none bg-white dark:bg-[#1c1c1e] focus:border-primary focus:ring-0 h-10 text-sm">
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
-                  <SelectContent className="apple-card border-border/60 dark:border-white/30 backdrop-blur-md">
+                  <SelectContent className="apple-card border border-[rgba(255,255,255,0.3)] dark:border-none bg-white dark:bg-[#1c1c1e] backdrop-blur-md">
                     {localCategories.map((category) => (
                       <SelectItem key={category.id} value={category.id} className="rounded-lg">
                         {category.name}
@@ -248,15 +249,15 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                     ))}
                   </SelectContent>
                 </Select>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setIsAddCategoryOpen(true)}
-                  className="shrink-0"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setIsAddCategoryOpen(true)}
+                    className="shrink-0 border border-[rgba(255,255,255,0.3)] dark:border-[rgba(255,255,255,0.18)] bg-white dark:bg-[#1c1c1e] hover:bg-gray-100 dark:hover:bg-[#232326]"
+                  >
+                    <Plus className="h-4 w-4 text-muted-foreground dark:text-gray-300" />
+                  </Button>
               </div>
             </div>
 
@@ -269,14 +270,14 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                   onValueChange={setSelectedExerciseId}
                   disabled={!selectedCategoryId}
                 >
-                  <SelectTrigger className="flex-1 rounded-lg border-border/60 dark:border-white/30 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 h-10 text-sm">
+                  <SelectTrigger className="flex-1 rounded-lg border border-[rgba(255,255,255,0.3)] dark:border-none bg-white dark:bg-[#1c1c1e] focus:border-primary focus:ring-0 h-10 text-sm">
                     <SelectValue placeholder={
                       selectedCategoryId 
                         ? "Select exercise" 
                         : "Category first"
                     } />
                   </SelectTrigger>
-                  <SelectContent className="apple-card border-border/60 dark:border-white/30 backdrop-blur-md">
+                  <SelectContent className="apple-card border border-[rgba(255,255,255,0.3)] dark:border-none bg-white dark:bg-[#1c1c1e] backdrop-blur-md">
                     {filteredExercises.length > 0 ? (
                       filteredExercises.map((exercise) => (
                         <SelectItem key={exercise.id} value={exercise.id} className="rounded-lg">
@@ -296,9 +297,9 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                   size="icon"
                   onClick={() => setIsAddExerciseOpen(true)}
                   disabled={!selectedCategoryId}
-                  className="shrink-0"
+                  className="shrink-0 border border-[rgba(255,255,255,0.3)] dark:border-[rgba(255,255,255,0.18)] bg-white dark:bg-[#1c1c1e] hover:bg-gray-100 dark:hover:bg-[#232326]"
                 >
-                  <Plus className="h-4 w-4" />
+                  <Plus className="h-4 w-4 text-muted-foreground dark:text-gray-300" />
                 </Button>
               </div>
             </div>
@@ -327,7 +328,7 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                   }
                 }}
                 placeholder="Enter weight"
-                className="w-full rounded-xl border-border/60 dark:border-white/30 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 text-lg h-12"
+                className="w-full rounded-xl border border-[rgba(255,255,255,0.3)] dark:border-none bg-white dark:bg-[#1c1c1e] focus:border-primary focus:ring-0 text-lg h-12"
               />
             </div>
 
@@ -339,7 +340,7 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Add any notes about your set..."
-                className="resize-none h-20 rounded-xl border-border/60 dark:border-white/30 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0"
+                className="resize-none h-20 rounded-xl border border-[rgba(255,255,255,0.3)] dark:border-none bg-white dark:bg-[#1c1c1e] focus:border-primary focus:ring-0"
               />
             </div>
 
