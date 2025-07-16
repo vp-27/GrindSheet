@@ -57,10 +57,11 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, onFadeOut }) => {
         background: bgColor,
         zIndex: 9999,
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start', // align to top
         justifyContent: 'center',
         transition: 'opacity 0.5s',
         opacity: fade ? 0 : 1,
+        paddingTop: '15vh', // push image down to top half's center
       }}
     >
       <img
