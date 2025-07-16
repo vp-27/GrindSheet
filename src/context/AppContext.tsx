@@ -15,6 +15,9 @@ export interface AppContextType { // Added export
   setSelectedCategory: (category: Category | null) => void;
   selectedExercise: Exercise | null;
   setSelectedExercise: (exercise: Exercise | null) => void;
+  loading: boolean; // <-- add loading to context
+  appReady: boolean;
+  setAppReady: (ready: boolean) => void;
 }
 
 export const AppContext = createContext<AppContextType | undefined>(undefined); // Added export
@@ -28,6 +31,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [loading, setLoading] = useState(true);
+  const [appReady, setAppReady] = useState(false);
 
   const exercisesSubRef = useRef<any>(null);
   const categoriesSubRef = useRef<any>(null);
@@ -317,7 +321,10 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         selectedCategory,
         setSelectedCategory,
         selectedExercise,
-        setSelectedExercise
+        setSelectedExercise,
+        loading, // <-- provide loading
+        appReady,
+        setAppReady,
       }}
     >
       {children}

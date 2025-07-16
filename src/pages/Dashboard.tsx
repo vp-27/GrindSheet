@@ -20,6 +20,7 @@ import { MobileSlider } from '@/components/ui/mobile-slider';
 import '@/styles/index.css';
 import { Input } from '@/components/ui/input'; // Import Input
 import '@/styles/components/search.css'; // Import search styles
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 const Dashboard = () => {
   const { categories, exercises, exerciseLogs } = useAppContext();
@@ -379,8 +380,35 @@ const Dashboard = () => {
     </div>
   );
 
+  // Data ready check: all main data loaded and tournament initialized
+  const dataReady = categories.length > 0 && exercises.length > 0 && exerciseLogs.length >= 0 && tournamentInitialized;
+
+  // Only show overlay if not seen in this session
+  const [showOverlay, setShowOverlay] = useState(() => {
+    return !window.sessionStorage.getItem('hasSeenDashboard');
+  });
+
+  useEffect(() => {
+    if (dataReady && showOverlay) {
+      setShowOverlay(false);
+      window.sessionStorage.setItem('hasSeenDashboard', 'true');
+    }
+  }, [dataReady, showOverlay]);
+
+  const { setAppReady } = useAppContext();
+
+  // When all data and UI is ready, signal app is ready
+  useEffect(() => {
+    // Data is ready if chartData and exerciseProgressItems are loaded and not showing placeholders
+    const dashboardReady = chartData && chartData.length > 0 && exerciseProgressItems && exerciseProgressItems.length > 0;
+    if (dashboardReady) {
+      setAppReady(true);
+    }
+  }, [chartData, exerciseProgressItems, setAppReady]);
+
   return (
     <>
+      <LoadingOverlay show={showOverlay} />
       {/* Category background tinting - positioned outside Layout for proper viewport positioning */}
       {selectedCategoryColor && (
         <div 
