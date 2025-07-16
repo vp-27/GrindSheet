@@ -5,9 +5,27 @@ interface LoadingOverlayProps {
   onFadeOut?: () => void;
 }
 
+const LIGHT_BG = '#00ddc4';
+const DARK_BG = '#0f0f0c';
+const LIGHT_IMG = '/grindsheetLogo.png';
+const DARK_IMG = '/grindsheetLogoDark.PNG';
+
+const getIsDark = () =>
+  typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+
 const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, onFadeOut }) => {
   const [visible, setVisible] = useState(show);
   const [fade, setFade] = useState(false);
+  const [isDark, setIsDark] = useState(getIsDark());
+
+  useEffect(() => {
+    // Listen for class changes on <html> to update dark mode
+    const observer = new MutationObserver(() => {
+      setIsDark(getIsDark());
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!show) {
@@ -27,13 +45,16 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, onFadeOut }) => {
 
   if (!visible) return null;
 
+  const bgColor = isDark ? DARK_BG : LIGHT_BG;
+  const logoSrc = isDark ? DARK_IMG : LIGHT_IMG;
+
   return (
     <div
       className={`loading-overlay${fade ? ' fade-out' : ''}`}
       style={{
         position: 'fixed',
         inset: 0,
-        background: '#00ddc4',
+        background: bgColor,
         zIndex: 9999,
         display: 'flex',
         alignItems: 'center',
@@ -43,13 +64,13 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, onFadeOut }) => {
       }}
     >
       <img
-        src="/grindsheetLogo.png"
+        src={logoSrc}
         alt="Grindsheet Logo"
         style={{
           width: '180px',
           height: '180px',
           objectFit: 'contain',
-          background: '#00ddc4',
+          background: bgColor,
           borderRadius: 0,
           display: 'block',
         }}

@@ -24,25 +24,38 @@ import React, { useState, useEffect } from 'react';
 
 const queryClient = new QueryClient();
 
+const getIsDark = () =>
+  typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+
 const AppWithLoader = () => {
   const [showOverlay, setShowOverlay] = useState(true); // Always true on mount
   const { appReady } = useAppContext();
+  const [isDark, setIsDark] = useState(getIsDark());
+
+  // Listen for class changes on <html> to update dark mode
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(getIsDark());
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   // Set theme-color meta tag while loader is visible
   useEffect(() => {
     const meta = document.querySelector('meta[name="theme-color"]');
+    const color = isDark ? '#0f0f0c' : '#00ddc4';
     if (showOverlay) {
-      if (meta) meta.setAttribute('content', '#00ddc4');
+      if (meta) meta.setAttribute('content', color);
       else {
         const newMeta = document.createElement('meta');
         newMeta.name = 'theme-color';
-        newMeta.content = '#00ddc4';
+        newMeta.content = color;
         document.head.appendChild(newMeta);
       }
     }
     // When loader is hidden, let ThemeProvider restore the color
-    // (ThemeProvider will run its effect on theme change)
-  }, [showOverlay]);
+  }, [showOverlay, isDark]);
 
   useEffect(() => {
     if (appReady && showOverlay) {
