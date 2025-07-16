@@ -28,6 +28,22 @@ const AppWithLoader = () => {
   const [showOverlay, setShowOverlay] = useState(true); // Always true on mount
   const { appReady } = useAppContext();
 
+  // Set theme-color meta tag while loader is visible
+  useEffect(() => {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (showOverlay) {
+      if (meta) meta.setAttribute('content', '#00ddc4');
+      else {
+        const newMeta = document.createElement('meta');
+        newMeta.name = 'theme-color';
+        newMeta.content = '#00ddc4';
+        document.head.appendChild(newMeta);
+      }
+    }
+    // When loader is hidden, let ThemeProvider restore the color
+    // (ThemeProvider will run its effect on theme change)
+  }, [showOverlay]);
+
   useEffect(() => {
     if (appReady && showOverlay) {
       setShowOverlay(false);
