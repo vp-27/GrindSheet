@@ -17,20 +17,27 @@
 
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/favicon.ico" id="dynamic-favicon" />
-    <style>
-      html, body {
-        background: #00ddc4;
-      }
-      html.dark, body.dark {
-        background: #0f0f0c;
-      }
-    </style>
     <script>
       (function() {
         try {
           var theme = localStorage.getItem('theme');
           var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-          if (isDark) document.documentElement.classList.add('dark');
+          var html = document.documentElement;
+          var body = document.body;
+          var color = isDark ? '#0f0f0c' : '#00ddc4';
+
+          if (isDark) html.classList.add('dark');
+          html.style.background = color;
+          if (body) body.style.background = color;
+
+          // Set or update theme-color meta
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (!meta) {
+            meta = document.createElement('meta');
+            meta.name = 'theme-color';
+            document.head.appendChild(meta);
+          }
+          meta.setAttribute('content', color);
         } catch (e) {}
       })();
     </script>
