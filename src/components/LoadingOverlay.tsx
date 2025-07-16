@@ -33,7 +33,7 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, onFadeOut }) => {
       style={{
         position: 'fixed',
         inset: 0,
-        background: '#05d9d4',
+        background: '#00ddc4',
         zIndex: 9999,
         display: 'flex',
         alignItems: 'center',
@@ -42,22 +42,18 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, onFadeOut }) => {
         opacity: fade ? 0 : 1,
       }}
     >
-      <video
-        autoPlay
-        loop
-        muted
-        playsInline
+      <img
+        src="/grindsheetLogo.png"
+        alt="Grindsheet Logo"
         style={{
           width: '180px',
           height: '180px',
           objectFit: 'contain',
-          background: 'transparent',
+          background: '#00ddc4',
+          borderRadius: 0,
+          display: 'block',
         }}
-      >
-        <source src="/animateLogo.webm" type="video/webm" />
-        <source src="/animateLogo.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
+      />
     </div>
   );
 };
