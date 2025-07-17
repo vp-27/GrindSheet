@@ -26,7 +26,7 @@ const ExerciseDetail = () => {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   
-  // Get exerciseId from URL params
+  // Get exerciseId from URL parameters
   const exerciseId = searchParams.get('exercise');
   
   // Form state
