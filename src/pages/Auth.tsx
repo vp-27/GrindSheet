@@ -5,12 +5,14 @@ import { useTheme } from '@/context/ThemeContext';
 import { useToast } from '@/components/ui/use-toast';
 import { Dumbbell, ChevronRight, Check, Mail, Lock, User, ArrowRight } from 'lucide-react';
 import '@/styles/components/auth.css';
+import { useAppContext } from '@/context/useAppContext';
 
 const Auth = () => {
   const { signIn, signUp, session } = useAuth();
   const { isDark } = useTheme();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { setAppReady } = useAppContext();
   
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -46,6 +48,10 @@ const Auth = () => {
       progressLine.className = `progress-line step-${signupStep}`;
     }
   }, [signupStep, isLogin]);
+
+  useEffect(() => {
+    setAppReady(true);
+  }, [setAppReady]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

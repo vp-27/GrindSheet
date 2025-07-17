@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { useForm } from 'react-hook-form';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
-import { ChevronRight, ChevronDown, Edit2, Plus, Trash2, Pencil, LogOut, Folder, Palette, Dumbbell, Sun, Moon, Monitor } from 'lucide-react';
+import { ChevronRight, ChevronDown, Edit2, Plus, Trash2, Pencil, LogOut, Folder, Palette, Dumbbell, Sun, Moon, Monitor, X } from 'lucide-react';
 import { getCategoryColors, getCategoryKeyByName } from '@/utils/categoryColors';
 import { CategoryDialog, ExerciseDialog } from '@/components/ui/shared-dialogs';
 import '@/components/ui/color-indicator.css';
@@ -557,26 +557,20 @@ const Settings: React.FC = () => {
                               </h3>
                               <div className="flex gap-1">
                                 <Button 
-                                  variant="ghost" 
-                                  size="sm"
+                                  size="icon"
                                   onClick={() => handleEditCategory(category)}
-                                  className="h-8 w-8 rounded-lg active:bg-muted/60 text-muted-foreground active:text-foreground transition-colors"
+                                  className="h-8 w-8 rounded-full bg-[#14b8a6] text-white shadow-md hover:bg-[#10b981] active:bg-[#0e9e6e] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#14b8a6]/40"
                                 >
                                   <Pencil className="h-4 w-4" />
                                 </Button>
                                 <Button 
-                                  variant="ghost" 
-                                  size="sm"
+                                  size="icon"
                                   onClick={() => handleDeleteCategory(category.id)}
                                   disabled={!canDelete}
-                                  className={`h-8 w-8 rounded-lg ${
-                                    canDelete 
-                                      ? 'text-muted-foreground active:text-red-600 active:bg-red-50 dark:active:bg-red-950/30' 
-                                      : 'text-muted-foreground/40 cursor-not-allowed'
-                                  }`}
+                                  className={`h-8 w-8 rounded-full bg-red-500 text-white shadow-md hover:bg-red-600 active:bg-red-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500/40 ${!canDelete ? 'opacity-50 cursor-not-allowed' : ''}`}
                                   title={canDelete ? 'Delete category' : 'Cannot delete - used by other users'}
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  <X className="h-4 w-4" />
                                 </Button>
                               </div>
                             </div>
@@ -683,26 +677,20 @@ const Settings: React.FC = () => {
                               </h3>
                               <div className="flex gap-1">
                                 <Button 
-                                  variant="ghost" 
-                                  size="sm"
+                                  size="icon"
                                   onClick={() => handleEditExercise(exercise)}
-                                  className="h-8 w-8 rounded-lg active:bg-muted/60 text-muted-foreground active:text-foreground transition-colors"
+                                  className="h-8 w-8 rounded-full bg-[#14b8a6] text-white shadow-md hover:bg-[#10b981] active:bg-[#0e9e6e] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#14b8a6]/40"
                                 >
                                   <Pencil className="h-4 w-4" />
                                 </Button>
                                 <Button 
-                                  variant="ghost" 
-                                  size="sm"
+                                  size="icon"
                                   onClick={() => handleDeleteExercise(exercise.id)}
                                   disabled={!canDelete}
-                                  className={`h-8 w-8 rounded-lg ${
-                                    canDelete 
-                                      ? 'text-muted-foreground active:text-red-600 active:bg-red-50 dark:active:bg-red-950/30' 
-                                      : 'text-muted-foreground/40 cursor-not-allowed'
-                                  }`}
+                                  className={`h-8 w-8 rounded-full bg-red-500 text-white shadow-md hover:bg-red-600 active:bg-red-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500/40 ${!canDelete ? 'opacity-50 cursor-not-allowed' : ''}`}
                                   title={canDelete ? 'Delete exercise' : 'Cannot delete - used by other users'}
                                 >
-                                  <Trash2 className="h-4 w-4" />
+                                  <X className="h-4 w-4" />
                                 </Button>
                               </div>
                             </div>

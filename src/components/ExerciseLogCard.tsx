@@ -1,7 +1,7 @@
 import React from 'react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Clock, Pencil, Trash2 } from 'lucide-react';
+import { Clock, Pencil, Trash2, X } from 'lucide-react';
 import AnimatedCounter from '@/components/ui/animated-counter';
 
 interface ExerciseLogCardProps {
@@ -69,28 +69,26 @@ const ExerciseLogCard: React.FC<ExerciseLogCardProps> = ({
         {/* Action Buttons - Always visible for mobile optimization */}
         <div className="flex gap-2">
           <Button 
-            variant="outline" 
             size="icon"
-            className="h-8 w-8 rounded-lg border-border/50 active:bg-muted active:border-primary/30 transition-all duration-200 shadow-sm" 
+            className="h-8 w-8 rounded-full bg-[#14b8a6] text-white shadow-md hover:bg-[#10b981] active:bg-[#0e9e6e] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#14b8a6]/40"
             onClick={(e) => {
               e.stopPropagation();
               onEdit(log);
             }}
             aria-label="Edit exercise log"
           >
-            <Pencil className="h-3 w-3" />
+            <Pencil className="h-4 w-4" />
           </Button>
           <Button 
-            variant="outline" 
             size="icon"
-            className="h-8 w-8 rounded-lg border-border/50 text-red-500 active:text-red-600 active:bg-red-50 active:border-red-200 transition-all duration-200 shadow-sm" 
+            className="h-8 w-8 rounded-full bg-red-500 text-white shadow-md hover:bg-red-600 active:bg-red-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500/40"
             onClick={(e) => {
               e.stopPropagation();
               onDelete(log.id);
             }}
             aria-label="Delete exercise log"
           >
-            <Trash2 className="h-3 w-3" />
+            <X className="h-4 w-4" />
           </Button>
         </div>
       </div>
