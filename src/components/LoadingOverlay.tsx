@@ -47,6 +47,7 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, onFadeOut }) => {
 
   const bgColor = isDark ? DARK_BG : LIGHT_BG;
   const logoSrc = isDark ? DARK_IMG : LIGHT_IMG;
+  const textColor = isDark ? '#ffffff' : '#000000';
 
   return (
     <div
@@ -57,25 +58,47 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, onFadeOut }) => {
         background: bgColor,
         zIndex: 9999,
         display: 'flex',
-        alignItems: 'flex-start', // align to top
+        alignItems: 'flex-start',
         justifyContent: 'center',
         transition: 'opacity 0.5s',
         opacity: fade ? 0 : 1,
-        paddingTop: '15vh', // push image down to top half's center
+        paddingTop: '15vh',
       }}
     >
-      <img
-        src={logoSrc}
-        alt="Grindsheet Logo"
-        style={{
-          width: '180px',
-          height: '180px',
-          objectFit: 'contain',
-          background: bgColor,
-          borderRadius: 0,
-          display: 'block',
-        }}
-      />
+      <div style={{ 
+        textAlign: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
+        <img
+          src={logoSrc}
+          alt="Grindsheet Logo"
+          style={{
+            width: '180px',
+            height: '180px',
+            objectFit: 'contain',
+            background: bgColor,
+            borderRadius: 0,
+            display: 'block',
+            marginBottom: '16px',
+          }}
+        />
+        <h1
+          style={{
+            fontFamily: 'SF Pro Display, -apple-system, BlinkMacSystemFont, sans-serif',
+            fontSize: '2.25rem',
+            fontWeight: 600,
+            color: textColor,
+            margin: 0,
+            letterSpacing: '-0.02em',
+            lineHeight: 1.1,
+          }}
+        >
+          GrindSheet
+        </h1>
+      </div>
     </div>
   );
 };
