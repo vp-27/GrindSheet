@@ -592,10 +592,10 @@ const TournamentPage: React.FC = () => {
                 <div className="flex gap-1 mt-1 flex-wrap">
                   {/* Winning streak badge */}
                   {participant.rank === 1 && winningStreak >= 2 && (
-                    <Badge className="text-xs bg-gradient-to-r from-orange-100/80 to-red-100/80 text-orange-700 dark:from-orange-900/30 dark:to-red-900/30 dark:text-orange-300 px-2 py-0.5 rounded-full border border-orange-200 dark:border-orange-700/50 flex-shrink-0 flex items-center gap-1">
+                    <Badge className="text-xs bg-gradient-to-r from-orange-600 to-red-600 text-white dark:from-orange-400 dark:to-red-400 dark:text-gray-900 px-2 py-0.5 rounded-full border border-orange-700 dark:border-orange-400 flex-shrink-0 flex items-center gap-1">
                       {(() => {
                         const FlameIcon = TOURNAMENT_ICONS.WINNING_STREAK;
-                        return <FlameIcon className="w-2.5 h-2.5" />;
+                        return <FlameIcon className="w-2.5 h-2.5 text-white dark:text-gray-900" />;
                       })()}
                       <span>{winningStreak}x</span>
                     </Badge>
