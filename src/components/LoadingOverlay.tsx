@@ -17,6 +17,7 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, onFadeOut }) => {
   const [visible, setVisible] = useState(show);
   const [fade, setFade] = useState(false);
   const [isDark, setIsDark] = useState(getIsDark());
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   useEffect(() => {
     // Listen for class changes on <html> to update dark mode
@@ -40,6 +41,7 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, onFadeOut }) => {
     } else {
       setVisible(true);
       setFade(false);
+      setImgLoaded(false); // reset image loaded state when showing
     }
   }, [show, onFadeOut]);
 
@@ -84,20 +86,23 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, onFadeOut }) => {
             display: 'block',
             marginBottom: '16px',
           }}
+          onLoad={() => setImgLoaded(true)}
         />
-        <h1
-          style={{
-            fontFamily: 'SF Pro Display, -apple-system, BlinkMacSystemFont, sans-serif',
-            fontSize: '2.25rem',
-            fontWeight: 600,
-            color: textColor,
-            margin: 0,
-            letterSpacing: '-0.02em',
-            lineHeight: 1.1,
-          }}
-        >
-          GrindSheet
-        </h1>
+        {imgLoaded && (
+          <h1
+            style={{
+              fontFamily: 'SF Pro Display, -apple-system, BlinkMacSystemFont, sans-serif',
+              fontSize: '2.25rem',
+              fontWeight: 600,
+              color: textColor,
+              margin: 0,
+              letterSpacing: '-0.02em',
+              lineHeight: 1.1,
+            }}
+          >
+            GrindSheet
+          </h1>
+        )}
       </div>
     </div>
   );
