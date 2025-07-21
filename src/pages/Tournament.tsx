@@ -691,14 +691,14 @@ const TournamentPage: React.FC = () => {
           }`}>
             <button
               onClick={() => setExpandedParticipant(isExpanded ? null : participant.userId)}
-              className={`w-full flex items-center justify-center gap-2 text-sm font-medium transition-all duration-300 ease-out py-2 px-3 rounded-xl ${
-                isExpanded 
-                  ? 'text-blue-600 dark:text-blue-400 bg-blue-50/80 dark:bg-blue-900/20' 
-                  : 'text-muted-foreground bg-muted/30 hover:bg-muted/50'
-              }`}
+              className={`w-full flex items-center justify-center gap-2 text-sm font-medium transition-all duration-300 ease-out py-2 px-3 rounded-xl 
+                ${isExpanded 
+                  ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40' 
+                  : 'text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'}
+              `}
             >
               <span className="text-xs">{isExpanded ? 'Hide Point Breakdown' : 'Show Point Breakdown'}</span>
-              <div className={`transition-transform duration-300 ease-out ${isExpanded ? 'rotate-180' : 'rotate-0'}`}>
+              <div className={`transition-transform duration-300 ease-out ${isExpanded ? 'rotate-180' : 'rotate-0'}`}> 
                 <ChevronDown className="w-3 h-3" />
               </div>
             </button>
