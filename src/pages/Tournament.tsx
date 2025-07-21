@@ -548,7 +548,8 @@ const TournamentPage: React.FC = () => {
     const getCardStyling = (rank: number, isCurrentUser: boolean) => {
       switch (rank) {
         case 1:
-          return 'bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 dark:from-amber-950/30 dark:via-yellow-950/30 dark:to-orange-950/30 border-amber-300/50 dark:border-amber-700/50 shadow-lg';
+          // Use a neutral light background for dark mode for readability, keep yellow border
+          return 'bg-gradient-to-r from-amber-50 via-yellow-50 to-orange-50 dark:from-slate-900/70 dark:via-slate-800/70 dark:to-slate-900/70 border-amber-300/50 dark:border-yellow-200/50 shadow-lg';
         case 2:
           return 'apple-card border-gray-300/30 dark:border-gray-600/30';
         case 3:
@@ -647,7 +648,9 @@ const TournamentPage: React.FC = () => {
           </div>
 
           {/* 3-Category Points Breakdown - Compact Layout */}
-          <div className="mt-3 pt-3 border-t border-border/30 transition-all duration-300">
+          <div className={`mt-3 pt-3 border-t border-border/30 transition-all duration-300 ${
+            participant.rank === 1 ? 'dark:border-yellow-200/40' : 'dark:border-gray-300/40'
+          }`}>
             <div className="grid grid-cols-3 gap-3 text-sm">
               <div 
                 className="flex flex-col items-center text-center cursor-pointer p-2 rounded-lg transition-all duration-200 hover:bg-amber-50/50 dark:hover:bg-amber-950/20"
@@ -683,7 +686,9 @@ const TournamentPage: React.FC = () => {
           </div>
 
           {/* Expandable Details Toggle */}
-          <div className="mt-3 pt-3 border-t border-border/30">
+          <div className={`mt-3 pt-3 border-t border-border/30 ${
+            participant.rank === 1 ? 'dark:border-yellow-200/40' : 'dark:border-gray-300/40'
+          }`}>
             <button
               onClick={() => setExpandedParticipant(isExpanded ? null : participant.userId)}
               className={`w-full flex items-center justify-center gap-2 text-sm font-medium transition-all duration-300 ease-out py-2 px-3 rounded-xl ${
@@ -819,7 +824,7 @@ const TournamentPage: React.FC = () => {
                     
                     {/* Divider between sections */}
                     {(pointBreakdown.performance > 0 && pointBreakdown.volume > 0) && (
-                      <div className="border-t border-slate-300/60 dark:border-slate-600/60 my-6"></div>
+                      <div className="border-t border-slate-300/60 dark:border-slate-700/40 my-6"></div>
                     )}
                     
                     {/* --- Volume & Consistency Section --- */}
@@ -900,7 +905,7 @@ const TournamentPage: React.FC = () => {
 
                     {/* Divider between sections */}
                     {(pointBreakdown.volume > 0 && pointBreakdown.bonuses > 0) && (
-                      <div className="border-t border-slate-300/60 dark:border-slate-600/60 my-6"></div>
+                      <div className="border-t border-slate-300/60 dark:border-slate-700/40 my-6"></div>
                     )}
                     
                     {/* --- Achievement Bonuses Section --- */}
