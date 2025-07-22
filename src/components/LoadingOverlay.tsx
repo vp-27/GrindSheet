@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface LoadingOverlayProps {
   show: boolean;
@@ -14,10 +14,10 @@ const getIsDark = () =>
   typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
 
 const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, onFadeOut }) => {
-  const [visible, setVisible] = useState(show);
-  const [fade, setFade] = useState(false);
   const [isDark, setIsDark] = useState(getIsDark());
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [preloaded, setPreloaded] = useState(false);
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     // Listen for class changes on <html> to update dark mode
@@ -28,24 +28,29 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, onFadeOut }) => {
     return () => observer.disconnect();
   }, []);
 
+  // Preload logo image for smoother appearance
   useEffect(() => {
-    if (!show) {
-      setFade(true);
-      // Wait for fade-out transition, then hide
+    const img = new window.Image();
+    img.src = isDark ? DARK_IMG : LIGHT_IMG;
+    img.onload = () => setPreloaded(true);
+  }, [isDark]);
+
+  // Fade-out effect using CSS, keep overlay mounted
+  useEffect(() => {
+    if (!show && overlayRef.current) {
+      overlayRef.current.classList.add('fade-out');
       const timeout = setTimeout(() => {
-        setVisible(false);
-        setFade(false);
         if (onFadeOut) onFadeOut();
       }, 500); // match CSS duration
       return () => clearTimeout(timeout);
-    } else {
-      setVisible(true);
-      setFade(false);
-      setImgLoaded(false); // reset image loaded state when showing
+    } else if (show && overlayRef.current) {
+      overlayRef.current.classList.remove('fade-out');
     }
   }, [show, onFadeOut]);
 
-  if (!visible) return null;
+  // Always render overlay, but hide with opacity/pointer-events
+  const shouldShow = show || (overlayRef.current && overlayRef.current.classList.contains('fade-out'));
+  if (!shouldShow) return null;
 
   const bgColor = isDark ? DARK_BG : LIGHT_BG;
   const logoSrc = isDark ? DARK_IMG : LIGHT_IMG;
@@ -53,7 +58,8 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, onFadeOut }) => {
 
   return (
     <div
-      className={`loading-overlay${fade ? ' fade-out' : ''}`}
+      ref={overlayRef}
+      className="loading-overlay"
       style={{
         position: 'fixed',
         inset: 0,
@@ -63,11 +69,13 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, onFadeOut }) => {
         alignItems: 'flex-start',
         justifyContent: 'center',
         transition: 'opacity 0.5s',
-        opacity: fade ? 0 : 1,
+        opacity: show ? 1 : 0,
+        pointerEvents: show ? 'auto' : 'none',
         paddingTop: '15vh',
+        willChange: 'opacity',
       }}
     >
-      <div style={{ 
+      <div style={{
         textAlign: 'center',
         display: 'flex',
         flexDirection: 'column',
@@ -86,9 +94,9 @@ const LoadingOverlay: React.FC<LoadingOverlayProps> = ({ show, onFadeOut }) => {
             display: 'block',
             marginBottom: '16px',
           }}
-          onLoad={() => setImgLoaded(true)}
         />
-        {imgLoaded && (
+        {/* Show text as soon as image is preloaded, not after imgLoaded */}
+        {preloaded && (
           <h1
             style={{
               fontFamily: 'SF Pro Display, -apple-system, BlinkMacSystemFont, sans-serif',
