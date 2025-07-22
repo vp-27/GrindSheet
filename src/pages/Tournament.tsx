@@ -212,14 +212,14 @@ const TournamentPage: React.FC = () => {
     }
     
     if (rank <= totalParticipants / 2) {
-      return "Mediocrity loves company 🤝";
+      return "Mediocrity loves company ";
     }
     
     if (rank === totalParticipants && totalParticipants > 1) {
-      return "Rock bottom has great WiFi 📶";
+      return "Rock bottom has great WiFi ";
     }
     
-    return "Gravity seems stronger for you 🌍";
+    return "Gravity seems stronger for you ";
   };
 
   // Get roast message for current user
@@ -1092,7 +1092,7 @@ const TournamentPage: React.FC = () => {
                       if (currentParticipant && currentParticipant.totalPoints === 0) {
                         return (
                           <span className="text-sm text-muted-foreground mt-1">
-                            Time to get those gains 💪
+                            Time to get those gains
                           </span>
                         );
                       }
