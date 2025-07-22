@@ -60,7 +60,7 @@ const harshRoasts = [
   "If you worked out as much as you talk about it, you'd be in first place.",
   "Your gym shoes are in mint condition.",
   "Even the yoga mats are judging you.",
-  "You have more gym memberships than gym visits.",
+  "You're the before image in before and after.",
   "Your biceps are on a milk carton—missing since January."
 ];
 
