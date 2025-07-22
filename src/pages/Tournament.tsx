@@ -574,8 +574,10 @@ const TournamentPage: React.FC = () => {
     return (
       <Card 
         key={participant.userId}
-        className={`relative rounded-2xl transition-all duration-500 ease-out transform ${getCardStyling(participant.rank, isCurrentUser)} ${
-          isExpanded ? 'scale-[1.01] shadow-xl' : 'shadow-md'
+        className={`relative transition-all duration-500 ease-out transform ${getCardStyling(participant.rank, isCurrentUser)} ${
+          isExpanded 
+            ? 'scale-[1.01] shadow-xl rounded-t-2xl rounded-b-none'
+            : 'shadow-md rounded-2xl'
         }`}
       >
         <CardContent className="p-4">
@@ -707,11 +709,7 @@ const TournamentPage: React.FC = () => {
           }`}>
             <button
               onClick={() => setExpandedParticipant(isExpanded ? null : participant.userId)}
-              className={`w-full flex items-center justify-center gap-2 text-sm font-medium transition-all duration-300 ease-out py-2 px-3 rounded-xl 
-                ${isExpanded 
-                  ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/40' 
-                  : 'text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'}
-              `}
+              className={`w-full flex items-center justify-center gap-2 text-sm font-medium transition-all duration-300 ease-out py-2 px-3 rounded-xl z-30 relative ${isExpanded ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900' : 'text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
             >
               <span className="text-xs">{isExpanded ? 'Hide Point Breakdown' : 'Show Point Breakdown'}</span>
               <div className={`transition-transform duration-300 ease-out ${isExpanded ? 'rotate-180' : 'rotate-0'}`}> 
@@ -721,10 +719,12 @@ const TournamentPage: React.FC = () => {
 
             {/* Expandable Detail Section - Unified Single Card */}
             <div className={`overflow-hidden transition-all duration-500 ease-out ${
-              isExpanded ? 'max-h-[2000px] opacity-100 mt-3' : 'max-h-0 opacity-0 mt-0'
+              isExpanded 
+                ? 'max-h-[2000px] opacity-100 -mt-4 z-10 translate-y-0'
+                : 'max-h-0 opacity-0 mt-0 z-10 -translate-y-4'
             }`}>
               <div className="space-y-3 text-sm">
-                <div className="bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-900/50 dark:to-slate-800/30 rounded-2xl p-5 border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
+                <div className="bg-gradient-to-br from-white to-slate-50/50 dark:from-slate-900/50 dark:to-slate-800/30 p-5 border border-slate-200/50 dark:border-slate-700/50 shadow-sm rounded-2xl"> 
                   
 
                   
@@ -1069,8 +1069,8 @@ const TournamentPage: React.FC = () => {
                 if (!roastMessage) {
                   return (
                     <div className="text-center">
-                      <span className="font-bold text-lg text-foreground">Join the Competition! 🏆</span>
-                      <div className="text-sm text-muted-foreground mt-1">Log a workout to get roasted</div>
+                      <span className="font-bold text-lg text-foreground">Join the Competition!</span>
+                      <div className="text-sm text-muted-foreground mt-1">Log a workout to get points</div>
                     </div>
                   );
                 }
