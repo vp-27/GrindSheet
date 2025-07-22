@@ -417,6 +417,18 @@ const TournamentPage: React.FC = () => {
   // Badge icon and short name mapping
   const getBadgeIcon = (badgeType: BadgeType) => {
     const IconComponent = TOURNAMENT_ICONS[badgeType] || TOURNAMENT_ICONS.BONUSES;
+    // PR badge icon color matches performance gradient
+    if (badgeType === BadgeType.FIRST_PR) {
+      return <IconComponent className="h-3 w-3 text-amber-200 dark:text-amber-100" />;
+    }
+    // High volume badge icon color matches volume gradient
+    if (badgeType === BadgeType.VOLUME_CRUSHER) {
+      return <IconComponent className="h-3 w-3 text-blue-200 dark:text-blue-100" />;
+    }
+    // Streak badge icon color matches volume gradient
+    if (badgeType === BadgeType.CONSISTENCY_KING) {
+      return <IconComponent className="h-3 w-3 text-blue-200 dark:text-blue-100" />;
+    }
     return <IconComponent className="h-3 w-3" />;
   };
 
@@ -449,26 +461,26 @@ const TournamentPage: React.FC = () => {
   // Badge color scheme for consistent styling
   const getBadgeStyles = (badgeType: BadgeType) => {
     switch (badgeType) {
-      case BadgeType.FIRST_PR:
-        return 'bg-amber-100/80 text-amber-700 border-amber-200 dark:bg-amber-900/30 dark:text-amber-300 dark:border-amber-700/50';
-      case BadgeType.CONSISTENCY_KING:
-        return 'bg-blue-100/80 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700/50';
+      case BadgeType.FIRST_PR: // PR badge matches performance section
+        return 'text-amber-50 bg-gradient-to-r from-amber-600 to-orange-600 border-amber-200 dark:text-amber-100 dark:bg-gradient-to-r dark:from-amber-600 dark:to-orange-600 dark:border-amber-700/50';
+      case BadgeType.CONSISTENCY_KING: // Streak badge, avoid orange clash
+        return 'text-blue-50 bg-gradient-to-r from-blue-600 to-purple-600 border-blue-200 dark:text-blue-100 dark:bg-gradient-to-r dark:from-blue-600 dark:to-purple-600 dark:border-blue-700/50';
       case BadgeType.IMPROVEMENT_STAR:
-        return 'bg-purple-100/80 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:text-purple-300 dark:border-purple-700/50';
+        return 'text-purple-50 bg-purple-700 border-purple-200 dark:text-purple-100 dark:bg-purple-700 dark:border-purple-700/50';
       case BadgeType.WEEKEND_WARRIOR:
-        return 'bg-orange-100/80 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-300 dark:border-orange-700/50';
+        return 'text-orange-50 bg-orange-700 border-orange-200 dark:text-orange-100 dark:bg-orange-700 dark:border-orange-700/50';
       case BadgeType.CATEGORY_MASTER:
-        return 'bg-emerald-100/80 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700/50';
+        return 'text-emerald-50 bg-emerald-700 border-emerald-200 dark:text-emerald-100 dark:bg-emerald-700 dark:border-emerald-700/50';
       case BadgeType.NEWCOMER_BONUS:
-        return 'bg-teal-100/80 text-teal-700 border-teal-200 dark:bg-teal-900/30 dark:text-teal-300 dark:border-teal-700/50';
+        return 'text-teal-50 bg-teal-700 border-teal-200 dark:text-teal-100 dark:bg-teal-700 dark:border-teal-700/50';
       case BadgeType.PERFECT_WEEK:
-        return 'bg-red-100/80 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700/50';
-      case BadgeType.VOLUME_CRUSHER:
-        return 'bg-indigo-100/80 text-indigo-700 border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-700/50';
+        return 'text-red-50 bg-red-700 border-red-200 dark:text-red-100 dark:bg-red-700 dark:border-red-200/50';
+      case BadgeType.VOLUME_CRUSHER: // High volume matches volume section
+        return 'text-blue-50 bg-gradient-to-r from-blue-600 to-purple-600 border-indigo-200 dark:text-blue-100 dark:bg-gradient-to-r dark:from-blue-600 dark:to-purple-600 dark:border-indigo-700/50';
       case BadgeType.CORE_DESTROYER:
-        return 'bg-emerald-100/80 text-emerald-700 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-700/50';
+        return 'text-emerald-50 bg-emerald-700 border-emerald-200 dark:text-emerald-100 dark:bg-emerald-700 dark:border-emerald-700/50';
       default:
-        return 'bg-gray-100/80 text-gray-700 border-gray-200 dark:bg-gray-900/30 dark:text-gray-300 dark:border-gray-700/50';
+        return 'text-gray-50 bg-gray-700 border-gray-200 dark:text-gray-100 dark:bg-gray-700 dark:border-gray-700/50';
     }
   };
 
@@ -585,7 +597,14 @@ const TournamentPage: React.FC = () => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
                   <h3 className={`font-semibold text-sm text-foreground truncate ${isCurrentUser ? 'bg-blue-100/80 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5 rounded-lg' : ''}`}>
-                    {participant.user.name}
+                    {/* 'You' badge: teal text, no background, visually distinct from other badges */}
+                    {isCurrentUser ? (
+                      <span className="font-semibold text-sm text-teal-600 dark:text-teal-400">
+                        {participant.user.name}
+                      </span>
+                    ) : (
+                      participant.user.name
+                    )}
                   </h3>
                 </div>
                 
@@ -605,14 +624,11 @@ const TournamentPage: React.FC = () => {
                   {/* Relevant badges (expanded or just top 1) */}
                   {badgesToShow.map(badge => (
                     <Badge 
-                      key={badge.id} 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        getBadgeClickHandler(badge.type, participant.userId)();
-                      }}
-                      className={`text-xs px-2 py-0.5 rounded-full border flex-shrink-0 flex items-center gap-1 cursor-pointer ${getBadgeStyles(badge.type)}`}
+                      key={badge.id}
+                      className={`text-xs px-2 py-0.5 rounded-full border flex-shrink-0 flex items-center gap-1 ${getBadgeStyles(badge.type)}`}
                     >
-                      {getBadgeIcon(badge.type)}
+                      {/* Remove PR trophy icon from PR badge */}
+                      {badge.type !== BadgeType.FIRST_PR && getBadgeIcon(badge.type)}
                       <span className="font-medium">{getBadgeShortName(badge.type)}</span>
                     </Badge>
                   ))}
@@ -653,7 +669,7 @@ const TournamentPage: React.FC = () => {
           }`}>
             <div className="grid grid-cols-3 gap-3 text-sm">
               <div 
-                className="flex flex-col items-center text-center cursor-pointer p-2 rounded-lg transition-all duration-200 hover:bg-amber-50/50 dark:hover:bg-amber-950/20"
+                className="flex flex-col items-center text-center p-2 rounded-lg"
                 onClick={() => handleSectionClick(participant.userId, 'performance')}
               >
                 <span className="text-xs text-muted-foreground mb-1">Performance</span>
@@ -663,7 +679,7 @@ const TournamentPage: React.FC = () => {
                 <span className="text-xs text-muted-foreground">PRs & Competition</span>
               </div>
               <div 
-                className="flex flex-col items-center text-center cursor-pointer p-2 rounded-lg transition-all duration-200 hover:bg-blue-50/50 dark:hover:bg-blue-950/20"
+                className="flex flex-col items-center text-center p-2 rounded-lg"
                 onClick={() => handleSectionClick(participant.userId, 'volume')}
               >
                 <span className="text-xs text-muted-foreground mb-1">Volume</span>
@@ -673,7 +689,7 @@ const TournamentPage: React.FC = () => {
                 <span className="text-xs text-muted-foreground">Work & Consistency</span>
               </div>
               <div 
-                className="flex flex-col items-center text-center cursor-pointer p-2 rounded-lg transition-all duration-200 hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20"
+                className="flex flex-col items-center text-center p-2 rounded-lg"
                 onClick={() => handleSectionClick(participant.userId, 'bonuses')}
               >
                 <span className="text-xs text-muted-foreground mb-1">Bonuses</span>
