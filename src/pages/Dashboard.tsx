@@ -295,67 +295,69 @@ const Dashboard = () => {
     `${categories.find(c => c.id === selectedCategoryId)?.name} Progress` : 
     "Overall Progress";
 
-  // --- Streak Calculation ---
-  // Assume exerciseLogs is an array of logs with a 'timestamp' property (ISO string)
-  // Each log is a workout for a day. We'll count unique days with logs.
+  // --- Streak Calculation (Duolingo-style, local time safe) ---
+  // Helper: get local YYYY-MM-DD string
+  const getLocalDateString = (date: Date | string) => {
+    const d = typeof date === 'string' ? new Date(date) : date;
+    return d.getFullYear() + '-' + (d.getMonth()+1).toString().padStart(2,'0') + '-' + d.getDate().toString().padStart(2,'0');
+  };
+
+  // Each log is a workout for a day. We'll count unique days with logs (local time)
   const logDates = Array.from(new Set(
-    exerciseLogs.map(log => {
-      const d = new Date(log.timestamp);
-      // Normalize to YYYY-MM-DD
-      return d.getFullYear() + '-' + (d.getMonth()+1).toString().padStart(2,'0') + '-' + d.getDate().toString().padStart(2,'0');
-    })
+    exerciseLogs.map(log => getLocalDateString(log.timestamp))
   ));
 
   // Sort dates descending (most recent first)
   logDates.sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
 
-  // Calculate streak: consecutive days up to today
+  // Get today's and yesterday's local date string
+  const todayStr = getLocalDateString(new Date());
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayStr = getLocalDateString(yesterday);
+
+  // Debug: print log dates and today
+  if (process.env.NODE_ENV !== 'production') {
+    // eslint-disable-next-line no-console
+    console.log('Streak debug:', { logDates, todayStr, yesterdayStr });
+  }
+
+  // Determine if user has logged today (local time)
+  const hasLoggedToday = logDates.length > 0 && logDates[0] === todayStr;
+
+  // Calculate streak: consecutive days up to today (if logged today), or up to yesterday (if not)
   let streak = 0;
-  let streakBroken = false;
-  let prev = new Date(); // today
-  prev.setHours(0,0,0,0);
-  for (let i = 0; i < logDates.length; i++) {
-    const logDate = new Date(logDates[i]);
-    logDate.setHours(0,0,0,0);
-    if (i === 0) {
-      // If last log is today or yesterday, streak can start
-      const diff = (prev.getTime() - logDate.getTime())/(1000*60*60*24);
-      if (diff === 0 || diff === 1) {
-        streak = 1;
-      } else {
-        streak = 0;
-        streakBroken = true;
-        break;
-      }
-    } else {
-      // Check if previous log was exactly 1 day before
-      const lastLogDate = new Date(logDates[i-1]);
-      lastLogDate.setHours(0,0,0,0);
-      const diff = (lastLogDate.getTime() - logDate.getTime())/(1000*60*60*24);
-      if (diff === 1) {
+  if (logDates.length > 0) {
+    let expectedDate = new Date();
+    if (!hasLoggedToday) {
+      // If not logged today, start from yesterday
+      expectedDate.setDate(expectedDate.getDate() - 1);
+    }
+    expectedDate.setHours(0,0,0,0);
+    let expectedStr = getLocalDateString(expectedDate);
+    for (let i = 0; i < logDates.length; i++) {
+      if (logDates[i] === expectedStr) {
         streak++;
+        expectedDate.setDate(expectedDate.getDate() - 1);
+        expectedStr = getLocalDateString(expectedDate);
       } else {
         break;
       }
     }
   }
-  // If no logs or last log is not today/yesterday, streak is 0 and broken
-  if (logDates.length === 0) {
-    streak = 0;
-    streakBroken = true;
-  }
+  // If no logs or streak broken, streak is 0
 
-  // --- Streak Indicator UI ---
-  // Use a fire emoji or SVG, color if streak > 0, gray if 0
+  // --- Streak Indicator UI (Duolingo-style) ---
+  // Colored if logged today, gray if not, number always shows streak (unless 0)
   const StreakIndicator = (
     <div className="flex items-center gap-2 group select-none" title={streak > 0 ? `🔥 ${streak} day streak!` : 'No active streak'}>
       <span
         className={
-          streak > 0
+          streak > 0 && hasLoggedToday
             ? 'text-amber-500 drop-shadow-md text-2xl transition-colors'
             : 'text-gray-400 dark:text-gray-600 text-2xl transition-colors'
         }
-        style={{ filter: streak > 0 ? 'drop-shadow(0 0 6px #fbbf24)' : 'none' }}
+        style={{ filter: streak > 0 && hasLoggedToday ? 'drop-shadow(0 0 6px #fbbf24)' : 'none' }}
       >
         {/* Fire SVG for more control, fallback to emoji */}
         <svg
@@ -369,7 +371,7 @@ const Dashboard = () => {
       </span>
       <span
         className={
-          streak > 0
+          streak > 0 && hasLoggedToday
             ? 'text-lg font-bold text-amber-600 dark:text-amber-400 drop-shadow-sm'
             : 'text-lg font-bold text-gray-400 dark:text-gray-600'
         }
