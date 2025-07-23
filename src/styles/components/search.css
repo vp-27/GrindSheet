@@ -382,18 +382,21 @@
 
 /* ===== NEW: Control Panel Styles ===== */
 .control-panel {
-  background-color: hsl(var(--muted));
+  background-color: rgba(120, 120, 128, 0.16); /* Match MobileSlider light mode */
   border-radius: 1.25rem; /* 20px */
   padding: 0.5rem; /* 8px */
   display: flex;
   flex-direction: column;
-  border: 1px solid hsl(var(--border));
+  border: none;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
 }
 
 
 .panel-divider {
   height: 1px;
-  background-color: hsl(var(--border));
+  background-color: rgba(60, 60, 67, 0.18); /* More visible in light mode */
   margin: 0.25rem 0.5rem; /* 4px top/bottom, 8px left/right */
   border-radius: 9999px;
 }
@@ -418,6 +421,13 @@
 /* Make search icon subtler */
 .control-panel .search-bar-icon {
   color: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* REVERT: Remove custom selected button color/font-weight overrides */
+/* .category-filter-button.selected and .dark .category-filter-button.selected overrides removed */
+
+.dark .control-panel {
+  background-color: rgba(39, 39, 41, 0.92); /* More translucent, Apple-like dark mode */
 }
 
 @media (min-width: 768px) {
