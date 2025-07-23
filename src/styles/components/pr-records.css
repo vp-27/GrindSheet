@@ -2,13 +2,45 @@
 /* PR Records unified card design matching Dashboard and History */
 
 /* PR Champion Card Styling */
-.pr-champion-card {
-  --category-color: #f59e0b;
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
+
+
+.apple-health-card.pr-champion-card {
+  --category-color: #fbbf24;
+  background: linear-gradient(135deg, rgba(251,191,36,0.13) 0%, rgba(245,158,11,0.07) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.18);
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.08);
 }
 
-.dark .pr-champion-card {
-  background: linear-gradient(135deg, rgba(251, 191, 36, 0.05) 0%, rgba(245, 158, 11, 0.02) 100%);
+
+.dark .apple-health-card.pr-champion-card {
+  background:
+    linear-gradient(135deg, rgba(40, 32, 10, 0.92) 0%, rgba(60, 40, 10, 0.96) 100%),
+    linear-gradient(135deg, rgba(251,191,36,0.22) 0%, rgba(245,158,11,0.13) 100%);
+  border: 1.5px solid rgba(245, 158, 11, 0.38);
+  box-shadow: 0 8px 32px rgba(245, 158, 11, 0.22);
+  color: #ffe9b0;
+}
+
+.dark .apple-health-card.pr-champion-card .apple-health-card-title,
+.dark .apple-health-card.pr-champion-card h3,
+.dark .apple-health-card.pr-champion-card .font-semibold,
+.dark .apple-health-card.pr-champion-card .font-medium {
+  color: #fff8e1 !important;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.18);
+}
+
+.dark .apple-health-card.pr-champion-card .apple-health-card-time,
+.dark .apple-health-card.pr-champion-card .apple-health-card-time-text,
+.dark .apple-health-card.pr-champion-card p,
+.dark .apple-health-card.pr-champion-card .text-muted-foreground {
+  color: #ffe9b0 !important;
+}
+
+.dark .apple-health-card.pr-champion-card .badge,
+.dark .apple-health-card.pr-champion-card .font-bold,
+.dark .apple-health-card.pr-champion-card .apple-health-card-crown,
+.dark .apple-health-card.pr-champion-card .apple-health-card-icon {
+  color: #fbbf24 !important;
 }
 
 /* Challenge Cards - Orange theme for beatable PRs */

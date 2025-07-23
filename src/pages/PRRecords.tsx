@@ -37,6 +37,7 @@ import { MobileSlider } from '@/components/ui/mobile-slider';
 import '@/styles/index.css';
 import '@/styles/components/search.css';
 
+import '../styles/components/pr-records.css';
 // Internal component for use within Tournament tab
 export const PRRecordsContent: React.FC = () => {
   const { profile } = useAuth();
@@ -309,7 +310,7 @@ export const PRRecordsContent: React.FC = () => {
   const renderPRChampionSummary = () => {
     if (!prChampionship.champion && prChampionship.summary.length === 0) {
       return (
-        <div className={`glass-card rounded-2xl p-8 text-center ${selectedCategoryId ? 'category-tinted' : ''}`}>
+        <div className={`glass-card rounded-2xl p-8 text-center ${selectedCategoryId ? 'category-tinted' : 'pr-champion-card'}`}>
           <Trophy className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-foreground mb-2">No PR Records Yet</h3>
           <p className="text-muted-foreground">
@@ -329,7 +330,7 @@ export const PRRecordsContent: React.FC = () => {
 
     return (
       <div 
-        className={`apple-health-card mb-6 ${selectedCategoryId ? 'category-tinted' : ''}`}
+        className={`apple-health-card mb-6 ${selectedCategoryId ? 'category-tinted' : 'pr-champion-card'}`}
         style={{
           '--category-color': categoryColor,
           '--category-color-rgb': categoryColor.replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '251, 191, 36'
