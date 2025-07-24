@@ -1,3 +1,12 @@
+/* Ensure the progress dropdown always appears above the control panel */
+/* Ensure all dropdown/popout menus are above control panel and cards */
+.progress-dropdown,
+.category-filter-dropdown,
+.filter-dropdown,
+.progress-dropdown-container,
+.dropdown-menu {
+  z-index: 9999 !important;
+}
 /* ===== SEARCH COMPONENT STYLES ===== */
 /* Search bars, expandable search, and search-related UI components */
 
@@ -391,6 +400,7 @@
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
+  z-index: 10;
 }
 
 
@@ -413,9 +423,12 @@
 }
 
 /* The category filter container inside the panel should also be transparent */
+
 .control-panel > .bg-muted {
   background-color: transparent !important;
   padding: 0 !important; /* Remove padding which is now on the parent */
+  position: relative;
+  z-index: 2;
 }
 
 /* Make search icon subtler */
