@@ -11,6 +11,7 @@ import {
   TrophyIcon as TrophyOutline,
   ClockIcon as ClockOutline,
   ClipboardDocumentCheckIcon as GoalsOutline, // Using ClipboardDocumentCheckIcon for "Goals"
+  UserIcon as UserOutline,
 } from '@heroicons/react/24/outline';
 // Heroicons imports - solid versions
 import {
@@ -18,6 +19,7 @@ import {
   TrophyIcon as TrophySolid,
   ClockIcon as ClockSolid,
   ClipboardDocumentCheckIcon as GoalsSolid, // Using ClipboardDocumentCheckIcon for "Goals"
+  UserIcon as UserSolid,
 } from '@heroicons/react/24/solid';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
@@ -95,13 +97,8 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
 
   // Memoize the profile nav link to prevent unnecessary re-renders
   const profileNavLink = useMemo(() => (
-    <ProfileNavLink 
-      to="/settings" 
-      profile={stableProfile}
-      avatarImageError={avatarImageError}
-      setAvatarImageError={setAvatarImageError}
-    />
-  ), [stableProfile, avatarImageError, setAvatarImageError]);
+    <ProfileNavLink to="/settings" />
+  ), []);
 
   // Create ranking indicator component
   const RankingIndicator: React.FC<{ rank: number | null; totalParticipants: number }> = ({ rank, totalParticipants }) => {
@@ -270,34 +267,11 @@ const NavLink: React.FC<{
 
 const ProfileNavLink = memo<{ 
   to: string; 
-  profile: any;
-  avatarImageError: boolean;
-  setAvatarImageError: (error: boolean) => void;
-}>(({ to, profile, avatarImageError, setAvatarImageError }) => {
+}>(({ to }) => {
   // Get current path
   const currentPath = window.location.pathname;
   const isActive = currentPath === to || 
                   (to !== '/' && currentPath.startsWith(to));
-
-  // Memoize user initials to prevent recalculation on every render
-  const userInitials = useMemo(() => {
-    if (!profile?.name) return '?';
-    return profile.name
-      .split(' ')
-      .map(word => word.charAt(0))
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
-  }, [profile?.name]);
-
-  // Memoize the avatar image source to prevent unnecessary re-renders
-  const avatarSrc = useMemo(() => profile?.avatar_url, [profile?.avatar_url]);
-  const avatarAlt = useMemo(() => profile?.name || 'Profile', [profile?.name]);
-
-  // Memoize the error handler to prevent recreation on every render
-  const handleAvatarError = useCallback(() => {
-    setAvatarImageError(true);
-  }, [setAvatarImageError]);
 
   return (
     <Link 
@@ -311,28 +285,14 @@ const ProfileNavLink = memo<{
         "mb-0.5 relative transition-all duration-200",
         isActive ? "text-primary" : "text-icon-muted"
       )}>
-        <Avatar 
-          className={cn(
-            "h-6 w-6 transition-all duration-200 ring-2",
-            isActive 
-              ? "ring-primary" 
-              : "ring-muted-foreground/20 hover:ring-muted-foreground/40"
-          )}
-        >
-          {avatarSrc && !avatarImageError ? (
-            <AvatarImage 
-              key={avatarSrc} // Force re-render only when src changes
-              src={avatarSrc} 
-              alt={avatarAlt}
-              onError={handleAvatarError}
-            />
-          ) : null}
-          <AvatarFallback className="text-xs font-medium bg-muted">
-            {userInitials}
-          </AvatarFallback>
-        </Avatar>
+        <AnimatedIcon 
+          outlineIcon={UserOutline}
+          solidIcon={UserSolid}
+          isActive={isActive}
+          className="h-6 w-6"
+        />
       </div>
-      <span className={cn("text-center truncate w-full", isActive ? "font-bold" : "font-normal")}>
+      <span className={cn("text-center truncate w-full", isActive ? "font-bold" : "font-normal")}> 
         Profile
       </span>
     </Link>
