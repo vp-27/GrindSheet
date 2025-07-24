@@ -74,34 +74,65 @@ const roastStorage = {
 const IOSPillSwitcher: React.FC<{
   activeTab: 'tournament' | 'records';
   onTabChange: (tab: 'tournament' | 'records') => void;
-}> = ({ activeTab, onTabChange }) => (
-  <div className="w-full flex justify-center">
-    <div className="flex bg-muted rounded-full p-1 shadow-inner w-[340px] max-w-full">
-      <button
-        className={`flex-1 px-6 py-2 rounded-full text-sm font-semibold transition-all duration-200 focus:outline-none ${
-          activeTab === 'tournament'
-            ? 'bg-white dark:bg-gray-900 shadow text-primary'
-            : 'bg-transparent text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
-        }`}
-        onClick={() => onTabChange('tournament')}
-        aria-pressed={activeTab === 'tournament'}
-      >
-        Tournament
-      </button>
-      <button
-        className={`flex-1 px-6 py-2 rounded-full text-sm font-semibold transition-all duration-200 focus:outline-none ${
-          activeTab === 'records'
-            ? 'bg-white dark:bg-gray-900 shadow text-primary'
-            : 'bg-transparent text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
-        }`}
-        onClick={() => onTabChange('records')}
-        aria-pressed={activeTab === 'records'}
-      >
-        PR Records
-      </button>
+}> = ({ activeTab, onTabChange }) => {
+  // Sliding UI logic
+  // We'll use refs to measure button positions for the slider
+  const tournamentRef = React.useRef<HTMLButtonElement>(null);
+  const recordsRef = React.useRef<HTMLButtonElement>(null);
+  const [sliderStyle, setSliderStyle] = React.useState<React.CSSProperties>({});
+
+  React.useEffect(() => {
+    const activeRef = activeTab === 'tournament' ? tournamentRef : recordsRef;
+    if (activeRef.current) {
+      setSliderStyle({
+        left: activeRef.current.offsetLeft,
+        width: activeRef.current.offsetWidth,
+        transition: 'left 0.25s cubic-bezier(0.4,0,0.2,1), width 0.25s cubic-bezier(0.4,0,0.2,1)'
+      });
+    }
+  }, [activeTab]);
+
+  return (
+    <div className="w-full flex justify-center">
+      <div className="relative flex bg-muted rounded-full p-1 shadow-inner w-[340px] max-w-full h-10">
+        {/* Sliding indicator */}
+        <div
+          className="absolute left-0 rounded-full bg-white dark:bg-gray-900 shadow transition-all duration-300 border border-gray-200 dark:border-gray-800"
+          style={{
+            ...sliderStyle,
+            top: 2,
+            bottom: 2,
+            height: 'calc(100% - 4px)',
+          }}
+        />
+        <button
+          ref={tournamentRef}
+          className={`flex-1 px-6 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 focus:outline-none z-10 ${
+            activeTab === 'tournament'
+              ? 'text-primary'
+              : 'text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
+          }`}
+          onClick={() => onTabChange('tournament')}
+          aria-pressed={activeTab === 'tournament'}
+        >
+          Tournament
+        </button>
+        <button
+          ref={recordsRef}
+          className={`flex-1 px-6 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 focus:outline-none z-10 ${
+            activeTab === 'records'
+              ? 'text-primary'
+              : 'text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
+          }`}
+          onClick={() => onTabChange('records')}
+          aria-pressed={activeTab === 'records'}
+        >
+          PR Records
+        </button>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const TournamentPage: React.FC = () => {
   const { profile } = useAuth();
@@ -1079,10 +1110,7 @@ const TournamentPage: React.FC = () => {
     >
       <div className={`space-y-6 relative transition-all duration-500 ease-out ${contentReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
 
-        {/* Page Title */}
-        <h2 className="text-2xl font-bold text-foreground text-center mb-2">
-          {activeTab === 'tournament' ? 'Tournament' : 'PR Records'}
-        </h2>
+        {/* Page Title removed as per new design */}
 
         {/* Tournament Header with Roast and Week Selector - Only for Tournament tab */}
         {activeTab === 'tournament' && (currentTournament || tournamentHistory.length > 0) && (
