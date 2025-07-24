@@ -41,6 +41,7 @@ interface LayoutProps {
   categoryColor?: string;
   headerSlider?: React.ReactNode;
   headerStreak?: React.ReactNode; // New: custom header right-side content
+  customHeader?: React.ReactNode; // New: custom header element (e.g., pill switcher)
 }
 
 // Icon transition component
@@ -70,7 +71,7 @@ const AnimatedIcon: React.FC<AnimatedIconProps> = ({ outlineIcon: OutlineIcon, s
   );
 };
 
-const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerSlider, headerStreak }) => {
+const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerSlider, headerStreak, customHeader }) => {
   const { profile, signOut } = useAuth();
   const { rank: tournamentRank, totalParticipants, isLoading: rankingLoading } = useTournamentRanking();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -141,7 +142,9 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Minimal header */}
       <header className="p-4 flex justify-between items-center">
-        {title ? (
+        {customHeader ? (
+          customHeader
+        ) : title ? (
           <>
             <h1 
               className={categoryColor ? "category-exercise-title" : "text-3xl font-bold text-foreground"}

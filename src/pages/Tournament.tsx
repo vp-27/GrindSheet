@@ -71,6 +71,38 @@ const roastStorage = {
   lastTournamentId: null as string | null
 };
 
+const IOSPillSwitcher: React.FC<{
+  activeTab: 'tournament' | 'records';
+  onTabChange: (tab: 'tournament' | 'records') => void;
+}> = ({ activeTab, onTabChange }) => (
+  <div className="w-full flex justify-center">
+    <div className="flex bg-muted rounded-full p-1 shadow-inner w-[340px] max-w-full">
+      <button
+        className={`flex-1 px-6 py-2 rounded-full text-sm font-semibold transition-all duration-200 focus:outline-none ${
+          activeTab === 'tournament'
+            ? 'bg-white dark:bg-gray-900 shadow text-primary'
+            : 'bg-transparent text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
+        }`}
+        onClick={() => onTabChange('tournament')}
+        aria-pressed={activeTab === 'tournament'}
+      >
+        Tournament
+      </button>
+      <button
+        className={`flex-1 px-6 py-2 rounded-full text-sm font-semibold transition-all duration-200 focus:outline-none ${
+          activeTab === 'records'
+            ? 'bg-white dark:bg-gray-900 shadow text-primary'
+            : 'bg-transparent text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
+        }`}
+        onClick={() => onTabChange('records')}
+        aria-pressed={activeTab === 'records'}
+      >
+        PR Records
+      </button>
+    </div>
+  </div>
+);
+
 const TournamentPage: React.FC = () => {
   const { profile } = useAuth();
   const { categories, exercises } = useAppContext();
@@ -1011,53 +1043,46 @@ const TournamentPage: React.FC = () => {
 
   return (
     <Layout 
-      title={activeTab === 'tournament' ? 'Tournament' : 'PR Records'}
-      headerSlider={
-        activeTab === 'tournament' ? (
-          <div className="flex items-center gap-3">
-            {/* Countdown Timer - Plain text with icon and urgency color */}
-            {countdown.text && (
-              <span className={`flex items-center gap-1 font-medium text-xs 
-                ${countdown.urgency === 'low' ? 'text-emerald-700 dark:text-emerald-300' : ''}
-                ${countdown.urgency === 'medium' ? 'text-amber-700 dark:text-amber-300' : ''}
-                ${countdown.urgency === 'high' ? 'text-orange-700 dark:text-orange-300' : ''}
-                ${countdown.urgency === 'critical' ? 'text-red-700 dark:text-red-300' : ''}
-                ${countdown.urgency === 'ended' ? 'text-gray-700 dark:text-gray-300' : ''}
-              `}>
-                <Clock className="h-4 w-4 mr-1" />
-                {countdown.text}
-              </span>
-            )}
-            {/* Rulebook Button */}
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setShowPointsGuide(true)}
-              className="rounded-full h-9 w-9 p-0"
-            >
-              {(() => {
-                const BookOpenIcon = TOURNAMENT_ICONS.RULEBOOK;
-                return <BookOpenIcon className="h-4 w-4" />;
-              })()}
-            </Button>
-          </div>
-        ) : undefined
+      customHeader={
+        <div className="w-full flex flex-col gap-2">
+          <IOSPillSwitcher activeTab={activeTab} onTabChange={tab => setActiveTab(tab)} />
+          {/* Countdown and Book icon row, only for Tournament tab */}
+          {activeTab === 'tournament' && (
+            <div className="flex items-center justify-between mt-2 px-2">
+              {countdown.text && (
+                <span className={`flex items-center gap-1 font-medium text-xs 
+                  ${countdown.urgency === 'low' ? 'text-emerald-700 dark:text-emerald-300' : ''}
+                  ${countdown.urgency === 'medium' ? 'text-amber-700 dark:text-amber-300' : ''}
+                  ${countdown.urgency === 'high' ? 'text-orange-700 dark:text-orange-300' : ''}
+                  ${countdown.urgency === 'critical' ? 'text-red-700 dark:text-red-300' : ''}
+                  ${countdown.urgency === 'ended' ? 'text-gray-700 dark:text-gray-300' : ''}`}
+                >
+                  <Clock className="h-4 w-4 mr-1" />
+                  {countdown.text}
+                </span>
+              )}
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowPointsGuide(true)}
+                className="rounded-full h-9 w-9 p-0"
+              >
+                {(() => {
+                  const BookOpenIcon = TOURNAMENT_ICONS.RULEBOOK;
+                  return <BookOpenIcon className="h-4 w-4" />;
+                })()}
+              </Button>
+            </div>
+          )}
+        </div>
       }
     >
       <div className={`space-y-6 relative transition-all duration-500 ease-out ${contentReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
 
-        {/* Navigation Slider - Full width, thin and crispy */}
-        <div className="w-full">
-          <MobileSlider
-            options={[
-              { id: 'tournament', label: 'Tournament' },
-              { id: 'records', label: 'PR Records' }
-            ]}
-            activeOption={activeTab}
-            onOptionChange={(optionId) => setActiveTab(optionId as 'tournament' | 'records')}
-            variant="default"
-          />
-        </div>
+        {/* Page Title */}
+        <h2 className="text-2xl font-bold text-foreground text-center mb-2">
+          {activeTab === 'tournament' ? 'Tournament' : 'PR Records'}
+        </h2>
 
         {/* Tournament Header with Roast and Week Selector - Only for Tournament tab */}
         {activeTab === 'tournament' && (currentTournament || tournamentHistory.length > 0) && (
