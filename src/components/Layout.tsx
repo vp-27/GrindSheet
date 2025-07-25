@@ -41,6 +41,7 @@ interface LayoutProps {
   categoryColor?: string;
   headerSlider?: React.ReactNode;
   headerStreak?: React.ReactNode; // New: custom header right-side content
+  customHeader?: React.ReactNode; // Restored: custom header content (e.g., pill switcher)
 }
 
 // Icon transition component
@@ -70,7 +71,7 @@ const AnimatedIcon: React.FC<AnimatedIconProps> = ({ outlineIcon: OutlineIcon, s
   );
 };
 
-const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerSlider, headerStreak }) => {
+const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerSlider, headerStreak, customHeader }) => {
   const { profile, signOut } = useAuth();
   const { rank: tournamentRank, totalParticipants, isLoading: rankingLoading } = useTournamentRanking();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -140,29 +141,35 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       {/* Minimal header */}
-      <header className="p-4 flex justify-between items-center">
-        {title ? (
-          <>
-            <h1 
-              className={categoryColor ? "category-exercise-title" : "text-3xl font-bold text-foreground"}
-              style={categoryColor ? {
-                '--category-color': categoryColor
-              } as React.CSSProperties : undefined}
-            >
-              {title}
-            </h1>
-            {/* Streak indicator or fallback */}
-            {headerStreak || headerSlider}
-          </>
-        ) : (
-          // Full width header slider when no title
-          headerSlider || (
-            <div className="flex justify-between items-center w-full">
-              <div></div>
-              {/* Optionally, could show streak here too if needed */}
-            </div>
-          )
+      <header className="p-4 flex flex-col gap-2">
+        {/* Render customHeader at the top if provided */}
+        {customHeader && (
+          <div className="mb-2">{customHeader}</div>
         )}
+        <div className="flex justify-between items-center w-full">
+          {title ? (
+            <>
+              <h1 
+                className={categoryColor ? "category-exercise-title" : "text-3xl font-bold text-foreground"}
+                style={categoryColor ? {
+                  '--category-color': categoryColor
+                } as React.CSSProperties : undefined}
+              >
+                {title}
+              </h1>
+              {/* Streak indicator or fallback */}
+              {headerStreak || headerSlider}
+            </>
+          ) : (
+            // Full width header slider when no title
+            headerSlider || (
+              <div className="flex justify-between items-center w-full">
+                <div></div>
+                {/* Optionally, could show streak here too if needed */}
+              </div>
+            )
+          )}
+        </div>
       </header>
       
       {/* Main content */}
