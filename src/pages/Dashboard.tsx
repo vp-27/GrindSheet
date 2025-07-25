@@ -20,7 +20,6 @@ import { MobileSlider } from '@/components/ui/mobile-slider';
 import '@/styles/index.css';
 import { Input } from '@/components/ui/input'; // Import Input
 import '@/styles/components/search.css'; // Import search styles
-import LoadingOverlay from '@/components/LoadingOverlay';
 
 const Dashboard = () => {
   const { categories, exercises, exerciseLogs } = useAppContext();
@@ -410,7 +409,6 @@ const Dashboard = () => {
 
   return (
     <>
-      <LoadingOverlay show={showOverlay} />
       {/* Category background tinting - positioned outside Layout for proper viewport positioning */}
       {selectedCategoryColor && (
         <div 

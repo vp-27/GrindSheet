@@ -832,19 +832,8 @@ export const PRRecordsContent: React.FC = () => {
 
 // Standalone page component with Layout wrapper
 const PRRecordsPage: React.FC = () => {
-  const navigate = useNavigate();
   return (
-    <Layout 
-      customHeader={
-        <IOSPillSwitcher 
-          activeTab="records" 
-          onTabChange={tab => {
-            if (tab === 'tournament') navigate('/tournament');
-          }}
-        />
-      }
-    >
-      <h2 className="text-2xl font-bold text-foreground text-center mb-2">PR Records</h2>
+    <Layout title="PR Records">
       <PRRecordsContent />
     </Layout>
   );

@@ -18,7 +18,6 @@ import GoalsPage from "./pages/Goals";
 import ScrollToTop from './utils/ScrollToTop';
 import './styles/index.css';
 import './styles/components/page-transitions.css';
-import LoadingOverlay from '@/components/LoadingOverlay';
 import { useAppContext } from '@/context/useAppContext';
 import React, { useState, useEffect } from 'react';
 
@@ -65,7 +64,6 @@ const AppWithLoader = () => {
 
   return (
     <>
-      <LoadingOverlay show={showOverlay} />
       <Toaster />
       <Sonner />
       <Routes>
