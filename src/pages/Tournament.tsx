@@ -1146,7 +1146,7 @@ const TournamentPage: React.FC = () => {
                             countdown.urgency === 'critical' ? 'text-red-700 dark:text-red-300' : ''
                           }${
                             countdown.urgency === 'ended' ? 'text-gray-700 dark:text-gray-300' : ''
-                          }`}>· {countdown.text} left</span>
+                          }`}>· {countdown.text}{countdown.urgency !== 'ended' ? ' left' : ''}</span>
                         )}
                       </span>
                       <ChevronDown className="h-4 w-4" />
