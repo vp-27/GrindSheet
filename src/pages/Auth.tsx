@@ -8,7 +8,7 @@ import '@/styles/components/auth.css';
 import { useAppContext } from '@/context/useAppContext';
 
 const Auth = () => {
-  const { signIn, signUp, session } = useAuth();
+  const { signIn, signUp, session, resetPasswordForEmail } = useAuth();
   const { isDark } = useTheme();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -22,6 +22,9 @@ const Auth = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [signupStep, setSignupStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  const [showReset, setShowReset] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -207,7 +210,7 @@ const Auth = () => {
           {/* Form */}
           <form onSubmit={handleSubmit} className="auth-form">
             {/* Login Form */}
-            {isLogin && (
+            {isLogin && !showReset && (
               <>
                 <div className="input-group">
                   <input
@@ -228,6 +231,75 @@ const Auth = () => {
                     className="auth-input"
                     required
                   />
+                </div>
+                <div className="auth-forgot-password">
+                  <button
+                    type="button"
+                    className="auth-forgot-btn"
+                    onClick={() => setShowReset(true)}
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+              </>
+            )}
+            {/* Password Reset View */}
+            {isLogin && showReset && (
+              <>
+                <div className="input-group">
+                  <input
+                    type="email"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    placeholder="Enter your email address"
+                    className="auth-input"
+                    required
+                  />
+                </div>
+                <div className="auth-nav-buttons">
+                  <button
+                    type="button"
+                    className="auth-submit-btn auth-back-btn"
+                    onClick={() => setShowReset(false)}
+                  >
+                    ←
+                  </button>
+                  <button
+                    type="button"
+                    className="auth-submit-btn primary"
+                    disabled={resetLoading}
+                    onClick={async () => {
+                      setResetLoading(true);
+                      try {
+                        const { error } = await resetPasswordForEmail(resetEmail, {
+                          redirectTo: window.location.origin + '/reset-password',
+                        });
+                        if (error) {
+                          toast({
+                            title: 'Reset failed',
+                            description: error.message || 'Please try again',
+                            variant: 'destructive',
+                          });
+                        } else {
+                          toast({
+                            title: 'Check your email',
+                            description: 'Password reset link sent',
+                          });
+                          setShowReset(false);
+                        }
+                      } catch (err) {
+                        toast({
+                          title: 'Something went wrong',
+                          description: 'Please try again',
+                          variant: 'destructive',
+                        });
+                      } finally {
+                        setResetLoading(false);
+                      }
+                    }}
+                  >
+                    {resetLoading ? 'Sending...' : 'Send Reset Link'}
+                  </button>
                 </div>
               </>
             )}

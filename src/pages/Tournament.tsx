@@ -1076,33 +1076,129 @@ const TournamentPage: React.FC = () => {
     <Layout 
       customHeader={
         <div className="w-full flex flex-col gap-2">
+          {/* Pill Switcher (unchanged) */}
           <IOSPillSwitcher activeTab={activeTab} onTabChange={tab => setActiveTab(tab)} />
-          {/* Countdown and Book icon row, only for Tournament tab */}
+
+          {/* Unified Header (integrated with background, improved spacing) */}
           {activeTab === 'tournament' && (
-            <div className="flex items-center justify-between mt-2 px-2">
-              {countdown.text && (
-                <span className={`flex items-center gap-1 font-medium text-xs 
-                  ${countdown.urgency === 'low' ? 'text-emerald-700 dark:text-emerald-300' : ''}
-                  ${countdown.urgency === 'medium' ? 'text-amber-700 dark:text-amber-300' : ''}
-                  ${countdown.urgency === 'high' ? 'text-orange-700 dark:text-orange-300' : ''}
-                  ${countdown.urgency === 'critical' ? 'text-red-700 dark:text-red-300' : ''}
-                  ${countdown.urgency === 'ended' ? 'text-gray-700 dark:text-gray-300' : ''}`}
-                >
-                  <Clock className="h-4 w-4 mr-1" />
-                  {countdown.text}
-                </span>
-              )}
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowPointsGuide(true)}
-                className="rounded-full h-9 w-9 p-0"
-              >
+            <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-4 px-4 pb-2">
+              {/* Left: Roast/Message */}
+              <div className="flex-1 min-w-0">
                 {(() => {
-                  const BookOpenIcon = TOURNAMENT_ICONS.RULEBOOK;
-                  return <BookOpenIcon className="h-4 w-4" />;
+                  const roastMessage = getCurrentUserRoast();
+                  if (!roastMessage) {
+                    return (
+                      <div className="text-center">
+                        <span className="font-bold text-lg text-foreground">Join the Competition!</span>
+                        <div className="text-sm text-muted-foreground mt-1">Log a workout to get points</div>
+                      </div>
+                    );
+                  }
+                  return (
+                    <div className="flex flex-col">
+                      <span className="font-bold text-lg text-foreground leading-tight">
+                        <TypewriterText 
+                          key={messageKey}
+                          text={roastMessage}
+                          speed={40}
+                          delay={600}
+                          className="competitive-message-enter"
+                          showOnce={true}
+                        />
+                      </span>
+                      {(() => {
+                        const currentParticipant = selectedTournament?.participants.find(p => p.userId === profile?.id);
+                        if (currentParticipant && currentParticipant.totalPoints === 0) {
+                          return (
+                            <span className="text-sm text-muted-foreground mt-1">
+                              Time to get those gains
+                            </span>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
+                  );
                 })()}
-              </Button>
+              </div>
+
+              {/* Right: Week Dropdown (with timer) and Guide Button */}
+              <div className="flex items-center gap-2 mt-4 md:mt-0">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="flex items-center gap-2 px-4 py-2 rounded-full min-w-[140px]"
+                    >
+                      <span className="font-medium text-sm">
+                        {selectedTournament?.id === currentTournament?.id 
+                          ? 'This Week' 
+                          : new Date(selectedTournament?.weekStart || '').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                        }
+                        {countdown.text && (
+                          <span className={`ml-2 text-xs font-normal ${
+                            countdown.urgency === 'low' ? 'text-emerald-700 dark:text-emerald-300' : ''
+                          }${
+                            countdown.urgency === 'medium' ? 'text-amber-700 dark:text-amber-300' : ''
+                          }${
+                            countdown.urgency === 'high' ? 'text-orange-700 dark:text-orange-300' : ''
+                          }${
+                            countdown.urgency === 'critical' ? 'text-red-700 dark:text-red-300' : ''
+                          }${
+                            countdown.urgency === 'ended' ? 'text-gray-700 dark:text-gray-300' : ''
+                          }`}>· {countdown.text} left</span>
+                        )}
+                      </span>
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    {/* Current Tournament */}
+                    {currentTournament && (
+                      <DropdownMenuItem 
+                        onClick={() => setSelectedTournament(currentTournament)}
+                        className={`flex items-center justify-between ${selectedTournament?.id === currentTournament?.id ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
+                      >
+                        <span className="font-medium">This Week</span>
+                        {selectedTournament?.id === currentTournament?.id && (
+                          <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                        )}
+                      </DropdownMenuItem>
+                    )}
+                    {/* Past Tournaments */}
+                    {tournamentHistory
+                      .filter(tournament => tournament.id !== currentTournament?.id)
+                      .slice()
+                      .reverse()
+                      .map(tournament => (
+                        <DropdownMenuItem 
+                          key={tournament.id}
+                          onClick={() => setSelectedTournament(tournament)}
+                          className={`flex items-center justify-between ${selectedTournament?.id === tournament.id ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
+                        >
+                          <span className="font-medium">
+                            {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </span>
+                          {selectedTournament?.id === tournament.id && (
+                            <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                          )}
+                        </DropdownMenuItem>
+                      ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  onClick={() => setShowPointsGuide(true)}
+                  className="rounded-full flex items-center gap-2 px-4 py-2"
+                >
+                  {(() => {
+                    const BookOpenIcon = TOURNAMENT_ICONS.RULEBOOK;
+                    return <BookOpenIcon className="h-5 w-5" />;
+                  })()}
+                  <span className="hidden sm:inline">Guide</span>
+                </Button>
+              </div>
             </div>
           )}
         </div>
@@ -1114,107 +1210,7 @@ const TournamentPage: React.FC = () => {
 
         {/* Tournament Header with Roast and Week Selector - Only for Tournament tab */}
         {activeTab === 'tournament' && (currentTournament || tournamentHistory.length > 0) && (
-          <div className="flex items-center justify-between gap-4 p-4 bg-gradient-to-r from-slate-50/50 to-gray-50/50 dark:from-slate-900/30 dark:to-gray-900/30 rounded-2xl border border-slate-200/50 dark:border-slate-700/50">
-            {/* Left: Roast Message */}
-            <div className="flex-1 min-w-0">
-              {(() => {
-                const roastMessage = getCurrentUserRoast();
-                if (!roastMessage) {
-                  return (
-                    <div className="text-center">
-                      <span className="font-bold text-lg text-foreground">Join the Competition!</span>
-                      <div className="text-sm text-muted-foreground mt-1">Log a workout to get points</div>
-                    </div>
-                  );
-                }
-                
-                return (
-                  <div className="flex flex-col">
-                    <span className="font-bold text-lg text-foreground leading-tight">
-                      <TypewriterText 
-                        key={messageKey}
-                        text={roastMessage}
-                        speed={40}
-                        delay={600}
-                        className="competitive-message-enter"
-                        showOnce={true}
-                      />
-                    </span>
-                    {(() => {
-                      const currentParticipant = selectedTournament?.participants.find(p => p.userId === profile?.id);
-                      if (currentParticipant && currentParticipant.totalPoints === 0) {
-                        return (
-                          <span className="text-sm text-muted-foreground mt-1">
-                            Time to get those gains
-                          </span>
-                        );
-                      }
-                      return null;
-                    })()}
-                  </div>
-                );
-              })()}
-            </div>
-
-            {/* Right: Week Selector Dropdown */}
-            <div className="flex-shrink-0">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="outline" 
-                    className="flex items-center gap-2 px-4 py-2 rounded-xl border-slate-300/50 dark:border-slate-600/50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm hover:bg-white dark:hover:bg-slate-800"
-                  >
-                    <span className="font-medium text-sm">
-                      {selectedTournament?.id === currentTournament?.id 
-                        ? 'This Week' 
-                        : new Date(selectedTournament?.weekStart || '').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                      }
-                    </span>
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-48">
-                  {/* Current Tournament */}
-                  {currentTournament && (
-                    <DropdownMenuItem 
-                      onClick={() => setSelectedTournament(currentTournament)}
-                      className={`flex items-center justify-between ${selectedTournament?.id === currentTournament?.id ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
-                    >
-                      <span className="font-medium">This Week</span>
-                      {selectedTournament?.id === currentTournament?.id && (
-                        <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                      )}
-                    </DropdownMenuItem>
-                  )}
-                  
-                  {/* Past Tournaments */}
-                  {tournamentHistory
-                    .filter(tournament => tournament.id !== currentTournament?.id)
-                    .slice()
-                    .reverse()
-                    .map(tournament => (
-                    <DropdownMenuItem 
-                      key={tournament.id}
-                      onClick={() => setSelectedTournament(tournament)}
-                      className={`flex items-center justify-between ${selectedTournament?.id === tournament.id ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
-                    >
-                      <span className="font-medium">
-                        {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                      </span>
-                      {selectedTournament?.id === tournament.id && (
-                        <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                      )}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-        )}
-
-        {/* Clear Divider before Rankings */}
-        {activeTab === 'tournament' && selectedTournament && (
-          <div className="border-t border-slate-300/60 dark:border-slate-600/60 my-6"></div>
+          <div className="border-t border-slate-300/60 dark:border-slate-600/60 my-2"></div>
         )}
         
         {/* Tournament Content */}

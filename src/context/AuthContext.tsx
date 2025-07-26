@@ -12,6 +12,7 @@ type AuthContextType = {
   signUp: (email: string, password: string, userData: any) => Promise<{error: any, user: any}>;
   signOut: () => Promise<{error: any}>;
   updateProfile: (profile: any) => Promise<{error: any, data: any}>;
+  resetPasswordForEmail: (email: string, options?: any) => Promise<{error: any}>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -144,6 +145,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const resetPasswordForEmail = async (email: string, options?: any) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, options);
+      return { error };
+    } catch (error) {
+      return { error };
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -155,6 +165,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         signUp,
         signOut,
         updateProfile,
+        resetPasswordForEmail,
       }}
     >
       {children}
