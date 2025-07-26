@@ -113,7 +113,7 @@ const IOSPillSwitcher: React.FC<{
               : 'text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
           }`}
           onClick={() => onTabChange('tournament')}
-          aria-pressed={activeTab === 'tournament'}
+          aria-pressed={activeTab === 'tournament' ? 'true' : 'false'}
         >
           Tournament
         </button>
@@ -125,7 +125,7 @@ const IOSPillSwitcher: React.FC<{
               : 'text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
           }`}
           onClick={() => onTabChange('records')}
-          aria-pressed={activeTab === 'records'}
+          aria-pressed={activeTab === 'records' ? 'true' : 'false'}
         >
           PR Records
         </button>
@@ -847,9 +847,12 @@ const TournamentPage: React.FC = () => {
                                   <div className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">
                                     +{pr.improvementPercent.toFixed(1)}% Improvement
                                   </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {pr.improvementPercent.toFixed(1)}% × 2 pts = {Math.min(Math.floor(pr.improvementPercent * 2), 50)} pts
+                                  </div>
                                 </div>
                               </div>
-                                                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{Math.min(Math.floor(pr.improvementPercent * 2), 50)}</span>
+                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{Math.min(Math.floor(pr.improvementPercent * 2), 50)}</span>
                             </div>
                           ))}
 
@@ -870,9 +873,12 @@ const TournamentPage: React.FC = () => {
                                   <div className="text-xs text-blue-600 dark:text-blue-400 font-medium">
                                     +{improvement.improvementPercent.toFixed(1)}% Improvement
                                   </div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {improvement.improvementPercent.toFixed(1)}% × 2 pts = {Math.min(Math.floor(improvement.improvementPercent * 2), 50)} pts
+                                  </div>
                                 </div>
                               </div>
-                                                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{Math.min(Math.floor(improvement.improvementPercent * 2), 50)}</span>
+                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{Math.min(Math.floor(improvement.improvementPercent * 2), 50)}</span>
                             </div>
                           ))}
 
@@ -894,7 +900,7 @@ const TournamentPage: React.FC = () => {
                                   </div>
                                 </div>
                               </div>
-                                                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{comp.points}</span>
+                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{comp.points}</span>
                             </div>
                           ))}
                         </div>
@@ -934,10 +940,12 @@ const TournamentPage: React.FC = () => {
                                 })()}
                                 <div>
                                   <span className="font-medium">Daily Workouts</span>
-                                  <div className="text-xs text-muted-foreground">{participant.workoutDays.length} days logged</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {participant.workoutDays.length} days logged × 6 pts = {participant.pointsBreakdown.participationPoints} pts
+                                  </div>
                                 </div>
                               </div>
-                                                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{participant.pointsBreakdown.participationPoints + participant.pointsBreakdown.varietyPoints}</span>
+                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{participant.pointsBreakdown.participationPoints + participant.pointsBreakdown.varietyPoints}</span>
                             </div>
                           )}
 
@@ -956,7 +964,7 @@ const TournamentPage: React.FC = () => {
                                   <div className="text-xs text-muted-foreground">5+ workout days</div>
                                 </div>
                               </div>
-                                                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{participant.pointsBreakdown.consistencyPoints}</span>
+                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{participant.pointsBreakdown.consistencyPoints}</span>
                             </div>
                           )}
                           
@@ -972,10 +980,12 @@ const TournamentPage: React.FC = () => {
                                 })()}
                                 <div>
                                   <span className="font-medium">Exercise Volume</span>
-                                  <div className="text-xs text-muted-foreground">{participant.exerciseStats?.totalExercises || 0} exercises</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {participant.exerciseStats?.totalExercises || 0} exercises × 8 pts = {participant.pointsBreakdown.exercisePoints} pts
+                                  </div>
                                 </div>
                               </div>
-                                                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{participant.pointsBreakdown.exercisePoints}</span>
+                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{participant.pointsBreakdown.exercisePoints}</span>
                             </div>
                           )}
                         </div>
@@ -1015,10 +1025,12 @@ const TournamentPage: React.FC = () => {
                                 })()}
                                 <div>
                                   <span className="font-medium">New Exercise Bonus</span>
-                                  <div className="text-xs text-muted-foreground">{Math.floor((participant.exerciseStats?.newExerciseBonusPoints || 0) / NEW_EXERCISE_BONUS.points)} new exercises</div>
+                                  <div className="text-xs text-muted-foreground">
+                                    {Math.floor((participant.exerciseStats?.newExerciseBonusPoints || 0) / NEW_EXERCISE_BONUS.points)} new exercises × 10 pts = {participant.exerciseStats?.newExerciseBonusPoints || 0} pts
+                                  </div>
                                 </div>
                               </div>
-                                                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{participant.exerciseStats?.newExerciseBonusPoints || 0}</span>
+                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{participant.exerciseStats?.newExerciseBonusPoints || 0}</span>
                             </div>
                           )}
                           
@@ -1034,7 +1046,7 @@ const TournamentPage: React.FC = () => {
                                   <span className="font-medium">{BADGE_DEFINITIONS[badge.type].name}</span>
                                 </div>
                               </div>
-                                                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{badge.points}</span>
+                              <span className="font-semibold text-emerald-600 dark:text-emerald-400">+{badge.points}</span>
                             </div>
                           ))}
                         </div>
