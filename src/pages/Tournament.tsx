@@ -1196,7 +1196,7 @@ const TournamentPage: React.FC = () => {
                     const BookOpenIcon = TOURNAMENT_ICONS.RULEBOOK;
                     return <BookOpenIcon className="h-5 w-5" />;
                   })()}
-                  <span className="hidden sm:inline">Guide</span>
+                  <span>Guide</span>
                 </Button>
               </div>
             </div>
