@@ -7,6 +7,7 @@
 .dropdown-menu {
   z-index: 9999 !important;
 }
+
 /* ===== SEARCH COMPONENT STYLES ===== */
 /* Search bars, expandable search, and search-related UI components */
 
@@ -122,20 +123,29 @@
   color: rgba(255, 255, 255, 0.9) !important;
 }
 
-/* Expandable Search Bar - Apple Style Animation */
-.expandable-search-container {
-  position: relative;
+/* ===== NEW: Expandable Search Overlay Styles ===== */
+
+/* Expandable Search Overlay Container */
+.expandable-search-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
   align-items: center;
-  height: 2.25rem;
-  max-width: 280px;
-  margin-left: auto; /* Align to the right */
+  z-index: 10;
+  pointer-events: none; /* Allow clicks to pass through when collapsed */
 }
 
-/* Search Icon Button */
+.expandable-search-overlay.search-active {
+  pointer-events: auto; /* Enable clicks when search is active */
+}
+
+/* Search Icon Button - Positioned on the right side */
 .search-icon-button {
   position: absolute;
-  right: 0;
+  right: 0.125rem; /* Move even closer to the edge for flush positioning */
   top: 50%;
   transform: translateY(-50%);
   width: 2.25rem;
@@ -144,18 +154,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(120, 120, 128, 0.16);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  background: transparent; /* Make it truly flush with the category slider */
   border: none;
   color: rgba(60, 60, 67, 0.6);
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 2;
+  pointer-events: auto; /* Always allow clicks on the search button */
 }
 
 .dark .search-icon-button {
-  background: rgba(39, 39, 41, 1);
+  background: transparent; /* Make it truly flush with the category slider */
   color: rgba(235, 235, 245, 0.6);
 }
 
@@ -188,42 +197,71 @@
   transform: translateY(-50%) scale(0.95);
 }
 
-/* Expandable Search Input Container */
+/* Expandable Search Input Container - Covers entire category slider */
 .expandable-search-input {
   position: absolute;
-  right: 0;
-  top: 0;
-  height: 2.25rem;
+  top: -0.375rem; /* Extend slightly more for increased height */
+  left: -0.25rem;
+  right: -0.25rem;
+  bottom: -0.375rem; /* Extend slightly more for increased height */
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
+  background: rgba(255, 255, 255, 0.95); /* Better light mode visibility */
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border-radius: 1rem;
+  z-index: 1;
+  width: calc(100% + 0.5rem);
+  height: calc(100% + 0.75rem); /* Increased height */
+  padding: 0.25rem; /* Add padding to make it slightly larger */
+  border: 1px solid rgba(0, 0, 0, 0.1); /* Subtle border for definition */
 }
 
-/* Collapsed state - starts as icon width */
+.dark .expandable-search-input {
+  background: rgba(39, 39, 41, 0.95); /* Better dark mode visibility */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Collapsed state - hidden */
 .expandable-search-input.search-collapsed {
-  width: 2.25rem;
   opacity: 0;
   pointer-events: none;
+  transform: scale(0.95);
 }
 
-/* Expanded state - full search bar width */
+/* Expanded state - covers entire container */
 .expandable-search-input.search-expanded {
-  width: 280px;
   opacity: 1;
   pointer-events: auto;
+  transform: scale(1);
+  width: calc(100% + 0.5rem);
+  height: calc(100% + 0.75rem); /* Increased height */
 }
 
 /* The actual search input field */
 .expandable-search-field {
   width: 100%;
   height: 100%;
-  padding: 0.5rem 2.5rem 0.5rem 0.75rem !important;
+  padding: 0.75rem 3.5rem 0.75rem 1rem !important; /* More padding for better touch targets */
   font-size: 16px !important; /* Prevent iOS zoom */
   -webkit-appearance: none !important;
   appearance: none !important;
   outline: none !important;
-  border-radius: 0.5rem !important;
+  border-radius: 1rem !important;
   transition: all 0.3s ease !important;
+  background: transparent !important;
+  border: none !important;
+  color: hsl(var(--foreground));
+}
+
+.expandable-search-field::placeholder {
+  color: hsl(var(--muted-foreground) / 0.6);
+}
+
+.expandable-search-field:focus {
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 /* Desktop can use smaller font size */
@@ -236,33 +274,38 @@
 /* Clear button positioning */
 .search-clear-button {
   position: absolute;
-  right: 0.5rem;
+  right: 0.5rem; /* Align with the search icon position */
   top: 50%;
   transform: translateY(-50%);
-  background: none;
+  background: rgba(0, 0, 0, 0.1); /* Better light mode visibility */
   border: none;
-  color: rgba(60, 60, 67, 0.6);
+  color: rgba(0, 0, 0, 0.7);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0.25rem;
-  border-radius: 0.25rem;
+  padding: 0.5rem; /* Larger touch target */
+  border-radius: 0.5rem;
   transition: all 0.2s ease;
+  width: 2rem;
+  height: 2rem;
+  z-index: 3; /* Ensure it's above the search input */
 }
 
 .dark .search-clear-button {
-  color: rgba(235, 235, 245, 0.6);
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .search-clear-button:hover {
-  color: rgba(60, 60, 67, 0.8);
-  background: rgba(120, 120, 128, 0.16);
+  color: rgba(60, 60, 67, 1);
+  background: rgba(120, 120, 128, 0.3);
+  transform: translateY(-50%) scale(1.05);
 }
 
 .dark .search-clear-button:hover {
-  background: rgba(235, 235, 245, 0.1);
-  color: rgba(235, 235, 245, 0.8);
+  background: rgba(235, 235, 245, 0.2);
+  color: rgba(235, 235, 245, 1);
 }
 
 .search-clear-button:active {
@@ -271,35 +314,14 @@
 
 /* Category-specific styling for expanded search */
 .expandable-search-field.category-search-border {
-  background: rgba(var(--category-color-rgb), 0.12) !important;
+  background: transparent !important;
   border: none !important;
 }
 
 .expandable-search-field.category-search-focused {
-  background: rgba(var(--category-color-rgb), 0.16) !important;
+  background: transparent !important;
   border: none !important;
-  box-shadow: 0 0 0 1px rgba(var(--category-color-rgb), 0.3) !important;
-}
-
-/* Responsive adjustments */
-@media (max-width: 640px) {
-  .expandable-search-container {
-    max-width: 240px;
-  }
-  
-  .expandable-search-input.search-expanded {
-    width: 240px;
-  }
-}
-
-@media (max-width: 480px) {
-  .expandable-search-container {
-    max-width: 200px;
-  }
-  
-  .expandable-search-input.search-expanded {
-    width: 200px;
-  }
+  box-shadow: none !important;
 }
 
 /* Animation timing adjustments for ultra-smooth feel */
@@ -320,75 +342,6 @@
   }
 }
 
-/* ===== New Dashboard Search Bar ===== */
-
-.search-bar-wrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.search-bar-input {
-  width: 100%;
-  height: 2.5rem; /* 40px */
-  padding-left: 2.25rem; /* space for icon */
-  padding-right: 2.25rem; /* space for clear button */
-  border-radius: 1rem; /* 16px to match cards */
-  border: none;
-  outline: none;
-  font-size: 1rem; /* 16px to prevent iOS zoom */
-  background-color: rgba(120, 120, 128, 0.16);
-  color: hsl(var(--foreground));
-  transition: all 0.2s ease-out;
-  -webkit-appearance: none;
-}
-
-.dark .search-bar-input {
-  background-color: rgba(39, 39, 41, 1);
-}
-
-.search-bar-input::placeholder {
-  color: hsl(var(--muted-foreground) / 0.6);
-}
-
-.search-bar-input:focus {
-  background-color: rgba(120, 120, 128, 0.24);
-  box-shadow: none; 
-}
-
-.dark .search-bar-input:focus {
-  background-color: rgba(58, 58, 60, 1);
-}
-
-
-.search-bar-icon {
-  position: absolute;
-  left: 0.75rem;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  color: hsl(var(--muted-foreground) / 0.7);
-}
-
-.search-bar-clear {
-  position: absolute;
-  right: 0.5rem;
-  top: 50%;
-  transform: translateY(-50%);
-  background: hsl(var(--muted));
-  color: hsl(var(--muted-foreground));
-  border-radius: 9999px;
-  width: 1.25rem;
-  height: 1.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.search-bar-clear:hover {
-  background: hsl(var(--accent));
-}
-
 /* ===== NEW: Control Panel Styles ===== */
 .control-panel {
   background-color: rgba(120, 120, 128, 0.16); /* Match MobileSlider light mode */
@@ -403,6 +356,12 @@
   z-index: 10;
 }
 
+/* Compact control panel - single row */
+.control-panel.compact {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
 
 .panel-divider {
   height: 1px;
@@ -423,7 +382,6 @@
 }
 
 /* The category filter container inside the panel should also be transparent */
-
 .control-panel > .bg-muted {
   background-color: transparent !important;
   padding: 0 !important; /* Remove padding which is now on the parent */
@@ -448,3 +406,43 @@
     font-size: 0.875rem; /* 14px on desktop */
   }
 }
+
+/* ===== Category Filter Button Adjustments ===== */
+/* Make the history/filter buttons more compact */
+.category-filter-button.px-3 {
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+}
+
+/* Ensure proper spacing in the filter row */
+.category-filter-button.flex-shrink-0 {
+  flex-shrink: 0;
+}
+
+/* Category Filter Divider */
+.category-filter-divider {
+  width: 1px;
+  height: 1.5rem;
+  background-color: rgba(60, 60, 67, 0.2);
+  margin: 0 0.5rem;
+  border-radius: 9999px;
+  flex-shrink: 0;
+  align-self: center; /* Ensure vertical centering */
+}
+
+.dark .category-filter-divider {
+  background-color: rgba(235, 235, 245, 0.2);
+}
+
+/* ===== Dropdown Positioning for PR Records ===== */
+/* Position the sort dropdown relative to the filter button */
+.control-panel {
+  position: relative;
+}
+
+.control-panel .absolute.top-full.left-0 {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 0.5rem;
+} 

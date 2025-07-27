@@ -68,6 +68,39 @@ export const PRRecordsContent: React.FC = () => {
   const filterContainerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<{[key: string]: HTMLButtonElement | null}>({});
 
+  // State for expandable search
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle search expansion
+  const handleSearchToggle = () => {
+    setIsSearchExpanded(!isSearchExpanded);
+    if (!isSearchExpanded) {
+      // Focus the input after expansion animation
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 200);
+    }
+  };
+
+  // Close search when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isSearchExpanded && !(event.target as Element).closest('.expandable-search-overlay')) {
+        setIsSearchExpanded(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isSearchExpanded]);
+
+  // Handle search clear
+  const handleSearchClear = () => {
+    setSearchQuery('');
+    // Don't close the search, just clear the input
+  };
+
   // Use the same color system as the rest of the app
   const chartColors = getCategoryChartColors();
 
@@ -663,14 +696,25 @@ export const PRRecordsContent: React.FC = () => {
         <div className="relative flex flex-col pb-6 z-10">
           
           {/* Controls Island */}
-          <div className="control-panel mt-4 mb-8">
-            {/* Category Filter */}
+          <div className="control-panel mt-4 mb-8 relative">
+            {/* Compact Category Filter with Filter Button */}
             <div className="relative bg-muted p-1 rounded-2xl">
               <div 
                 ref={filterContainerRef}
                 className="relative flex gap-1 overflow-x-auto scrollbar-hide"
               >
                 <div className="category-filter-indicator" style={indicatorStyle} />
+                
+                {/* Filter Button */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                  className="category-filter-button px-3 py-2.5 flex-shrink-0"
+                >
+                  <Filter className="h-4 w-4" />
+                </Button>
+                
                 <Button
                   ref={(el) => (buttonRefs.current['all'] = el)}
                   onClick={() => setSelectedCategoryId(null)}
@@ -702,78 +746,71 @@ export const PRRecordsContent: React.FC = () => {
                   );
                 })}
               </div>
-            </div>
-            
-            <div className="panel-divider" />
-            
-            {/* Bottom row of controls */}
-            <div className="flex items-center gap-2">
-              {/* Search Bar */}
-              <div className="relative search-bar-wrapper flex-grow">
-                <div className="search-bar-icon">
-                  <Search className="h-4 w-4" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search records..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="search-bar-input"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="search-bar-clear"
-                    aria-label="Clear search"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-
-              {/* Sort button and dropdown */}
-              <div className="relative">
+              
+              {/* Expandable Search Overlay */}
+              <div className="expandable-search-overlay">
                 <Button
                   variant="ghost"
-                  size="icon"
-                  onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                  className="rounded-full w-10 h-10 flex-shrink-0 text-muted-foreground"
+                  size="sm"
+                  onClick={handleSearchToggle}
+                  className={`search-icon-button ${isSearchExpanded ? 'search-hidden' : 'search-visible'}`}
                 >
-                  <Filter className="h-4 w-4" />
+                  <Search className="h-4 w-4" />
                 </Button>
                 
-                {isSortDropdownOpen && (
-                  <div className="absolute top-full right-0 mt-2 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-md z-50 min-w-48">
-                    <div className="p-2">
-                      {[
-                        { id: 'weight', label: 'Weight', icon: TrendingUp },
-                        { id: 'recent', label: 'Recent', icon: Activity },
-                        { id: 'exercise', label: 'Exercise', icon: Target }
-                      ].map((option) => {
-                        const Icon = option.icon;
-                        return (
-                          <button
-                            key={option.id}
-                            onClick={() => {
-                              setSortBy(option.id as 'weight' | 'recent' | 'exercise');
-                              setIsSortDropdownOpen(false);
-                            }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-95 ${
-                              sortBy === option.id
-                                ? 'bg-primary text-primary-foreground'
-                                : 'text-foreground active:bg-gray-100 dark:active:bg-gray-800'
-                            }`}
-                          >
-                            <Icon className="h-4 w-4" />
-                            <span className="font-medium">{option.label}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+                <div className={`expandable-search-input ${isSearchExpanded ? 'search-expanded' : 'search-collapsed'}`}>
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Search records..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="expandable-search-field"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={handleSearchClear}
+                      className="search-clear-button"
+                      aria-label="Clear search"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
+            
+            {/* Sort Dropdown */}
+            {isSortDropdownOpen && (
+              <div className="absolute top-full left-0 mt-2 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-md z-50 min-w-48">
+                <div className="p-2">
+                  {[
+                    { id: 'weight', label: 'Weight', icon: TrendingUp },
+                    { id: 'recent', label: 'Recent', icon: Activity },
+                    { id: 'exercise', label: 'Exercise', icon: Target }
+                  ].map((option) => {
+                    const Icon = option.icon;
+                    return (
+                      <button
+                        key={option.id}
+                        onClick={() => {
+                          setSortBy(option.id as 'weight' | 'recent' | 'exercise');
+                          setIsSortDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-95 ${
+                          sortBy === option.id
+                            ? 'bg-primary text-primary-foreground'
+                            : 'text-foreground active:bg-gray-100 dark:active:bg-gray-800'
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" />
+                        <span className="font-medium">{option.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Content */}

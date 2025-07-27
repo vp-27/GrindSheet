@@ -407,6 +407,39 @@ const Dashboard = () => {
     }
   }, [chartData, exerciseProgressItems, setAppReady]);
 
+  // State for expandable search
+  const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // Handle search expansion
+  const handleSearchToggle = () => {
+    setIsSearchExpanded(!isSearchExpanded);
+    if (!isSearchExpanded) {
+      // Focus the input after expansion animation
+      setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 200);
+    }
+  };
+
+  // Close search when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isSearchExpanded && !(event.target as Element).closest('.expandable-search-overlay')) {
+        setIsSearchExpanded(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isSearchExpanded]);
+
+  // Handle search clear
+  const handleSearchClear = () => {
+    setSearchQuery('');
+    // Don't close the search, just clear the input
+  };
+
   return (
     <>
       {/* Category background tinting - positioned outside Layout for proper viewport positioning */}
@@ -501,14 +534,28 @@ const Dashboard = () => {
             </div>
           
           {/* Controls Island */}
-          <div className="control-panel mt-4">
-            {/* Category Filter */}
+          <div className="control-panel mt-4 relative">
+            {/* Compact Category Filter with History Button */}
             <div className="relative bg-muted p-1 rounded-2xl">
               <div 
                 ref={filterContainerRef}
                 className="relative flex gap-1 overflow-x-auto scrollbar-hide"
               >
                 <div className="category-filter-indicator" style={indicatorStyle} />
+                
+                {/* History Button */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => navigate('/history')}
+                  className="category-filter-button px-3 py-2.5 flex-shrink-0"
+                >
+                  <Clock className="h-4 w-4" />
+                </Button>
+                
+                {/* Divider */}
+                <div className="category-filter-divider" />
+                
                 <Button
                   ref={(el) => (buttonRefs.current['all'] = el)}
                   onClick={() => setSelectedCategoryId(null)}
@@ -540,88 +587,41 @@ const Dashboard = () => {
                   );
                 })}
               </div>
-            </div>
-            
-            <div className="panel-divider" />
-            
-            {/* Bottom row of controls */}
-            <div className="flex items-center gap-2">
-              {/* Redesigned Search Bar */}
-              <div className="relative search-bar-wrapper flex-grow">
-                <div className="search-bar-icon">
-                  <Search className="h-4 w-4" />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Search exercises..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="search-bar-input"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="search-bar-clear"
-                    aria-label="Clear search"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
-              </div>
-
-              {/* Sort button and dropdown */}
-              <div className="relative progress-dropdown-container">
+              
+              {/* Expandable Search Overlay */}
+              <div className={`expandable-search-overlay ${isSearchExpanded ? 'search-active' : ''}`}>
                 <Button
                   variant="ghost"
-                  size="icon"
-                  onClick={() => setIsProgressDropdownOpen(!isProgressDropdownOpen)}
-                  className="rounded-full w-10 h-10 flex-shrink-0 text-muted-foreground"
+                  size="sm"
+                  onClick={handleSearchToggle}
+                  className={`search-icon-button ${isSearchExpanded ? 'search-hidden' : 'search-visible'}`}
                 >
-                  <Filter className="h-4 w-4" />
+                  <Search className="h-4 w-4" />
                 </Button>
                 
-                {isProgressDropdownOpen && (
-                  <div className="absolute top-full right-0 mt-2 bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 backdrop-blur-md z-50 min-w-48 progress-dropdown">
-                    <div className="p-2">
-                      {[
-                        { id: 'recent', label: 'Recent', icon: Clock },
-                        { id: 'pr', label: 'PRs', icon: Trophy },
-                        { id: 'progress', label: 'Growth', icon: TrendingUp }
-                      ].map((option) => {
-                        const Icon = option.icon;
-                        return (
-                          <button
-                            key={option.id}
-                            onClick={() => {
-                              setSortBy(option.id as 'recent' | 'pr' | 'progress');
-                              setIsProgressDropdownOpen(false);
-                            }}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 active:scale-95 ${
-                              sortBy === option.id
-                                ? 'bg-primary text-primary-foreground'
-                                : 'text-foreground active:bg-gray-100 dark:active:bg-gray-800'
-                            }`}
-                          >
-                            <Icon className="h-4 w-4" />
-                            <span className="font-medium">{option.label}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+                <div className={`expandable-search-input ${isSearchExpanded ? 'search-expanded' : 'search-collapsed'}`}>
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Search exercises..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="expandable-search-field"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={handleSearchClear}
+                      className="search-clear-button"
+                      aria-label="Clear search"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
               </div>
-              
-              {/* History Button */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate('/history')}
-                className="rounded-full w-10 h-10 flex-shrink-0 text-muted-foreground"
-              >
-                <Clock className="h-4 w-4" />
-              </Button>
             </div>
+            
+
           </div>
 
           {/* Exercise Progress Grid */}
