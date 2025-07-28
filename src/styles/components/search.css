@@ -1,3 +1,28 @@
+/* Dashboard: Overlay search bar on right of slider, match background */
+.expandable-search-overlay {
+  background: transparent;
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+}
+
+/* Dashboard: Search input background matches slider/island */
+.expandable-search-input {
+  background: rgba(120, 120, 128, 0.16);
+  border-radius: 0.5rem;
+  box-shadow: none;
+  border: none;
+}
+
+.expandable-search-field {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
 /* Ensure the progress dropdown always appears above the control panel */
 /* Ensure all dropdown/popout menus are above control panel and cards */
 .progress-dropdown,

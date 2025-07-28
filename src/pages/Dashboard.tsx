@@ -41,6 +41,8 @@ const Dashboard = () => {
   const [indicatorStyle, setIndicatorStyle] = useState({});
   const filterContainerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<{[key: string]: HTMLButtonElement | null}>({});
+  // Track if user has interacted with the slider to prevent initial animation
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   // Use the same color system as the rest of the app
   const chartColors = getCategoryChartColors();
@@ -49,21 +51,19 @@ const Dashboard = () => {
   useEffect(() => {
     const activeId = selectedCategoryId ?? 'all';
     const activeButton = buttonRefs.current[activeId];
-    
     if (activeButton) {
       const activeColor = selectedCategoryId
         ? getCategoryColor(categories.findIndex(cat => cat.id === selectedCategoryId))
         : 'hsl(var(--primary))';
-
       setIndicatorStyle({
         transform: `translateX(${activeButton.offsetLeft}px)`,
         width: `${activeButton.offsetWidth}px`,
         backgroundColor: activeColor,
+        transition: hasInteracted ? 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
       });
-
       activeButton.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
-  }, [selectedCategoryId, categories]); // Rerun when selection or categories change
+  }, [selectedCategoryId, categories, hasInteracted]);
 
   // Generate tournament data with better state management
   useEffect(() => {
@@ -558,7 +558,10 @@ const Dashboard = () => {
                 
                 <Button
                   ref={(el) => (buttonRefs.current['all'] = el)}
-                  onClick={() => setSelectedCategoryId(null)}
+                  onClick={() => {
+                    setSelectedCategoryId(null);
+                    setHasInteracted(true);
+                  }}
                   variant="ghost"
                   size="sm"
                   className={`category-filter-button px-5 py-2.5 ${
@@ -576,7 +579,10 @@ const Dashboard = () => {
                       key={category.id}
                       variant="ghost"
                       size="sm"
-                      onClick={() => setSelectedCategoryId(category.id)}
+                      onClick={() => {
+                        setSelectedCategoryId(category.id);
+                        setHasInteracted(true);
+                      }}
                       className={`category-filter-button px-5 py-2.5 ${
                         isSelected ? 'selected' : ''
                       }`}
@@ -589,17 +595,17 @@ const Dashboard = () => {
               </div>
               
               {/* Expandable Search Overlay */}
-              <div className={`expandable-search-overlay ${isSearchExpanded ? 'search-active' : ''}`}>
+              <div className={`expandable-search-overlay ${isSearchExpanded ? 'search-active' : ''}`} style={{ background: 'transparent', position: 'absolute', right: 0, top: 0, height: '100%', zIndex: 2, display: 'flex', alignItems: 'center' }}>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleSearchToggle}
                   className={`search-icon-button ${isSearchExpanded ? 'search-hidden' : 'search-visible'}`}
+                  style={{ background: 'transparent' }}
                 >
                   <Search className="h-4 w-4" />
                 </Button>
-                
-                <div className={`expandable-search-input ${isSearchExpanded ? 'search-expanded' : 'search-collapsed'}`}>
+                <div className={`expandable-search-input ${isSearchExpanded ? 'search-expanded' : 'search-collapsed'}`} style={{ background: 'rgba(120, 120, 128, 0.16)', borderRadius: '0.5rem', boxShadow: 'none', border: 'none' }}>
                   <input
                     ref={searchInputRef}
                     type="text"
@@ -607,6 +613,7 @@ const Dashboard = () => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="expandable-search-field"
+                    style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
                   />
                   {searchQuery && (
                     <button
