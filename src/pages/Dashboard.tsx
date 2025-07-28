@@ -518,30 +518,15 @@ const Dashboard = () => {
               )}
             </div>
 
-            {/* Chart Tooltip - Closer to chart */}
-            <div className="relative z-20">
-              {chartHoverData && (
-                <div className="tooltip-card-enter-active absolute -top-2 left-1/2 -translate-x-1/2">
-                  <ChartTooltipCard 
-                    hoverData={chartHoverData}
-                    showPercentage={!selectedCategoryId}
-                    weightUnit="lbs"
-                    multiple={true}
-                    customColors={chartColors}
-                  />
-                </div>
-              )}
-            </div>
-          
-          {/* Controls Island (Sticky Category Selector/Filter Bar) */}
-          <div className="control-panel mt-4 relative sticky top-4 z-30">
-            {/* Compact Category Filter with History Button */}
-            <div className="relative bg-muted p-1 rounded-2xl">
-              <div 
-                ref={filterContainerRef}
-                className="relative flex gap-1 overflow-x-auto scrollbar-hide"
-              >
-                <div className="category-filter-indicator" style={indicatorStyle} />
+            {/* Controls Island (Sticky Category Selector/Filter Bar) */}
+            <div className="control-panel mt-4 relative sticky top-4 z-30">
+              {/* Compact Category Filter with History Button */}
+              <div className="relative bg-muted p-1 rounded-2xl">
+                <div 
+                  ref={filterContainerRef}
+                  className="relative flex gap-1 overflow-x-auto scrollbar-hide"
+                >
+                  <div className="category-filter-indicator" style={indicatorStyle} />
                 
                 {/* History Button */}
                 <Button
@@ -593,40 +578,54 @@ const Dashboard = () => {
                 })}
               </div>
               
-              {/* Expandable Search Overlay */}
-              <div className={`expandable-search-overlay ${isSearchExpanded ? 'search-active' : ''}`}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={handleSearchToggle}
-                  className={`search-icon-button ${isSearchExpanded ? 'search-hidden' : 'search-visible'}`}
-                >
-                  <Search className="h-4 w-4" />
-                </Button>
-                <div className={`expandable-search-input ${isSearchExpanded ? 'search-expanded' : 'search-collapsed'}`}>
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    placeholder="Search exercises..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="expandable-search-field"
-                  />
-                  {searchQuery && (
-                    <button
-                      onClick={handleSearchClear}
-                      className="search-clear-button"
-                      aria-label="Clear search"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  )}
+
+                {/* Expandable Search Overlay */}
+                <div className={`expandable-search-overlay ${isSearchExpanded ? 'search-active' : ''}`}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleSearchToggle}
+                    className={`search-icon-button ${isSearchExpanded ? 'search-hidden' : 'search-visible'}`}
+                  >
+                    <Search className="h-4 w-4" />
+                  </Button>
+                  <div className={`expandable-search-input ${isSearchExpanded ? 'search-expanded' : 'search-collapsed'}`}>
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      placeholder="Search exercises..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="expandable-search-field"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={handleSearchClear}
+                        className="search-clear-button"
+                        aria-label="Clear search"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-            
 
-          </div>
+            {/* Chart Tooltip - Move here so it appears above the sticky control island */}
+            <div className="relative z-40">
+              {chartHoverData && (
+                <div className="tooltip-card-enter-active absolute -top-2 left-1/2 -translate-x-1/2">
+                  <ChartTooltipCard 
+                    hoverData={chartHoverData}
+                    showPercentage={!selectedCategoryId}
+                    weightUnit="lbs"
+                    multiple={true}
+                    customColors={chartColors}
+                  />
+                </div>
+              )}
+            </div>
 
           {/* Exercise Progress Grid */}
         <div className="relative exercise-grid-container mt-4">
