@@ -1,6 +1,7 @@
 /* Dashboard: Overlay search bar on right of slider, match background */
+
+/* Dashboard: Overlay search bar on right of slider, match background */
 .expandable-search-overlay {
-  background: transparent;
   position: absolute;
   right: 0;
   top: 0;
@@ -11,17 +12,30 @@
 }
 
 /* Dashboard: Search input background matches slider/island */
+
+/* Use the same solid background as the category slider/island (not transparent) */
 .expandable-search-input {
-  background: rgba(120, 120, 128, 0.16);
+  background: rgba(120, 120, 128, 0.16); /* matches .bg-muted and slider */
   border-radius: 0.5rem;
   box-shadow: none;
   border: none;
 }
 
+.dark .expandable-search-input {
+  background: rgba(39, 39, 41, 1);
+}
+
+
 .expandable-search-field {
-  background: transparent;
+  background: rgba(120, 120, 128, 0.16); /* same as slider */
   border: none;
   box-shadow: none;
+  color: hsl(var(--foreground));
+}
+
+.dark .expandable-search-field {
+  background: rgba(39, 39, 41, 1);
+  color: hsl(var(--foreground));
 }
 /* Ensure the progress dropdown always appears above the control panel */
 /* Ensure all dropdown/popout menus are above control panel and cards */

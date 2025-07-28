@@ -595,17 +595,16 @@ const Dashboard = () => {
               </div>
               
               {/* Expandable Search Overlay */}
-              <div className={`expandable-search-overlay ${isSearchExpanded ? 'search-active' : ''}`} style={{ background: 'transparent', position: 'absolute', right: 0, top: 0, height: '100%', zIndex: 2, display: 'flex', alignItems: 'center' }}>
+              <div className={`expandable-search-overlay ${isSearchExpanded ? 'search-active' : ''}`}>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={handleSearchToggle}
                   className={`search-icon-button ${isSearchExpanded ? 'search-hidden' : 'search-visible'}`}
-                  style={{ background: 'transparent' }}
                 >
                   <Search className="h-4 w-4" />
                 </Button>
-                <div className={`expandable-search-input ${isSearchExpanded ? 'search-expanded' : 'search-collapsed'}`} style={{ background: 'rgba(120, 120, 128, 0.16)', borderRadius: '0.5rem', boxShadow: 'none', border: 'none' }}>
+                <div className={`expandable-search-input ${isSearchExpanded ? 'search-expanded' : 'search-collapsed'}`}>
                   <input
                     ref={searchInputRef}
                     type="text"
@@ -613,7 +612,6 @@ const Dashboard = () => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="expandable-search-field"
-                    style={{ background: 'transparent', border: 'none', boxShadow: 'none' }}
                   />
                   {searchQuery && (
                     <button
