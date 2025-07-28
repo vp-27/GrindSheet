@@ -299,28 +299,31 @@
 }
 
 /* Dark mode: Reduced visibility for better balance */
+
 .category-background-tint.dark-mode {
   background: linear-gradient(135deg, 
-    rgba(var(--category-color-rgb), 0.06) 0%, 
-    rgba(var(--category-color-rgb), 0.03) 50%,
+    rgba(var(--category-color-rgb), 0.18) 0%, 
+    rgba(var(--category-color-rgb), 0.10) 50%,
     transparent 100%
   ) !important;
 }
 
 /* Support for data-theme attribute */
+
 [data-theme="dark"] .category-background-tint {
   background: linear-gradient(135deg, 
-    rgba(var(--category-color-rgb), 0.06) 0%, 
-    rgba(var(--category-color-rgb), 0.03) 50%,
+    rgba(var(--category-color-rgb), 0.18) 0%, 
+    rgba(var(--category-color-rgb), 0.10) 50%,
     transparent 100%
   ) !important;
 }
 
 /* Support for .dark class */
+
 .dark .category-background-tint {
   background: linear-gradient(135deg, 
-    rgba(var(--category-color-rgb), 0.06) 0%, 
-    rgba(var(--category-color-rgb), 0.03) 50%,
+    rgba(var(--category-color-rgb), 0.18) 0%, 
+    rgba(var(--category-color-rgb), 0.10) 50%,
     transparent 100%
   ) !important;
 }
