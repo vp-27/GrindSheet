@@ -437,7 +437,7 @@ const Dashboard = () => {
   // Handle search clear
   const handleSearchClear = () => {
     setSearchQuery('');
-    // Don't close the search, just clear the input
+    setIsSearchExpanded(false); // Also hide/collapse the search bar
   };
 
   return (

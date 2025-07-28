@@ -98,7 +98,7 @@ export const PRRecordsContent: React.FC = () => {
   // Handle search clear
   const handleSearchClear = () => {
     setSearchQuery('');
-    // Don't close the search, just clear the input
+    setIsSearchExpanded(false); // Also hide/collapse the search bar
   };
 
   // Use the same color system as the rest of the app
