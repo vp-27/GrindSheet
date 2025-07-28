@@ -695,8 +695,8 @@ export const PRRecordsContent: React.FC = () => {
       <div className="relative">
         <div className="relative flex flex-col pb-6 z-10">
           
-          {/* Controls Island */}
-          <div className="control-panel mt-4 mb-8 relative">
+          {/* Controls Island (Sticky Category Selector/Filter Bar) */}
+          <div className="control-panel mt-4 mb-8 relative sticky top-0 z-30">
             {/* Compact Category Filter with Filter Button */}
             <div className="relative bg-muted p-1 rounded-2xl">
               <div 

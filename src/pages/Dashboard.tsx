@@ -533,8 +533,8 @@ const Dashboard = () => {
               )}
             </div>
           
-          {/* Controls Island */}
-          <div className="control-panel mt-4 relative">
+          {/* Controls Island (Sticky Category Selector/Filter Bar) */}
+          <div className="control-panel mt-4 relative sticky top-0 z-30">
             {/* Compact Category Filter with History Button */}
             <div className="relative bg-muted p-1 rounded-2xl">
               <div 
