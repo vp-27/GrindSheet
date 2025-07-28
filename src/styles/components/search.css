@@ -182,28 +182,29 @@
 }
 
 /* Search Icon Button - Positioned on the right side */
+
 .search-icon-button {
   position: absolute;
-  right: 0.125rem; /* Move even closer to the edge for flush positioning */
+  right: 0;
   top: 50%;
   transform: translateY(-50%);
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: 0.5rem;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 1.25rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent; /* Make it truly flush with the category slider */
+  background: #e5e7eb; /* fully opaque, matches filter row border in light mode */
   border: none;
   color: rgba(60, 60, 67, 0.6);
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 2;
-  pointer-events: auto; /* Always allow clicks on the search button */
+  pointer-events: auto;
 }
 
 .dark .search-icon-button {
-  background: transparent; /* Make it truly flush with the category slider */
+  background: #23272f;
   color: rgba(235, 235, 245, 0.6);
 }
 
