@@ -261,7 +261,7 @@
   width: calc(100% + 0.5rem);
   height: calc(100% + 0.75rem); /* Increased height */
   padding: 0.25rem; /* Add padding to make it slightly larger */
-  border: 1px solid rgba(0, 0, 0, 0.1); /* Subtle border for definition */
+  
 }
 
 .dark .expandable-search-input {
