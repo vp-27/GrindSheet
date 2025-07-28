@@ -573,6 +573,7 @@ const Dashboard = () => {
                 {categories.map((category, index) => {
                   const isSelected = selectedCategoryId === category.id;
                   const categoryColor = getCategoryColor(index);
+                  const isLast = index === categories.length - 1;
                   return (
                     <Button
                       ref={(el) => (buttonRefs.current[category.id] = el)}
@@ -583,9 +584,7 @@ const Dashboard = () => {
                         setSelectedCategoryId(category.id);
                         setHasInteracted(true);
                       }}
-                      className={`category-filter-button px-5 py-2.5 ${
-                        isSelected ? 'selected' : ''
-                      }`}
+                      className={`category-filter-button px-5 py-2.5${isSelected ? ' selected' : ''}${isLast ? ' category-filter-button--last' : ''}`}
                       style={!isSelected ? { color: categoryColor } : {}}
                     >
                       {category.name}

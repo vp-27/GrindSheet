@@ -1,3 +1,9 @@
+
+/* Utility class for the last category filter button to prevent overlap with the search icon */
+.category-filter-button--last {
+  margin-right: 3.25rem !important;
+}
+
 /* Dashboard: Overlay search bar on right of slider, match background */
 
 /* Dashboard: Overlay search bar on right of slider, match background */
