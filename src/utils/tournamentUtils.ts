@@ -1,3 +1,74 @@
+/**
+ * Get a list of friends' PRs that the user can try to beat (solo PR challenges)
+ */
+export function getFriendsSoloPRs(
+  profile: any,
+  exerciseLogs: any[],
+  exercises: any[],
+  categories: any[],
+  users?: any[]
+) {
+  if (!profile || !exerciseLogs || !exercises || !categories) return [];
+
+  // If users not provided, extract from logs
+  let userList = users;
+  if (!userList) {
+    const userIds = Array.from(new Set(exerciseLogs.map(log => log.userId)));
+    userList = userIds.map(id => ({ id }));
+  }
+
+  const friendsSoloPRs: any[] = [];
+  const currentUserLogs = exerciseLogs.filter(log => log.userId === profile.id);
+  const friendsLogs = exerciseLogs.filter(log => log.userId !== profile.id);
+
+  exercises.forEach(exercise => {
+    // Get current user's best for this exercise
+    const currentUserBest = currentUserLogs
+      .filter(log => log.exerciseId === exercise.id)
+      .reduce((best, log) => log.weight > best ? log.weight : best, 0);
+
+    // Get friends' PRs for this exercise
+    const friendsPRs = friendsLogs
+      .filter(log => log.exerciseId === exercise.id)
+      .reduce((prs: any[], log) => {
+        const existingPR = prs.find(pr => pr.userId === log.userId);
+        if (!existingPR) {
+          prs.push({
+            userId: log.userId,
+            weight: log.weight,
+            timestamp: log.timestamp,
+            avatarUrl: log.avatar_url,
+            name: log.name
+          });
+        } else if (log.weight > existingPR.weight) {
+          existingPR.weight = log.weight;
+          existingPR.timestamp = log.timestamp;
+        }
+        return prs;
+      }, []);
+
+    // Find beatable PRs (friend's PR > current user's best)
+    friendsPRs.forEach(pr => {
+      if (pr.weight > currentUserBest) {
+        const user = userList.find(u => u.id === pr.userId) || {};
+        friendsSoloPRs.push({
+          exerciseId: exercise.id,
+          exerciseName: exercise.name,
+          category: categories.find(cat => cat.id === exercise.categoryId),
+          friendName: user.name || pr.name || 'Friend',
+          friendAvatarUrl: user.avatar_url || pr.avatarUrl || '',
+          friendPR: pr.weight,
+          userBest: currentUserBest,
+          deficit: pr.weight - currentUserBest,
+          timestamp: pr.timestamp
+        });
+      }
+    });
+  });
+
+  // Sort by deficit (closest to beat first)
+  return friendsSoloPRs.sort((a, b) => a.deficit - b.deficit);
+}
 import { 
   Tournament, 
   TournamentParticipant, 
