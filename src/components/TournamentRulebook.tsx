@@ -204,82 +204,82 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg max-h-[95vh] flex flex-col overflow-hidden p-0 bg-gradient-to-br from-white to-slate-50/30 dark:from-slate-900 dark:to-slate-800/20 border-0 rounded-3xl shadow-2xl">
+      <DialogContent className="max-w-[95vw] w-full max-h-[90vh] flex flex-col overflow-hidden p-0 bg-gradient-to-br from-white to-slate-50/30 dark:from-slate-900 dark:to-slate-800/20 border-0 rounded-3xl shadow-2xl mx-auto my-auto">
         {/* Mobile-optimized Header */}
-        <DialogHeader className="flex-shrink-0 bg-white/98 dark:bg-slate-900/98 backdrop-blur-xl border-b border-border/20 p-6 rounded-t-3xl">
-          <div className="flex items-center gap-4">
-            <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 text-white shadow-lg">
+        <DialogHeader className="flex-shrink-0 bg-white/98 dark:bg-slate-900/98 backdrop-blur-xl border-b border-border/20 p-4 sm:p-6 rounded-t-3xl">
+          <div className="flex items-center gap-3 sm:gap-4">
+            <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 text-white shadow-lg">
               {(() => {
                 const BookOpenIcon = TOURNAMENT_ICONS.RULEBOOK;
-                return <BookOpenIcon className="h-6 w-6" />;
+                return <BookOpenIcon className="h-5 w-5 sm:h-6 sm:w-6" />;
               })()}
             </div>
-            <div>
-              <DialogTitle className="text-xl font-bold text-foreground">
+            <div className="flex-1 min-w-0">
+              <DialogTitle className="text-lg sm:text-xl font-bold text-foreground truncate">
                 Tournament Guide
               </DialogTitle>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                 Clear & Simple Point System
               </p>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-6 max-h-[calc(95vh-120px)]">
+        <div className="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-6 space-y-4 sm:space-y-6 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
           {/* Quick Overview Card */}
-          <div className="bg-gradient-to-br from-blue-50/90 via-indigo-50/90 to-purple-50/90 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 rounded-3xl p-6 border border-blue-200/40 dark:border-blue-800/40 shadow-sm">
-            <div className="flex items-start gap-4 mb-4">
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 text-white flex-shrink-0 shadow-md">
+          <div className="bg-gradient-to-br from-blue-50/90 via-indigo-50/90 to-purple-50/90 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-blue-200/40 dark:border-blue-800/40 shadow-sm">
+            <div className="flex items-start gap-3 sm:gap-4 mb-3 sm:mb-4">
+              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 text-white flex-shrink-0 shadow-md">
                 {(() => {
                   const TrophyIcon = TOURNAMENT_ICONS.PERFORMANCE;
-                  return <TrophyIcon className="h-5 w-5" />;
+                  return <TrophyIcon className="h-4 w-4 sm:h-5 sm:w-5" />;
                 })()}
               </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-lg text-foreground mb-2">Weekly Competition</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-base sm:text-lg text-foreground mb-2">Weekly Competition</h3>
+                <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                   Complete Monday-Sunday. Points reset each week. Compete with friends and track your fitness progress!
                 </p>
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="flex flex-col items-center gap-2 bg-white/70 dark:bg-slate-800/70 px-3 py-4 rounded-2xl">
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              <div className="flex flex-col items-center gap-1 sm:gap-2 bg-white/70 dark:bg-slate-800/70 px-2 sm:px-3 py-3 sm:py-4 rounded-xl sm:rounded-2xl">
                 {(() => {
                   const CalendarIcon = TOURNAMENT_ICONS.DAILY_WORKOUT;
-                  return <CalendarIcon className="h-5 w-5 text-blue-500" />;
+                  return <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />;
                 })()}
                 <div className="text-center">
-                  <div className="font-semibold text-sm text-foreground">7 Days</div>
-                  <div className="text-xs text-muted-foreground">Mon-Sun</div>
+                  <div className="font-semibold text-xs sm:text-sm text-foreground">7 Days</div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground">Mon-Sun</div>
                 </div>
               </div>
-              <div className="flex flex-col items-center gap-2 bg-white/70 dark:bg-slate-800/70 px-3 py-4 rounded-2xl">
+              <div className="flex flex-col items-center gap-1 sm:gap-2 bg-white/70 dark:bg-slate-800/70 px-2 sm:px-3 py-3 sm:py-4 rounded-xl sm:rounded-2xl">
                 {(() => {
                   const UsersIcon = TOURNAMENT_ICONS.USERS;
-                  return <UsersIcon className="h-5 w-5 text-emerald-500" />;
+                  return <UsersIcon className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500" />;
                 })()}
                 <div className="text-center">
-                  <div className="font-semibold text-sm text-foreground">Friends</div>
-                  <div className="text-xs text-muted-foreground">Compete</div>
+                  <div className="font-semibold text-xs sm:text-sm text-foreground">Friends</div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground">Compete</div>
                 </div>
               </div>
-              <div className="flex flex-col items-center gap-2 bg-white/70 dark:bg-slate-800/70 px-3 py-4 rounded-2xl">
+              <div className="flex flex-col items-center gap-1 sm:gap-2 bg-white/70 dark:bg-slate-800/70 px-2 sm:px-3 py-3 sm:py-4 rounded-xl sm:rounded-2xl">
                 {(() => {
                   const TrendingUpIcon = TOURNAMENT_ICONS.IMPROVEMENT_DETAIL;
-                  return <TrendingUpIcon className="h-5 w-5 text-purple-500" />;
+                  return <TrendingUpIcon className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500" />;
                 })()}
                 <div className="text-center">
-                  <div className="font-semibold text-sm text-foreground">Progress</div>
-                  <div className="text-xs text-muted-foreground">Track</div>
+                  <div className="font-semibold text-xs sm:text-sm text-foreground">Progress</div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground">Track</div>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Point Categories */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-              <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></div>
+          <div className="space-y-3 sm:space-y-4">
+            <h2 className="text-base sm:text-lg font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
+              <div className="w-1 h-5 sm:h-6 bg-gradient-to-b from-blue-500 to-purple-600 rounded-full"></div>
               How to Earn Points
             </h2>
             
@@ -287,53 +287,53 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
               <div key={category.id} className="space-y-2">
                 <button
                   onClick={() => setExpandedSection(expandedSection === category.id ? null : category.id)}
-                  className={`w-full text-left transition-all duration-200 rounded-2xl p-4 border ${category.borderColor} ${category.bgColor} hover:shadow-md`}
+                  className={`w-full text-left transition-all duration-200 rounded-xl sm:rounded-2xl p-3 sm:p-4 border ${category.borderColor} ${category.bgColor} hover:shadow-md active:scale-[0.98] touch-manipulation`}
                 >
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2.5 rounded-xl bg-gradient-to-br ${category.color} text-white shadow-sm`}>
+                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                      <div className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-gradient-to-br ${category.color} text-white shadow-sm flex-shrink-0`}>
                         {category.icon}
                       </div>
-                      <div>
-                        <h3 className="font-bold text-base text-foreground">{category.title}</h3>
-                        <p className="text-sm text-muted-foreground">{category.subtitle}</p>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-bold text-sm sm:text-base text-foreground truncate">{category.title}</h3>
+                        <p className="text-xs sm:text-sm text-muted-foreground truncate">{category.subtitle}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                       <div className="text-right">
-                        <div className="text-lg font-bold text-foreground">
+                        <div className="text-base sm:text-lg font-bold text-foreground">
                           {category.id === 'performance' ? '150+' : 
                            category.id === 'volume' ? '200+' : '125+'}
                         </div>
-                        <div className="text-xs text-muted-foreground">pts max</div>
+                        <div className="text-[10px] sm:text-xs text-muted-foreground">pts max</div>
                       </div>
                       {expandedSection === category.id ? (
-                        <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                        <ChevronUp className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground flex-shrink-0" />
                       ) : (
-                        <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                        <ChevronDown className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground flex-shrink-0" />
                       )}
                     </div>
                   </div>
                 </button>
 
                 {expandedSection === category.id && (
-                  <div className="space-y-3 px-4 pb-4">
+                  <div className="space-y-2 sm:space-y-3 px-3 sm:px-4 pb-3 sm:pb-4">
                     {category.items.map((item, index) => (
                       <div 
                         key={index}
                         data-item-name={item.name}
-                        className={`flex items-start gap-3 p-4 rounded-xl border transition-all duration-500 ${
+                        className={`flex items-start gap-2 sm:gap-3 p-3 sm:p-4 rounded-lg sm:rounded-xl border transition-all duration-500 touch-manipulation ${
                           highlightedItem === item.name 
                             ? 'bg-teal-50/80 dark:bg-teal-950/30 border-teal-300 dark:border-teal-700 ring-2 ring-teal-400/50 scale-105' 
                             : 'bg-white/60 dark:bg-slate-800/60 border-white/60 dark:border-slate-700/60'
                         }`}
                       >
-                        <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center shadow-sm">
-                          <span className="font-bold text-sm text-foreground">{item.points}</span>
+                        <div className="flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center shadow-sm">
+                          <span className="font-bold text-xs sm:text-sm text-foreground">{item.points}</span>
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-sm text-foreground mb-1">{item.name}</h4>
-                          <p className="text-xs text-muted-foreground leading-relaxed">{item.description}</p>
+                          <h4 className="font-semibold text-xs sm:text-sm text-foreground mb-1">{item.name}</h4>
+                          <p className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed">{item.description}</p>
                         </div>
                       </div>
                     ))}
@@ -344,26 +344,26 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
           </div>
 
           {/* Key Badges Section */}
-          <div className="space-y-4">
-            <h2 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-              <div className="w-1 h-6 bg-gradient-to-b from-emerald-500 to-teal-600 rounded-full"></div>
+          <div className="space-y-3 sm:space-y-4">
+            <h2 className="text-base sm:text-lg font-bold text-foreground mb-3 sm:mb-4 flex items-center gap-2">
+              <div className="w-1 h-5 sm:h-6 bg-gradient-to-b from-emerald-500 to-teal-600 rounded-full"></div>
               Achievement Badges
             </h2>
             
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
               {keyBadges.map((badge, index) => (
-                <div key={index} className="p-4 bg-white/80 dark:bg-slate-800/80 rounded-2xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className={`p-2 rounded-xl bg-gradient-to-br ${badge.color} text-white shadow-sm flex-shrink-0`}>
+                <div key={index} className="p-3 sm:p-4 bg-white/80 dark:bg-slate-800/80 rounded-xl sm:rounded-2xl border border-slate-200/50 dark:border-slate-700/50 shadow-sm">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-2">
+                    <div className={`p-1.5 sm:p-2 rounded-lg sm:rounded-xl bg-gradient-to-br ${badge.color} text-white shadow-sm flex-shrink-0`}>
                       {badge.icon}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-sm text-foreground truncate">
+                      <h4 className="font-semibold text-xs sm:text-sm text-foreground truncate">
                         {BADGE_DEFINITIONS[badge.type]?.name || badge.type}
                       </h4>
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground leading-relaxed">
                     {BADGE_DEFINITIONS[badge.type]?.description || 'Special achievement badge'}
                   </p>
                 </div>
@@ -372,29 +372,29 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
           </div>
 
           {/* Pro Tips */}
-          <div className="bg-gradient-to-br from-emerald-50/90 via-teal-50/90 to-green-50/90 dark:from-emerald-950/30 dark:via-teal-950/30 dark:to-green-950/30 rounded-3xl p-6 border border-emerald-200/40 dark:border-emerald-800/40">
-            <div className="flex items-start gap-4">
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex-shrink-0 shadow-md">
-                <Lightbulb className="h-5 w-5" />
+          <div className="bg-gradient-to-br from-emerald-50/90 via-teal-50/90 to-green-50/90 dark:from-emerald-950/30 dark:via-teal-950/30 dark:to-green-950/30 rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-emerald-200/40 dark:border-emerald-800/40">
+            <div className="flex items-start gap-3 sm:gap-4">
+              <div className="p-2 sm:p-3 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex-shrink-0 shadow-md">
+                <Lightbulb className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
-              <div className="flex-1">
-                <h3 className="font-bold text-lg text-foreground mb-3">Pro Tips</h3>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-base sm:text-lg text-foreground mb-2 sm:mb-3">Pro Tips</h3>
+                <div className="space-y-2 sm:space-y-3">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-emerald-500 rounded-full mt-1.5 sm:mt-2 flex-shrink-0"></div>
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                       <span className="font-semibold text-foreground">Stay Consistent:</span> Log workouts daily to earn consistency bonuses and daily workout points.
                     </p>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-emerald-500 rounded-full mt-1.5 sm:mt-2 flex-shrink-0"></div>
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                       <span className="font-semibold text-foreground">Beat Your Records:</span> Focus on gradual improvements to earn performance points and improvement bonuses.
                     </p>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-2 flex-shrink-0"></div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <div className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-emerald-500 rounded-full mt-1.5 sm:mt-2 flex-shrink-0"></div>
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                       <span className="font-semibold text-foreground">Mix It Up:</span> Try different exercise categories to maximize variety bonuses and earn special badges.
                     </p>
                   </div>
