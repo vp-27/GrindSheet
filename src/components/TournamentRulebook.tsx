@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { 
-  X,
   ChevronRight,
   ChevronDown,
   ChevronUp,
@@ -209,31 +207,21 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
       <DialogContent className="max-w-lg max-h-[95vh] flex flex-col overflow-hidden p-0 bg-gradient-to-br from-white to-slate-50/30 dark:from-slate-900 dark:to-slate-800/20 border-0 rounded-3xl shadow-2xl">
         {/* Mobile-optimized Header */}
         <DialogHeader className="flex-shrink-0 bg-white/98 dark:bg-slate-900/98 backdrop-blur-xl border-b border-border/20 p-6 rounded-t-3xl">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 text-white shadow-lg">
-                {(() => {
-                  const BookOpenIcon = TOURNAMENT_ICONS.RULEBOOK;
-                  return <BookOpenIcon className="h-6 w-6" />;
-                })()}
-              </div>
-              <div>
-                <DialogTitle className="text-xl font-bold text-foreground">
-                  Tournament Guide
-                </DialogTitle>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Clear & Simple Point System
-                </p>
-              </div>
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 text-white shadow-lg">
+              {(() => {
+                const BookOpenIcon = TOURNAMENT_ICONS.RULEBOOK;
+                return <BookOpenIcon className="h-6 w-6" />;
+              })()}
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="rounded-full h-10 w-10 p-0 hover:bg-muted/60 transition-colors duration-200"
-            >
-              <X className="h-5 w-5" />
-            </Button>
+            <div>
+              <DialogTitle className="text-xl font-bold text-foreground">
+                Tournament Guide
+              </DialogTitle>
+              <p className="text-sm text-muted-foreground mt-1">
+                Clear & Simple Point System
+              </p>
+            </div>
           </div>
         </DialogHeader>
 

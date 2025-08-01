@@ -96,13 +96,8 @@ const IOSPillSwitcher: React.FC<{
       <div className="relative flex bg-slate-100/80 dark:bg-slate-800/80 rounded-full p-1 shadow-inner w-[340px] max-w-full h-10 backdrop-blur-md">
         {/* Sliding indicator */}
         <div
-          className="absolute left-0 rounded-full bg-white dark:bg-slate-700 shadow-md transition-all duration-300 border border-slate-200/50 dark:border-slate-600/50"
-          style={{
-            ...sliderStyle,
-            top: 2,
-            bottom: 2,
-            height: 'calc(100% - 4px)',
-          }}
+          className="absolute left-0 rounded-full bg-white dark:bg-slate-700 shadow-md transition-all duration-300 border border-slate-200/50 dark:border-slate-600/50 top-0.5 bottom-0.5 h-[calc(100%-4px)]"
+          style={sliderStyle}
         />
         <button
           ref={tournamentRef}
@@ -112,7 +107,7 @@ const IOSPillSwitcher: React.FC<{
               : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
           }`}
           onClick={() => onTabChange('tournament')}
-          aria-pressed={activeTab === 'tournament' ? 'true' : 'false'}
+          aria-pressed={activeTab === 'tournament'}
         >
           Tournament
         </button>
