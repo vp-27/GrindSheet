@@ -637,7 +637,7 @@ const TournamentPage: React.FC = () => {
     return (
       <Card 
         key={participant.userId}
-        className={`relative transition-all duration-500 ease-out transform ${getCardStyling(participant.rank, isCurrentUser)} ${
+        className={`relative transition-all duration-500 ease-out transform tournament-card ${getCardStyling(participant.rank, isCurrentUser)} ${
           isExpanded 
             ? 'scale-[1.01] shadow-xl rounded-t-2xl rounded-b-none'
             : 'shadow-md rounded-2xl'
@@ -661,20 +661,20 @@ const TournamentPage: React.FC = () => {
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className={`font-semibold text-sm text-foreground truncate ${isCurrentUser ? 'bg-blue-100/80 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 px-2 py-0.5 rounded-lg' : ''}`}>
-                    {/* 'You' badge: teal text, no background, visually distinct from other badges */}
-                    {isCurrentUser ? (
-                      <span className="font-semibold text-sm text-teal-600 dark:text-teal-400">
-                        {participant.user.name}
-                      </span>
-                    ) : (
-                      participant.user.name
-                    )}
+                  <h3 className="font-semibold text-sm text-foreground truncate">
+                    {participant.user.name}
                   </h3>
+                  {/* Enhanced 'You' badge with proper badge styling */}
+                  {isCurrentUser && (
+                    <Badge className="text-xs font-semibold bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white border-0 px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1 flex-shrink-0">
+                      <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                      You
+                    </Badge>
+                  )}
                 </div>
                 
                 {/* Badges, clickable to scroll to details */}
-                <div className="flex gap-1 mt-1 flex-wrap">
+                <div className="flex gap-1 mt-1 flex-wrap tournament-badges">
                   {/* Winning streak badge */}
                   {participant.rank === 1 && winningStreak >= 2 && (
                     <Badge className="text-xs bg-gradient-to-r from-orange-600 to-red-600 text-white dark:from-orange-400 dark:to-red-400 dark:text-gray-900 px-2 py-0.5 rounded-full flex-shrink-0 flex items-center gap-1">
@@ -772,11 +772,11 @@ const TournamentPage: React.FC = () => {
           }`}>
             <button
               onClick={() => setExpandedParticipant(isExpanded ? null : participant.userId)}
-              className={`w-full flex items-center justify-center gap-2 text-sm font-medium transition-all duration-300 ease-out py-2 px-3 rounded-xl z-30 relative ${isExpanded ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900' : 'text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700'}`}
+              className={`w-full flex items-center justify-center gap-2 text-sm font-medium transition-all duration-300 ease-out py-3 px-4 rounded-2xl z-30 relative apple-button ${isExpanded ? 'text-blue-700 dark:text-blue-300 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border border-blue-200/50 dark:border-blue-800/50' : 'text-slate-700 dark:text-slate-300 bg-gradient-to-r from-slate-50/80 to-slate-100/80 dark:from-slate-800/80 dark:to-slate-700/80 border border-slate-200/50 dark:border-slate-700/50 hover:from-slate-100 hover:to-slate-200 dark:hover:from-slate-700 dark:hover:to-slate-600'}`}
             >
-              <span className="text-xs">{isExpanded ? 'Hide Point Breakdown' : 'Show Point Breakdown'}</span>
+              <span className="text-sm font-medium">{isExpanded ? 'Hide Point Breakdown' : 'Show Point Breakdown'}</span>
               <div className={`transition-transform duration-300 ease-out ${isExpanded ? 'rotate-180' : 'rotate-0'}`}> 
-                <ChevronDown className="w-3 h-3" />
+                <ChevronDown className="w-4 h-4" />
               </div>
             </button>
 
@@ -1135,41 +1135,44 @@ const TournamentPage: React.FC = () => {
               </div>
 
               {/* Right: Week Dropdown (with timer) and Guide Button */}
-              <div className="flex items-center gap-2 mt-4 md:mt-0">
+              <div className="flex items-center gap-3 mt-4 md:mt-0">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button 
                       variant="outline" 
-                      className="flex items-center gap-2 px-4 py-2 rounded-full min-w-[140px]"
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-2xl min-w-[140px] bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-slate-200/60 dark:border-slate-700/60 shadow-sm hover:shadow-md transition-all duration-200 apple-button"
                     >
+                      <Clock className="h-4 w-4 text-slate-600 dark:text-slate-400" />
                       <span className="font-medium text-sm">
                         {selectedTournament?.id === currentTournament?.id 
                           ? 'This Week' 
                           : new Date(selectedTournament?.weekStart || '').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
                         }
-                        {countdown.text && (
-                          <span className={`ml-2 text-xs font-normal ${
-                            countdown.urgency === 'low' ? 'text-emerald-700 dark:text-emerald-300' : ''
-                          }${
-                            countdown.urgency === 'medium' ? 'text-amber-700 dark:text-amber-300' : ''
-                          }${
-                            countdown.urgency === 'high' ? 'text-orange-700 dark:text-orange-300' : ''
-                          }${
-                            countdown.urgency === 'critical' ? 'text-red-700 dark:text-red-300' : ''
-                          }${
-                            countdown.urgency === 'ended' ? 'text-gray-700 dark:text-gray-300' : ''
-                          }`}>· {countdown.text}{countdown.urgency !== 'ended' ? ' left' : ''}</span>
-                        )}
                       </span>
-                      <ChevronDown className="h-4 w-4" />
+                      {countdown.text && (
+                        <div className={`ml-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                          countdown.urgency === 'low' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : ''
+                        }${
+                          countdown.urgency === 'medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' : ''
+                        }${
+                          countdown.urgency === 'high' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' : ''
+                        }${
+                          countdown.urgency === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 animate-pulse' : ''
+                        }${
+                          countdown.urgency === 'ended' ? 'bg-gray-100 text-gray-700 dark:bg-gray-900/40 dark:text-gray-300' : ''
+                        }`}>
+                          {countdown.text}{countdown.urgency !== 'ended' ? ' left' : ''}
+                        </div>
+                      )}
+                      <ChevronDown className="h-4 w-4 text-slate-400" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuContent align="end" className="w-48 rounded-2xl border-slate-200/60 dark:border-slate-700/60 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl shadow-lg">
                     {/* Current Tournament */}
                     {currentTournament && (
                       <DropdownMenuItem 
                         onClick={() => setSelectedTournament(currentTournament)}
-                        className={`flex items-center justify-between ${selectedTournament?.id === currentTournament?.id ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
+                        className={`flex items-center justify-between rounded-xl m-1 ${selectedTournament?.id === currentTournament?.id ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
                       >
                         <span className="font-medium">This Week</span>
                         {selectedTournament?.id === currentTournament?.id && (
@@ -1186,7 +1189,7 @@ const TournamentPage: React.FC = () => {
                         <DropdownMenuItem 
                           key={tournament.id}
                           onClick={() => setSelectedTournament(tournament)}
-                          className={`flex items-center justify-between ${selectedTournament?.id === tournament.id ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
+                          className={`flex items-center justify-between rounded-xl m-1 ${selectedTournament?.id === tournament.id ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
                         >
                           <span className="font-medium">
                             {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -1202,13 +1205,13 @@ const TournamentPage: React.FC = () => {
                   variant="outline" 
                   size="lg"
                   onClick={() => setShowPointsGuide(true)}
-                  className="rounded-full flex items-center gap-2 px-4 py-2"
+                  className="rounded-2xl flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 dark:from-blue-950/30 dark:to-indigo-950/30 dark:hover:from-blue-900/40 dark:hover:to-indigo-900/40 border-blue-200/60 dark:border-blue-800/60 shadow-sm hover:shadow-md transition-all duration-200 apple-button"
                 >
                   {(() => {
                     const BookOpenIcon = TOURNAMENT_ICONS.RULEBOOK;
-                    return <BookOpenIcon className="h-5 w-5" />;
+                    return <BookOpenIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />;
                   })()}
-                  <span>Guide</span>
+                  <span className="font-medium text-blue-700 dark:text-blue-300">Guide</span>
                 </Button>
               </div>
             </div>
