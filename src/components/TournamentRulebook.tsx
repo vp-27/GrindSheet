@@ -36,6 +36,19 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
     }
     if (isOpen && highlightItem) {
       setHighlightedItem(highlightItem);
+      
+      // Scroll to the highlighted item after expansion animation
+      setTimeout(() => {
+        const element = document.querySelector(`[data-item-name="${highlightItem}"]`);
+        if (element) {
+          element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center',
+            inline: 'nearest'
+          });
+        }
+      }, 300); // Wait for expansion animation
+      
       // Remove highlight after 3 seconds
       const timer = setTimeout(() => {
         setHighlightedItem(null);
@@ -193,9 +206,9 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-lg max-h-[95vh] overflow-hidden p-0 bg-gradient-to-br from-white to-slate-50/30 dark:from-slate-900 dark:to-slate-800/20 border-0 rounded-3xl shadow-2xl">
+      <DialogContent className="max-w-lg max-h-[95vh] flex flex-col overflow-hidden p-0 bg-gradient-to-br from-white to-slate-50/30 dark:from-slate-900 dark:to-slate-800/20 border-0 rounded-3xl shadow-2xl">
         {/* Mobile-optimized Header */}
-        <DialogHeader className="sticky top-0 bg-white/98 dark:bg-slate-900/98 backdrop-blur-xl border-b border-border/20 p-6 z-10 rounded-t-3xl">
+        <DialogHeader className="flex-shrink-0 bg-white/98 dark:bg-slate-900/98 backdrop-blur-xl border-b border-border/20 p-6 rounded-t-3xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-500 via-purple-500 to-indigo-600 text-white shadow-lg">
@@ -224,7 +237,7 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
           </div>
         </DialogHeader>
 
-        <div className="overflow-y-auto flex-1 p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto overscroll-contain p-6 space-y-6 max-h-[calc(95vh-120px)]">
           {/* Quick Overview Card */}
           <div className="bg-gradient-to-br from-blue-50/90 via-indigo-50/90 to-purple-50/90 dark:from-blue-950/30 dark:via-indigo-950/30 dark:to-purple-950/30 rounded-3xl p-6 border border-blue-200/40 dark:border-blue-800/40 shadow-sm">
             <div className="flex items-start gap-4 mb-4">
@@ -319,7 +332,8 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
                   <div className="space-y-3 px-4 pb-4">
                     {category.items.map((item, index) => (
                       <div 
-                        key={index} 
+                        key={index}
+                        data-item-name={item.name}
                         className={`flex items-start gap-3 p-4 rounded-xl border transition-all duration-500 ${
                           highlightedItem === item.name 
                             ? 'bg-teal-50/80 dark:bg-teal-950/30 border-teal-300 dark:border-teal-700 ring-2 ring-teal-400/50 scale-105' 

@@ -830,7 +830,7 @@ const TournamentPage: React.FC = () => {
                             <div 
                               key={`improvement-${idx}`} 
                               className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-amber-100/50 dark:hover:bg-amber-900/20 cursor-pointer transition-all duration-200"
-                              onClick={() => openRulebookToSection('performance')}
+                              onClick={() => openRulebookToSection('performance', 'Improvement Bonus')}
                             >
                               <div className="flex items-center gap-2">
                                 {(() => {
@@ -856,7 +856,7 @@ const TournamentPage: React.FC = () => {
                             <div 
                               key={`non-pr-improvement-${idx}`} 
                               className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-amber-100/50 dark:hover:bg-amber-900/20 cursor-pointer transition-all duration-200"
-                              onClick={() => openRulebookToSection('performance')}
+                              onClick={() => openRulebookToSection('performance', 'Improvement Bonus')}
                             >
                               <div className="flex items-center gap-2">
                                 {(() => {
@@ -881,7 +881,7 @@ const TournamentPage: React.FC = () => {
                             <div 
                               key={`comp-${idx}`} 
                               className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-amber-100/50 dark:hover:bg-amber-900/20 cursor-pointer transition-all duration-200"
-                              onClick={() => openRulebookToSection('performance')}
+                              onClick={() => openRulebookToSection('performance', 'Beat Friends')}
                             >
                               <div className="flex items-center gap-2">
                                 {(() => {
@@ -926,7 +926,7 @@ const TournamentPage: React.FC = () => {
                           {(participant.pointsBreakdown.participationPoints + participant.pointsBreakdown.varietyPoints) > 0 && (
                             <div 
                               className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20 cursor-pointer transition-all duration-200"
-                              onClick={() => openRulebookToSection('volume')}
+                              onClick={() => openRulebookToSection('volume', 'Daily Workout')}
                             >
                               <div className="flex items-center gap-2">
                                 {(() => {
@@ -947,7 +947,7 @@ const TournamentPage: React.FC = () => {
                           {participant.pointsBreakdown.consistencyPoints > 0 && (
                             <div 
                               className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20 cursor-pointer transition-all duration-200"
-                              onClick={() => openRulebookToSection('volume')}
+                              onClick={() => openRulebookToSection('volume', 'Consistency Bonus')}
                             >
                               <div className="flex items-center gap-2">
                                 {(() => {
@@ -966,7 +966,7 @@ const TournamentPage: React.FC = () => {
                           {(participant.exerciseStats?.totalExercises || 0) > 0 && (
                             <div 
                               className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-blue-100/50 dark:hover:bg-blue-900/20 cursor-pointer transition-all duration-200"
-                              onClick={() => openRulebookToSection('volume')}
+                              onClick={() => openRulebookToSection('volume', 'Exercise Points')}
                             >
                               <div className="flex items-center gap-2">
                                 {(() => {
@@ -1011,7 +1011,7 @@ const TournamentPage: React.FC = () => {
                           {(participant.exerciseStats?.newExerciseBonusPoints || 0) > 0 && (
                             <div 
                               className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-emerald-100/50 dark:hover:bg-emerald-900/20 cursor-pointer transition-all duration-200"
-                              onClick={() => openRulebookToSection('bonuses')}
+                              onClick={() => openRulebookToSection('bonuses', 'New Exercise Bonus')}
                             >
                               <div className="flex items-center gap-2">
                                 {(() => {
