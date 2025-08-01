@@ -37,7 +37,6 @@ import {
 } from '@/utils/tournamentUtils';
 import { supabase } from '@/integrations/supabase/client';
 import PRRecordsPage, { PRRecordsContent } from './PRRecords';
-import TypewriterText from '@/components/ui/typewriter-text';
 import '@/styles/index.css';
 
 // Harsh roast lines for zero-point users
@@ -94,10 +93,10 @@ const IOSPillSwitcher: React.FC<{
 
   return (
     <div className="w-full flex justify-center">
-      <div className="relative flex bg-muted rounded-full p-1 shadow-inner w-[340px] max-w-full h-10">
+      <div className="relative flex bg-slate-100/80 dark:bg-slate-800/80 rounded-full p-1 shadow-inner w-[340px] max-w-full h-10 backdrop-blur-md">
         {/* Sliding indicator */}
         <div
-          className="absolute left-0 rounded-full bg-white dark:bg-gray-900 shadow transition-all duration-300 border border-gray-200 dark:border-gray-800"
+          className="absolute left-0 rounded-full bg-white dark:bg-slate-700 shadow-md transition-all duration-300 border border-slate-200/50 dark:border-slate-600/50"
           style={{
             ...sliderStyle,
             top: 2,
@@ -107,10 +106,10 @@ const IOSPillSwitcher: React.FC<{
         />
         <button
           ref={tournamentRef}
-          className={`flex-1 px-6 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 focus:outline-none z-10 ${
+          className={`flex-1 px-6 py-1.5 rounded-full text-sm font-medium transition-all duration-200 focus:outline-none z-10 ${
             activeTab === 'tournament'
-              ? 'text-primary'
-              : 'text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
+              ? 'text-slate-900 dark:text-slate-100'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
           }`}
           onClick={() => onTabChange('tournament')}
           aria-pressed={activeTab === 'tournament' ? 'true' : 'false'}
@@ -119,10 +118,10 @@ const IOSPillSwitcher: React.FC<{
         </button>
         <button
           ref={recordsRef}
-          className={`flex-1 px-6 py-1.5 rounded-full text-sm font-semibold transition-all duration-200 focus:outline-none z-10 ${
+          className={`flex-1 px-6 py-1.5 rounded-full text-sm font-medium transition-all duration-200 focus:outline-none z-10 ${
             activeTab === 'records'
-              ? 'text-primary'
-              : 'text-muted-foreground hover:bg-gray-100 dark:hover:bg-gray-800'
+              ? 'text-slate-900 dark:text-slate-100'
+              : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
           }`}
           onClick={() => onTabChange('records')}
           aria-pressed={activeTab === 'records' ? 'true' : 'false'}
@@ -150,7 +149,7 @@ const TournamentPage: React.FC = () => {
   const [showHistoricalWeeks, setShowHistoricalWeeks] = useState(false);
   const [highlightedSection, setHighlightedSection] = useState<'performance' | 'volume' | 'bonuses' | null>(null);
   const [rulebookSection, setRulebookSection] = useState<string | null>(null);
-  const [messageKey, setMessageKey] = useState(0); // Force re-render of typewriter
+  const [highlightRulebookItem, setHighlightRulebookItem] = useState<string | null>(null);
 
   // Tab state for switching between tournament and PR records
   const [activeTab, setActiveTab] = useState<'tournament' | 'records'>('tournament');
@@ -168,7 +167,6 @@ const TournamentPage: React.FC = () => {
       roastStorage.zeroPointsRoast = null;
       roastStorage.secondPlaceRoast = null;
       roastStorage.lastTournamentId = selectedTournament.id;
-      setMessageKey(prev => prev + 1); // Trigger new typewriter animation
     }
   }, [selectedTournament?.id]);
 
@@ -202,8 +200,11 @@ const TournamentPage: React.FC = () => {
   };
 
   // Helper function to open rulebook to specific section
-  const openRulebookToSection = (section: string) => {
+  const openRulebookToSection = (section: string, itemName?: string) => {
     setRulebookSection(section);
+    if (itemName) {
+      setHighlightRulebookItem(itemName);
+    }
     setShowPointsGuide(true);
   };
 
@@ -467,14 +468,14 @@ const TournamentPage: React.FC = () => {
       BadgeType.NEWCOMER_BONUS
     ];
     
-    // Sort by priority and take top 1
+    // Sort by priority and take top 2
     return badges
       .sort((a, b) => {
         const aIndex = priorityOrder.indexOf(a.type);
         const bIndex = priorityOrder.indexOf(b.type);
         return aIndex - bIndex;
       })
-      .slice(0, 1);
+      .slice(0, 2);
   };
 
   // Badge icon and short name mapping
@@ -652,7 +653,7 @@ const TournamentPage: React.FC = () => {
 
             {/* User Info */}
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <Avatar className="h-8 w-8 ring-1 ring-white dark:ring-gray-800">
+              <Avatar className={`h-8 w-8 ring-2 transition-all duration-200 ${isCurrentUser ? 'ring-teal-500 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 shadow-md' : 'ring-white dark:ring-gray-800 ring-1'}`}>
                 <AvatarImage src={participant.user.avatarUrl} alt={participant.user.name} />
                 <AvatarFallback className="bg-muted text-muted-foreground text-xs">
                   {participant.user.name?.substring(0, 2).toUpperCase() || 'U'}
@@ -661,16 +662,10 @@ const TournamentPage: React.FC = () => {
               
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h3 className="font-semibold text-sm text-foreground truncate">
+                  <h3 className={`font-semibold text-sm truncate ${isCurrentUser ? 'text-teal-700 dark:text-teal-300' : 'text-foreground'}`}>
                     {participant.user.name}
+                    {isCurrentUser && <span className="text-xs text-teal-600 dark:text-teal-400 ml-1">(You)</span>}
                   </h3>
-                  {/* Enhanced 'You' badge with proper badge styling */}
-                  {isCurrentUser && (
-                    <Badge className="text-xs font-semibold bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white border-0 px-2.5 py-0.5 rounded-full shadow-sm flex items-center gap-1 flex-shrink-0">
-                      <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
-                      You
-                    </Badge>
-                  )}
                 </div>
                 
                 {/* Badges, clickable to scroll to details */}
@@ -698,8 +693,8 @@ const TournamentPage: React.FC = () => {
                     </Badge>
                   ))}
                   
-                  {/* Show "+X more" or "Less" toggle if there are additional badges */}
-                  {participant.badges.length > 1 && (
+                  {/* Show "+X more" or "Less" toggle if there are more than 2 badges */}
+                  {participant.badges.length > 2 && (
                     <Badge 
                       onClick={(e) => {
                         e.stopPropagation();
@@ -707,7 +702,7 @@ const TournamentPage: React.FC = () => {
                       }}
                       className="text-xs px-2 py-0.5 bg-gray-100/80 text-gray-600 dark:bg-gray-900/30 dark:text-gray-400 rounded-full border border-gray-200 dark:border-gray-700/50 flex-shrink-0 cursor-pointer"
                     >
-                      {areBadgesExpanded ? 'Less' : `+${participant.badges.length - 1} more`}
+                      {areBadgesExpanded ? 'Less' : `+${participant.badges.length - 2} more`}
                     </Badge>
                   )}
                 </div>
@@ -772,7 +767,7 @@ const TournamentPage: React.FC = () => {
           }`}>
             <button
               onClick={() => setExpandedParticipant(isExpanded ? null : participant.userId)}
-              className={`w-full flex items-center justify-center gap-2 text-sm font-medium transition-all duration-300 ease-out py-3 px-4 rounded-2xl z-30 relative apple-button ${isExpanded ? 'text-blue-700 dark:text-blue-300 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border border-blue-200/50 dark:border-blue-800/50' : 'text-slate-700 dark:text-slate-300 bg-gradient-to-r from-slate-50/80 to-slate-100/80 dark:from-slate-800/80 dark:to-slate-700/80 border border-slate-200/50 dark:border-slate-700/50 hover:from-slate-100 hover:to-slate-200 dark:hover:from-slate-700 dark:hover:to-slate-600'}`}
+              className={`w-full flex items-center justify-center gap-2 text-sm font-medium transition-all duration-300 ease-out py-3 px-4 rounded-2xl z-30 relative apple-button ${isExpanded ? 'text-teal-700 dark:text-teal-300 bg-gradient-to-r from-teal-50/80 to-teal-100/80 dark:from-teal-950/40 dark:to-teal-900/30 border border-teal-200/50 dark:border-teal-800/50' : 'text-slate-600 dark:text-slate-400 bg-gradient-to-r from-slate-50/80 to-slate-100/80 dark:from-slate-800/80 dark:to-slate-700/80 border border-slate-200/50 dark:border-slate-700/50 hover:from-slate-100 hover:to-slate-200 dark:hover:from-slate-700 dark:hover:to-slate-600 hover:text-slate-700 dark:hover:text-slate-300'}`}
             >
               <span className="text-sm font-medium">{isExpanded ? 'Hide Point Breakdown' : 'Show Point Breakdown'}</span>
               <div className={`transition-transform duration-300 ease-out ${isExpanded ? 'rotate-180' : 'rotate-0'}`}> 
@@ -813,7 +808,7 @@ const TournamentPage: React.FC = () => {
                             <div 
                               key={`pr-${idx}`} 
                               className="flex items-center justify-between text-sm p-2 rounded-md hover:bg-amber-100/50 dark:hover:bg-amber-900/20 cursor-pointer transition-all duration-200"
-                              onClick={() => openRulebookToSection('performance')}
+                              onClick={() => openRulebookToSection('performance', 'Personal Records')}
                             >
                               <div className="flex items-center gap-2">
                                 {(() => {
@@ -1109,14 +1104,7 @@ const TournamentPage: React.FC = () => {
                   return (
                     <div className="flex flex-col">
                       <span className="font-bold text-lg text-foreground leading-tight">
-                        <TypewriterText 
-                          key={messageKey}
-                          text={roastMessage}
-                          speed={40}
-                          delay={600}
-                          className="competitive-message-enter"
-                          showOnce={true}
-                        />
+                        {roastMessage}
                       </span>
                       {(() => {
                         const currentParticipant = selectedTournament?.participants.find(p => p.userId === profile?.id);
@@ -1140,10 +1128,10 @@ const TournamentPage: React.FC = () => {
                   <DropdownMenuTrigger asChild>
                     <Button 
                       variant="outline" 
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-2xl min-w-[140px] bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-slate-200/60 dark:border-slate-700/60 shadow-sm hover:shadow-md transition-all duration-200 apple-button"
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-2xl min-w-[140px] bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 shadow-sm hover:shadow-md transition-all duration-200 apple-button hover:bg-slate-50 dark:hover:bg-slate-700/90"
                     >
-                      <Clock className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                      <span className="font-medium text-sm">
+                      <Clock className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                      <span className="font-medium text-sm text-slate-700 dark:text-slate-300">
                         {selectedTournament?.id === currentTournament?.id 
                           ? 'This Week' 
                           : new Date(selectedTournament?.weekStart || '').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
@@ -1172,11 +1160,11 @@ const TournamentPage: React.FC = () => {
                     {currentTournament && (
                       <DropdownMenuItem 
                         onClick={() => setSelectedTournament(currentTournament)}
-                        className={`flex items-center justify-between rounded-xl m-1 ${selectedTournament?.id === currentTournament?.id ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
+                        className={`flex items-center justify-between rounded-xl m-1 ${selectedTournament?.id === currentTournament?.id ? 'bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-300' : ''}`}
                       >
                         <span className="font-medium">This Week</span>
                         {selectedTournament?.id === currentTournament?.id && (
-                          <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                          <div className="w-2 h-2 bg-teal-500 rounded-full" />
                         )}
                       </DropdownMenuItem>
                     )}
@@ -1189,13 +1177,13 @@ const TournamentPage: React.FC = () => {
                         <DropdownMenuItem 
                           key={tournament.id}
                           onClick={() => setSelectedTournament(tournament)}
-                          className={`flex items-center justify-between rounded-xl m-1 ${selectedTournament?.id === tournament.id ? 'bg-blue-50 dark:bg-blue-950/30' : ''}`}
+                          className={`flex items-center justify-between rounded-xl m-1 ${selectedTournament?.id === tournament.id ? 'bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-300' : ''}`}
                         >
                           <span className="font-medium">
                             {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                           </span>
                           {selectedTournament?.id === tournament.id && (
-                            <div className="w-2 h-2 bg-blue-500 rounded-full" />
+                            <div className="w-2 h-2 bg-teal-500 rounded-full" />
                           )}
                         </DropdownMenuItem>
                       ))}
@@ -1205,13 +1193,13 @@ const TournamentPage: React.FC = () => {
                   variant="outline" 
                   size="lg"
                   onClick={() => setShowPointsGuide(true)}
-                  className="rounded-2xl flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 dark:from-blue-950/30 dark:to-indigo-950/30 dark:hover:from-blue-900/40 dark:hover:to-indigo-900/40 border-blue-200/60 dark:border-blue-800/60 shadow-sm hover:shadow-md transition-all duration-200 apple-button"
+                  className="rounded-2xl flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-teal-50 to-teal-100/80 hover:from-teal-100 hover:to-teal-200/80 dark:from-teal-950/30 dark:to-teal-900/20 dark:hover:from-teal-900/40 dark:hover:to-teal-800/30 border-teal-200/60 dark:border-teal-800/60 shadow-sm hover:shadow-md transition-all duration-200 apple-button"
                 >
                   {(() => {
                     const BookOpenIcon = TOURNAMENT_ICONS.RULEBOOK;
-                    return <BookOpenIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />;
+                    return <BookOpenIcon className="h-4 w-4 text-teal-600 dark:text-teal-400" />;
                   })()}
-                  <span className="font-medium text-blue-700 dark:text-blue-300">Guide</span>
+                  <span className="font-medium text-teal-700 dark:text-teal-300">Guide</span>
                 </Button>
               </div>
             </div>
@@ -1237,8 +1225,10 @@ const TournamentPage: React.FC = () => {
               onClose={() => {
                 setShowPointsGuide(false);
                 setRulebookSection(null);
+                setHighlightRulebookItem(null);
               }}
               initialSection={rulebookSection}
+              highlightItem={highlightRulebookItem}
             />
 
             {/* Current Tournament Leaderboard */}

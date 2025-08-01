@@ -22,17 +22,27 @@ interface TournamentRulebookProps {
   isOpen: boolean;
   onClose: () => void;
   initialSection?: string | null;
+  highlightItem?: string | null; // New prop for highlighting specific items
 }
 
-const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose, initialSection }) => {
+const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose, initialSection, highlightItem }) => {
   const [expandedSection, setExpandedSection] = useState<string | null>('performance');
+  const [highlightedItem, setHighlightedItem] = useState<string | null>(null);
 
   // Handle initial section when rulebook opens
   useEffect(() => {
     if (isOpen && initialSection) {
       setExpandedSection(initialSection);
     }
-  }, [isOpen, initialSection]);
+    if (isOpen && highlightItem) {
+      setHighlightedItem(highlightItem);
+      // Remove highlight after 3 seconds
+      const timer = setTimeout(() => {
+        setHighlightedItem(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, initialSection, highlightItem]);
 
   // Streamlined point categories matching Tournament page design
   const pointCategories = [
@@ -308,7 +318,14 @@ const TournamentRulebook: React.FC<TournamentRulebookProps> = ({ isOpen, onClose
                 {expandedSection === category.id && (
                   <div className="space-y-3 px-4 pb-4">
                     {category.items.map((item, index) => (
-                      <div key={index} className="flex items-start gap-3 p-4 bg-white/60 dark:bg-slate-800/60 rounded-xl border border-white/60 dark:border-slate-700/60">
+                      <div 
+                        key={index} 
+                        className={`flex items-start gap-3 p-4 rounded-xl border transition-all duration-500 ${
+                          highlightedItem === item.name 
+                            ? 'bg-teal-50/80 dark:bg-teal-950/30 border-teal-300 dark:border-teal-700 ring-2 ring-teal-400/50 scale-105' 
+                            : 'bg-white/60 dark:bg-slate-800/60 border-white/60 dark:border-slate-700/60'
+                        }`}
+                      >
                         <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center shadow-sm">
                           <span className="font-bold text-sm text-foreground">{item.points}</span>
                         </div>
