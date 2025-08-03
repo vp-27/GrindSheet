@@ -432,30 +432,49 @@ export const getExerciseProgressChartData = (
   // Get all exercises for this category
   const categoryExercises = exercises.filter(exercise => exercise.categoryId === categoryId);
   if (categoryExercises.length === 0) return [];
+  
   // Sort logs by timestamp to ensure proper chronological order
   const sortedLogs = [...logs].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
-  // Filter logs to only include those for exercises in this category
-  const categoryLogs = sortedLogs.filter(log => 
+  
+  // Get all logs for exercises in this category (not filtered by window yet)
+  const allCategoryLogs = sortedLogs.filter(log => 
     categoryExercises.some(ex => ex.id === log.exerciseId)
   );
-  // Collect all unique dates for this category (after windowStartDate if provided)
+  
+  // Filter logs by window if provided
+  const categoryLogs = windowStartDate 
+    ? allCategoryLogs.filter(log => new Date(log.timestamp) >= windowStartDate)
+    : allCategoryLogs;
+  
+  // If no logs exist within the window, but there are logs before the window, we still need to show something with backfill
+  if (windowStartDate && categoryLogs.length === 0 && allCategoryLogs.length > 0) {
+    // We'll only show backfill data points
+  }
+  
+  // Collect all unique dates for this category (from logs within window)
   const allDates = new Set();
   categoryLogs.forEach(log => {
     const logDate = new Date(log.timestamp);
-    if (windowStartDate && logDate < windowStartDate) return;
     const date = `${logDate.getMonth() + 1}/${logDate.getDate()}/${logDate.getFullYear()}`;
     allDates.add(date);
   });
+  
+  // Add window start date for backfill if we have historical data
+  if (windowStartDate && allCategoryLogs.length > 0) {
+    const windowDateStr = `${windowStartDate.getMonth() + 1}/${windowStartDate.getDate()}/${windowStartDate.getFullYear()}`;
+    allDates.add(windowDateStr);
+  }
+  
   // Initialize chart data structure for all dates
   Array.from(allDates).forEach(date => {
     chartData.set(date, { date });
   });
-  // Process all logs for exercises in this category (after windowStartDate if provided)
+  
+  // Process all logs for exercises in this category (within window)
   categoryLogs.forEach(log => {
     const exercise = categoryExercises.find(ex => ex.id === log.exerciseId);
     if (!exercise) return;
     const logDate = new Date(log.timestamp);
-    if (windowStartDate && logDate < windowStartDate) return;
     const date = `${logDate.getMonth() + 1}/${logDate.getDate()}/${logDate.getFullYear()}`;
     const exerciseName = exercise.name;
     const dayData = chartData.get(date);
@@ -468,21 +487,31 @@ export const getExerciseProgressChartData = (
     const weightInLbs = log.weightUnit === 'kg' ? convertWeight(log.weight, 'kg') : log.weight;
     dayData[exerciseName].maxWeight = Math.max(dayData[exerciseName].maxWeight || 0, weightInLbs);
   });
-  // --- Backfill logic: for each exercise, if windowStartDate is set, find last log before window and insert as first point ---
+  
+  // --- Enhanced Backfill logic: for each exercise, if windowStartDate is set, find last log before window and insert as first point ---
   if (windowStartDate) {
     categoryExercises.forEach(exercise => {
-      // Find last log before windowStartDate
-      const logsForExercise = sortedLogs.filter(log => log.exerciseId === exercise.id);
-      const lastBeforeWindow = logsForExercise.filter(log => new Date(log.timestamp) < windowStartDate);
+      // Find all logs for this exercise (not just category logs)
+      const allLogsForExercise = sortedLogs.filter(log => log.exerciseId === exercise.id);
+      const lastBeforeWindow = allLogsForExercise.filter(log => new Date(log.timestamp) < windowStartDate);
+      
       if (lastBeforeWindow.length > 0) {
         const lastLog = lastBeforeWindow[lastBeforeWindow.length - 1];
         const weightInLbs = lastLog.weightUnit === 'kg' ? convertWeight(lastLog.weight, 'kg') : lastLog.weight;
+        
         // Insert a synthetic data point at windowStartDate (as first point)
         const syntheticDate = `${windowStartDate.getMonth() + 1}/${windowStartDate.getDate()}/${windowStartDate.getFullYear()}`;
         if (!chartData.has(syntheticDate)) {
           chartData.set(syntheticDate, { date: syntheticDate });
         }
-        chartData.get(syntheticDate)[exercise.name] = { maxWeight: weightInLbs };
+        
+        const dayData = chartData.get(syntheticDate);
+        if (!dayData[exercise.name]) {
+          dayData[exercise.name] = { maxWeight: weightInLbs };
+        } else {
+          // If there's already data for this exercise on this date, take the max
+          dayData[exercise.name].maxWeight = Math.max(dayData[exercise.name].maxWeight || 0, weightInLbs);
+        }
       }
     });
   }
@@ -502,8 +531,10 @@ export const getExerciseProgressChartData = (
     });
     return formattedDay;
   });
+  
   // Sort by date
   const sortedResult = result.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  
   // Forward fill missing values to maintain line continuity for each exercise
   for (let i = 1; i < sortedResult.length; i++) {
     categoryExercises.forEach(exercise => {
@@ -514,10 +545,12 @@ export const getExerciseProgressChartData = (
       }
     });
   }
+  
   // Only return results that have at least one non-null exercise value
   const finalResult = sortedResult.filter(day => 
     categoryExercises.some(exercise => day[exercise.name] !== null)
   );
+  
   return finalResult;
 };
 

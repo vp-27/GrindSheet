@@ -180,10 +180,9 @@ const Dashboard = () => {
       }
       return getOverallProgressChartData(exerciseLogs, exercises, categories);
     } else {
-      // Only include exercises in this category that have logs
-      const categoryExercisesWithLogs = exercises.filter(
-        e => e.categoryId === selectedCategoryId && exerciseLogs.some(log => log.exerciseId === e.id)
-      );
+      // Get all exercises in this category (not just those with current logs - needed for backfill)
+      const categoryExercises = exercises.filter(e => e.categoryId === selectedCategoryId);
+      
       // Category-specific chart (by exercise) - show percentage growth
       if (chartTimeframe !== 'ALL') {
         const now = new Date();
@@ -196,9 +195,9 @@ const Dashboard = () => {
             cutoffDate.setMonth(now.getMonth() - 1);
             break;
         }
-        return getExerciseProgressChartData(exerciseLogs, categoryExercisesWithLogs, selectedCategoryId, cutoffDate);
+        return getExerciseProgressChartData(exerciseLogs, categoryExercises, selectedCategoryId, cutoffDate);
       }
-      return getExerciseProgressChartData(exerciseLogs, categoryExercisesWithLogs, selectedCategoryId);
+      return getExerciseProgressChartData(exerciseLogs, categoryExercises, selectedCategoryId);
     }
   }, [exerciseLogs, exercises, categories, selectedCategoryId, chartTimeframe]);
 
