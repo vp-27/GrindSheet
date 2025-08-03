@@ -36,7 +36,6 @@ import {
   NEW_EXERCISE_BONUS
 } from '@/utils/tournamentUtils';
 import { supabase } from '@/integrations/supabase/client';
-import PRRecordsPage, { PRRecordsContent } from './PRRecords';
 import '@/styles/index.css';
 
 // Harsh roast lines for zero-point users
@@ -70,65 +69,6 @@ const roastStorage = {
   lastTournamentId: null as string | null
 };
 
-const IOSPillSwitcher: React.FC<{
-  activeTab: 'tournament' | 'records';
-  onTabChange: (tab: 'tournament' | 'records') => void;
-}> = ({ activeTab, onTabChange }) => {
-  // Sliding UI logic
-  // We'll use refs to measure button positions for the slider
-  const tournamentRef = React.useRef<HTMLButtonElement>(null);
-  const recordsRef = React.useRef<HTMLButtonElement>(null);
-  const [sliderStyle, setSliderStyle] = React.useState<React.CSSProperties>({});
-
-  React.useEffect(() => {
-    const activeRef = activeTab === 'tournament' ? tournamentRef : recordsRef;
-    if (activeRef.current) {
-      setSliderStyle({
-        left: activeRef.current.offsetLeft,
-        width: activeRef.current.offsetWidth,
-        transition: 'left 0.25s cubic-bezier(0.4,0,0.2,1), width 0.25s cubic-bezier(0.4,0,0.2,1)'
-      });
-    }
-  }, [activeTab]);
-
-  return (
-    <div className="w-full flex justify-center">
-      <div className="relative flex bg-slate-100/80 dark:bg-slate-800/80 rounded-full p-1 shadow-inner w-[340px] max-w-full h-10 backdrop-blur-md">
-        {/* Sliding indicator */}
-        {/* eslint-disable-next-line react/forbid-dom-props */}
-        <div
-          className="absolute left-0 rounded-full bg-white dark:bg-slate-700 shadow-md transition-all duration-300 border border-slate-200/50 dark:border-slate-600/50 top-0.5 bottom-0.5 h-[calc(100%-4px)]"
-          style={sliderStyle}
-        />
-        <button
-          ref={tournamentRef}
-          className={`flex-1 px-6 py-1.5 rounded-full text-sm font-medium transition-all duration-200 focus:outline-none z-10 ${
-            activeTab === 'tournament'
-              ? 'text-slate-900 dark:text-slate-100'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-          }`}
-          onClick={() => onTabChange('tournament')}
-          aria-pressed={String(activeTab === 'tournament')}
-        >
-          Tournament
-        </button>
-        <button
-          ref={recordsRef}
-          className={`flex-1 px-6 py-1.5 rounded-full text-sm font-medium transition-all duration-200 focus:outline-none z-10 ${
-            activeTab === 'records'
-              ? 'text-slate-900 dark:text-slate-100'
-              : 'text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
-          }`}
-          onClick={() => onTabChange('records')}
-          aria-pressed={activeTab === 'records' ? true : false}
-        >
-          PR Records
-        </button>
-      </div>
-    </div>
-  );
-};
-
 const TournamentPage: React.FC = () => {
   const { profile } = useAuth();
   const { categories, exercises } = useAppContext();
@@ -147,9 +87,6 @@ const TournamentPage: React.FC = () => {
   const [rulebookSection, setRulebookSection] = useState<string | null>(null);
   const [highlightRulebookItem, setHighlightRulebookItem] = useState<string | null>(null);
 
-  // Tab state for switching between tournament and PR records
-  const [activeTab, setActiveTab] = useState<'tournament' | 'records'>('tournament');
-  
   // Countdown state
   const [countdown, setCountdown] = useState<{
     text: string;
@@ -1079,143 +1016,135 @@ const TournamentPage: React.FC = () => {
     <Layout 
       customHeader={
         <div className="w-full flex flex-col gap-2">
-          {/* Pill Switcher (unchanged) */}
-          <IOSPillSwitcher activeTab={activeTab} onTabChange={tab => setActiveTab(tab)} />
-
-          {/* Unified Header (integrated with background, improved spacing) */}
-          {activeTab === 'tournament' && (
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-4 px-4 pb-2">
-              {/* Left: Roast/Message */}
-              <div className="flex-1 min-w-0">
-                {(() => {
-                  const roastMessage = getCurrentUserRoast();
-                  if (!roastMessage) {
-                    return (
-                      <div className="text-center">
-                        <span className="font-bold text-lg text-foreground">Join the Competition!</span>
-                        <div className="text-sm text-muted-foreground mt-1">Log a workout to get points</div>
-                      </div>
-                    );
-                  }
+          {/* Tournament Header */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-4 px-4 pb-2">
+            {/* Left: Roast/Message */}
+            <div className="flex-1 min-w-0">
+              {(() => {
+                const roastMessage = getCurrentUserRoast();
+                if (!roastMessage) {
                   return (
-                    <div className="flex flex-col">
-                      <span className="font-bold text-lg text-foreground leading-tight">
-                        {roastMessage}
-                      </span>
-                      {(() => {
-                        const currentParticipant = selectedTournament?.participants.find(p => p.userId === profile?.id);
-                        if (currentParticipant && currentParticipant.totalPoints === 0) {
-                          return (
-                            <span className="text-sm text-muted-foreground mt-1">
-                              Time to get those gains
-                            </span>
-                          );
-                        }
-                        return null;
-                      })()}
+                    <div className="text-center">
+                      <span className="font-bold text-lg text-foreground">Join the Competition!</span>
+                      <div className="text-sm text-muted-foreground mt-1">Log a workout to get points</div>
                     </div>
                   );
-                })()}
-              </div>
+                }
+                return (
+                  <div className="flex flex-col">
+                    <span className="font-bold text-lg text-foreground leading-tight">
+                      {roastMessage}
+                    </span>
+                    {(() => {
+                      const currentParticipant = selectedTournament?.participants.find(p => p.userId === profile?.id);
+                      if (currentParticipant && currentParticipant.totalPoints === 0) {
+                        return (
+                          <span className="text-sm text-muted-foreground mt-1">
+                            Time to get those gains
+                          </span>
+                        );
+                      }
+                      return null;
+                    })()}
+                  </div>
+                );
+              })()}
+            </div>
 
-              {/* Right: Week Dropdown (with timer) and Guide Button */}
-              <div className="flex items-center gap-3 mt-4 md:mt-0">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      className="flex items-center gap-2 px-4 py-2.5 rounded-2xl min-w-[140px] bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 shadow-sm hover:shadow-md transition-all duration-200 apple-button hover:bg-slate-50 dark:hover:bg-slate-700/90"
+            {/* Right: Week Dropdown (with timer) and Guide Button */}
+            <div className="flex items-center gap-3 mt-4 md:mt-0">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="outline" 
+                    className="flex items-center gap-2 px-4 py-2.5 rounded-2xl min-w-[140px] bg-white/90 dark:bg-slate-800/90 backdrop-blur-sm border-slate-200/60 dark:border-slate-700/60 shadow-sm hover:shadow-md transition-all duration-200 apple-button hover:bg-slate-50 dark:hover:bg-slate-700/90"
+                  >
+                    <Clock className="h-4 w-4 text-slate-500 dark:text-slate-400" />
+                    <span className="font-medium text-sm text-slate-700 dark:text-slate-300">
+                      {selectedTournament?.id === currentTournament?.id 
+                        ? 'This Week' 
+                        : new Date(selectedTournament?.weekStart || '').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+                      }
+                    </span>
+                    {countdown.text && (
+                      <div className={`ml-1 px-2 py-0.5 rounded-full text-xs font-medium ${
+                        countdown.urgency === 'low' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : ''
+                      }${
+                        countdown.urgency === 'medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' : ''
+                      }${
+                        countdown.urgency === 'high' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' : ''
+                      }${
+                        countdown.urgency === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 animate-pulse' : ''
+                      }${
+                        countdown.urgency === 'ended' ? 'bg-gray-100 text-gray-700 dark:bg-gray-900/40 dark:text-gray-300' : ''
+                      }`}>
+                        {countdown.text}{countdown.urgency !== 'ended' ? ' left' : ''}
+                      </div>
+                    )}
+                    <ChevronDown className="h-4 w-4 text-slate-400" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 rounded-2xl border-slate-200/60 dark:border-slate-700/60 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl shadow-lg">
+                  {/* Current Tournament */}
+                  {currentTournament && (
+                    <DropdownMenuItem 
+                      onClick={() => setSelectedTournament(currentTournament)}
+                      className={`flex items-center justify-between rounded-xl m-1 ${selectedTournament?.id === currentTournament?.id ? 'bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-300' : ''}`}
                     >
-                      <Clock className="h-4 w-4 text-slate-500 dark:text-slate-400" />
-                      <span className="font-medium text-sm text-slate-700 dark:text-slate-300">
-                        {selectedTournament?.id === currentTournament?.id 
-                          ? 'This Week' 
-                          : new Date(selectedTournament?.weekStart || '').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-                        }
-                      </span>
-                      {countdown.text && (
-                        <div className={`ml-1 px-2 py-0.5 rounded-full text-xs font-medium ${
-                          countdown.urgency === 'low' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300' : ''
-                        }${
-                          countdown.urgency === 'medium' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300' : ''
-                        }${
-                          countdown.urgency === 'high' ? 'bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300' : ''
-                        }${
-                          countdown.urgency === 'critical' ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 animate-pulse' : ''
-                        }${
-                          countdown.urgency === 'ended' ? 'bg-gray-100 text-gray-700 dark:bg-gray-900/40 dark:text-gray-300' : ''
-                        }`}>
-                          {countdown.text}{countdown.urgency !== 'ended' ? ' left' : ''}
-                        </div>
+                      <span className="font-medium">This Week</span>
+                      {selectedTournament?.id === currentTournament?.id && (
+                        <div className="w-2 h-2 bg-teal-500 rounded-full" />
                       )}
-                      <ChevronDown className="h-4 w-4 text-slate-400" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-48 rounded-2xl border-slate-200/60 dark:border-slate-700/60 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl shadow-lg">
-                    {/* Current Tournament */}
-                    {currentTournament && (
+                    </DropdownMenuItem>
+                  )}
+                  {/* Past Tournaments */}
+                  {tournamentHistory
+                    .filter(tournament => tournament.id !== currentTournament?.id)
+                    .slice()
+                    .reverse()
+                    .map(tournament => (
                       <DropdownMenuItem 
-                        onClick={() => setSelectedTournament(currentTournament)}
-                        className={`flex items-center justify-between rounded-xl m-1 ${selectedTournament?.id === currentTournament?.id ? 'bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-300' : ''}`}
+                        key={tournament.id}
+                        onClick={() => setSelectedTournament(tournament)}
+                        className={`flex items-center justify-between rounded-xl m-1 ${selectedTournament?.id === tournament.id ? 'bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-300' : ''}`}
                       >
-                        <span className="font-medium">This Week</span>
-                        {selectedTournament?.id === currentTournament?.id && (
+                        <span className="font-medium">
+                          {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                        </span>
+                        {selectedTournament?.id === tournament.id && (
                           <div className="w-2 h-2 bg-teal-500 rounded-full" />
                         )}
                       </DropdownMenuItem>
-                    )}
-                    {/* Past Tournaments */}
-                    {tournamentHistory
-                      .filter(tournament => tournament.id !== currentTournament?.id)
-                      .slice()
-                      .reverse()
-                      .map(tournament => (
-                        <DropdownMenuItem 
-                          key={tournament.id}
-                          onClick={() => setSelectedTournament(tournament)}
-                          className={`flex items-center justify-between rounded-xl m-1 ${selectedTournament?.id === tournament.id ? 'bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-300' : ''}`}
-                        >
-                          <span className="font-medium">
-                            {new Date(tournament.weekStart).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                          </span>
-                          {selectedTournament?.id === tournament.id && (
-                            <div className="w-2 h-2 bg-teal-500 rounded-full" />
-                          )}
-                        </DropdownMenuItem>
-                      ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  onClick={() => setShowPointsGuide(true)}
-                  className="rounded-2xl flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-teal-50 to-teal-100/80 hover:from-teal-100 hover:to-teal-200/80 dark:from-teal-950/30 dark:to-teal-900/20 dark:hover:from-teal-900/40 dark:hover:to-teal-800/30 border-teal-200/60 dark:border-teal-800/60 shadow-sm hover:shadow-md transition-all duration-200 apple-button"
-                >
-                  {(() => {
-                    const BookOpenIcon = TOURNAMENT_ICONS.RULEBOOK;
-                    return <BookOpenIcon className="h-4 w-4 text-teal-600 dark:text-teal-400" />;
-                  })()}
-                  <span className="font-medium text-teal-700 dark:text-teal-300">Guide</span>
-                </Button>
-              </div>
+                    ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button 
+                variant="outline" 
+                size="lg"
+                onClick={() => setShowPointsGuide(true)}
+                className="rounded-2xl flex items-center gap-2 px-4 py-2.5 bg-gradient-to-br from-teal-50 to-teal-100/80 hover:from-teal-100 hover:to-teal-200/80 dark:from-teal-950/30 dark:to-teal-900/20 dark:hover:from-teal-900/40 dark:hover:to-teal-800/30 border-teal-200/60 dark:border-teal-800/60 shadow-sm hover:shadow-md transition-all duration-200 apple-button"
+              >
+                {(() => {
+                  const BookOpenIcon = TOURNAMENT_ICONS.RULEBOOK;
+                  return <BookOpenIcon className="h-4 w-4 text-teal-600 dark:text-teal-400" />;
+                })()}
+                <span className="font-medium text-teal-700 dark:text-teal-300">Guide</span>
+              </Button>
             </div>
-          )}
+          </div>
         </div>
       }
     >
       <div className={`space-y-6 relative transition-all duration-500 ease-out ${contentReady ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
 
-        {/* Page Title removed as per new design */}
-
-        {/* Tournament Header with Roast and Week Selector - Only for Tournament tab */}
-        {activeTab === 'tournament' && (currentTournament || tournamentHistory.length > 0) && (
+        {/* Tournament Header with Roast and Week Selector */}
+        {(currentTournament || tournamentHistory.length > 0) && (
           <div className="border-t border-slate-300/60 dark:border-slate-600/60 my-2"></div>
         )}
         
         {/* Tournament Content */}
-        {activeTab === 'tournament' && (
-          <>
-            {/* Dynamic Rulebook Modal */}
+        <>
+          {/* Dynamic Rulebook Modal */}
             <TournamentRulebook 
               isOpen={showPointsGuide} 
               onClose={() => {
@@ -1253,12 +1182,6 @@ const TournamentPage: React.FC = () => {
 
             {/* Removed Historical Tournaments section since it's now at the top */}
           </>
-        )}
-
-        {/* PR Records Content */}
-        {activeTab === 'records' && (
-          <PRRecordsContent />
-        )}
 
       </div>
     </Layout>

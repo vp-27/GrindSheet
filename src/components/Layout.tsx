@@ -10,7 +10,7 @@ import {
   HomeIcon as HomeOutline,
   TrophyIcon as TrophyOutline,
   ClockIcon as ClockOutline,
-  ClipboardDocumentCheckIcon as GoalsOutline, // Using ClipboardDocumentCheckIcon for "Goals"
+  ChartBarIcon as PRsOutline, // Using ChartBarIcon for "PRs"
   UserIcon as UserOutline,
 } from '@heroicons/react/24/outline';
 // Heroicons imports - solid versions
@@ -18,7 +18,7 @@ import {
   HomeIcon as HomeSolid,
   TrophyIcon as TrophySolid,
   ClockIcon as ClockSolid,
-  ClipboardDocumentCheckIcon as GoalsSolid, // Using ClipboardDocumentCheckIcon for "Goals"
+  ChartBarIcon as PRsSolid, // Using ChartBarIcon for "PRs"
   UserIcon as UserSolid,
 } from '@heroicons/react/24/solid';
 import { Card } from '@/components/ui/card';
@@ -206,10 +206,10 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
           </div>
           <div className="flex-1 flex justify-center items-center">
             <NavLink 
-              to="/goals" 
-              outlineIcon={GoalsOutline}
-              solidIcon={GoalsSolid}
-              label="Goals" 
+              to="/pr-records" 
+              outlineIcon={PRsOutline}
+              solidIcon={PRsSolid}
+              label="PRs" 
             />
           </div>
           <div className="flex-1 flex justify-center items-center">
