@@ -90,18 +90,84 @@ export const calculateProgress = (logs: ExerciseLog[], exerciseId: string, exerc
   };
 };
 
-export const getProgressChartData = (logs: ExerciseLog[], exerciseId: string): ProgressChartData[] => {
+export const getProgressChartData = (logs: ExerciseLog[], exerciseId: string, timeframeFilter?: '1W' | '2W' | '1M' | 'ALL'): ProgressChartData[] => {
   // Filter logs for this exercise and sort by timestamp (oldest first)
-  const exerciseLogs = logs
+  const allExerciseLogs = logs
     .filter(log => log.exerciseId === exerciseId)
     .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   
-  if (exerciseLogs.length === 0) return [];
+  if (allExerciseLogs.length === 0) return [];
   
-  // Calculate the starting weight for percentage gains
-  const startingWeight = exerciseLogs[0].weight;
+  let exerciseLogs = allExerciseLogs;
+  let backfillLog: ExerciseLog | null = null;
   
-  return exerciseLogs.map(log => {
+  // Apply timeframe filter if specified
+  if (timeframeFilter && timeframeFilter !== 'ALL') {
+    const now = new Date();
+    const cutoffDate = new Date();
+    
+    switch (timeframeFilter) {
+      case '1W':
+        cutoffDate.setDate(now.getDate() - 7);
+        break;
+      case '2W':
+        cutoffDate.setDate(now.getDate() - 14);
+        break;
+      case '1M':
+        cutoffDate.setMonth(now.getMonth() - 1);
+        break;
+    }
+    
+    // Filter logs to only include those within the timeframe
+    const logsWithinTimeframe = allExerciseLogs.filter(log => new Date(log.timestamp) >= cutoffDate);
+    
+    // If no logs exist within the timeframe, return empty array (no fake dots)
+    if (logsWithinTimeframe.length === 0) return [];
+    
+    // Find the last log before the timeframe cutoff to use as backfill
+    const logsBeforeTimeframe = allExerciseLogs.filter(log => new Date(log.timestamp) < cutoffDate);
+    if (logsBeforeTimeframe.length > 0) {
+      backfillLog = logsBeforeTimeframe[logsBeforeTimeframe.length - 1]; // Last log before timeframe
+    }
+    
+    exerciseLogs = logsWithinTimeframe;
+  }
+  
+  // If we have a backfill log, create a synthetic data point at the cutoff date
+  const finalLogs: ExerciseLog[] = [];
+  if (backfillLog && timeframeFilter && timeframeFilter !== 'ALL') {
+    // Create synthetic log at the start of the timeframe with the backfill weight
+    const now = new Date();
+    const cutoffDate = new Date();
+    
+    switch (timeframeFilter) {
+      case '1W':
+        cutoffDate.setDate(now.getDate() - 7);
+        break;
+      case '2W':
+        cutoffDate.setDate(now.getDate() - 14);
+        break;
+      case '1M':
+        cutoffDate.setMonth(now.getMonth() - 1);
+        break;
+    }
+    
+    const syntheticLog: ExerciseLog = {
+      ...backfillLog,
+      id: `synthetic-${backfillLog.id}`, // Make unique ID
+      timestamp: cutoffDate.toISOString() // Set to exactly the cutoff date
+    };
+    
+    finalLogs.push(syntheticLog);
+  }
+  
+  // Add the actual logs within timeframe
+  finalLogs.push(...exerciseLogs);
+  
+  // Calculate the starting weight for percentage gains (use first log in final set)
+  const startingWeight = finalLogs[0].weight;
+  
+  return finalLogs.map(log => {
     // Handle percentage calculation for bodyweight exercises
     let percentGain = 0;
     if (startingWeight > 0) {

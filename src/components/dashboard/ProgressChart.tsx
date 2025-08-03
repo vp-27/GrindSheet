@@ -59,7 +59,7 @@ interface ProgressChartProps {
 }
 
 // Define timeframe options
-type TimeframeOption = '2W' | '1M' | 'ALL';
+type TimeframeOption = '1W' | '2W' | '1M' | 'ALL';
 
 // Helper function to filter data based on timeframe
 const filterDataByTimeframe = (data: any[], timeframe: TimeframeOption) => {
@@ -69,6 +69,9 @@ const filterDataByTimeframe = (data: any[], timeframe: TimeframeOption) => {
   const cutoffDate = new Date();
   
   switch (timeframe) {
+    case '1W':
+      cutoffDate.setDate(now.getDate() - 7);
+      break;
     case '2W':
       cutoffDate.setDate(now.getDate() - 14);
       break;

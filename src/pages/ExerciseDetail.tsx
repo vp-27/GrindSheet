@@ -74,13 +74,13 @@ const ExerciseDetail = () => {
     return calculateProgress(exerciseLogs, exercise.id, exercise);
   }, [exerciseLogs, exercise]);
   
-  // Get chart data
+  // Get chart data with timeframe filtering
   const chartData = useMemo(() => {
     if (!exerciseId) return [];
-    const data = getProgressChartData(exerciseLogs, exerciseId);
+    const data = getProgressChartData(exerciseLogs, exerciseId, currentTimeframe);
     console.log('ExerciseDetail chart data:', data);
     return data;
-  }, [exerciseLogs, exerciseId]);
+  }, [exerciseLogs, exerciseId, currentTimeframe]);
 
   // Get category colors
   const categoryColors = useMemo(() => {
@@ -285,6 +285,8 @@ const ExerciseDetail = () => {
               onHoverData={setChartHoverData}
               hideTooltip={true}
               defaultTimeframe="1M"
+              timeframe={currentTimeframe}
+              disableInternalTimeframeFilter={true}
             />
           ) : (
             <div className="text-center text-muted-foreground py-16">
