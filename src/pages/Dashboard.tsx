@@ -781,7 +781,7 @@ const Dashboard = () => {
                                 '--circle-bg-color': category.color,
                                 '--circle-shadow-color': `${category.color}20`
                               } as React.CSSProperties : category.significantLoss ? {
-                                '--circle-border-color': '#f59e0b'
+                                '--circle-border-color': '#ef4444'
                               } as React.CSSProperties : {}}
                             >
                               {category.completedToday && (
