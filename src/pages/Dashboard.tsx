@@ -765,12 +765,12 @@ const Dashboard = () => {
                     </div>
                     
                     {/* Progress circles section */}
-                    <div className="flex items-center justify-center">
-                      <div className="flex items-center gap-1.5">
+                    <div className="flex items-center justify-center px-2">
+                      <div className="flex items-center gap-3 justify-between w-full max-w-xs">
                         {weeklyCategories.map((category) => (
-                          <div key={category.id} className="flex flex-col items-center gap-0.5">
+                          <div key={category.id} className="flex flex-col items-center gap-1">
                             <div 
-                              className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-300 weekly-category-circle relative ${
+                              className={`w-5 h-5 rounded-full border-2 transition-all duration-300 weekly-category-circle relative ${
                                 category.hasActivity 
                                   ? 'active' 
                                   : category.significantLoss
@@ -790,14 +790,14 @@ const Dashboard = () => {
                                     xmlns="http://www.w3.org/2000/svg"
                                     viewBox="0 0 24 24"
                                     fill="currentColor"
-                                    className="w-2.5 h-2.5 text-white"
+                                    className="w-3 h-3 text-white"
                                   >
                                     <path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clipRule="evenodd" />
                                   </svg>
                                 </div>
                               )}
                             </div>
-                            <span className="text-xs text-muted-foreground font-medium text-center leading-tight max-w-12">
+                            <span className="text-xs text-muted-foreground font-medium text-center leading-tight max-w-14">
                               {category.name}
                             </span>
                           </div>
