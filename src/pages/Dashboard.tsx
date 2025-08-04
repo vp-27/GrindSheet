@@ -161,15 +161,26 @@ const Dashboard = () => {
     mondayThisWeek.setDate(now.getDate() - daysFromMonday);
     mondayThisWeek.setHours(0, 0, 0, 0); // Start of Monday
     
+    // Get logs from this week and today specifically
     const recentLogs = userLogs.filter(log => new Date(log.timestamp) >= mondayThisWeek);
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayLogs = userLogs.filter(log => {
+      const logDate = new Date(log.timestamp);
+      const logDateOnly = new Date(logDate.getFullYear(), logDate.getMonth(), logDate.getDate());
+      return logDateOnly.getTime() === today.getTime();
+    });
     
     return categories.map((category, index) => {
       const categoryExercises = exercises.filter(ex => ex.categoryId === category.id);
       const categoryLogs = recentLogs.filter(log => 
         categoryExercises.some(ex => ex.id === log.exerciseId)
       );
+      const todayCategoryLogs = todayLogs.filter(log => 
+        categoryExercises.some(ex => ex.id === log.exerciseId)
+      );
       
       const hasActivity = categoryLogs.length > 0;
+      const completedToday = todayCategoryLogs.length > 0;
       const color = getCategoryColor(index);
       
       // Calculate category performance (average percentage loss/gain)
@@ -206,6 +217,7 @@ const Dashboard = () => {
         id: category.id,
         name: category.name,
         hasActivity,
+        completedToday,
         color,
         exerciseCount: categoryLogs.length,
         exercises: categoryExercises,
@@ -605,7 +617,7 @@ const Dashboard = () => {
           <div className="relative -mx-4 px-4">
             {/* Show percentage gain if available - with inline chart slider */}
             {dynamicPercentGain !== null && (
-              <div className="mb-4 flex items-center justify-between">
+              <div className="mb-2 flex items-center justify-between">
                   <div className="text-2xl font-bold" style={
                     dynamicPercentGain >= 0
                       ? isDark
@@ -681,25 +693,25 @@ const Dashboard = () => {
             </div>
 
             {/* Weekly Category Recommendation Widget */}
-            <div className="mt-4 -mx-4 px-4">
+            <div className="mt-3 -mx-4 px-4">
               {loading || !exerciseLogs || !exercises || !categories || !profile || 
                categories.length === 0 || exercises.length === 0 || weeklyCategories.length === 0 || !getRecommendation ? (
                 /* Loading State */
                 <div className="apple-health-card animate-pulse">
-                  <div className="p-2">
+                  <div className="p-1.5">
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex-1">
-                        <div className="h-5 bg-muted rounded-md w-32 mb-2"></div>
-                        <div className="h-4 bg-muted/60 rounded-md w-24"></div>
+                        <div className="h-4 bg-muted rounded-md w-32 mb-1.5"></div>
+                        <div className="h-3 bg-muted/60 rounded-md w-24"></div>
                       </div>
-                      <div className="h-5 w-5 bg-muted/40 rounded"></div>
+                      <div className="h-4 w-4 bg-muted/40 rounded"></div>
                     </div>
                     <div className="flex items-center justify-center">
                       <div className="flex items-center gap-2">
                         {[...Array(4)].map((_, i) => (
                           <div key={i} className="flex flex-col items-center gap-0.5">
-                            <div className="w-4 h-4 bg-muted/40 rounded-full"></div>
-                            <div className="h-3 w-6 bg-muted/30 rounded"></div>
+                            <div className="w-3 h-3 bg-muted/40 rounded-full"></div>
+                            <div className="h-2.5 w-5 bg-muted/30 rounded"></div>
                           </div>
                         ))}
                       </div>
@@ -723,14 +735,14 @@ const Dashboard = () => {
                     '--category-color-rgb': (getRecommendation.category?.color || '#10b981').replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
                   } as React.CSSProperties}
                 >
-                  <div className="p-2">
+                  <div className="p-1.5">
                     {/* Header section */}
-                    <div className="flex items-start justify-between mb-1">
+                    <div className="flex items-start justify-between mb-0.5">
                       <div className="flex-1">
-                        <h3 className="apple-health-card-title mb-0.5 text-base">
+                        <h3 className="apple-health-card-title mb-0.5 text-sm">
                           {getRecommendation.message}
                         </h3>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-xs text-muted-foreground">
                           {getRecommendation.subMessage}
                         </p>
                       </div>
@@ -738,13 +750,13 @@ const Dashboard = () => {
                       {/* Top right: completion trophy or AI sparkles icon */}
                       <div className="ml-2">
                         {getRecommendation.type === 'complete' ? (
-                          <Trophy className="w-5 h-5 text-amber-500" />
+                          <Trophy className="w-4 h-4 text-amber-500" />
                         ) : (
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 24 24"
                             fill="currentColor"
-                            className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors"
+                            className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors"
                           >
                             <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" />
                           </svg>
@@ -754,11 +766,11 @@ const Dashboard = () => {
                     
                     {/* Progress circles section */}
                     <div className="flex items-center justify-center">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         {weeklyCategories.map((category) => (
                           <div key={category.id} className="flex flex-col items-center gap-0.5">
                             <div 
-                              className={`w-4 h-4 rounded-full border-2 transition-all duration-300 weekly-category-circle ${
+                              className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-300 weekly-category-circle relative ${
                                 category.hasActivity 
                                   ? 'active' 
                                   : category.significantLoss
@@ -771,8 +783,21 @@ const Dashboard = () => {
                               } as React.CSSProperties : category.significantLoss ? {
                                 '--circle-border-color': '#f59e0b'
                               } as React.CSSProperties : {}}
-                            />
-                            <span className="text-xs text-muted-foreground font-medium text-center leading-tight max-w-14">
+                            >
+                              {category.completedToday && (
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    viewBox="0 0 24 24"
+                                    fill="currentColor"
+                                    className="w-2.5 h-2.5 text-white"
+                                  >
+                                    <path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clipRule="evenodd" />
+                                  </svg>
+                                </div>
+                              )}
+                            </div>
+                            <span className="text-xs text-muted-foreground font-medium text-center leading-tight max-w-12">
                               {category.name}
                             </span>
                           </div>
@@ -785,7 +810,7 @@ const Dashboard = () => {
             </div>
 
             {/* Controls Island (Sticky Category Selector/Filter Bar) */}
-            <div className="control-panel mt-4 relative sticky top-4 z-30">
+            <div className="control-panel mt-3 relative sticky top-4 z-30">
               {/* Compact Category Filter with History Button */}
               <div className="relative bg-muted p-1 rounded-2xl">
                 <div 
