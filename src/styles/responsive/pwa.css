@@ -250,7 +250,15 @@
 
 /* PWA Dialog Optimizations for iOS Safari and Chrome Mobile */
 @media screen and (max-device-width: 768px) {
-  /* Prevent viewport zoom on input focus */
+  /* Prevent viewport zoom on input focus - Global rule for all modals */
+  input,
+  select,
+  textarea {
+    font-size: max(16px, 1rem) !important;
+    /* This prevents iOS Safari from zooming on all input elements */
+  }
+  
+  /* Prevent viewport zoom on input focus - Specific to modal dialogs */
   .mobile-dialog input,
   .mobile-dialog select,
   .mobile-dialog textarea {
@@ -272,6 +280,20 @@
       /* Account for iOS keyboard and bottom home indicator */
       max-height: calc(100vh - 4rem - env(safe-area-inset-bottom, 0px)) !important;
     }
+  }
+}
+
+/* PWA Modal Input Zoom Prevention */
+@media screen and (max-device-width: 768px) and (hover: none) and (pointer: coarse) {
+  /* This targets touch devices specifically */
+  [role="dialog"] input,
+  [role="dialog"] textarea,
+  [role="dialog"] select,
+  .fixed input,
+  .fixed textarea,
+  .fixed select {
+    font-size: max(16px, 1rem) !important;
+    /* Prevents zoom on mobile PWA */
   }
 }
 
