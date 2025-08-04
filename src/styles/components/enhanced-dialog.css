@@ -126,9 +126,9 @@
 
 .enhanced-input:focus,
 .enhanced-textarea:focus {
-  border-color: #007AFF !important;
+  border-color: #0d9488 !important;
   box-shadow: 
-    0 0 0 3px rgba(0, 122, 255, 0.15),
+    0 0 0 3px rgba(13, 148, 136, 0.15),
     0 2px 8px rgba(0, 0, 0, 0.15) !important;
   transform: translateY(-1px) !important;
 }
@@ -136,9 +136,9 @@
 /* Dark mode focus state */
 .dark .enhanced-input:focus,
 .dark .enhanced-textarea:focus {
-  border-color: #0A84FF !important;
+  border-color: #14b8a6 !important;
   box-shadow: 
-    0 0 0 3px rgba(10, 132, 255, 0.15),
+    0 0 0 3px rgba(20, 184, 166, 0.15),
     0 2px 8px rgba(0, 0, 0, 0.3) !important;
 }
 
@@ -197,34 +197,34 @@
 }
 
 .enhanced-button-primary {
-  background: #007AFF !important;
+  background: #0d9488 !important;
   color: #ffffff !important;
   border: none !important;
   box-shadow: 
-    0 4px 12px rgba(0, 122, 255, 0.3),
+    0 4px 12px rgba(13, 148, 136, 0.3),
     0 1px 3px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* Dark mode primary button */
 .dark .enhanced-button-primary {
-  background: #0A84FF !important;
+  background: #14b8a6 !important;
   box-shadow: 
-    0 4px 12px rgba(10, 132, 255, 0.3),
+    0 4px 12px rgba(20, 184, 166, 0.3),
     0 1px 3px rgba(0, 0, 0, 0.2) !important;
 }
 
 .enhanced-button-primary:hover:not(:disabled) {
-  background: #0056CC !important;
+  background: #0f766e !important;
   transform: translateY(-1px) !important;
   box-shadow: 
-    0 6px 16px rgba(0, 122, 255, 0.4),
+    0 6px 16px rgba(13, 148, 136, 0.4),
     0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
 .dark .enhanced-button-primary:hover:not(:disabled) {
-  background: #0969DA !important;
+  background: #10b981 !important;
   box-shadow: 
-    0 6px 16px rgba(10, 132, 255, 0.4),
+    0 6px 16px rgba(20, 184, 166, 0.4),
     0 2px 4px rgba(0, 0, 0, 0.2) !important;
 }
 
