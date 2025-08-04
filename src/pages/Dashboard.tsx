@@ -172,25 +172,75 @@ const Dashboard = () => {
       const hasActivity = categoryLogs.length > 0;
       const color = getCategoryColor(index);
       
+      // Calculate category performance (average percentage loss/gain)
+      let averagePerformanceChange = 0;
+      let exercisesWithLosses = 0;
+      let significantLoss = false;
+      
+      if (categoryExercises.length > 0) {
+        const progressData = categoryExercises.map(exercise => 
+          calculateProgress(userLogs, exercise.id, exercise)
+        ).filter(progress => 
+          progress.percentGainFromPrevious !== undefined && 
+          progress.previousWeight !== undefined
+        );
+        
+        if (progressData.length > 0) {
+          const totalChange = progressData.reduce((sum, progress) => 
+            sum + (progress.percentGainFromPrevious || 0), 0
+          );
+          averagePerformanceChange = totalChange / progressData.length;
+          
+          // Count exercises with losses > 3%
+          exercisesWithLosses = progressData.filter(progress => 
+            (progress.percentGainFromPrevious || 0) < -3
+          ).length;
+          
+          // Significant loss if average loss > 5% or multiple exercises declining
+          significantLoss = averagePerformanceChange < -5 || 
+                           (exercisesWithLosses >= 2 && averagePerformanceChange < -2);
+        }
+      }
+      
       return {
         id: category.id,
         name: category.name,
         hasActivity,
         color,
         exerciseCount: categoryLogs.length,
-        exercises: categoryExercises
+        exercises: categoryExercises,
+        averagePerformanceChange,
+        exercisesWithLosses,
+        significantLoss
       };
     });
   }, [exerciseLogs, exercises, categories, profile]);
 
-  // Get recommendation based on weekly activity
+  // Get recommendation based on weekly activity and performance
   const getRecommendation = useMemo(() => {
     if (!weeklyCategories.length || !profile) return null;
     
     const inactiveCategories = weeklyCategories.filter(cat => !cat.hasActivity);
     const activeCategories = weeklyCategories.filter(cat => cat.hasActivity);
+    const weakCategories = weeklyCategories.filter(cat => cat.significantLoss);
     
-    // If no activity at all, suggest any category
+    // Priority 1: Address significant performance losses (weakness-based recommendation)
+    if (weakCategories.length > 0) {
+      // Sort by most severe loss (lowest average performance change)
+      const weakestCategory = weakCategories.sort((a, b) => 
+        a.averagePerformanceChange - b.averagePerformanceChange
+      )[0];
+      
+      const lossPercentage = Math.abs(weakestCategory.averagePerformanceChange).toFixed(1);
+      return {
+        type: 'weakness',
+        category: weakestCategory,
+        message: `Focus on ${weakestCategory.name}`,
+        subMessage: `Performance down ${lossPercentage}% - time to rebuild`
+      };
+    }
+    
+    // Priority 2: If no activity at all, suggest any category
     if (activeCategories.length === 0) {
       const suggestedCategory = weeklyCategories[Math.floor(Math.random() * weeklyCategories.length)];
       return {
@@ -201,7 +251,7 @@ const Dashboard = () => {
       };
     }
     
-    // If missing categories, suggest a specific one
+    // Priority 3: If missing categories, suggest a specific one
     if (inactiveCategories.length > 0) {
       const suggestedCategory = inactiveCategories[0]; // Pick first missing category
       return {
@@ -212,7 +262,7 @@ const Dashboard = () => {
       };
     }
     
-    // All categories hit, encourage consistency
+    // Priority 4: All categories hit, encourage consistency
     return {
       type: 'complete',
       category: null,
@@ -645,7 +695,8 @@ const Dashboard = () => {
                 /* Actual Widget */
                 <div 
                   className={`apple-health-card weekly-recommendation-card group cursor-pointer transition-all duration-200 hover:shadow-lg active:scale-[0.99] ${
-                    getRecommendation.type === 'any' ? 'weekly-recommendation-card--gradient' : ''
+                    getRecommendation.type === 'any' ? 'weekly-recommendation-card--gradient' : 
+                    getRecommendation.type === 'weakness' ? 'weekly-recommendation-card--weakness' : ''
                   }`}
                   onClick={handleRecommendationClick}
                   style={getRecommendation.type === 'any' ? {
@@ -695,11 +746,15 @@ const Dashboard = () => {
                               className={`w-4 h-4 rounded-full border-2 transition-all duration-300 weekly-category-circle ${
                                 category.hasActivity 
                                   ? 'active' 
+                                  : category.significantLoss
+                                  ? 'weakness'
                                   : 'inactive'
                               }`}
                               style={category.hasActivity ? {
                                 '--circle-bg-color': category.color,
                                 '--circle-shadow-color': `${category.color}20`
+                              } as React.CSSProperties : category.significantLoss ? {
+                                '--circle-border-color': '#f59e0b'
                               } as React.CSSProperties : {}}
                             />
                             <span className="text-xs text-muted-foreground font-medium text-center leading-tight max-w-14">
