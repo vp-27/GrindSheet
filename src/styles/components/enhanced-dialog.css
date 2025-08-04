@@ -1,0 +1,232 @@
+/* ===== ENHANCED DIALOG STYLES ===== */
+/* Beautiful, properly centered dialogs with excellent dark/light mode support */
+
+/* Enhanced Dialog Container */
+.enhanced-dialog-content {
+  /* Perfect centering */
+  position: fixed !important;
+  left: 50% !important;
+  top: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  
+  /* Responsive sizing */
+  width: calc(100vw - 2rem) !important;
+  max-width: 480px !important;
+  max-height: 90vh !important;
+  
+  /* Beautiful styling */
+  border-radius: 1.5rem !important;
+  border: 1px solid hsl(var(--border)) !important;
+  padding: 2rem !important;
+  
+  /* Enhanced shadows and backdrop */
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+  
+  /* Beautiful background with proper theme support */
+  background: hsl(var(--background)) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  backdrop-filter: blur(20px) !important;
+  
+  /* Smooth animations */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  
+  /* Ensure proper z-index */
+  z-index: 50 !important;
+}
+
+/* Dark mode enhancements */
+.dark .enhanced-dialog-content {
+  background: hsl(var(--background)) !important;
+  border-color: hsl(var(--border)) !important;
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Enhanced Dialog Header */
+.enhanced-dialog-header {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.enhanced-dialog-title {
+  font-size: 1.5rem !important;
+  font-weight: 700 !important;
+  color: hsl(var(--foreground)) !important;
+  margin-bottom: 0.5rem !important;
+  line-height: 1.3 !important;
+}
+
+.enhanced-dialog-description {
+  font-size: 0.95rem !important;
+  color: hsl(var(--muted-foreground)) !important;
+  line-height: 1.5 !important;
+  opacity: 0.8;
+}
+
+/* Enhanced Form Elements */
+.enhanced-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.enhanced-label {
+  display: block;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+  color: hsl(var(--foreground)) !important;
+  margin-bottom: 0.75rem !important;
+}
+
+.enhanced-input,
+.enhanced-textarea {
+  width: 100% !important;
+  padding: 1rem 1.25rem !important;
+  border-radius: 1rem !important;
+  border: 1.5px solid hsl(var(--border)) !important;
+  background: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  font-size: max(1rem, 16px) !important; /* Prevent zoom on iOS */
+  line-height: 1.5 !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  
+  /* Enhanced focus state */
+  outline: none !important;
+}
+
+.enhanced-input:focus,
+.enhanced-textarea:focus {
+  border-color: hsl(var(--primary)) !important;
+  box-shadow: 
+    0 0 0 3px hsl(var(--primary) / 0.1),
+    0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+.enhanced-textarea {
+  min-height: 100px !important;
+  resize: vertical !important;
+}
+
+/* Enhanced Info Display */
+.enhanced-info-display {
+  padding: 1rem 1.25rem !important;
+  background: hsl(var(--muted) / 0.3) !important;
+  border: 1px solid hsl(var(--border) / 0.5) !important;
+  border-radius: 1rem !important;
+  font-size: 0.9rem !important;
+  color: hsl(var(--muted-foreground)) !important;
+  line-height: 1.5 !important;
+}
+
+/* Enhanced Dialog Footer */
+.enhanced-dialog-footer {
+  display: flex !important;
+  gap: 1rem !important;
+  margin-top: 2rem !important;
+  padding-top: 1.5rem !important;
+  border-top: 1px solid hsl(var(--border) / 0.3) !important;
+}
+
+/* Enhanced Buttons */
+.enhanced-button-primary,
+.enhanced-button-secondary {
+  flex: 1 !important;
+  padding: 1rem 1.5rem !important;
+  border-radius: 1rem !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer !important;
+  min-height: 48px !important; /* Touch-friendly */
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.enhanced-button-primary {
+  background: hsl(var(--primary)) !important;
+  color: hsl(var(--primary-foreground)) !important;
+  border: none !important;
+  box-shadow: 
+    0 4px 12px hsl(var(--primary) / 0.3),
+    0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+.enhanced-button-primary:hover:not(:disabled) {
+  background: hsl(var(--primary) / 0.9) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 
+    0 6px 16px hsl(var(--primary) / 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.enhanced-button-primary:active:not(:disabled) {
+  transform: translateY(0) !important;
+  box-shadow: 
+    0 2px 8px hsl(var(--primary) / 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+.enhanced-button-primary:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+}
+
+.enhanced-button-secondary {
+  background: hsl(var(--background)) !important;
+  color: hsl(var(--foreground)) !important;
+  border: 1.5px solid hsl(var(--border)) !important;
+}
+
+.enhanced-button-secondary:hover {
+  background: hsl(var(--muted) / 0.5) !important;
+  border-color: hsl(var(--border)) !important;
+  transform: translateY(-1px) !important;
+}
+
+.enhanced-button-secondary:active {
+  transform: translateY(0) !important;
+  background: hsl(var(--muted) / 0.7) !important;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .enhanced-dialog-content {
+    width: calc(100vw - 1rem) !important;
+    max-width: calc(100vw - 1rem) !important;
+    padding: 1.5rem !important;
+    margin: 0.5rem !important;
+    border-radius: 1.25rem !important;
+  }
+  
+  .enhanced-dialog-title {
+    font-size: 1.25rem !important;
+  }
+  
+  .enhanced-dialog-description {
+    font-size: 0.9rem !important;
+  }
+  
+  .enhanced-dialog-footer {
+    flex-direction: column !important;
+    gap: 0.75rem !important;
+  }
+  
+  .enhanced-button-primary,
+  .enhanced-button-secondary {
+    width: 100% !important;
+    flex: none !important;
+  }
+}
+
+/* PWA-specific optimizations */
+@media screen and (max-device-width: 768px) {
+  .enhanced-dialog-content {
+    /* Account for safe areas on devices with notches */
+    margin: env(safe-area-inset-top, 0.5rem) env(safe-area-inset-right, 0.5rem) env(safe-area-inset-bottom, 0.5rem) env(safe-area-inset-left, 0.5rem) !important;
+    max-height: calc(100vh - env(safe-area-inset-top, 1rem) - env(safe-area-inset-bottom, 1rem)) !important;
+  }
+}

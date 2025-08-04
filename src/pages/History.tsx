@@ -518,71 +518,75 @@ const History = () => {
 
         {/* Edit Dialog */}
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="enhanced-dialog-content">
             <form onSubmit={handleEditSubmit}>
-              <DialogHeader>
-                <DialogTitle>Edit Exercise Log</DialogTitle>
-                <DialogDescription>
+              <div className="enhanced-dialog-header">
+                <DialogTitle className="enhanced-dialog-title">Edit Exercise Log</DialogTitle>
+                <DialogDescription className="enhanced-dialog-description">
                   Update the weight or note for this exercise entry.
                 </DialogDescription>
-              </DialogHeader>
-              
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <Label htmlFor="weight">Weight (lbs)</Label>
-                  <Input
-                    id="weight"
-                    name="weight"
-                    type="number"
-                    step="0.5"
-                    min="0"
-                    value={editForm.weight}
-                    onChange={handleEditChange}
-                    className="rounded-xl"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="note">Note (optional)</Label>
-                  <Textarea
-                    id="note"
-                    name="note"
-                    value={editForm.note}
-                    onChange={handleEditChange}
-                    placeholder="Add a note about this workout..."
-                    rows={3}
-                    className="rounded-xl resize-none"
-                  />
-                </div>
-                
-                {editLog && (
-                  <div className="space-y-2">
-                    <Label>Date & Time</Label>
-                    <div className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-xl">
-                      {format(new Date(editLog.timestamp), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}
-                    </div>
-                  </div>
-                )}
               </div>
               
-              <DialogFooter>
-                <Button
+              <div className="enhanced-form-group">
+                <label htmlFor="weight" className="enhanced-label">Weight (lbs)</label>
+                <input
+                  id="weight"
+                  name="weight"
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  value={editForm.weight}
+                  onChange={handleEditChange}
+                  className="enhanced-input"
+                  required
+                />
+              </div>
+              
+              <div className="enhanced-form-group">
+                <label htmlFor="note" className="enhanced-label">Note (optional)</label>
+                <textarea
+                  id="note"
+                  name="note"
+                  value={editForm.note}
+                  onChange={handleEditChange}
+                  placeholder="Add a note about this workout..."
+                  rows={3}
+                  className="enhanced-textarea"
+                />
+              </div>
+              
+              {editLog && (
+                <div className="enhanced-form-group">
+                  <label className="enhanced-label">Date & Time</label>
+                  <div className="enhanced-info-display">
+                    {format(new Date(editLog.timestamp), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}
+                  </div>
+                </div>
+              )}
+              
+              <div className="enhanced-dialog-footer">
+                <button
                   type="button"
-                  variant="outline"
                   onClick={() => setEditDialogOpen(false)}
-                  className="rounded-xl"
+                  className="enhanced-button-secondary"
                 >
                   Cancel
-                </Button>
-                <Button 
+                </button>
+                <button 
                   type="submit" 
-                  className="rounded-xl"
+                  className="enhanced-button-primary"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? 'Updating...' : 'Update Log'}
-                </Button>
-              </DialogFooter>
+                  {isSubmitting ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Updating...
+                    </div>
+                  ) : (
+                    'Update Log'
+                  )}
+                </button>
+              </div>
             </form>
           </DialogContent>
         </Dialog>

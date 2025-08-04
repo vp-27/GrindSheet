@@ -113,68 +113,59 @@ export const CategoryDialog: React.FC<CategoryDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="sm:max-w-[425px] max-w-[95vw] w-full rounded-2xl backdrop-blur-sm bg-card/95 border-border/50 mobile-dialog"
-        style={{
-          position: 'fixed',
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          margin: '0',
-        }}
-      >
+      <DialogContent className="enhanced-dialog-content">
         <form onSubmit={form.handleSubmit(handleSubmit)}>
-          <DialogHeader>
-            <DialogTitle className="text-foreground mobile-dialog-title">
+          <div className="enhanced-dialog-header">
+            <DialogTitle className="enhanced-dialog-title">
               {editingCategory ? 'Edit Category' : 'Add New Category'}
             </DialogTitle>
-            <DialogDescription className="text-muted-foreground mobile-dialog-description">
+            <DialogDescription className="enhanced-dialog-description">
               {editingCategory 
                 ? 'Update the category details below' 
                 : 'Create a new category for organizing exercises'}
             </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4 mobile-dialog-content">
-            <div className="space-y-2">
-              <Label htmlFor="category-name" className="text-sm font-medium text-foreground mobile-label">
-                Name
-              </Label>
-              <Input
-                id="category-name"
-                {...form.register('name', { required: true })}
-                className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 mobile-input"
-                placeholder="Chest"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="category-description" className="text-sm font-medium text-foreground mobile-label">
-                Description (Optional)
-              </Label>
-              <Input
-                id="category-description"
-                {...form.register('description')}
-                className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 mobile-input"
-                placeholder="Chest exercises"
-              />
-            </div>
           </div>
-          <DialogFooter className="mobile-dialog-footer">
-            <Button
+          
+          <div className="enhanced-form-group">
+            <label htmlFor="category-name" className="enhanced-label">
+              Name
+            </label>
+            <input
+              id="category-name"
+              {...form.register('name', { required: true })}
+              className="enhanced-input"
+              placeholder="Chest"
+              required
+            />
+          </div>
+          
+          <div className="enhanced-form-group">
+            <label htmlFor="category-description" className="enhanced-label">
+              Description (Optional)
+            </label>
+            <input
+              id="category-description"
+              {...form.register('description')}
+              className="enhanced-input"
+              placeholder="Chest exercises"
+            />
+          </div>
+          
+          <div className="enhanced-dialog-footer">
+            <button
               type="button"
-              variant="outline"
               onClick={() => onOpenChange(false)}
-              className="rounded-xl mobile-button-secondary"
+              className="enhanced-button-secondary"
             >
               Cancel
-            </Button>
-            <Button 
+            </button>
+            <button 
               type="submit" 
-              className="rounded-xl font-medium bg-primary active:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200 mobile-button-primary"
+              className="enhanced-button-primary"
             >
               {editingCategory ? 'Update Category' : 'Add Category'}
-            </Button>
-          </DialogFooter>
+            </button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>
@@ -268,86 +259,78 @@ export const ExerciseDialog: React.FC<ExerciseDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent 
-        className="sm:max-w-[425px] max-w-[95vw] w-full rounded-2xl backdrop-blur-sm bg-card/95 border-border/50 mobile-dialog"
-        style={{
-          position: 'fixed',
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          margin: '0',
-        }}
-      >
+      <DialogContent className="enhanced-dialog-content">
         <form onSubmit={form.handleSubmit(handleSubmit)}>
-          <DialogHeader>
-            <DialogTitle className="text-foreground mobile-dialog-title">
+          <div className="enhanced-dialog-header">
+            <DialogTitle className="enhanced-dialog-title">
               {editingExercise ? 'Edit Exercise' : 'Add New Exercise'}
             </DialogTitle>
-            <DialogDescription className="text-muted-foreground mobile-dialog-description">
+            <DialogDescription className="enhanced-dialog-description">
               {editingExercise 
                 ? 'Update the exercise details below' 
                 : 'Add a new exercise to track your progress'}
             </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4 mobile-dialog-content">
-            <div className="space-y-2">
-              <Label htmlFor="exercise-name" className="text-sm font-medium text-foreground mobile-label">
-                Name
-              </Label>
-              <Input
-                id="exercise-name"
-                {...form.register('name', { required: true })}
-                className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 mobile-input"
-                placeholder="Bench Press"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="exercise-description" className="text-sm font-medium text-foreground mobile-label">
-                Description (Optional)
-              </Label>
-              <Input
-                id="exercise-description"
-                {...form.register('description')}
-                className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0 mobile-input"
-                placeholder="Barbell bench press"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="exercise-category" className="text-sm font-medium text-foreground mobile-label">
-                Category
-              </Label>
-              <select
-                id="exercise-category"
-                {...form.register('categoryId', { required: true })}
-                className="w-full p-2.5 border border-border/60 rounded-xl text-sm focus:outline-none bg-background/80 text-foreground focus:border-primary mobile-select"
-                required
-              >
-                <option value="">Select a category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
           </div>
-          <DialogFooter className="mobile-dialog-footer">
-            <Button
+          
+          <div className="enhanced-form-group">
+            <label htmlFor="exercise-name" className="enhanced-label">
+              Name
+            </label>
+            <input
+              id="exercise-name"
+              {...form.register('name', { required: true })}
+              className="enhanced-input"
+              placeholder="Bench Press"
+              required
+            />
+          </div>
+          
+          <div className="enhanced-form-group">
+            <label htmlFor="exercise-description" className="enhanced-label">
+              Description (Optional)
+            </label>
+            <input
+              id="exercise-description"
+              {...form.register('description')}
+              className="enhanced-input"
+              placeholder="Barbell bench press"
+            />
+          </div>
+          
+          <div className="enhanced-form-group">
+            <label htmlFor="exercise-category" className="enhanced-label">
+              Category
+            </label>
+            <select
+              id="exercise-category"
+              {...form.register('categoryId', { required: true })}
+              className="enhanced-input"
+              required
+            >
+              <option value="">Select a category</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="enhanced-dialog-footer">
+            <button
               type="button"
-              variant="outline"
               onClick={() => onOpenChange(false)}
-              className="rounded-xl mobile-button-secondary"
+              className="enhanced-button-secondary"
             >
               Cancel
-            </Button>
-            <Button 
+            </button>
+            <button 
               type="submit" 
-              className="rounded-xl font-medium bg-primary active:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200 mobile-button-primary"
+              className="enhanced-button-primary"
             >
               {editingExercise ? 'Update Exercise' : 'Add Exercise'}
-            </Button>
-          </DialogFooter>
+            </button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

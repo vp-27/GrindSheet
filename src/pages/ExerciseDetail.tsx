@@ -456,75 +456,72 @@ const ExerciseDetail = () => {
 
         {/* Edit Exercise Log Dialog */}
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="apple-card sm:max-w-md mobile-dialog">
+          <DialogContent className="enhanced-dialog-content">
             <form onSubmit={handleEditSubmit}>
-              <DialogHeader className="pb-4">
-                <DialogTitle className="text-xl font-semibold mobile-dialog-title">Edit Exercise Log</DialogTitle>
-                <DialogDescription className="text-muted-foreground mobile-dialog-description">
+              <div className="enhanced-dialog-header">
+                <DialogTitle className="enhanced-dialog-title">Edit Exercise Log</DialogTitle>
+                <DialogDescription className="enhanced-dialog-description">
                   Update the weight or note for this workout entry.
                 </DialogDescription>
-              </DialogHeader>
+              </div>
               
-              <div className="space-y-6 py-4 mobile-dialog-content">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-weight" className="text-sm font-medium text-gray-700 mobile-label">
-                    Weight (lbs)
-                  </Label>
-                  <Input
-                    id="edit-weight"
-                    name="weight"
-                    type="number"
-                    step="0.5"
-                    min="0"
-                    value={editForm.weight}
-                    onChange={handleEditChange}
-                    onKeyDown={(e) => {
-                      // Prevent non-numeric characters except for allowed keys
-                      if (!/[0-9.]/.test(e.key) && 
-                          !['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
-                        e.preventDefault();
-                      }
-                    }}
-                    className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0 text-lg h-12 mobile-input"
-                    required
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="edit-note" className="text-sm font-medium text-gray-700 mobile-label">
-                    Note (optional)
-                  </Label>
-                  <Textarea
-                    id="edit-note"
-                    name="note"
-                    value={editForm.note}
-                    onChange={handleEditChange}
-                    placeholder="Add a note about this workout..."
-                    rows={3}
-                    className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0 resize-none mobile-textarea"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700 mobile-label">Date & Time</Label>
-                  <div className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-xl">
-                    {editLog && format(new Date(editLog.timestamp), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}
-                  </div>
+              <div className="enhanced-form-group">
+                <label htmlFor="edit-weight" className="enhanced-label">
+                  Weight (lbs)
+                </label>
+                <input
+                  id="edit-weight"
+                  name="weight"
+                  type="number"
+                  step="0.5"
+                  min="0"
+                  value={editForm.weight}
+                  onChange={handleEditChange}
+                  onKeyDown={(e) => {
+                    // Prevent non-numeric characters except for allowed keys
+                    if (!/[0-9.]/.test(e.key) && 
+                        !['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+                      e.preventDefault();
+                    }
+                  }}
+                  className="enhanced-input"
+                  required
+                />
+              </div>
+              
+              <div className="enhanced-form-group">
+                <label htmlFor="edit-note" className="enhanced-label">
+                  Note (optional)
+                </label>
+                <textarea
+                  id="edit-note"
+                  name="note"
+                  value={editForm.note}
+                  onChange={handleEditChange}
+                  placeholder="Add a note about this workout..."
+                  rows={3}
+                  className="enhanced-textarea"
+                />
+              </div>
+              
+              <div className="enhanced-form-group">
+                <label className="enhanced-label">Date & Time</label>
+                <div className="enhanced-info-display">
+                  {editLog && format(new Date(editLog.timestamp), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}
                 </div>
               </div>
               
-              <DialogFooter className="pt-4 mobile-dialog-footer">
-                <Button
+              <div className="enhanced-dialog-footer">
+                <button
                   type="button"
-                  variant="outline"
                   onClick={() => setEditDialogOpen(false)}
-                  className="rounded-xl mobile-button-secondary"
+                  className="enhanced-button-secondary"
                 >
                   Cancel
-                </Button>
-                <Button 
+                </button>
+                <button 
                   type="submit" 
-                  className="rounded-xl bg-primary active:bg-primary/90 text-primary-foreground shadow-lg transition-all duration-200 active:shadow-xl mobile-button-primary"
+                  className="enhanced-button-primary"
                   disabled={isEditSubmitting}
                 >
                   {isEditSubmitting ? (
@@ -535,8 +532,8 @@ const ExerciseDetail = () => {
                   ) : (
                     'Update Log'
                   )}
-                </Button>
-              </DialogFooter>
+                </button>
+              </div>
             </form>
           </DialogContent>
         </Dialog>

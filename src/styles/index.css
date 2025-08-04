@@ -10,6 +10,7 @@
 @import './components/page-transitions.css';
 @import './components/auth.css';
 @import './components/toasts.css';
+@import './components/enhanced-dialog.css';
 
 /* Animation Styles */
 @import './animations/counters.css';

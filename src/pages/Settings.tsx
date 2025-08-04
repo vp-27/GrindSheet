@@ -397,52 +397,54 @@ const Settings: React.FC = () => {
                   <Edit2 className="h-5 w-5 text-muted-foreground" />
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px] apple-card border-border/50">
+              <DialogContent className="enhanced-dialog-content">
                 <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)}>
-                  <DialogHeader>
-                    <DialogTitle className="text-foreground">Edit Profile</DialogTitle>
-                    <DialogDescription className="text-muted-foreground">
+                  <div className="enhanced-dialog-header">
+                    <DialogTitle className="enhanced-dialog-title">Edit Profile</DialogTitle>
+                    <DialogDescription className="enhanced-dialog-description">
                       Update your profile information
                     </DialogDescription>
-                  </DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name" className="text-sm font-medium text-foreground">Name</Label>
-                      <Input
-                        id="name"
-                        value={profileForm.watch('name')}
-                        onChange={(e) => profileForm.setValue('name', e.target.value)}
-                        className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="username" className="text-sm font-medium text-foreground">Username</Label>
-                      <Input
-                        id="username"
-                        value={profileForm.watch('username')}
-                        onChange={(e) => profileForm.setValue('username', e.target.value)}
-                        className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="avatar_url" className="text-sm font-medium text-foreground">Avatar URL</Label>
-                      <Input
-                        id="avatar_url"
-                        value={profileForm.watch('avatar_url')}
-                        onChange={(e) => profileForm.setValue('avatar_url', e.target.value)}
-                        className="rounded-xl border-border/60 bg-background/80 backdrop-blur-sm focus:border-primary focus:ring-0"
-                        placeholder="https://api.dicebear.com/7.x/avataaars/svg?seed=YourName"
-                      />
-                    </div>
                   </div>
-                  <DialogFooter>
-                    <Button 
+                  
+                  <div className="enhanced-form-group">
+                    <label htmlFor="name" className="enhanced-label">Name</label>
+                    <input
+                      id="name"
+                      value={profileForm.watch('name')}
+                      onChange={(e) => profileForm.setValue('name', e.target.value)}
+                      className="enhanced-input"
+                    />
+                  </div>
+                  
+                  <div className="enhanced-form-group">
+                    <label htmlFor="username" className="enhanced-label">Username</label>
+                    <input
+                      id="username"
+                      value={profileForm.watch('username')}
+                      onChange={(e) => profileForm.setValue('username', e.target.value)}
+                      className="enhanced-input"
+                    />
+                  </div>
+                  
+                  <div className="enhanced-form-group">
+                    <label htmlFor="avatar_url" className="enhanced-label">Avatar URL</label>
+                    <input
+                      id="avatar_url"
+                      value={profileForm.watch('avatar_url')}
+                      onChange={(e) => profileForm.setValue('avatar_url', e.target.value)}
+                      className="enhanced-input"
+                      placeholder="https://api.dicebear.com/7.x/avataaars/svg?seed=YourName"
+                    />
+                  </div>
+                  
+                  <div className="enhanced-dialog-footer">
+                    <button 
                       type="submit" 
-                      className="w-full h-11 rounded-xl font-medium bg-primary active:bg-primary/90 text-primary-foreground shadow-sm transition-all duration-200"
+                      className="enhanced-button-primary w-full"
                     >
                       Save Changes
-                    </Button>
-                  </DialogFooter>
+                    </button>
+                  </div>
                 </form>
               </DialogContent>
             </Dialog>
