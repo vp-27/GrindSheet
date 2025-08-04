@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAppContext } from '@/context/useAppContext';
 import { calculateProgress, getOverallProgressChartData, getExerciseProgressChartData } from '@/utils/progressUtils';
 import { generateCurrentTournament } from '@/utils/tournamentUtils';
-import { TrendingUp, Clock, Trophy, ChevronRight, Activity, Zap, Search, X, Filter, TrendingDown } from 'lucide-react';
+import { TrendingUp, Clock, Trophy, ChevronRight, Activity, Zap, Search, X, Filter, TrendingDown, Target, Users } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
@@ -19,10 +19,12 @@ import AnimatedCounter from '@/components/ui/animated-counter';
 import { MobileSlider } from '@/components/ui/mobile-slider';
 import '@/styles/index.css';
 import { Input } from '@/components/ui/input'; // Import Input
+import { Progress } from '@/components/ui/progress'; // Import Progress for circular rings
 import '@/styles/components/search.css'; // Import search styles
+import '@/styles/components/weekly-recommendation-widget.css'; // Import weekly recommendation widget styles
 
 const Dashboard = () => {
-  const { categories, exercises, exerciseLogs } = useAppContext();
+  const { categories, exercises, exerciseLogs, loading } = useAppContext();
   const { profile } = useAuth();
   const { isDark } = useTheme();
   const navigate = useNavigate();
@@ -142,6 +144,102 @@ const Dashboard = () => {
   // Get color for a category based on its index
   const getCategoryColor = (categoryIndex: number) => {
     return chartColors[categoryIndex % chartColors.length];
+  };
+
+  // Calculate weekly category progress for recommendation widget
+  const weeklyCategories = useMemo(() => {
+    if (!exerciseLogs || !exercises || !categories || !profile || 
+        exerciseLogs.length === 0 || exercises.length === 0 || categories.length === 0) return [];
+    
+    const userLogs = exerciseLogs.filter(log => log.userId === profile.id);
+    
+    // Get start of current week (Monday)
+    const now = new Date();
+    const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, etc.
+    const daysFromMonday = currentDay === 0 ? 6 : currentDay - 1; // If Sunday, go back 6 days to Monday
+    const mondayThisWeek = new Date(now);
+    mondayThisWeek.setDate(now.getDate() - daysFromMonday);
+    mondayThisWeek.setHours(0, 0, 0, 0); // Start of Monday
+    
+    const recentLogs = userLogs.filter(log => new Date(log.timestamp) >= mondayThisWeek);
+    
+    return categories.map((category, index) => {
+      const categoryExercises = exercises.filter(ex => ex.categoryId === category.id);
+      const categoryLogs = recentLogs.filter(log => 
+        categoryExercises.some(ex => ex.id === log.exerciseId)
+      );
+      
+      const hasActivity = categoryLogs.length > 0;
+      const color = getCategoryColor(index);
+      
+      return {
+        id: category.id,
+        name: category.name,
+        hasActivity,
+        color,
+        exerciseCount: categoryLogs.length,
+        exercises: categoryExercises
+      };
+    });
+  }, [exerciseLogs, exercises, categories, profile]);
+
+  // Get recommendation based on weekly activity
+  const getRecommendation = useMemo(() => {
+    if (!weeklyCategories.length || !profile) return null;
+    
+    const inactiveCategories = weeklyCategories.filter(cat => !cat.hasActivity);
+    const activeCategories = weeklyCategories.filter(cat => cat.hasActivity);
+    
+    // If no activity at all, suggest any category
+    if (activeCategories.length === 0) {
+      const suggestedCategory = weeklyCategories[Math.floor(Math.random() * weeklyCategories.length)];
+      return {
+        type: 'any',
+        category: suggestedCategory,
+        message: 'Start your week strong',
+        subMessage: 'Hit any muscle group to get going'
+      };
+    }
+    
+    // If missing categories, suggest a specific one
+    if (inactiveCategories.length > 0) {
+      const suggestedCategory = inactiveCategories[0]; // Pick first missing category
+      return {
+        type: 'specific',
+        category: suggestedCategory,
+        message: `Try ${suggestedCategory.name}`,
+        subMessage: `${inactiveCategories.length} groups left this week`
+      };
+    }
+    
+    // All categories hit, encourage consistency
+    return {
+      type: 'complete',
+      category: null,
+      message: 'All groups hit!',
+      subMessage: 'Keep the momentum going'
+    };
+  }, [weeklyCategories, profile]);
+
+  // Handle recommendation click
+  const handleRecommendationClick = () => {
+    if (!getRecommendation) return;
+    
+    if (getRecommendation.type === 'complete') {
+      // Navigate to goals page
+      navigate('/goals');
+    } else {
+      // Navigate to home and scroll to category
+      navigate('/');
+      if (getRecommendation.category) {
+        setTimeout(() => {
+          const categoryElement = document.querySelector(`[data-category-id="${getRecommendation.category.id}"]`);
+          if (categoryElement) {
+            categoryElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      }
+    }
   };
 
   // Filter logs based on selected category
@@ -513,6 +611,105 @@ const Dashboard = () => {
                   <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
                   <p className="text-lg font-medium mb-2">No data available yet</p>
                   <p>Start logging exercises to see your progress!</p>
+                </div>
+              )}
+            </div>
+
+            {/* Weekly Category Recommendation Widget */}
+            <div className="mt-4 -mx-4 px-4">
+              {loading || !exerciseLogs || !exercises || !categories || !profile || 
+               categories.length === 0 || exercises.length === 0 || weeklyCategories.length === 0 || !getRecommendation ? (
+                /* Loading State */
+                <div className="apple-health-card animate-pulse">
+                  <div className="p-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex-1">
+                        <div className="h-5 bg-muted rounded-md w-32 mb-2"></div>
+                        <div className="h-4 bg-muted/60 rounded-md w-24"></div>
+                      </div>
+                      <div className="h-5 w-5 bg-muted/40 rounded"></div>
+                    </div>
+                    <div className="flex items-center justify-center">
+                      <div className="flex items-center gap-2">
+                        {[...Array(4)].map((_, i) => (
+                          <div key={i} className="flex flex-col items-center gap-0.5">
+                            <div className="w-4 h-4 bg-muted/40 rounded-full"></div>
+                            <div className="h-3 w-6 bg-muted/30 rounded"></div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Actual Widget */
+                <div 
+                  className={`apple-health-card weekly-recommendation-card group cursor-pointer transition-all duration-200 hover:shadow-lg active:scale-[0.99] ${
+                    getRecommendation.type === 'any' ? 'weekly-recommendation-card--gradient' : ''
+                  }`}
+                  onClick={handleRecommendationClick}
+                  style={getRecommendation.type === 'any' ? {
+                    '--category-colors': weeklyCategories.map(cat => cat.color).join(', '),
+                    '--category-color': '#10b981',
+                    '--category-color-rgb': '16, 185, 129'
+                  } as React.CSSProperties : {
+                    '--category-color': getRecommendation.category?.color || '#10b981',
+                    '--category-color-rgb': (getRecommendation.category?.color || '#10b981').replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
+                  } as React.CSSProperties}
+                >
+                  <div className="p-2">
+                    {/* Header section */}
+                    <div className="flex items-start justify-between mb-1">
+                      <div className="flex-1">
+                        <h3 className="apple-health-card-title mb-0.5 text-base">
+                          {getRecommendation.message}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {getRecommendation.subMessage}
+                        </p>
+                      </div>
+                      
+                      {/* Top right: completion trophy or AI sparkles icon */}
+                      <div className="ml-2">
+                        {getRecommendation.type === 'complete' ? (
+                          <Trophy className="w-5 h-5 text-amber-500" />
+                        ) : (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors"
+                          >
+                            <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Progress circles section */}
+                    <div className="flex items-center justify-center">
+                      <div className="flex items-center gap-2">
+                        {weeklyCategories.map((category) => (
+                          <div key={category.id} className="flex flex-col items-center gap-0.5">
+                            <div 
+                              className={`w-4 h-4 rounded-full border-2 transition-all duration-300 weekly-category-circle ${
+                                category.hasActivity 
+                                  ? 'active' 
+                                  : 'inactive'
+                              }`}
+                              style={category.hasActivity ? {
+                                '--circle-bg-color': category.color,
+                                '--circle-shadow-color': `${category.color}20`
+                              } as React.CSSProperties : {}}
+                            />
+                            <span className="text-xs text-muted-foreground font-medium text-center leading-tight max-w-14">
+                              {category.name}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
