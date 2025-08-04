@@ -247,3 +247,44 @@
     padding-right: 0.75rem;
   }
 }
+
+/* PWA Dialog Optimizations for iOS Safari and Chrome Mobile */
+@media screen and (max-device-width: 768px) {
+  /* Prevent viewport zoom on input focus */
+  .mobile-dialog input,
+  .mobile-dialog select,
+  .mobile-dialog textarea {
+    font-size: max(16px, 1rem) !important;
+    /* This prevents iOS Safari from zooming */
+  }
+  
+  /* Enhanced dialog positioning for PWA */
+  .mobile-dialog[data-state="open"] {
+    /* Ensure dialog stays within safe areas */
+    margin: env(safe-area-inset-top, 1rem) env(safe-area-inset-right, 1rem) env(safe-area-inset-bottom, 1rem) env(safe-area-inset-left, 1rem) !important;
+    max-height: calc(100vh - env(safe-area-inset-top, 2rem) - env(safe-area-inset-bottom, 2rem)) !important;
+  }
+  
+  /* PWA-specific keyboard handling */
+  @supports (-webkit-touch-callout: none) {
+    /* iOS Safari specific */
+    .mobile-dialog[data-state="open"] {
+      /* Account for iOS keyboard and bottom home indicator */
+      max-height: calc(100vh - 4rem - env(safe-area-inset-bottom, 0px)) !important;
+    }
+  }
+}
+
+/* iPhone specific optimizations */
+@media screen and (max-device-width: 430px) {
+  .mobile-dialog {
+    width: calc(100vw - 1rem) !important;
+    margin: 0.5rem !important;
+  }
+  
+  .mobile-dialog[data-state="open"] {
+    width: calc(100vw - 1rem) !important;
+    margin: 0.5rem !important;
+    max-width: none !important;
+  }
+}

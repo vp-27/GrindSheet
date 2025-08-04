@@ -30,6 +30,27 @@
     left: 50% !important;
     top: 50% !important;
     transform: translate(-50%, -50%) !important;
+    /* PWA specific optimizations */
+    width: calc(100vw - 2rem) !important;
+    max-width: 425px !important;
+    border-radius: 1rem !important;
+    /* Improved scrolling behavior */
+    overflow: auto;
+  }
+
+  /* Enhanced viewport handling for PWA */
+  .mobile-dialog[data-state="open"] {
+    left: 50% !important;
+    top: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    width: calc(100vw - 2rem) !important;
+    max-width: 425px !important;
+    min-width: unset !important;
+    box-sizing: border-box !important;
+    padding: 1rem !important;
+    /* Prevent zoom on input focus */
+    font-size: 16px;
   }
 
   /* Mobile Dialog Header */
@@ -64,6 +85,8 @@
     padding: 0.75rem 1rem;
     border-radius: 0.75rem;
     line-height: 1.5;
+    /* Prevent zoom on focus in iOS Safari */
+    font-size: max(1rem, 16px);
   }
 
   /* Mobile Select Fields */
@@ -72,6 +95,8 @@
     font-size: 1rem;
     padding: 0.75rem 1rem;
     border-radius: 0.75rem;
+    /* Prevent zoom on focus in iOS Safari */
+    font-size: max(1rem, 16px);
   }
 
   /* Mobile Dialog Footer */
@@ -104,6 +129,8 @@
     padding: 0.75rem 1rem;
     border-radius: 0.75rem;
     line-height: 1.5;
+    /* Prevent zoom on focus in iOS Safari */
+    font-size: max(1rem, 16px);
   }
 
   /* Force Radix DialogContent to center and size correctly on mobile */

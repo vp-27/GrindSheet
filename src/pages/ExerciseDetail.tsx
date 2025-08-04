@@ -456,18 +456,18 @@ const ExerciseDetail = () => {
 
         {/* Edit Exercise Log Dialog */}
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-          <DialogContent className="apple-card sm:max-w-md">
+          <DialogContent className="apple-card sm:max-w-md mobile-dialog">
             <form onSubmit={handleEditSubmit}>
               <DialogHeader className="pb-4">
-                <DialogTitle className="text-xl font-semibold">Edit Exercise Log</DialogTitle>
-                <DialogDescription className="text-muted-foreground">
+                <DialogTitle className="text-xl font-semibold mobile-dialog-title">Edit Exercise Log</DialogTitle>
+                <DialogDescription className="text-muted-foreground mobile-dialog-description">
                   Update the weight or note for this workout entry.
                 </DialogDescription>
               </DialogHeader>
               
-              <div className="space-y-6 py-4">
+              <div className="space-y-6 py-4 mobile-dialog-content">
                 <div className="space-y-2">
-                  <Label htmlFor="edit-weight" className="text-sm font-medium text-gray-700">
+                  <Label htmlFor="edit-weight" className="text-sm font-medium text-gray-700 mobile-label">
                     Weight (lbs)
                   </Label>
                   <Input
@@ -485,13 +485,13 @@ const ExerciseDetail = () => {
                         e.preventDefault();
                       }
                     }}
-                    className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0 text-lg h-12"
+                    className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0 text-lg h-12 mobile-input"
                     required
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="edit-note" className="text-sm font-medium text-gray-700">
+                  <Label htmlFor="edit-note" className="text-sm font-medium text-gray-700 mobile-label">
                     Note (optional)
                   </Label>
                   <Textarea
@@ -501,30 +501,30 @@ const ExerciseDetail = () => {
                     onChange={handleEditChange}
                     placeholder="Add a note about this workout..."
                     rows={3}
-                    className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0 resize-none"
+                    className="rounded-xl border-gray-200/60 bg-white/80 backdrop-blur-sm focus:border-gray-300 focus:ring-0 resize-none mobile-textarea"
                   />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">Date & Time</Label>
+                  <Label className="text-sm font-medium text-gray-700 mobile-label">Date & Time</Label>
                   <div className="text-sm text-muted-foreground p-3 bg-muted/50 rounded-xl">
                     {editLog && format(new Date(editLog.timestamp), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}
                   </div>
                 </div>
               </div>
               
-              <DialogFooter className="pt-4">
+              <DialogFooter className="pt-4 mobile-dialog-footer">
                 <Button
                   type="button"
                   variant="outline"
                   onClick={() => setEditDialogOpen(false)}
-                  className="rounded-xl"
+                  className="rounded-xl mobile-button-secondary"
                 >
                   Cancel
                 </Button>
                 <Button 
                   type="submit" 
-                  className="rounded-xl bg-primary active:bg-primary/90 text-primary-foreground shadow-lg transition-all duration-200 active:shadow-xl"
+                  className="rounded-xl bg-primary active:bg-primary/90 text-primary-foreground shadow-lg transition-all duration-200 active:shadow-xl mobile-button-primary"
                   disabled={isEditSubmitting}
                 >
                   {isEditSubmitting ? (
