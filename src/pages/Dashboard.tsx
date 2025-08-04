@@ -665,6 +665,21 @@ const Dashboard = () => {
               )}
             </div>
 
+            {/* Chart Tooltip - Positioned above weekly recommendation widget */}
+            <div className="relative z-50">
+              {chartHoverData && (
+                <div className="tooltip-card-enter-active absolute -top-2 left-1/2 -translate-x-1/2">
+                  <ChartTooltipCard 
+                    hoverData={chartHoverData}
+                    showPercentage={!selectedCategoryId}
+                    weightUnit="lbs"
+                    multiple={true}
+                    customColors={chartColors}
+                  />
+                </div>
+              )}
+            </div>
+
             {/* Weekly Category Recommendation Widget */}
             <div className="mt-4 -mx-4 px-4">
               {loading || !exerciseLogs || !exercises || !categories || !profile || 
@@ -863,20 +878,7 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Chart Tooltip - Move here so it appears above the sticky control island */}
-            <div className="relative z-40">
-              {chartHoverData && (
-                <div className="tooltip-card-enter-active absolute -top-2 left-1/2 -translate-x-1/2">
-                  <ChartTooltipCard 
-                    hoverData={chartHoverData}
-                    showPercentage={!selectedCategoryId}
-                    weightUnit="lbs"
-                    multiple={true}
-                    customColors={chartColors}
-                  />
-                </div>
-              )}
-            </div>
+
 
           {/* Exercise Progress Grid */}
         <div className="relative exercise-grid-container mt-4">
