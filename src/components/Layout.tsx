@@ -326,12 +326,15 @@ const AddExerciseButton: React.FC<{
       onClick={handleClick}
       aria-label={isModalOpen ? "Close exercise modal" : "Add exercise"}
       className={cn(
-        "rounded-full h-14 w-14 flex items-center justify-center shadow-xl transition-all duration-300 backdrop-blur-lg group hover:scale-105 active:scale-95 focus:outline-none",
+        "rounded-full h-14 w-14 flex items-center justify-center transition-all duration-300 group hover:scale-105 active:scale-95 focus:outline-none",
         isModalOpen 
           ? "bg-red-500 hover:bg-red-600 text-white shadow-2xl scale-105 shadow-red-500/25" 
-          : "text-white shadow-2xl hover:shadow-teal-500/25"
+          : "text-white shadow-2xl"
       )}
-      style={!isModalOpen ? { backgroundColor: '#14b8a6' } : undefined}
+      style={!isModalOpen ? {
+        backgroundColor: '#14b8a6',
+        boxShadow: '0 25px 50px -12px rgb(20 184 166 / 0.25), 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
+      } : undefined}
     >
       <Plus className={cn(
         "h-6 w-6 transition-all duration-300 group-hover:scale-110", 

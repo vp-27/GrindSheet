@@ -249,15 +249,14 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                     ))}
                   </SelectContent>
                 </Select>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setIsAddCategoryOpen(true)}
-                    className="shrink-0 rounded-lg border border-[rgba(200,200,200,0.7)] dark:border-[rgba(80,80,80,0.7)] bg-white dark:bg-[#1c1c1e] hover:bg-gray-100 dark:hover:bg-[#232326] transition-colors"
-                  >
-                    <Plus className="h-4 w-4 text-muted-foreground dark:text-gray-300" />
-                  </Button>
+                <button
+                  type="button"
+                  onClick={() => setIsAddCategoryOpen(true)}
+                  aria-label="Add new category"
+                  className="shrink-0 rounded-full h-10 w-10 flex items-center justify-center focus:outline-none brand-add-button group active:scale-95"
+                >
+                  <Plus className="h-4 w-4 transition-all duration-300 group-active:scale-110" />
+                </button>
               </div>
             </div>
 
@@ -291,16 +290,28 @@ const AddExerciseModal: React.FC<AddExerciseModalProps> = ({ isOpen, onOpenChang
                     )}
                   </SelectContent>
                 </Select>
-                <Button
+                <button
                   type="button"
-                  variant="outline"
-                  size="icon"
                   onClick={() => setIsAddExerciseOpen(true)}
                   disabled={!selectedCategoryId}
-                  className="shrink-0 rounded-lg border border-[rgba(200,200,200,0.7)] dark:border-[rgba(80,80,80,0.7)] bg-white dark:bg-[#1c1c1e] hover:bg-gray-100 dark:hover:bg-[#232326] transition-colors"
+                  aria-label="Add new exercise"
+                  className={cn(
+                    "shrink-0 rounded-full h-10 w-10 flex items-center justify-center focus:outline-none transition-all duration-300 group",
+                    !selectedCategoryId 
+                      ? "brand-add-button opacity-50 cursor-not-allowed" 
+                      : "shadow-lg active:scale-95"
+                  )}
+                  style={selectedCategoryId && categoryColors ? {
+                    backgroundColor: categoryColors.primary,
+                    boxShadow: `0 8px 16px -4px ${categoryColors.primary}40, 0 4px 8px -2px ${categoryColors.primary}30`,
+                    color: 'white'
+                  } : undefined}
                 >
-                  <Plus className="h-4 w-4 text-muted-foreground dark:text-gray-300" />
-                </Button>
+                  <Plus className={cn(
+                    "h-4 w-4 transition-all duration-300",
+                    selectedCategoryId ? "group-active:scale-110" : ""
+                  )} />
+                </button>
               </div>
             </div>
 
