@@ -268,12 +268,18 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
     return filterDataByTimeframe(data, currentTimeframe);
   }, [data, currentTimeframe, disableInternalTimeframeFilter]);
 
+  // Determine which data array to use for rendering (the chart displays this data)
+  const dataArrayForChart = disableInternalTimeframeFilter ? data : filteredData;
+
   // Calculate percentage gain for current timeframe - using chart start date
   const timeframeGain = useMemo(() => {
+    // Determine which data array to use for calculations
+    const dataArrayToUse = disableInternalTimeframeFilter ? data : filteredData;
+    
     // If hovering, use hovered point for gain
-    if (hoveredIndex !== null && filteredData.length > 0) {
-      const chartStartPoint = filteredData[0];
-      const hoveredPoint = filteredData[hoveredIndex];
+    if (hoveredIndex !== null && dataArrayToUse.length > 0) {
+      const chartStartPoint = dataArrayToUse[0];
+      const hoveredPoint = dataArrayToUse[hoveredIndex];
       if (!hoveredPoint) return 0;
       if (multiple && showPercentage) {
         const keys = Object.keys(hoveredPoint).filter(key => key !== 'date');
@@ -331,11 +337,9 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
       }
     }
     // Default: use last point
-    // If disableInternalTimeframeFilter, use data as-is for gain calculation
-    const arr = disableInternalTimeframeFilter ? data : filteredData;
-    if (!arr || arr.length === 0) return null;
-    const chartStartPoint = arr[0];
-    const chartEndPoint = arr[arr.length - 1];
+    if (!dataArrayToUse || dataArrayToUse.length === 0) return null;
+    const chartStartPoint = dataArrayToUse[0];
+    const chartEndPoint = dataArrayToUse[dataArrayToUse.length - 1];
     if (multiple && showPercentage) {
       const keys = Object.keys(chartEndPoint).filter(key => key !== 'date');
       let totalGain = 0;
@@ -414,8 +418,9 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
         });
       }
 
-      // Find hovered index in filteredData
-      const idx = filteredData.findIndex(d => d.date === payload.date);
+      // Find hovered index in the correct data array
+      const dataArrayToUse = disableInternalTimeframeFilter ? data : filteredData;
+      const idx = dataArrayToUse.findIndex(d => d.date === payload.date);
       setHoveredIndex(idx);
 
       onHoverData({
@@ -435,7 +440,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
   };
 
   useEffect(() => {
-    if (filteredData && filteredData.length === 1) {
+    if (dataArrayForChart && dataArrayForChart.length === 1) {
       // For a single point, the animation might not trigger onAnimationEnd,
       // so we explicitly set the dot to be visible.
       setDotVisible(true);
@@ -443,7 +448,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
     // For multiple points, onAnimationEnd will handle setting dotVisible to true.
     // We don't reset to false here to avoid potential flickers if data changes
     // while an animation has already completed and set it to true.
-  }, [filteredData]);
+  }, [dataArrayForChart]);
 
   useEffect(() => {
     const timeout = setTimeout(() => setDisableInitialAnimation(false), 50);
@@ -523,7 +528,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
       <div className={`relative ${blendWithBackground ? 'px-0' : 'p-0'}`}>
         <ResponsiveContainer width="100%" height={240}>
           <LineChart
-            data={filteredData}
+            data={dataArrayForChart}
             margin={{
               top: 15,
               right: 10,
@@ -594,7 +599,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
             />
             {multiple ? (
               <>
-                {Object.keys(filteredData[0] || {})
+                {Object.keys(dataArrayForChart[0] || {})
                   .filter(key => key !== 'date')
                   .map((key, index) => (
                     <Line
@@ -604,7 +609,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
                       name={key}
                       stroke={colors[index % colors.length]}
                       strokeWidth={appleStyle ? 2.5 : 2}
-                      dot={renderEndDot(key, filteredData)}
+                      dot={renderEndDot(key, dataArrayForChart)}
                       activeDot={false}
                       animationDuration={disableInitialAnimation ? 0 : 800}
                       animationBegin={index * 100}
@@ -618,7 +623,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
                 dataKey={showPercentage ? "percentGain" : "weight"}
                 stroke={customColors ? customColors[0] : (appleStyle ? "#34C759" : "#3b82f6")}
                 strokeWidth={appleStyle ? 2.5 : 2}
-                dot={renderEndDot(showPercentage ? "percentGain" : "weight", filteredData)}
+                dot={renderEndDot(showPercentage ? "percentGain" : "weight", dataArrayForChart)}
                 activeDot={false}
                 animationDuration={disableInitialAnimation ? 0 : 800}
                 onAnimationEnd={() => setDotVisible(true)}
@@ -633,6 +638,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
         <div className="flex justify-center mt-4 mb-2">
           <MobileSlider
             options={[
+              { id: '1W', label: '1W' },
               { id: '2W', label: '2W' },
               { id: '1M', label: '1M' },
               { id: 'ALL', label: 'ALL' }

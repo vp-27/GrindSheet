@@ -77,10 +77,10 @@ const ExerciseDetail = () => {
   // Get chart data with timeframe filtering
   const chartData = useMemo(() => {
     if (!exerciseId) return [];
-    const data = getProgressChartData(exerciseLogs, exerciseId, currentTimeframe);
-    console.log('ExerciseDetail chart data:', data);
+    // Pass ALL data to ProgressChart and let it handle timeframe filtering internally
+    const data = getProgressChartData(exerciseLogs, exerciseId, 'ALL');
     return data;
-  }, [exerciseLogs, exerciseId, currentTimeframe]);
+  }, [exerciseLogs, exerciseId]);
 
   // Get category colors
   const categoryColors = useMemo(() => {
@@ -286,7 +286,6 @@ const ExerciseDetail = () => {
               hideTooltip={true}
               defaultTimeframe="1M"
               timeframe={currentTimeframe}
-              disableInternalTimeframeFilter={true}
             />
           ) : (
             <div className="text-center text-muted-foreground py-16">
