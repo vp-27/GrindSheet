@@ -90,7 +90,7 @@ export const calculateProgress = (logs: ExerciseLog[], exerciseId: string, exerc
   };
 };
 
-export const getProgressChartData = (logs: ExerciseLog[], exerciseId: string, timeframeFilter?: '1W' | '2W' | '1M' | 'ALL'): ProgressChartData[] => {
+export const getProgressChartData = (logs: ExerciseLog[], exerciseId: string, timeframeFilter?: '2W' | '1M' | 'ALL'): ProgressChartData[] => {
   // Filter logs for this exercise and sort by timestamp (oldest first)
   const allExerciseLogs = logs
     .filter(log => log.exerciseId === exerciseId)
@@ -107,9 +107,6 @@ export const getProgressChartData = (logs: ExerciseLog[], exerciseId: string, ti
     const cutoffDate = new Date();
     
     switch (timeframeFilter) {
-      case '1W':
-        cutoffDate.setDate(now.getDate() - 7);
-        break;
       case '2W':
         cutoffDate.setDate(now.getDate() - 14);
         break;
@@ -141,9 +138,6 @@ export const getProgressChartData = (logs: ExerciseLog[], exerciseId: string, ti
     const cutoffDate = new Date();
     
     switch (timeframeFilter) {
-      case '1W':
-        cutoffDate.setDate(now.getDate() - 7);
-        break;
       case '2W':
         cutoffDate.setDate(now.getDate() - 14);
         break;

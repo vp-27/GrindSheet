@@ -41,7 +41,7 @@ const ExerciseDetail = () => {
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
   
   // Chart timeframe state
-  const [currentTimeframe, setCurrentTimeframe] = useState<'1W' | '2W' | '1M' | 'ALL'>('1M');
+  const [currentTimeframe, setCurrentTimeframe] = useState<'2W' | '1M' | 'ALL'>('1M');
   const [timeframeGain, setTimeframeGain] = useState<number | null>(null);
   const [chartHoverData, setChartHoverData] = useState<any>(null);
   
@@ -90,7 +90,7 @@ const ExerciseDetail = () => {
   }, [category]);
   
   // Handle timeframe changes from chart
-  const handleTimeframeChange = (timeframe: '1W' | '2W' | '1M' | 'ALL', gain: number | null) => {
+  const handleTimeframeChange = (timeframe: '2W' | '1M' | 'ALL', gain: number | null) => {
     setCurrentTimeframe(timeframe);
     setTimeframeGain(gain);
   };
@@ -367,17 +367,22 @@ const ExerciseDetail = () => {
             </div>
             
             {/* Progress indicator */}
-            {((timeframeGain !== null && timeframeGain !== 0) || (progress?.percentGainFromStart !== undefined && progress.percentGainFromStart > 0)) && (
+            {(timeframeGain !== null || (progress?.percentGainFromStart !== undefined && progress.percentGainFromStart > 0)) && (
               <div className="mt-4 pt-4 border-t border-border/50">
                 <div className="flex items-center justify-center gap-2">
                   <TrendingUp className="w-4 h-4 text-teal-500" />
                   <span className="text-sm font-medium text-foreground">
-                    {timeframeGain !== null && timeframeGain !== 0 ? (
+                    {timeframeGain !== null ? (
                       <>
                         {timeframeGain >= 0 ? '+' : ''}
                         <AnimatedCounter 
                           value={timeframeGain}
-                          formatValue={(val) => `${val.toFixed(1)}% ${currentTimeframe} progress`}
+                          formatValue={(val) => {
+                            const timeframeLabel = currentTimeframe === '2W' ? '2-week' : 
+                                                 currentTimeframe === '1M' ? '1-month' : 
+                                                 'all-time';
+                            return `${val.toFixed(1)}% ${timeframeLabel} progress`;
+                          }}
                           duration={500}
                           className="tabular-nums"
                         />
