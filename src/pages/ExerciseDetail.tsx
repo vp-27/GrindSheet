@@ -40,8 +40,7 @@ const ExerciseDetail = () => {
   const [editForm, setEditForm] = useState({ weight: '', note: '' });
   const [isEditSubmitting, setIsEditSubmitting] = useState(false);
   
-  // Chart timeframe state
-  const [currentTimeframe, setCurrentTimeframe] = useState<'2W' | '1M' | 'ALL'>('1M');
+  // Chart timeframe state - will be set intelligently based on data
   const [timeframeGain, setTimeframeGain] = useState<number | null>(null);
   const [chartHoverData, setChartHoverData] = useState<any>(null);
   
@@ -81,6 +80,60 @@ const ExerciseDetail = () => {
     const data = getProgressChartData(exerciseLogs, exerciseId, 'ALL');
     return data;
   }, [exerciseLogs, exerciseId]);
+
+  // Intelligently determine the best timeframe based on data distribution
+  const bestTimeframe = useMemo((): '2W' | '1M' | 'ALL' => {
+    if (!chartData || chartData.length === 0) return '1M';
+    
+    const now = new Date();
+    const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+    const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    
+    // Sort data points by date (newest first)
+    const sortedData = [...chartData].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    
+    // Count data points in different timeframes
+    const pointsIn2W = sortedData.filter(point => new Date(point.date) >= twoWeeksAgo).length;
+    const pointsIn1M = sortedData.filter(point => new Date(point.date) >= oneMonthAgo).length;
+    const totalPoints = sortedData.length;
+    
+    // Get the most recent data point
+    const mostRecentDate = new Date(sortedData[0].date);
+    
+    // If the most recent data is more than 1 month old, show ALL to see historical progress
+    if (mostRecentDate < oneMonthAgo) {
+      return 'ALL';
+    }
+    
+    // If we have good activity in the last 2 weeks (2+ points), and the most recent point is within 2 weeks
+    if (pointsIn2W >= 2 && mostRecentDate >= twoWeeksAgo) {
+      return '2W';
+    }
+    
+    // If we have decent activity in the last month (2+ points), show 1M
+    if (pointsIn1M >= 2) {
+      return '1M';
+    }
+    
+    // If we have sparse data but some recent activity, show ALL to provide context
+    return 'ALL';
+  }, [chartData]);
+
+  // Initialize currentTimeframe with the intelligently determined best timeframe
+  const [currentTimeframe, setCurrentTimeframe] = useState<'2W' | '1M' | 'ALL'>('1M');
+  const [userSelectedTimeframe, setUserSelectedTimeframe] = useState<boolean>(false);
+  
+  // Update timeframe when bestTimeframe changes, but only if user hasn't manually selected a different one
+  useEffect(() => {
+    if (!userSelectedTimeframe) {
+      setCurrentTimeframe(bestTimeframe);
+    }
+  }, [bestTimeframe, userSelectedTimeframe]);
+  
+  // Reset user selection when exercise changes
+  useEffect(() => {
+    setUserSelectedTimeframe(false);
+  }, [exerciseId]);
 
   // Get category colors
   const categoryColors = useMemo(() => {
