@@ -10,6 +10,7 @@ import { TrendingUp, Clock, Trophy, ChevronRight, Activity, Zap, Search, X, Filt
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import ProgressChart from '@/components/dashboard/ProgressChart';
+import ChartWithLoader from '@/components/dashboard/ChartWithLoader';
 import ChartTooltipCard from '@/components/dashboard/ChartTooltipCard';
 import { getCategoryColors, getCategoryKeyByName, getCategoryChartColors } from '@/utils/categoryColors';
 import { format } from 'date-fns';
@@ -648,33 +649,26 @@ const Dashboard = () => {
                   </div>
                 </div>
               )}
-              {chartData.length > 0 ? (
-                <ProgressChart 
-                  data={chartData} 
-                  multiple={true}
-                  categoryId={selectedCategoryId || undefined}
-                  weightUnit="lbs"
-                  showPercentage={!selectedCategoryId}
-                  appleStyle={true}
-                  blendWithBackground={true}
-                  customColors={chartColors}
-                  onHoverData={setChartHoverData}
-                  onTimeframeChange={(tf, gain) => {
-                    setChartTimeframe(tf as '2W' | '1M' | 'ALL');
-                    setDynamicPercentGain(gain);
-                  }}
-                  hideTooltip={true}
-                  hideTimeframeControls={true}
-                  timeframe={chartTimeframe}
-                  disableInternalTimeframeFilter={true} // NEW: let parent handle windowing
-                />
-              ) : (
-                <div className="text-center text-muted-foreground py-16">
-                  <Activity className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-lg font-medium mb-2">No data available yet</p>
-                  <p>Start logging exercises to see your progress!</p>
-                </div>
-              )}
+              <ChartWithLoader
+                data={chartData}
+                loading={loading || !exercises.length || !categories.length}
+                multiple={true}
+                categoryId={selectedCategoryId || undefined}
+                weightUnit="lbs"
+                showPercentage={!selectedCategoryId}
+                appleStyle={true}
+                blendWithBackground={true}
+                customColors={chartColors}
+                onHoverData={setChartHoverData}
+                onTimeframeChange={(tf, gain) => {
+                  setChartTimeframe(tf as '2W' | '1M' | 'ALL');
+                  setDynamicPercentGain(gain);
+                }}
+                hideTooltip={true}
+                hideTimeframeControls={true}
+                timeframe={chartTimeframe}
+                disableInternalTimeframeFilter={true} // NEW: let parent handle windowing
+              />
             </div>
 
             {/* Chart Tooltip - Positioned above weekly recommendation widget */}

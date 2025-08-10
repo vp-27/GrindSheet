@@ -1,0 +1,61 @@
+/* Chart Loader Transition Styles */
+
+/* Smooth transition classes for chart loading states */
+.chart-loader-container {
+  position: relative;
+  min-height: 200px;
+}
+
+.chart-loader-fade-enter {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.chart-loader-fade-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 300ms ease-out, transform 300ms ease-out;
+}
+
+.chart-loader-fade-exit {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.chart-loader-fade-exit-active {
+  opacity: 0;
+  transform: translateY(-8px);
+  transition: opacity 300ms ease-out, transform 300ms ease-out;
+}
+
+/* Enhance chart appearance transitions */
+.chart-data-ready {
+  animation: slideInUp 400ms ease-out;
+}
+
+@keyframes slideInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Stagger animation for when chart elements appear */
+.chart-content-stagger {
+  animation: fadeInStagger 500ms ease-out both;
+}
+
+@keyframes fadeInStagger {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
