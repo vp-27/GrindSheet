@@ -50,10 +50,12 @@ const ChartSkeleton: React.FC<ChartSkeletonProps> = ({
         {/* Animated chart skeleton */}
         <div className="absolute inset-4">
           {/* Y-axis labels */}
-          <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-muted-foreground/60">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="animate-pulse chart-skeleton-breathe">
-                <div className="h-3 bg-muted/40 rounded w-8" />
+          <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-muted-foreground/40">
+            {['100%', '75%', '50%', '25%', '0%'].map((label, i) => (
+              <div key={i} className="animate-pulse flex items-center">
+                <div className={`h-2.5 bg-muted/30 rounded-sm y-axis-label-${i}`}>
+                  <div className={`h-full bg-gradient-to-r from-muted/50 to-transparent rounded-sm chart-skeleton-shimmer y-axis-shimmer-${i}`} />
+                </div>
               </div>
             ))}
           </div>
@@ -63,38 +65,67 @@ const ChartSkeleton: React.FC<ChartSkeletonProps> = ({
             <svg className="w-full h-full" viewBox="0 0 100 100">
               <defs>
                 <linearGradient id="shimmer-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'} />
-                  <stop offset="50%" stopColor={isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'} />
-                  <stop offset="100%" stopColor={isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)'} />
+                  <stop offset="0%" stopColor={isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} />
+                  <stop offset="50%" stopColor={isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'} />
+                  <stop offset="100%" stopColor={isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} />
                   <animateTransform
                     attributeName="gradientTransform"
                     type="translate"
                     values="-100 0;100 0;-100 0"
-                    dur="2s"
+                    dur="3s"
                     repeatCount="indefinite"
                   />
                 </linearGradient>
+                
+                {/* Gradient fill for chart area */}
+                <linearGradient id="area-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stopColor={isDark ? 'rgba(52, 199, 89, 0.1)' : 'rgba(52, 199, 89, 0.08)'} />
+                  <stop offset="100%" stopColor={isDark ? 'rgba(52, 199, 89, 0.02)' : 'rgba(52, 199, 89, 0.01)'} />
+                </linearGradient>
               </defs>
 
-              {/* Multiple skeleton lines */}
+              {/* Background grid lines */}
+              <g opacity="0.1">
+                {/* Horizontal grid lines */}
+                {[20, 40, 60, 80].map((y) => (
+                  <line key={y} x1="5" y1={y} x2="95" y2={y} stroke={isDark ? '#ffffff' : '#000000'} strokeWidth="0.5" />
+                ))}
+                {/* Vertical grid lines */}
+                {[20, 40, 60, 80].map((x) => (
+                  <line key={x} x1={x} y1="10" x2={x} y2="90" stroke={isDark ? '#ffffff' : '#000000'} strokeWidth="0.5" />
+                ))}
+              </g>
+
+              {/* Main trend line with realistic curve */}
               <path
-                d="M 10 80 Q 25 60, 40 70 T 70 45 T 90 30"
+                d="M 8 85 Q 20 75, 35 65 T 55 55 T 75 45 T 92 35"
                 stroke="url(#shimmer-gradient)"
-                strokeWidth="2.5"
+                strokeWidth="3"
                 fill="none"
                 strokeLinecap="round"
-                opacity="0.6"
+                strokeLinejoin="round"
+                opacity="0.7"
               />
+
+              {/* Area fill under main line */}
               <path
-                d="M 10 85 Q 25 75, 40 60 T 70 40 T 90 25"
+                d="M 8 85 Q 20 75, 35 65 T 55 55 T 75 45 T 92 35 L 92 90 L 8 90 Z"
+                fill="url(#area-gradient)"
+                opacity="0.3"
+              />
+
+              {/* Secondary trend lines */}
+              <path
+                d="M 8 80 Q 25 70, 40 60 T 70 50 T 92 40"
                 stroke="url(#shimmer-gradient)"
                 strokeWidth="2.5"
                 fill="none"
                 strokeLinecap="round"
                 opacity="0.4"
               />
+              
               <path
-                d="M 10 90 Q 25 80, 40 85 T 70 65 T 90 50"
+                d="M 8 75 Q 25 65, 40 70 T 70 60 T 92 45"
                 stroke="url(#shimmer-gradient)"
                 strokeWidth="2.5"
                 fill="none"
@@ -102,24 +133,36 @@ const ChartSkeleton: React.FC<ChartSkeletonProps> = ({
                 opacity="0.3"
               />
 
-              {/* Animated dots at end of lines */}
-              <circle cx="90" cy="30" r="3" fill={isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)'}>
-                <animate attributeName="opacity" values="0.4;0.8;0.4" dur="2s" repeatCount="indefinite" />
+              {/* Animated dots at end of lines with pulsing */}
+              <circle cx="92" cy="35" r="3.5" fill={isDark ? 'rgba(52, 199, 89, 0.6)' : 'rgba(52, 199, 89, 0.8)'}>
+                <animate attributeName="r" values="3.5;4.5;3.5" dur="2s" repeatCount="indefinite" />
+                <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite" />
               </circle>
-              <circle cx="90" cy="25" r="3" fill={isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)'}>
-                <animate attributeName="opacity" values="0.3;0.6;0.3" dur="2s" repeatCount="indefinite" begin="0.5s" />
+              <circle cx="92" cy="40" r="3" fill={isDark ? 'rgba(90, 200, 250, 0.5)' : 'rgba(90, 200, 250, 0.7)'}>
+                <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite" begin="0.7s" />
+                <animate attributeName="opacity" values="0.5;0.8;0.5" dur="2s" repeatCount="indefinite" begin="0.7s" />
               </circle>
-              <circle cx="90" cy="50" r="3" fill={isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}>
-                <animate attributeName="opacity" values="0.2;0.5;0.2" dur="2s" repeatCount="indefinite" begin="1s" />
+              <circle cx="92" cy="45" r="2.5" fill={isDark ? 'rgba(255, 149, 0, 0.4)' : 'rgba(255, 149, 0, 0.6)'}>
+                <animate attributeName="r" values="2.5;3.5;2.5" dur="2s" repeatCount="indefinite" begin="1.3s" />
+                <animate attributeName="opacity" values="0.4;0.7;0.4" dur="2s" repeatCount="indefinite" begin="1.3s" />
+              </circle>
+
+              {/* Subtle moving highlight effect */}
+              <circle r="8" fill="url(#shimmer-gradient)" opacity="0.15">
+                <animateMotion dur="4s" repeatCount="indefinite">
+                  <path d="M 8 85 Q 20 75, 35 65 T 55 55 T 75 45 T 92 35" />
+                </animateMotion>
               </circle>
             </svg>
           </div>
 
           {/* X-axis labels */}
-          <div className="absolute bottom-0 left-12 right-0 flex justify-between text-xs text-muted-foreground/60">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="animate-pulse chart-skeleton-breathe">
-                <div className="h-3 bg-muted/40 rounded w-12" />
+          <div className="absolute bottom-0 left-12 right-0 flex justify-between text-xs text-muted-foreground/40">
+            {['Jan 1', 'Jan 15', 'Feb 1', 'Feb 15'].map((label, i) => (
+              <div key={i} className="animate-pulse flex items-center">
+                <div className={`h-2.5 bg-muted/30 rounded-sm x-axis-label-${i}`}>
+                  <div className={`h-full bg-gradient-to-r from-muted/50 to-transparent rounded-sm chart-skeleton-shimmer x-axis-shimmer-${i}`} />
+                </div>
               </div>
             ))}
           </div>

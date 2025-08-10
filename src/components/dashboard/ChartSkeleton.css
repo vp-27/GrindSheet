@@ -49,6 +49,33 @@
 
 /* Breathing animation for skeleton elements */
 .chart-skeleton-breathe {
+  animation: breathe 3s ease-in-out infinite;
+}
+
+/* Y-axis label styles */
+.y-axis-label-0 { width: 20px; }
+.y-axis-label-1 { width: 24px; }
+.y-axis-label-2 { width: 28px; }
+.y-axis-label-3 { width: 32px; }
+.y-axis-label-4 { width: 36px; }
+
+.y-axis-shimmer-0 { animation-delay: 0s; }
+.y-axis-shimmer-1 { animation-delay: 0.2s; }
+.y-axis-shimmer-2 { animation-delay: 0.4s; }
+.y-axis-shimmer-3 { animation-delay: 0.6s; }
+.y-axis-shimmer-4 { animation-delay: 0.8s; }
+
+/* X-axis label styles */
+.x-axis-label-0 { width: 32px; }
+.x-axis-label-1 { width: 36px; }
+.x-axis-label-2 { width: 40px; }
+.x-axis-label-3 { width: 44px; }
+
+.x-axis-shimmer-0 { animation-delay: 0s; }
+.x-axis-shimmer-1 { animation-delay: 0.3s; }
+.x-axis-shimmer-2 { animation-delay: 0.6s; }
+.x-axis-shimmer-3 { animation-delay: 0.9s; }
+.chart-skeleton-breathe {
   animation: breathe 2.5s ease-in-out infinite;
 }
 
