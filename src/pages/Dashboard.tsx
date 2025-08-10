@@ -180,7 +180,7 @@ const Dashboard = () => {
       );
       
       const hasActivity = categoryLogs.length > 0;
-      const completedToday = todayCategoryLogs.length > 0;
+      const completedThisWeek = categoryLogs.length > 0; // Check mark shows if worked out this week
       const color = getCategoryColor(index);
       
       // Calculate category performance (average percentage loss/gain)
@@ -217,7 +217,7 @@ const Dashboard = () => {
         id: category.id,
         name: category.name,
         hasActivity,
-        completedToday,
+        completedThisWeek,
         color,
         exerciseCount: categoryLogs.length,
         exercises: categoryExercises,
@@ -784,7 +784,7 @@ const Dashboard = () => {
                                 '--circle-border-color': '#ef4444'
                               } as React.CSSProperties : {}}
                             >
-                              {category.completedToday && (
+                              {category.completedThisWeek && (
                                 <div className="absolute inset-0 flex items-center justify-center">
                                   <svg
                                     xmlns="http://www.w3.org/2000/svg"
