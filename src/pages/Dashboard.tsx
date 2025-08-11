@@ -229,80 +229,9 @@ const Dashboard = () => {
     });
   }, [exerciseLogs, exercises, categories, profile]);
 
-  // Get recommendation based on weekly activity and performance
-  const getRecommendation = useMemo(() => {
-    if (!weeklyCategories.length || !profile) return null;
-    
-    const inactiveCategories = weeklyCategories.filter(cat => !cat.hasActivity);
-    const activeCategories = weeklyCategories.filter(cat => cat.hasActivity);
-    const weakCategories = weeklyCategories.filter(cat => cat.significantLoss);
-    
-    // Priority 1: Address significant performance losses (weakness-based recommendation)
-    if (weakCategories.length > 0) {
-      // Sort by most severe loss (lowest average performance change)
-      const weakestCategory = weakCategories.sort((a, b) => 
-        a.averagePerformanceChange - b.averagePerformanceChange
-      )[0];
-      
-      const lossPercentage = Math.abs(weakestCategory.averagePerformanceChange).toFixed(1);
-      return {
-        type: 'weakness',
-        category: weakestCategory,
-        message: `Focus on ${weakestCategory.name}`,
-        subMessage: `Performance down ${lossPercentage}% - time to rebuild`
-      };
-    }
-    
-    // Priority 2: If no activity at all, suggest any category
-    if (activeCategories.length === 0) {
-      const suggestedCategory = weeklyCategories[Math.floor(Math.random() * weeklyCategories.length)];
-      return {
-        type: 'any',
-        category: suggestedCategory,
-        message: 'Start your week strong',
-        subMessage: 'Hit any muscle group to get going'
-      };
-    }
-    
-    // Priority 3: If missing categories, suggest a specific one
-    if (inactiveCategories.length > 0) {
-      const suggestedCategory = inactiveCategories[0]; // Pick first missing category
-      return {
-        type: 'specific',
-        category: suggestedCategory,
-        message: `Try ${suggestedCategory.name}`,
-        subMessage: `${inactiveCategories.length} groups left this week`
-      };
-    }
-    
-    // Priority 4: All categories hit, encourage consistency
-    return {
-      type: 'complete',
-      category: null,
-      message: 'All groups hit!',
-      subMessage: 'Keep the momentum going'
-    };
-  }, [weeklyCategories, profile]);
-
-  // Handle recommendation click
-  const handleRecommendationClick = () => {
-    if (!getRecommendation) return;
-    
-    if (getRecommendation.type === 'complete') {
-      // Navigate to goals page
-      navigate('/goals');
-    } else {
-      // Navigate to home and scroll to category
-      navigate('/');
-      if (getRecommendation.category) {
-        setTimeout(() => {
-          const categoryElement = document.querySelector(`[data-category-id="${getRecommendation.category.id}"]`);
-          if (categoryElement) {
-            categoryElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-        }, 100);
-      }
-    }
+  // Handle checklist click - navigate to main page to show exercises
+  const handleChecklistClick = () => {
+    navigate('/');
   };
 
   // Filter logs based on selected category
@@ -686,25 +615,18 @@ const Dashboard = () => {
               )}
             </div>
 
-            {/* Weekly Category Recommendation Widget */}
+            {/* Weekly Category Checklist */}
             <div className="mt-3 -mx-4 px-4">
               {loading || !exerciseLogs || !exercises || !categories || !profile || 
-               categories.length === 0 || exercises.length === 0 || weeklyCategories.length === 0 || !getRecommendation ? (
+               categories.length === 0 || exercises.length === 0 || weeklyCategories.length === 0 ? (
                 /* Loading State */
                 <div className="apple-health-card animate-pulse">
-                  <div className="p-1.5">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex-1">
-                        <div className="h-4 bg-muted rounded-md w-32 mb-1.5"></div>
-                        <div className="h-3 bg-muted/60 rounded-md w-24"></div>
-                      </div>
-                      <div className="h-4 w-4 bg-muted/40 rounded"></div>
-                    </div>
+                  <div className="p-2">
                     <div className="flex items-center justify-center">
                       <div className="flex items-center gap-2">
                         {[...Array(4)].map((_, i) => (
                           <div key={i} className="flex flex-col items-center gap-0.5">
-                            <div className="w-3 h-3 bg-muted/40 rounded-full"></div>
+                            <div className="w-5 h-5 bg-muted/40 rounded-full"></div>
                             <div className="h-2.5 w-5 bg-muted/30 rounded"></div>
                           </div>
                         ))}
@@ -713,84 +635,59 @@ const Dashboard = () => {
                   </div>
                 </div>
               ) : (
-                /* Actual Widget */
+                /* Weekly Checklist */
                 <div 
-                  className={`apple-health-card weekly-recommendation-card group cursor-pointer transition-all duration-200 hover:shadow-lg active:scale-[0.99] ${
-                    getRecommendation.type === 'any' ? 'weekly-recommendation-card--gradient' : 
-                    getRecommendation.type === 'weakness' ? 'weekly-recommendation-card--weakness' : ''
-                  }`}
-                  onClick={handleRecommendationClick}
-                  style={getRecommendation.type === 'any' ? {
+                  className="apple-health-card weekly-recommendation-card--gradient group cursor-pointer transition-all duration-200 hover:shadow-lg active:scale-[0.99]"
+                  onClick={handleChecklistClick}
+                  style={{
                     '--category-colors': weeklyCategories.map(cat => cat.color).join(', '),
                     '--category-color': '#10b981',
                     '--category-color-rgb': '16, 185, 129'
-                  } as React.CSSProperties : {
-                    '--category-color': getRecommendation.category?.color || '#10b981',
-                    '--category-color-rgb': (getRecommendation.category?.color || '#10b981').replace('#', '').match(/.{2}/g)?.map(hex => parseInt(hex, 16)).join(', ') || '16, 185, 129'
                   } as React.CSSProperties}
                 >
-                  <div className="p-1.5">
-                    {/* Header section */}
-                    <div className="flex items-start justify-between mb-0.5">
-                      <div className="flex-1">
-                        <h3 className="apple-health-card-title mb-0.5 text-sm">
-                          {getRecommendation.message}
-                        </h3>
-                        <p className="text-xs text-muted-foreground">
-                          {getRecommendation.subMessage}
-                        </p>
-                      </div>
-                      
-                      {/* Top right: completion trophy or AI sparkles icon */}
-                      <div className="ml-2">
-                        {getRecommendation.type === 'complete' ? (
-                          <Trophy className="w-4 h-4 text-amber-500" />
-                        ) : (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors"
-                          >
-                            <path d="M12 2L13.5 8.5L20 10L13.5 11.5L12 18L10.5 11.5L4 10L10.5 8.5L12 2Z" />
-                          </svg>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Progress circles section */}
-                    <div className="flex items-center justify-center px-2">
-                      <div className="flex items-center gap-3 justify-between w-full max-w-xs">
+                  <div className="p-2">
+                    {/* Compact checklist section */}
+                    <div className="flex items-center justify-center">
+                      <div className="flex items-center gap-3 justify-between w-full max-w-sm">
                         {weeklyCategories.map((category) => (
                           <div key={category.id} className="flex flex-col items-center gap-1">
-                            <div 
-                              className={`w-5 h-5 rounded-full border-2 transition-all duration-300 weekly-category-circle relative ${
-                                category.hasActivity 
-                                  ? 'active' 
-                                  : category.significantLoss
-                                  ? 'weakness'
-                                  : 'inactive'
-                              }`}
-                              style={category.hasActivity ? {
-                                '--circle-bg-color': category.color,
-                                '--circle-shadow-color': `${category.color}20`
-                              } as React.CSSProperties : category.significantLoss ? {
-                                '--circle-border-color': '#ef4444'
-                              } as React.CSSProperties : {}}
-                            >
-                              {category.completedThisWeek && (
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 24 24"
-                                    fill="currentColor"
-                                    className="w-3 h-3 text-white"
-                                  >
-                                    <path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clipRule="evenodd" />
-                                  </svg>
-                                </div>
-                              )}
-                            </div>
+                            {category.significantLoss && !category.hasActivity ? (
+                              // Warning icon replaces the circle entirely
+                              <div className="w-5 h-5 flex items-center justify-center">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="currentColor"
+                                  className="w-5 h-5 text-amber-500"
+                                >
+                                  <path fillRule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a.75.75 0 100-1.5.75.75 0 000 1.5z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            ) : (
+                              // Normal circle (completed or incomplete)
+                              <div 
+                                className={`w-5 h-5 rounded-full border-2 transition-all duration-300 weekly-category-circle relative ${
+                                  category.hasActivity ? 'active' : 'inactive'
+                                }`}
+                                style={category.hasActivity ? {
+                                  '--circle-bg-color': category.color,
+                                  '--circle-shadow-color': `${category.color}20`
+                                } as React.CSSProperties : {}}
+                              >
+                                {category.completedThisWeek && (
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <svg
+                                      xmlns="http://www.w3.org/2000/svg"
+                                      viewBox="0 0 24 24"
+                                      fill="currentColor"
+                                      className="w-3 h-3 text-white"
+                                    >
+                                      <path fillRule="evenodd" d="M19.916 4.626a.75.75 0 01.208 1.04l-9 13.5a.75.75 0 01-1.154.114l-6-6a.75.75 0 011.06-1.06l5.353 5.353 8.493-12.739a.75.75 0 011.04-.208z" clipRule="evenodd" />
+                                    </svg>
+                                  </div>
+                                )}
+                              </div>
+                            )}
                             <span className="text-xs text-muted-foreground font-medium text-center leading-tight max-w-14">
                               {category.name}
                             </span>

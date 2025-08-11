@@ -1,19 +1,6 @@
-/* Weekly Category Recommendation Widget Styles */
+/* Weekly Category Checklist Widget Styles */
 
-/* Main recommendation card styling */
-.weekly-recommendation-card {
-  /* Inherit apple-health-card styles and add subtle tinting */
-  background: linear-gradient(135deg, 
-    rgba(var(--category-color-rgb), 0.08) 0%, 
-    rgba(var(--category-color-rgb), 0.04) 50%,
-    rgba(255, 255, 255, 0.06) 100%
-  );
-  border: 1px solid rgba(var(--category-color-rgb), 0.15);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-}
-
-/* Gradient variant for "any muscle group" recommendations */
+/* Main checklist card styling - always uses gradient */
 .weekly-recommendation-card--gradient {
   background: linear-gradient(135deg, 
     rgba(16, 185, 129, 0.08) 0%,
@@ -28,28 +15,6 @@
     0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-/* Weakness variant for performance loss recommendations */
-.weekly-recommendation-card--weakness {
-  background: linear-gradient(135deg, 
-    rgba(251, 191, 36, 0.08) 0%, 
-    rgba(var(--category-color-rgb), 0.06) 50%,
-    rgba(255, 255, 255, 0.06) 100%
-  );
-  border: 1px solid rgba(251, 191, 36, 0.20);
-  box-shadow: 
-    0 2px 8px rgba(251, 191, 36, 0.10),
-    0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.dark .weekly-recommendation-card {
-  background: linear-gradient(135deg, 
-    rgba(var(--category-color-rgb), 0.12) 0%, 
-    rgba(var(--category-color-rgb), 0.06) 50%,
-    rgba(0, 0, 0, 0.08) 100%
-  );
-  border: 1px solid rgba(var(--category-color-rgb), 0.20);
-}
-
 .dark .weekly-recommendation-card--gradient {
   background: linear-gradient(135deg, 
     rgba(52, 211, 153, 0.25) 0%,
@@ -62,28 +27,6 @@
   box-shadow: 
     0 2px 12px rgba(52, 211, 153, 0.15),
     0 1px 4px rgba(0, 0, 0, 0.1);
-}
-
-.dark .weekly-recommendation-card--weakness {
-  background: linear-gradient(135deg, 
-    rgba(251, 191, 36, 0.15) 0%, 
-    rgba(var(--category-color-rgb), 0.12) 50%,
-    rgba(0, 0, 0, 0.08) 100%
-  );
-  border: 1px solid rgba(251, 191, 36, 0.25);
-  box-shadow: 
-    0 2px 12px rgba(251, 191, 36, 0.15),
-    0 1px 4px rgba(0, 0, 0, 0.1);
-}
-
-.weekly-recommendation-card:hover {
-  background: linear-gradient(135deg, 
-    rgba(var(--category-color-rgb), 0.12) 0%, 
-    rgba(var(--category-color-rgb), 0.06) 50%,
-    rgba(255, 255, 255, 0.08) 100%
-  );
-  border-color: rgba(var(--category-color-rgb), 0.20);
-  transform: translateY(-1px);
 }
 
 .weekly-recommendation-card--gradient:hover {
@@ -101,28 +44,6 @@
     0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
-.weekly-recommendation-card--weakness:hover {
-  background: linear-gradient(135deg, 
-    rgba(251, 191, 36, 0.12) 0%, 
-    rgba(var(--category-color-rgb), 0.08) 50%,
-    rgba(255, 255, 255, 0.08) 100%
-  );
-  border-color: rgba(251, 191, 36, 0.25);
-  transform: translateY(-1px);
-  box-shadow: 
-    0 4px 16px rgba(251, 191, 36, 0.15),
-    0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
-.dark .weekly-recommendation-card:hover {
-  background: linear-gradient(135deg, 
-    rgba(var(--category-color-rgb), 0.15) 0%, 
-    rgba(var(--category-color-rgb), 0.08) 50%,
-    rgba(0, 0, 0, 0.10) 100%
-  );
-  border-color: rgba(var(--category-color-rgb), 0.25);
-}
-
 .dark .weekly-recommendation-card--gradient:hover {
   background: linear-gradient(135deg, 
     rgba(52, 211, 153, 0.35) 0%,
@@ -137,19 +58,7 @@
     0 3px 8px rgba(0, 0, 0, 0.15);
 }
 
-.dark .weekly-recommendation-card--weakness:hover {
-  background: linear-gradient(135deg, 
-    rgba(251, 191, 36, 0.20) 0%, 
-    rgba(var(--category-color-rgb), 0.15) 50%,
-    rgba(0, 0, 0, 0.12) 100%
-  );
-  border-color: rgba(251, 191, 36, 0.30);
-  box-shadow: 
-    0 6px 20px rgba(251, 191, 36, 0.20),
-    0 3px 8px rgba(0, 0, 0, 0.15);
-}
-
-.weekly-recommendation-card:active {
+.weekly-recommendation-card--gradient:active {
   transform: translateY(0) scale(0.99);
 }
 
@@ -165,32 +74,8 @@
   background-color: transparent;
 }
 
-.weekly-category-circle.weakness {
-  border-color: var(--circle-border-color, #f59e0b);
-  background-color: transparent;
-  box-shadow: 0 0 0 1px var(--circle-border-color, #f59e0b);
-  animation: pulse-warning 3s ease-in-out infinite;
-}
-
 .dark .weekly-category-circle.inactive {
   border-color: rgb(75 85 99);
-}
-
-.dark .weekly-category-circle.weakness {
-  border-color: var(--circle-border-color, #fbbf24);
-  box-shadow: 0 0 0 1px var(--circle-border-color, #fbbf24);
-}
-
-/* Subtle pulsing animation for weakness indicators */
-@keyframes pulse-warning {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-  50% {
-    transform: scale(1.03);
-    opacity: 0.95;
-  }
 }
 
 /* Loading state shimmer animation */
