@@ -593,7 +593,6 @@ const Dashboard = () => {
                   setChartTimeframe(tf as '2W' | '1M' | 'ALL');
                   setDynamicPercentGain(gain);
                 }}
-                hideTooltip={true}
                 hideTimeframeControls={true}
                 timeframe={chartTimeframe}
                 disableInternalTimeframeFilter={true} // NEW: let parent handle windowing
