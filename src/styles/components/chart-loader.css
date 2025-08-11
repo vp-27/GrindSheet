@@ -1,61 +1,63 @@
-/* Chart Loader Transition Styles */
+/* Chart Loader Transition Styles - Spawn-in Effect */
 
-/* Smooth transition classes for chart loading states */
 .chart-loader-container {
   position: relative;
   min-height: 200px;
 }
 
+/* Smooth spawn-in transitions for chart loading states */
 .chart-loader-fade-enter {
   opacity: 0;
-  transform: translateY(8px);
 }
 
 .chart-loader-fade-enter-active {
   opacity: 1;
-  transform: translateY(0);
-  transition: opacity 300ms ease-out, transform 300ms ease-out;
+  transition: opacity 800ms ease-out;
 }
 
 .chart-loader-fade-exit {
   opacity: 1;
-  transform: translateY(0);
 }
 
 .chart-loader-fade-exit-active {
   opacity: 0;
-  transform: translateY(-8px);
-  transition: opacity 300ms ease-out, transform 300ms ease-out;
+  transition: opacity 600ms ease-out;
 }
 
-/* Enhance chart appearance transitions */
+/* Chart ready spawn-in animation - grows from background */
 .chart-data-ready {
-  animation: slideInUp 400ms ease-out;
+  animation: spawnIn 1200ms ease-out;
 }
 
-@keyframes slideInUp {
+@keyframes spawnIn {
   0% {
     opacity: 0;
-    transform: translateY(16px);
+    transform: scale(0.98);
   }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Stagger animation for when chart elements appear */
-.chart-content-stagger {
-  animation: fadeInStagger 500ms ease-out both;
-}
-
-@keyframes fadeInStagger {
-  0% {
-    opacity: 0;
-    transform: scale(0.95);
+  60% {
+    opacity: 0.7;
+    transform: scale(1.001);
   }
   100% {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+/* Integrated background spawn effect */
+.chart-spawn-container {
+  animation: backgroundSpawn 1000ms ease-out;
+}
+
+@keyframes backgroundSpawn {
+  0% {
+    opacity: 0;
+    -webkit-backdrop-filter: blur(0px);
+    backdrop-filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    -webkit-backdrop-filter: blur(1px);
+    backdrop-filter: blur(1px);
   }
 }

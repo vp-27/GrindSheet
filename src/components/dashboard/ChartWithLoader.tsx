@@ -40,12 +40,12 @@ const ChartWithLoader: React.FC<ChartWithLoaderProps> = ({
       // If we have data and were previously loading, start transition
       if (showSkeleton) {
         setIsTransitioning(true);
-        // Allow skeleton to show for a brief moment, then fade it out
+        // Allow skeleton to show for a longer moment for integrated feel
         const timer = setTimeout(() => {
           setShowSkeleton(false);
           // After skeleton is hidden, end transition
-          setTimeout(() => setIsTransitioning(false), 300);
-        }, 500); // Brief delay to show smooth transition
+          setTimeout(() => setIsTransitioning(false), 800);
+        }, 800); // Longer delay for smooth spawn-in effect
         
         return () => clearTimeout(timer);
       }
@@ -60,10 +60,10 @@ const ChartWithLoader: React.FC<ChartWithLoaderProps> = ({
     <div className={`chart-loader-container ${className}`}>
       {/* Skeleton Loader */}
       <div
-        className={`absolute inset-0 transition-all duration-500 ease-out ${
+        className={`absolute inset-0 transition-all duration-700 ease-out chart-spawn-container ${
           shouldShowSkeleton 
-            ? 'opacity-100 translate-y-0 scale-100' 
-            : 'opacity-0 translate-y-4 scale-95 pointer-events-none'
+            ? 'opacity-100 scale-100' 
+            : 'opacity-0 scale-98 pointer-events-none'
         }`}
       >
         <ChartSkeleton
@@ -76,10 +76,10 @@ const ChartWithLoader: React.FC<ChartWithLoaderProps> = ({
 
       {/* Actual Chart */}
       <div
-        className={`transition-all duration-500 ease-out ${
+        className={`transition-all duration-1000 ease-out ${
           shouldShowChart 
-            ? 'opacity-100 translate-y-0 scale-100' 
-            : 'opacity-0 translate-y-4 scale-95'
+            ? 'opacity-100 scale-100' 
+            : 'opacity-0 scale-98'
         } ${shouldShowChart ? 'visible' : 'invisible'}`}
       >
         {data && data.length > 0 && (
@@ -95,10 +95,10 @@ const ChartWithLoader: React.FC<ChartWithLoaderProps> = ({
       {/* Empty State - only show if not loading and no data */}
       {!loading && (!data || data.length === 0) && (
         <div
-          className={`transition-all duration-500 ease-out ${
+          className={`transition-all duration-800 ease-out ${
             !shouldShowSkeleton 
-              ? 'opacity-100 translate-y-0 scale-100' 
-              : 'opacity-0 translate-y-4 scale-95'
+              ? 'opacity-100 scale-100' 
+              : 'opacity-0 scale-98'
           }`}
         >
           <div className="text-center text-muted-foreground py-16">

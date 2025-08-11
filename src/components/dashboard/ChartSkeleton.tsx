@@ -1,6 +1,5 @@
 import React from 'react';
 import { MobileSlider } from '@/components/ui/mobile-slider';
-import { useTheme } from '@/context/ThemeContext';
 import './ChartSkeleton.css';
 
 interface ChartSkeletonProps {
@@ -18,16 +17,12 @@ const ChartSkeleton: React.FC<ChartSkeletonProps> = ({
   onTimeframeChange,
   className = ''
 }) => {
-  const { isDark } = useTheme();
-
   return (
     <div className={`relative ${className}`}>
-      {/* Percentage gain skeleton - animated shimmer */}
+      {/* Percentage gain skeleton */}
       {showPercentage && (
-        <div className="mb-2 flex items-center justify-between">
-          <div className="animate-pulse">
-            <div className="h-8 bg-gradient-to-r from-muted via-muted/50 to-muted rounded-lg w-20 chart-skeleton-shimmer" />
-          </div>
+        <div className="mb-3 flex items-center justify-between">
+          <div className="chart-skeleton-bar shimmer h-5 w-14 rounded-md" />
           {showTimeframeControls && (
             <div className="flex-shrink-0">
               <MobileSlider
@@ -45,131 +40,111 @@ const ChartSkeleton: React.FC<ChartSkeletonProps> = ({
         </div>
       )}
 
-      {/* Chart area skeleton */}
-      <div className={`chart-skeleton-container ${isDark ? 'dark' : 'light'}`}>
-        {/* Animated chart skeleton */}
-        <div className="absolute inset-4">
-          {/* Y-axis labels */}
-          <div className="absolute left-0 top-0 bottom-0 flex flex-col justify-between text-xs text-muted-foreground/40">
-            {['100%', '75%', '50%', '25%', '0%'].map((label, i) => (
-              <div key={i} className="animate-pulse flex items-center">
-                <div className={`h-2.5 bg-muted/30 rounded-sm y-axis-label-${i}`}>
-                  <div className={`h-full bg-gradient-to-r from-muted/50 to-transparent rounded-sm chart-skeleton-shimmer y-axis-shimmer-${i}`} />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Chart lines skeleton */}
-          <div className="absolute inset-0 ml-12">
-            <svg className="w-full h-full" viewBox="0 0 100 100">
-              <defs>
-                <linearGradient id="shimmer-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor={isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} />
-                  <stop offset="50%" stopColor={isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.15)'} />
-                  <stop offset="100%" stopColor={isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'} />
-                  <animateTransform
-                    attributeName="gradientTransform"
-                    type="translate"
-                    values="-100 0;100 0;-100 0"
-                    dur="3s"
-                    repeatCount="indefinite"
-                  />
-                </linearGradient>
-                
-                {/* Gradient fill for chart area */}
-                <linearGradient id="area-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor={isDark ? 'rgba(52, 199, 89, 0.1)' : 'rgba(52, 199, 89, 0.08)'} />
-                  <stop offset="100%" stopColor={isDark ? 'rgba(52, 199, 89, 0.02)' : 'rgba(52, 199, 89, 0.01)'} />
-                </linearGradient>
-              </defs>
-
-              {/* Background grid lines */}
-              <g opacity="0.1">
-                {/* Horizontal grid lines */}
-                {[20, 40, 60, 80].map((y) => (
-                  <line key={y} x1="5" y1={y} x2="95" y2={y} stroke={isDark ? '#ffffff' : '#000000'} strokeWidth="0.5" />
-                ))}
-                {/* Vertical grid lines */}
-                {[20, 40, 60, 80].map((x) => (
-                  <line key={x} x1={x} y1="10" x2={x} y2="90" stroke={isDark ? '#ffffff' : '#000000'} strokeWidth="0.5" />
-                ))}
-              </g>
-
-              {/* Main trend line with realistic curve */}
-              <path
-                d="M 8 85 Q 20 75, 35 65 T 55 55 T 75 45 T 92 35"
-                stroke="url(#shimmer-gradient)"
-                strokeWidth="3"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                opacity="0.7"
-              />
-
-              {/* Area fill under main line */}
-              <path
-                d="M 8 85 Q 20 75, 35 65 T 55 55 T 75 45 T 92 35 L 92 90 L 8 90 Z"
-                fill="url(#area-gradient)"
-                opacity="0.3"
-              />
-
-              {/* Secondary trend lines */}
-              <path
-                d="M 8 80 Q 25 70, 40 60 T 70 50 T 92 40"
-                stroke="url(#shimmer-gradient)"
-                strokeWidth="2.5"
-                fill="none"
-                strokeLinecap="round"
-                opacity="0.4"
-              />
-              
-              <path
-                d="M 8 75 Q 25 65, 40 70 T 70 60 T 92 45"
-                stroke="url(#shimmer-gradient)"
-                strokeWidth="2.5"
-                fill="none"
-                strokeLinecap="round"
-                opacity="0.3"
-              />
-
-              {/* Animated dots at end of lines with pulsing */}
-              <circle cx="92" cy="35" r="3.5" fill={isDark ? 'rgba(52, 199, 89, 0.6)' : 'rgba(52, 199, 89, 0.8)'}>
-                <animate attributeName="r" values="3.5;4.5;3.5" dur="2s" repeatCount="indefinite" />
-                <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite" />
-              </circle>
-              <circle cx="92" cy="40" r="3" fill={isDark ? 'rgba(90, 200, 250, 0.5)' : 'rgba(90, 200, 250, 0.7)'}>
-                <animate attributeName="r" values="3;4;3" dur="2s" repeatCount="indefinite" begin="0.7s" />
-                <animate attributeName="opacity" values="0.5;0.8;0.5" dur="2s" repeatCount="indefinite" begin="0.7s" />
-              </circle>
-              <circle cx="92" cy="45" r="2.5" fill={isDark ? 'rgba(255, 149, 0, 0.4)' : 'rgba(255, 149, 0, 0.6)'}>
-                <animate attributeName="r" values="2.5;3.5;2.5" dur="2s" repeatCount="indefinite" begin="1.3s" />
-                <animate attributeName="opacity" values="0.4;0.7;0.4" dur="2s" repeatCount="indefinite" begin="1.3s" />
-              </circle>
-
-              {/* Subtle moving highlight effect */}
-              <circle r="8" fill="url(#shimmer-gradient)" opacity="0.15">
-                <animateMotion dur="4s" repeatCount="indefinite">
-                  <path d="M 8 85 Q 20 75, 35 65 T 55 55 T 75 45 T 92 35" />
-                </animateMotion>
-              </circle>
-            </svg>
-          </div>
-
-          {/* X-axis labels */}
-          <div className="absolute bottom-0 left-12 right-0 flex justify-between text-xs text-muted-foreground/40">
-            {['Jan 1', 'Jan 15', 'Feb 1', 'Feb 15'].map((label, i) => (
-              <div key={i} className="animate-pulse flex items-center">
-                <div className={`h-2.5 bg-muted/30 rounded-sm x-axis-label-${i}`}>
-                  <div className={`h-full bg-gradient-to-r from-muted/50 to-transparent rounded-sm chart-skeleton-shimmer x-axis-shimmer-${i}`} />
-                </div>
-              </div>
-            ))}
-          </div>
+      {/* Chart container */}
+      <div className="chart-skeleton-container chart-skeleton-breathe">
+        {/* Grid background */}
+        <div className="chart-skeleton-grid">
+          {/* Horizontal grid lines */}
+          <div className="chart-skeleton-grid-line horizontal absolute grid-h-25" />
+          <div className="chart-skeleton-grid-line horizontal absolute grid-h-50" />
+          <div className="chart-skeleton-grid-line horizontal absolute grid-h-75" />
+          
+          {/* Vertical grid lines */}
+          <div className="chart-skeleton-grid-line vertical absolute grid-v-25" />
+          <div className="chart-skeleton-grid-line vertical absolute grid-v-50" />
+          <div className="chart-skeleton-grid-line vertical absolute grid-v-75" />
         </div>
 
-        {/* Pulse overlay for extra loading effect */}
-        <div className={`absolute inset-0 opacity-30 chart-skeleton-pulse-overlay ${isDark ? 'dark' : 'light'}`} />
+        {/* Y-axis labels */}
+        <div className="absolute left-3 top-4 bottom-8 flex flex-col justify-between">
+          <div className="chart-skeleton-bar shimmer h-2.5 w-6 rounded delay-0" />
+          <div className="chart-skeleton-bar shimmer h-2.5 w-7 rounded delay-1" />
+          <div className="chart-skeleton-bar shimmer h-2.5 w-8 rounded delay-2" />
+          <div className="chart-skeleton-bar shimmer h-2.5 w-7 rounded delay-3" />
+          <div className="chart-skeleton-bar shimmer h-2.5 w-6 rounded delay-4" />
+        </div>
+
+        {/* Chart area with subtle trend lines */}
+        <div className="absolute inset-4 ml-14 mr-4">
+          <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="hsl(var(--muted))" stopOpacity="0.1" />
+                <stop offset="50%" stopColor="hsl(var(--muted))" stopOpacity="0.25" />
+                <stop offset="100%" stopColor="hsl(var(--muted))" stopOpacity="0.1" />
+                <animateTransform
+                  attributeName="gradientTransform"
+                  type="translate"
+                  values="-100 0;100 0;-100 0"
+                  dur="4s"
+                  repeatCount="indefinite"
+                />
+              </linearGradient>
+              
+              <linearGradient id="area-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="hsl(var(--muted))" stopOpacity="0.05" />
+                <stop offset="100%" stopColor="hsl(var(--muted))" stopOpacity="0.01" />
+              </linearGradient>
+            </defs>
+
+            {/* Subtle area fill */}
+            <path
+              d="M 5 85 Q 25 70 50 55 T 95 25 L 95 95 L 5 95 Z"
+              fill="url(#area-gradient)"
+              className="chart-skeleton-breathe"
+            />
+
+            {/* Main trend line - very subtle */}
+            <path
+              d="M 5 85 Q 25 70 50 55 T 95 25"
+              stroke="url(#line-gradient)"
+              strokeWidth="1.5"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.6"
+            />
+
+            {/* Secondary trend line */}
+            <path
+              d="M 5 75 Q 30 65 55 60 T 95 40"
+              stroke="url(#line-gradient)"
+              strokeWidth="1"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              opacity="0.4"
+            />
+
+            {/* Subtle data points */}
+            {[25, 50, 75].map((x, i) => (
+              <circle
+                key={i}
+                cx={x}
+                cy={80 - i * 15}
+                r="1.5"
+                fill="hsl(var(--muted))"
+                opacity="0.2"
+              >
+                <animate
+                  attributeName="opacity"
+                  values="0.1;0.3;0.1"
+                  dur="3s"
+                  repeatCount="indefinite"
+                  begin={`${i * 0.5}s`}
+                />
+              </circle>
+            ))}
+          </svg>
+        </div>
+
+        {/* X-axis labels */}
+        <div className="absolute bottom-3 left-16 right-4 flex justify-between">
+          <div className="chart-skeleton-bar shimmer h-2.5 w-8 rounded delay-x-0" />
+          <div className="chart-skeleton-bar shimmer h-2.5 w-10 rounded delay-x-1" />
+          <div className="chart-skeleton-bar shimmer h-2.5 w-9 rounded delay-x-2" />
+          <div className="chart-skeleton-bar shimmer h-2.5 w-11 rounded delay-x-3" />
+        </div>
       </div>
     </div>
   );

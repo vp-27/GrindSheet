@@ -1,91 +1,140 @@
-/* Chart Skeleton Styles */
-.chart-skeleton-shimmer {
-  background-size: 200% 100%;
-  animation: shimmer 2s ease-in-out infinite;
+/* Chart Skeleton Styles - Transparent & Integrated */
+.chart-skeleton-container {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  height: 200px;
+  background: transparent;
+  -webkit-backdrop-filter: blur(1px);
+  backdrop-filter: blur(1px);
 }
 
-.chart-skeleton-pulse-overlay {
+/* Subtle background gradient overlay */
+.chart-skeleton-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    hsl(var(--muted) / 0.03) 0%,
+    hsl(var(--muted) / 0.08) 50%,
+    hsl(var(--muted) / 0.03) 100%
+  );
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.chart-skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--muted) / 0.15) 50%,
+    transparent 100%
+  );
   background-size: 200% 100%;
   animation: shimmer 3s ease-in-out infinite;
 }
 
-.chart-skeleton-container {
-  position: relative;
-  border-radius: 16px;
-  overflow: hidden;
-  height: 200px;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-}
-
-.chart-skeleton-container.dark {
-  background: linear-gradient(135deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.05) 100%);
-}
-
-.chart-skeleton-container.light {
-  background: linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.05) 100%);
-}
-
-.chart-skeleton-pulse-overlay.dark {
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%);
-}
-
-.chart-skeleton-pulse-overlay.light {
-  background: linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.08) 50%, transparent 100%);
-}
-
-/* Enhanced shimmer effect */
+/* Smooth, slower shimmer animation */
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
+    opacity: 0.3;
   }
   50% {
-    background-position: 0% 0;
+    opacity: 0.6;
   }
   100% {
     background-position: 200% 0;
+    opacity: 0.3;
   }
 }
 
-/* Breathing animation for skeleton elements */
-.chart-skeleton-breathe {
-  animation: breathe 3s ease-in-out infinite;
+/* Skeleton elements - more transparent */
+.chart-skeleton-bar {
+  background: hsl(var(--muted) / 0.08);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border) / 0.3);
 }
 
-/* Y-axis label styles */
-.y-axis-label-0 { width: 20px; }
-.y-axis-label-1 { width: 24px; }
-.y-axis-label-2 { width: 28px; }
-.y-axis-label-3 { width: 32px; }
-.y-axis-label-4 { width: 36px; }
+.chart-skeleton-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  border-radius: inherit;
+}
 
-.y-axis-shimmer-0 { animation-delay: 0s; }
-.y-axis-shimmer-1 { animation-delay: 0.2s; }
-.y-axis-shimmer-2 { animation-delay: 0.4s; }
-.y-axis-shimmer-3 { animation-delay: 0.6s; }
-.y-axis-shimmer-4 { animation-delay: 0.8s; }
+.chart-skeleton-bar.shimmer::after {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--muted) / 0.2) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+}
 
-/* X-axis label styles */
-.x-axis-label-0 { width: 32px; }
-.x-axis-label-1 { width: 36px; }
-.x-axis-label-2 { width: 40px; }
-.x-axis-label-3 { width: 44px; }
+/* Grid lines - very subtle */
+.chart-skeleton-grid {
+  position: absolute;
+  inset: 0;
+}
 
-.x-axis-shimmer-0 { animation-delay: 0s; }
-.x-axis-shimmer-1 { animation-delay: 0.3s; }
-.x-axis-shimmer-2 { animation-delay: 0.6s; }
-.x-axis-shimmer-3 { animation-delay: 0.9s; }
+.chart-skeleton-grid-line {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    hsl(var(--border) / 0.15) 50%,
+    transparent 100%
+  );
+  opacity: 0.4;
+}
+
+.chart-skeleton-grid-line.horizontal {
+  height: 1px;
+  width: 100%;
+}
+
+.chart-skeleton-grid-line.vertical {
+  width: 1px;
+  height: 100%;
+}
+
+/* Grid line positions */
+.grid-h-25 { top: 25%; }
+.grid-h-50 { top: 50%; }
+.grid-h-75 { top: 75%; }
+
+.grid-v-25 { left: 25%; }
+.grid-v-50 { left: 50%; }
+.grid-v-75 { left: 75%; }
+
+/* Animation delays for staggered effect - slower and more subtle */
+.delay-0 { animation-delay: 0s; }
+.delay-1 { animation-delay: 0.2s; }
+.delay-2 { animation-delay: 0.4s; }
+.delay-3 { animation-delay: 0.6s; }
+.delay-4 { animation-delay: 0.8s; }
+
+.delay-x-0 { animation-delay: 0s; }
+.delay-x-1 { animation-delay: 0.3s; }
+.delay-x-2 { animation-delay: 0.6s; }
+.delay-x-3 { animation-delay: 0.9s; }
+
+/* Breathing animation for subtle movement */
 .chart-skeleton-breathe {
-  animation: breathe 2.5s ease-in-out infinite;
+  animation: breathe 4s ease-in-out infinite;
 }
 
 @keyframes breathe {
   0%, 100% {
     opacity: 0.4;
-    transform: scale(1);
   }
   50% {
     opacity: 0.7;
-    transform: scale(1.02);
   }
 }
