@@ -3,7 +3,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   ArrowRight,
-  Dumbbell,
   Eye,
   EyeOff,
   Loader2,
@@ -171,9 +170,14 @@ export default function Auth() {
     <main className="auth-page">
       <div className="auth-shell">
         <Link to="/auth" className="auth-brand" aria-label="GrindSheet home">
-          <span className="auth-brand-mark">
-            <Dumbbell size={23} />
-          </span>
+          <img
+            className="auth-brand-mark"
+            src="/icon-192.png"
+            width={48}
+            height={48}
+            alt=""
+            aria-hidden="true"
+          />
           GrindSheet
         </Link>
         <section className="auth-panel" aria-labelledby="auth-title">

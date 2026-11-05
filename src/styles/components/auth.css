@@ -30,13 +30,11 @@
   letter-spacing: -0.04em;
 }
 .auth-brand-mark {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
+  display: block;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
   border-radius: 14px;
-  background: hsl(var(--brand));
-  color: hsl(var(--brand-foreground));
 }
 .auth-panel {
   padding: 1.75rem;

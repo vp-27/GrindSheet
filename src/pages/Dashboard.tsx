@@ -846,7 +846,7 @@ const Dashboard = () => {
             </div>
 
             {/* Exercise Progress Grid */}
-            <div className="relative exercise-grid-container mt-4">
+            <div className="relative exercise-grid-container mt-8">
               {/* Combined Search and Filter Bar -- THIS IS NOW MOVED */}
 
               {exerciseProgressItems.length > 0 ? (
