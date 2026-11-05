@@ -1,39 +1,27 @@
-import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
-import { Plus, Crown, Medal, Award } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import { useAuth } from '@/context/AuthContext';
-import { useTournamentRanking } from '@/hooks/useTournamentRanking';
-import AddExerciseModal from '@/components/AddExerciseModal';
+import AddExerciseModal from "@/components/AddExerciseModal";
+import { useAuth } from "@/context/AuthContext";
+import { useTournamentRanking } from "@/hooks/useTournamentRanking";
+import { cn } from "@/lib/utils";
+import { Award, Crown, Medal, Plus } from "lucide-react";
+import React, { memo, useMemo, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 // Heroicons imports - outline versions
 import {
   HomeIcon as HomeOutline,
-  TrophyIcon as TrophyOutline,
-  ClockIcon as ClockOutline,
-  ChartBarIcon as PRsOutline, // Using ChartBarIcon for "PRs"
+  ChartBarIcon as PRsOutline,
+  TrophyIcon as TrophyOutline, // Using ChartBarIcon for "PRs"
   UserIcon as UserOutline,
-} from '@heroicons/react/24/outline';
+} from "@heroicons/react/24/outline";
 // Heroicons imports - solid versions
+import { useAppContext } from "@/context/useAppContext";
+import { useCommunityData } from "@/hooks/useCommunityData";
+import "@/styles/index.css";
 import {
   HomeIcon as HomeSolid,
-  TrophyIcon as TrophySolid,
-  ClockIcon as ClockSolid,
-  ChartBarIcon as PRsSolid, // Using ChartBarIcon for "PRs"
+  ChartBarIcon as PRsSolid,
+  TrophyIcon as TrophySolid, // Using ChartBarIcon for "PRs"
   UserIcon as UserSolid,
-} from '@heroicons/react/24/solid';
-import { Card } from '@/components/ui/card';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import '@/styles/index.css';
+} from "@heroicons/react/24/solid";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -52,57 +40,56 @@ interface AnimatedIconProps {
   className?: string;
 }
 
-const AnimatedIcon: React.FC<AnimatedIconProps> = ({ outlineIcon: OutlineIcon, solidIcon: SolidIcon, isActive, className }) => {
+const AnimatedIcon: React.FC<AnimatedIconProps> = ({
+  outlineIcon: OutlineIcon,
+  solidIcon: SolidIcon,
+  isActive,
+  className,
+}) => {
   return (
     <div className={cn("relative transition-all duration-200", className)}>
-      <OutlineIcon 
+      <OutlineIcon
         className={cn(
           "h-6 w-6 transition-opacity duration-200",
-          isActive ? "opacity-0" : "opacity-100"
-        )} 
+          isActive ? "opacity-0" : "opacity-100",
+        )}
       />
-      <SolidIcon 
+      <SolidIcon
         className={cn(
           "h-6 w-6 absolute inset-0 transition-opacity duration-200",
-          isActive ? "opacity-100" : "opacity-0"
-        )} 
+          isActive ? "opacity-100" : "opacity-0",
+        )}
       />
     </div>
   );
 };
 
-const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerSlider, headerStreak, customHeader }) => {
-  const { profile, signOut } = useAuth();
-  const { rank: tournamentRank, totalParticipants, isLoading: rankingLoading } = useTournamentRanking();
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+const Layout: React.FC<LayoutProps> = ({
+  children,
+  title,
+  categoryColor,
+  headerSlider,
+  headerStreak,
+  customHeader,
+}) => {
+  const { isDemo, signOut } = useAuth();
+  const { error, refreshData } = useAppContext();
+  const community = useCommunityData();
+  const {
+    rank: tournamentRank,
+    totalParticipants,
+    isLoading: rankingLoading,
+  } = useTournamentRanking();
   const [isAddExerciseModalOpen, setIsAddExerciseModalOpen] = useState(false);
-  const [avatarImageError, setAvatarImageError] = useState(false);
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await signOut();
-  };
-
-  // Reset avatar error when profile changes
-  useEffect(() => {
-    setAvatarImageError(false);
-  }, [profile?.avatar_url]);
-
-  // Create a stable profile reference to prevent unnecessary re-renders
-  const stableProfile = useMemo(() => ({
-    id: profile?.id,
-    name: profile?.name,
-    username: profile?.username,
-    avatar_url: profile?.avatar_url
-  }), [profile?.id, profile?.name, profile?.username, profile?.avatar_url]);
 
   // Memoize the profile nav link to prevent unnecessary re-renders
-  const profileNavLink = useMemo(() => (
-    <ProfileNavLink to="/settings" />
-  ), []);
+  const profileNavLink = useMemo(() => <ProfileNavLink to="/settings" />, []);
 
   // Create ranking indicator component
-  const RankingIndicator: React.FC<{ rank: number | null; totalParticipants: number }> = ({ rank, totalParticipants }) => {
+  const RankingIndicator: React.FC<{
+    rank: number | null;
+    totalParticipants: number;
+  }> = ({ rank, totalParticipants }) => {
     if (!rank || totalParticipants === 0) return null;
 
     // Special indicators for top 3 positions using consistent icons
@@ -113,7 +100,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
         </div>
       );
     }
-    
+
     if (rank === 2) {
       return (
         <div className="w-3 h-3 rounded-full bg-gradient-to-br from-gray-300 to-gray-500 flex items-center justify-center shadow-sm">
@@ -121,7 +108,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
         </div>
       );
     }
-    
+
     if (rank === 3) {
       return (
         <div className="w-3 h-3 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center shadow-sm">
@@ -139,21 +126,55 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
+    <div className="app-shell bg-background text-foreground flex flex-col">
+      {isDemo && (
+        <div className="demo-banner">
+          <div>
+            <strong>Demo mode</strong>
+            <span>Sample data · changes stay on this device</span>
+          </div>
+          <button type="button" onClick={() => void signOut()}>
+            Exit demo
+          </button>
+        </div>
+      )}
+      {(error || community.error) && (
+        <div className="app-error" role="alert">
+          <p>
+            Couldn’t load {error ? "your workouts" : "competition data"}. Check
+            your connection and try again.
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              void refreshData();
+              void community.refetch();
+            }}
+          >
+            Try again
+          </button>
+        </div>
+      )}
       {/* Minimal header */}
-      <header className="p-4 flex flex-col gap-2">
+      <header className="app-header p-4 flex flex-col gap-2">
         {/* Render customHeader at the top if provided */}
-        {customHeader && (
-          <div className="mb-2">{customHeader}</div>
-        )}
+        {customHeader && <div className="mb-2">{customHeader}</div>}
         <div className="flex justify-between items-center w-full">
           {title ? (
             <>
-              <h1 
-                className={categoryColor ? "category-exercise-title" : "text-3xl font-bold text-foreground"}
-                style={categoryColor ? {
-                  '--category-color': categoryColor
-                } as React.CSSProperties : undefined}
+              <h1
+                className={
+                  categoryColor
+                    ? "category-exercise-title"
+                    : "text-3xl font-bold text-foreground"
+                }
+                style={
+                  categoryColor
+                    ? ({
+                        "--category-color": categoryColor,
+                      } as React.CSSProperties)
+                    : undefined
+                }
               >
                 {title}
               </h1>
@@ -171,32 +192,38 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
           )}
         </div>
       </header>
-      
+
       {/* Main content */}
       <main className="flex-1 container max-w-lg mx-auto py-2 px-4 page-container">
         {children}
       </main>
-      
+
       {/* Apple-style bottom navigation with glass effect */}
-      <div className="sticky bottom-0 z-50 backdrop-blur-xl bg-background/0 pb-3 w-full sm:max-w-lg sm:mx-auto rounded-t-2xl px-2 sm:px-0 border-t border-border/20 shadow-2xl shadow-black/20">
-        <nav className="relative flex items-center justify-between p-2 rounded-t-2xl">
+      <div className="app-bottom-nav sticky bottom-0 z-40 backdrop-blur-xl bg-background/90 w-full sm:max-w-lg sm:mx-auto rounded-t-2xl px-2 sm:px-0 border-t border-border/20 shadow-2xl shadow-black/20">
+        <nav
+          aria-label="Main navigation"
+          className="relative flex items-center justify-between p-2 rounded-t-2xl"
+        >
           <div className="flex-1 flex justify-center items-center">
-            <NavLink 
-              to="/" 
+            <NavLink
+              to="/"
               outlineIcon={HomeOutline}
               solidIcon={HomeSolid}
-              label="Home" 
+              label="Home"
             />
           </div>
           <div className="flex-1 flex justify-center items-center">
-            <NavLink 
-              to="/tournament" 
+            <NavLink
+              to="/tournament"
               outlineIcon={TrophyOutline}
               solidIcon={TrophySolid}
-              label="Compete" 
+              label="Compete"
               rankingIndicator={
                 !rankingLoading && tournamentRank ? (
-                  <RankingIndicator rank={tournamentRank} totalParticipants={totalParticipants} />
+                  <RankingIndicator
+                    rank={tournamentRank}
+                    totalParticipants={totalParticipants}
+                  />
                 ) : null
               }
             />
@@ -205,11 +232,11 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
             <div className="w-16 h-14 flex-shrink-0" />
           </div>
           <div className="flex-1 flex justify-center items-center">
-            <NavLink 
-              to="/pr-records" 
+            <NavLink
+              to="/pr-records"
               outlineIcon={PRsOutline}
               solidIcon={PRsSolid}
-              label="PRs" 
+              label="PRs"
             />
           </div>
           <div className="flex-1 flex justify-center items-center">
@@ -217,7 +244,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
           </div>
           {/* Absolutely positioned AddExerciseButton for precise centering */}
           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <AddExerciseButton 
+            <AddExerciseButton
               isModalOpen={isAddExerciseModalOpen}
               onOpenModal={() => setIsAddExerciseModalOpen(true)}
               onCloseModal={() => setIsAddExerciseModalOpen(false)}
@@ -227,7 +254,7 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
       </div>
 
       {/* Add Exercise Modal */}
-      <AddExerciseModal 
+      <AddExerciseModal
         isOpen={isAddExerciseModalOpen}
         onOpenChange={setIsAddExerciseModalOpen}
       />
@@ -235,78 +262,99 @@ const Layout: React.FC<LayoutProps> = ({ children, title, categoryColor, headerS
   );
 };
 
-const NavLink: React.FC<{ 
-  to: string; 
+const NavLink: React.FC<{
+  to: string;
   outlineIcon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   solidIcon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
-  label?: string; 
+  label?: string;
   rankingIndicator?: React.ReactNode;
 }> = ({ to, outlineIcon, solidIcon, label, rankingIndicator }) => {
   // Get current path
-  const currentPath = window.location.pathname;
-  const isActive = currentPath === to || 
-                  (to !== '/' && currentPath.startsWith(to));
+  const { pathname: currentPath } = useLocation();
+  const isActive =
+    currentPath === to || (to !== "/" && currentPath.startsWith(to));
 
   return (
-    <Link 
-      to={to} 
+    <Link
+      to={to}
+      aria-current={isActive ? "page" : undefined}
       className={cn(
         "flex flex-col items-center px-3 py-1 rounded text-xs w-full relative",
-        isActive ? "text-primary font-medium" : "text-muted-foreground"
+        isActive ? "text-primary font-medium" : "text-muted-foreground",
       )}
     >
-      <div className={cn("mb-0.5 relative", isActive ? "text-primary" : "text-icon-muted")}>
-        <AnimatedIcon 
+      <div
+        className={cn(
+          "mb-0.5 relative",
+          isActive ? "text-primary" : "text-icon-muted",
+        )}
+      >
+        <AnimatedIcon
           outlineIcon={outlineIcon}
           solidIcon={solidIcon}
           isActive={isActive}
         />
         {rankingIndicator && (
-          <div className="absolute -bottom-1 -right-1">
-            {rankingIndicator}
-          </div>
+          <div className="absolute -bottom-1 -right-1">{rankingIndicator}</div>
         )}
       </div>
-      {label && <span className={cn("text-center truncate w-full", isActive ? "font-bold" : "font-normal")}>{label}</span>}
+      {label && (
+        <span
+          className={cn(
+            "text-center truncate w-full",
+            isActive ? "font-bold" : "font-normal",
+          )}
+        >
+          {label}
+        </span>
+      )}
     </Link>
   );
 };
 
-const ProfileNavLink = memo<{ 
-  to: string; 
+const ProfileNavLink = memo<{
+  to: string;
 }>(({ to }) => {
   // Get current path
-  const currentPath = window.location.pathname;
-  const isActive = currentPath === to || 
-                  (to !== '/' && currentPath.startsWith(to));
+  const { pathname: currentPath } = useLocation();
+  const isActive =
+    currentPath === to || (to !== "/" && currentPath.startsWith(to));
 
   return (
-    <Link 
-      to={to} 
+    <Link
+      to={to}
+      aria-current={isActive ? "page" : undefined}
       className={cn(
         "flex flex-col items-center px-3 py-1 rounded text-xs w-full",
-        isActive ? "text-primary font-medium" : "text-muted-foreground"
+        isActive ? "text-primary font-medium" : "text-muted-foreground",
       )}
     >
-      <div className={cn(
-        "mb-0.5 relative transition-all duration-200",
-        isActive ? "text-primary" : "text-icon-muted"
-      )}>
-        <AnimatedIcon 
+      <div
+        className={cn(
+          "mb-0.5 relative transition-all duration-200",
+          isActive ? "text-primary" : "text-icon-muted",
+        )}
+      >
+        <AnimatedIcon
           outlineIcon={UserOutline}
           solidIcon={UserSolid}
           isActive={isActive}
           className="h-6 w-6"
         />
       </div>
-      <span className={cn("text-center truncate w-full", isActive ? "font-bold" : "font-normal")}> 
+      <span
+        className={cn(
+          "text-center truncate w-full",
+          isActive ? "font-bold" : "font-normal",
+        )}
+      >
         Profile
       </span>
     </Link>
   );
 });
 
-ProfileNavLink.displayName = 'ProfileNavLink';
+ProfileNavLink.displayName = "ProfileNavLink";
 
 const AddExerciseButton: React.FC<{
   isModalOpen: boolean;
@@ -322,24 +370,31 @@ const AddExerciseButton: React.FC<{
   };
 
   return (
-    <button 
+    <button
       onClick={handleClick}
       aria-label={isModalOpen ? "Close exercise modal" : "Add exercise"}
       className={cn(
         "rounded-full h-14 w-14 flex items-center justify-center transition-all duration-300 group hover:scale-105 active:scale-95 focus:outline-none",
-        isModalOpen 
-          ? "bg-red-500 hover:bg-red-600 text-white shadow-2xl scale-105 shadow-red-500/25" 
-          : "text-white shadow-2xl"
+        isModalOpen
+          ? "bg-red-500 hover:bg-red-600 text-white shadow-2xl scale-105 shadow-red-500/25"
+          : "text-white shadow-2xl",
       )}
-      style={!isModalOpen ? {
-        backgroundColor: '#14b8a6',
-        boxShadow: '0 25px 50px -12px rgb(20 184 166 / 0.25), 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
-      } : undefined}
+      style={
+        !isModalOpen
+          ? {
+              backgroundColor: "#14b8a6",
+              boxShadow:
+                "0 25px 50px -12px rgb(20 184 166 / 0.25), 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+            }
+          : undefined
+      }
     >
-      <Plus className={cn(
-        "h-6 w-6 transition-all duration-300 group-hover:scale-110", 
-        isModalOpen ? "rotate-45 scale-110" : "group-active:rotate-90"
-      )} />
+      <Plus
+        className={cn(
+          "h-6 w-6 transition-all duration-300 group-hover:scale-110",
+          isModalOpen ? "rotate-45 scale-110" : "group-active:rotate-90",
+        )}
+      />
     </button>
   );
 };

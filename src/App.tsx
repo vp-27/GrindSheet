@@ -1,106 +1,131 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { lazy, Suspense, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
+import { Toaster } from "@/components/ui/toaster";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { AppProvider } from "@/context/AppContext";
-import { AuthProvider } from "@/context/AuthContext";
+import { AuthProvider, useAuth } from "@/context/AuthContext";
 import { ThemeProvider } from "@/context/ThemeContext";
-import Dashboard from "./pages/Dashboard";
-import History from "./pages/History";
-import ExerciseDetail from "./pages/ExerciseDetail";
-import Tournament from "./pages/Tournament";
-import PRRecords from "./pages/PRRecords";
-import Settings from "./pages/Settings";
-import NotFound from "./pages/NotFound";
-import Auth from "./pages/Auth";
-import ScrollToTop from './utils/ScrollToTop';
-import './styles/index.css';
-import './styles/components/page-transitions.css';
-import { useAppContext } from '@/context/useAppContext';
-import React, { useState, useEffect } from 'react';
+import Auth from "@/pages/Auth";
+import PWAStatus from "@/components/PWAStatus";
+import ScrollToTop from "@/utils/ScrollToTop";
+import "@/styles/index.css";
 
-const queryClient = new QueryClient();
+const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const History = lazy(() => import("@/pages/History"));
+const ExerciseDetail = lazy(() => import("@/pages/ExerciseDetail"));
+const Tournament = lazy(() => import("@/pages/Tournament"));
+const PRRecords = lazy(() => import("@/pages/PRRecords"));
+const Settings = lazy(() => import("@/pages/Settings"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: 1 } },
+});
 
-const getIsDark = () =>
-  typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
-
-const AppWithLoader = () => {
-  const [showOverlay, setShowOverlay] = useState(true); // Always true on mount
-  const { appReady } = useAppContext();
-  const [isDark, setIsDark] = useState(getIsDark());
-
-  // Listen for class changes on <html> to update dark mode
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setIsDark(getIsDark());
-    });
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => observer.disconnect();
-  }, []);
-
-  // Set theme-color meta tag while loader is visible
-  useEffect(() => {
-    const meta = document.querySelector('meta[name="theme-color"]');
-    const color = isDark ? '#0f0f0c' : '#00ddc4';
-    if (showOverlay) {
-      if (meta) meta.setAttribute('content', color);
-      else {
-        const newMeta = document.createElement('meta');
-        newMeta.name = 'theme-color';
-        newMeta.content = color;
-        document.head.appendChild(newMeta);
-      }
-    }
-    // When loader is hidden, let ThemeProvider restore the color
-  }, [showOverlay, isDark]);
-
-  useEffect(() => {
-    if (appReady && showOverlay) {
-      setShowOverlay(false);
-    }
-  }, [appReady, showOverlay]);
-
+function Protected({ children }: { children: ReactNode }) {
+  const { user, loading, isPasswordRecovery } = useAuth();
+  if (loading) return <PageLoading />;
+  if (isPasswordRecovery) return <Navigate to="/reset-password" replace />;
+  return user ? children : <Navigate to="/auth" replace />;
+}
+function PageLoading() {
+  return (
+    <div className="page-loading" role="status">
+      <span className="page-loading-dot" />
+      Loading GrindSheet…
+    </div>
+  );
+}
+function AppRoutes() {
+  const { user, isDemo } = useAuth();
+  const { pathname } = useLocation();
   return (
     <>
-      <Toaster />
-      <Sonner />
-      <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/exercise-detail" element={<ExerciseDetail />} />
-        <Route path="/history" element={<History />} />
-        <Route path="/tournament" element={<Tournament />} />
-        <Route path="/pr-records" element={<PRRecords />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <PWAStatus />
+      <AppProvider
+        key={`${isDemo ? "demo" : "account"}:${user?.id ?? "guest"}`}
+      >
+        <Toaster />
+        <Suspense fallback={<PageLoading />}>
+          <Routes>
+            <Route path="/auth" element={<Auth key={pathname} />} />
+            <Route path="/reset-password" element={<Auth key={pathname} />} />
+            <Route
+              path="/"
+              element={
+                <Protected>
+                  <Dashboard />
+                </Protected>
+              }
+            />
+            <Route
+              path="/history"
+              element={
+                <Protected>
+                  <History />
+                </Protected>
+              }
+            />
+            <Route
+              path="/exercise-detail"
+              element={
+                <Protected>
+                  <ExerciseDetail />
+                </Protected>
+              }
+            />
+            <Route
+              path="/tournament"
+              element={
+                <Protected>
+                  <Tournament />
+                </Protected>
+              }
+            />
+            <Route
+              path="/pr-records"
+              element={
+                <Protected>
+                  <PRRecords />
+                </Protected>
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <Protected>
+                  <Settings />
+                </Protected>
+              }
+            />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
+      </AppProvider>
     </>
   );
-};
-
-const App = () => {
+}
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter
-        future={{
-          v7_startTransition: true,
-          v7_relativeSplatPath: true
-        }}
+        future={{ v7_startTransition: true, v7_relativeSplatPath: true }}
       >
         <ScrollToTop />
         <TooltipProvider>
           <ThemeProvider>
             <AuthProvider>
-              <AppProvider>
-                <AppWithLoader />
-              </AppProvider>
+              <AppRoutes />
             </AuthProvider>
           </ThemeProvider>
         </TooltipProvider>
       </BrowserRouter>
     </QueryClientProvider>
   );
-};
-
-export default App;
+}

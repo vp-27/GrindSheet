@@ -1,15 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <title>GrindSheet</title>
-    <meta name="description" content="Track your fitness progress with friends" />
-    <meta name="author" content="Your Name" />
+    <meta
+      name="description"
+      content="Track your fitness progress with friends"
+    />
 
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/favicon.ico" />
-    <meta name="theme-color" content="#00ddc4" id="initial-theme-color">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#f8fafc" id="initial-theme-color" />
 
     <meta property="og:title" content="GrindSheet" />
     <meta property="og:description" content="GrindSheet" />
@@ -18,26 +22,30 @@
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="/favicon.ico" id="dynamic-favicon" />
     <script>
-      (function() {
+      (function () {
         try {
-          var theme = localStorage.getItem('theme');
-          var isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+          var theme = localStorage.getItem("theme");
+          var isDark =
+            theme === "dark" ||
+            ((!theme || theme === "system") &&
+              window.matchMedia("(prefers-color-scheme: dark)").matches);
           var html = document.documentElement;
           var body = document.body;
-          var color = isDark ? '#0f0f0c' : '#00ddc4';
+          var color = isDark ? "#000000" : "#f8fafc";
 
-          if (isDark) html.classList.add('dark');
+          if (isDark) html.classList.add("dark");
+          html.style.colorScheme = isDark ? "dark" : "light";
           html.style.background = color;
           if (body) body.style.background = color;
 
           // Set or update theme-color meta
           var meta = document.querySelector('meta[name="theme-color"]');
           if (!meta) {
-            meta = document.createElement('meta');
-            meta.name = 'theme-color';
+            meta = document.createElement("meta");
+            meta.name = "theme-color";
             document.head.appendChild(meta);
           }
-          meta.setAttribute('content', color);
+          meta.setAttribute("content", color);
         } catch (e) {}
       })();
     </script>

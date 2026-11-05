@@ -40,6 +40,7 @@ export interface Progress {
 }
 
 export interface LeaderboardEntry {
+  timestamp?: string;
   userId: string;
   user: User;
   users?: User[]; // For ties - multiple users with same value
@@ -50,14 +51,14 @@ export interface LeaderboardEntry {
 }
 
 export enum LeaderboardType {
-  OVERALL_PROGRESS = 'Overall Progress',
-  RECENT_ACHIEVERS = 'Recent Achievers',
-  EXERCISE_PR = 'Exercise PR',
-  CONSISTENCY = 'Consistency',
-  TOURNAMENT = 'Tournament'
+  OVERALL_PROGRESS = "Overall Progress",
+  RECENT_ACHIEVERS = "Recent Achievers",
+  EXERCISE_PR = "Exercise PR",
+  CONSISTENCY = "Consistency",
+  TOURNAMENT = "Tournament",
 }
 
-export interface ProgressChartData {
+export interface ProgressChartData extends ChartDatum {
   date: string;
   weight: number;
   percentGain?: number; // Added to track percentage gains for visualization
@@ -68,8 +69,8 @@ export interface Tournament {
   id: string;
   name: string;
   weekStart: string; // ISO date string (Monday)
-  weekEnd: string;   // ISO date string (Sunday)
-  status: 'upcoming' | 'active' | 'completed';
+  weekEnd: string; // ISO date string (Sunday)
+  status: "upcoming" | "active" | "completed";
   participants: TournamentParticipant[];
   type: TournamentType;
   description?: string;
@@ -94,8 +95,15 @@ export interface TournamentParticipant {
   workoutDays: string[]; // ISO date strings of days they worked out
   prDetails: PRDetail[]; // Detailed PR achievements
   improvementDetails?: PRDetail[]; // Detailed improvements that don't qualify as PRs
-  competitiveDetails?: { exerciseId: string; exerciseName: string; type: string; targetUser?: string; points: number }[]; // Add exerciseName
-  exerciseStats?: { // NEW: exercise statistics
+  competitiveDetails?: {
+    exerciseId: string;
+    exerciseName: string;
+    type: string;
+    targetUser?: string;
+    points: number;
+  }[]; // Add exerciseName
+  exerciseStats?: {
+    // NEW: exercise statistics
     totalExercises: number;
     uniqueExercises: number;
     averageExercisesPerDay: number;
@@ -138,27 +146,50 @@ export interface TournamentBadge {
 }
 
 export enum TournamentType {
-  WEEKLY_GENERAL = 'Weekly General',
-  CATEGORY_FOCUS = 'Category Focus',
-  BEGINNER_FRIENDLY = 'Beginner Friendly',
-  TEAM_BATTLE = 'Team Battle'
+  WEEKLY_GENERAL = "Weekly General",
+  CATEGORY_FOCUS = "Category Focus",
+  BEGINNER_FRIENDLY = "Beginner Friendly",
+  TEAM_BATTLE = "Team Battle",
 }
 
 export enum BadgeType {
-  FIRST_PR = 'first_pr',
-  CONSISTENCY_KING = 'consistency_king',
-  IMPROVEMENT_STAR = 'improvement_star',
-  WEEKEND_WARRIOR = 'weekend_warrior',
-  CATEGORY_MASTER = 'category_master',
-  NEWCOMER_BONUS = 'newcomer_bonus',
-  PERFECT_WEEK = 'perfect_week',
-  VOLUME_CRUSHER = 'volume_crusher', // NEW: for high exercise volume
-  CORE_DESTROYER = 'core_destroyer' // NEW: for core focus
+  FIRST_PR = "first_pr",
+  CONSISTENCY_KING = "consistency_king",
+  IMPROVEMENT_STAR = "improvement_star",
+  WEEKEND_WARRIOR = "weekend_warrior",
+  CATEGORY_MASTER = "category_master",
+  NEWCOMER_BONUS = "newcomer_bonus",
+  PERFECT_WEEK = "perfect_week",
+  VOLUME_CRUSHER = "volume_crusher", // NEW: for high exercise volume
+  CORE_DESTROYER = "core_destroyer", // NEW: for core focus
 }
 
 export interface PointsRule {
-  type: 'pr_achievement' | 'daily_workout' | 'exercise_completed' | 'daily_workout_base' | 'exercise_variety_bonus' | 'improvement_percent' | 'consistency_bonus' | 'weekend_bonus' | 'category_completion' | 'core_focus_bonus';
+  type:
+    | "pr_achievement"
+    | "daily_workout"
+    | "exercise_completed"
+    | "daily_workout_base"
+    | "exercise_variety_bonus"
+    | "improvement_percent"
+    | "consistency_bonus"
+    | "weekend_bonus"
+    | "category_completion"
+    | "core_focus_bonus";
   points: number;
   description: string;
   multiplier?: number;
+}
+
+export interface ChartDatum {
+  date: string;
+  weight?: number;
+  percentGain?: number;
+  [metric: string]: number | string | undefined;
+}
+export interface ChartHoverData {
+  date: string;
+  data: ChartDatum;
+  label?: string;
+  colors?: string[];
 }

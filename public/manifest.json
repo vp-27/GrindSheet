@@ -1,16 +1,23 @@
 {
+  "id": "/",
   "name": "GrindSheet",
-  "short_name": "GrindSheet", 
-  "description": "Simple gym logging. Optional Friend Competing",
+  "short_name": "GrindSheet",
+  "description": "Log workouts, track your progress, and compete with friends.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#1a1a1a",
-  "theme_color": "#00ddc4",
+  "background_color": "#f8fafc",
+  "theme_color": "#f8fafc",
   "icons": [
     {
-      "src": "favicon.ico",
-      "sizes": "48x48 64x64 96x96 128x128 256x256",
-      "type": "image/x-icon"
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }

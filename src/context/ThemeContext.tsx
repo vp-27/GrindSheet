@@ -1,125 +1,63 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { updateManifestLink, updateFavicon, updateAppleTouchIcon } from '@/utils/manifestUtils';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import { updateFavicon } from "@/utils/manifestUtils";
 
-type Theme = 'light' | 'dark' | 'system';
-
+type Theme = "light" | "dark" | "system";
 interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   isDark: boolean;
 }
-
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
-
-// Function to update theme-color meta tag dynamically
-const updateThemeColorMeta = (isDark: boolean) => {
-  const metaThemeColor = document.querySelector('meta[name="theme-color"]');
-  if (metaThemeColor) {
-    // Use colors that match the actual CSS background values
-    const color = isDark ? '#000000' : '#f9fafb'; // Dark: pure black, Light: same as before
-    metaThemeColor.setAttribute('content', color);
+const getInitialTheme = (): Theme => {
+  try {
+    const saved = localStorage.getItem("theme");
+    if (saved === "light" || saved === "dark") return saved;
+  } catch {
+    /* Theme still works when persistent storage is unavailable. */
   }
+  return "system";
 };
-
+const systemIsDark = () =>
+  window.matchMedia("(prefers-color-scheme: dark)").matches;
 export const useTheme = () => {
   const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider');
-  }
+  if (!context) throw new Error("useTheme must be used within a ThemeProvider");
   return context;
 };
-
-interface ThemeProviderProps {
-  children: React.ReactNode;
-}
-
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const [theme, setTheme] = useState<Theme>(() => {
-    // Get theme from localStorage or default to 'system'
-    const saved = localStorage.getItem('theme');
-    return (saved as Theme) || 'system';
-  });
-
-  const [isDark, setIsDark] = useState(false);
-
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  const [systemDark, setSystemDark] = useState(systemIsDark);
+  const isDark = theme === "dark" || (theme === "system" && systemDark);
   useEffect(() => {
-    // Save theme preference to localStorage
-    localStorage.setItem('theme', theme);
-
-    // Determine if dark mode should be active
-    let shouldBeDark = false;
-    if (theme === 'dark') {
-      shouldBeDark = true;
-    } else if (theme === 'light') {
-      shouldBeDark = false;
-    } else {
-      // system theme - check user's device preference
-      shouldBeDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const update = () => setSystemDark(media.matches);
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+  useEffect(() => {
+    try {
+      localStorage.setItem("theme", theme);
+    } catch {
+      /* Use the in-memory preference. */
     }
-
-    setIsDark(shouldBeDark);
-
-    // Apply theme to document
     const root = document.documentElement;
-    if (shouldBeDark) {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-
-    // Force style recalculation to prevent cached styles
-    root.style.setProperty('--theme-timestamp', Date.now().toString());
-
-    // Update theme-color meta tag dynamically
-    updateThemeColorMeta(shouldBeDark);
-    // Update manifest dynamically for PWA
-    updateManifestLink(shouldBeDark);
-    // Update favicon dynamically
-    updateFavicon(shouldBeDark);
-    // Update apple-touch-icon dynamically for iOS PWA
-    updateAppleTouchIcon(shouldBeDark);
-  }, [theme]);
-
-  // Listen for system theme changes when using 'system' theme
-  useEffect(() => {
-    if (theme !== 'system') return;
-
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => {
-      setIsDark(mediaQuery.matches);
-      const root = document.documentElement;
-      if (mediaQuery.matches) {
-        root.classList.add('dark');
-      } else {
-        root.classList.remove('dark');
-      }
-      
-      // Force style recalculation to prevent cached styles
-      root.style.setProperty('--theme-timestamp', Date.now().toString());
-      
-      // Update theme-color meta tag when system theme changes
-      updateThemeColorMeta(mediaQuery.matches);
-      // Update manifest dynamically when system theme changes
-      updateManifestLink(mediaQuery.matches);
-      // Update favicon dynamically when system theme changes
-      updateFavicon(mediaQuery.matches);
-      // Update apple-touch-icon dynamically for iOS PWA
-      updateAppleTouchIcon(mediaQuery.matches);
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [theme]);
-
-  const value = {
-    theme,
-    setTheme,
-    isDark,
-  };
-
+    root.classList.toggle("dark", isDark);
+    root.style.colorScheme = isDark ? "dark" : "light";
+    root.style.background = isDark ? "#000000" : "#f8fafc";
+    document
+      .querySelector('meta[name="theme-color"]')
+      ?.setAttribute("content", isDark ? "#000000" : "#f8fafc");
+    updateFavicon(isDark);
+  }, [theme, isDark]);
   return (
-    <ThemeContext.Provider value={value}>
+    <ThemeContext.Provider value={{ theme, setTheme, isDark }}>
       {children}
     </ThemeContext.Provider>
   );
-};
+}

@@ -1,316 +1,201 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { User, Category, Exercise, ExerciseLog } from '../types';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './AuthContext';
+import { supabase } from "@/integrations/supabase/client";
+import { deleteRow, getLogs, getRows, saveRow } from "@/lib/app-data";
+import { DEMO_DATA_EVENT } from "@/lib/demo-store";
+import type { Category, Exercise, ExerciseLog } from "@/types";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  createContext,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { useAuth } from "./AuthContext";
 
-export interface AppContextType { // Added export
+export interface AppContextType {
   categories: Category[];
   exercises: Exercise[];
   exerciseLogs: ExerciseLog[];
-  addExerciseLog: (log: Omit<ExerciseLog, 'id' | 'timestamp'>) => Promise<void>;
+  addExerciseLog: (log: Omit<ExerciseLog, "id" | "timestamp">) => Promise<void>;
   updateExerciseLog: (log: ExerciseLog) => Promise<void>;
   deleteExerciseLog: (id: string) => Promise<void>;
   selectedCategory: Category | null;
   setSelectedCategory: (category: Category | null) => void;
   selectedExercise: Exercise | null;
   setSelectedExercise: (exercise: Exercise | null) => void;
-  loading: boolean; // <-- add loading to context
-  appReady: boolean;
-  setAppReady: (ready: boolean) => void;
+  loading: boolean;
+  error: string | null;
+  refreshData: () => Promise<void>;
 }
+export const AppContext = createContext<AppContextType | undefined>(undefined);
 
-export const AppContext = createContext<AppContextType | undefined>(undefined); // Added export
-
-export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { user, profile } = useAuth();
-  const navigate = useNavigate();
+export const AppProvider = ({ children }: { children: ReactNode }) => {
+  const { user, isDemo } = useAuth();
+  const userId = user?.id;
+  const queryClient = useQueryClient();
   const [categories, setCategories] = useState<Category[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [exerciseLogs, setExerciseLogs] = useState<ExerciseLog[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [appReady, setAppReady] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(
+    null,
+  );
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(
+    null,
+  );
+  const [loading, setLoading] = useState(!!userId);
+  const [error, setError] = useState<string | null>(null);
+  const generation = useRef(0);
 
-  const exercisesSubRef = useRef<any>(null);
-  const categoriesSubRef = useRef<any>(null);
-  const exerciseLogsSubRef = useRef<any>(null);
-
-  // Redirect to auth if not logged in and trying to access protected routes
-  useEffect(() => {
-    if (loading) return;
-    
-    const currentPath = window.location.pathname;
-    const publicRoutes = ['/auth'];
-    
-    if (!user && !publicRoutes.includes(currentPath)) {
-      navigate('/auth');
+  const refreshData = useCallback(async () => {
+    if (!userId) return;
+    const request = ++generation.current;
+    try {
+      const [categoryResult, exerciseResult, logResult] = await Promise.all([
+        getRows("categories"),
+        getRows("exercises"),
+        getLogs(userId),
+      ]);
+      if (request !== generation.current) return;
+      const failure =
+        categoryResult.error || exerciseResult.error || logResult.error;
+      if (failure) throw new Error(failure.message);
+      setCategories(
+        (categoryResult.data || [])
+          .map((row) => ({
+            id: row.id,
+            name: row.name,
+            description: row.description,
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name)),
+      );
+      setExercises(
+        (exerciseResult.data || [])
+          .map((row) => ({
+            id: row.id,
+            name: row.name,
+            categoryId: row.category_id,
+            description: row.description,
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name)),
+      );
+      setExerciseLogs(
+        (logResult.data || []).map((row) => ({
+          id: row.id,
+          userId: row.user_id,
+          exerciseId: row.exercise_id,
+          weight: row.weight,
+          timestamp: row.timestamp,
+          note: row.note,
+        })),
+      );
+      setError(null);
+    } catch (err) {
+      if (request === generation.current)
+        setError(
+          err instanceof Error ? err.message : "Could not load your workouts.",
+        );
+    } finally {
+      if (request === generation.current) setLoading(false);
     }
-  }, [user, loading, navigate]);
+  }, [userId]);
 
-  // Fetch categories, exercises, and exercise logs from Supabase
+  const cancelRequests = useCallback(() => {
+    ++generation.current;
+  }, []);
+
   useEffect(() => {
-    const fetchData = async () => {
-      // Always fetch categories and exercises, even if no user
-      try {
-        // Fetch categories (global for all users)
-        const { data: categoriesData, error: categoriesError } = await supabase
-          .from('categories')
-          .select('*')
-          .order('name');
-        if (categoriesError) throw categoriesError;
-        const mappedCategories: Category[] = (categoriesData || []).map(cat => ({
-          id: cat.id,
-          name: cat.name,
-          description: cat.description,
-        }));
-        setCategories(mappedCategories);
-
-        // Fetch exercises (global for all users)
-        const { data: exercisesData, error: exercisesError } = await supabase
-          .from('exercises')
-          .select('*')
-          .order('name');
-        if (exercisesError) throw exercisesError;
-        const mappedExercises: Exercise[] = (exercisesData || []).map(ex => ({
-          id: ex.id,
-          name: ex.name,
-          categoryId: ex.category_id,
-          description: ex.description,
-        }));
-        setExercises(mappedExercises);
-      } catch (error) {
-        console.error('Error fetching data from Supabase:', error);
-      }
-      // Only fetch logs if user exists
-      if (user) {
-        try {
-          const { data: logsData, error: logsError } = await supabase
-            .from('exercise_logs')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('timestamp', { ascending: false });
-          if (logsError) throw logsError;
-          const mappedLogs: ExerciseLog[] = (logsData || []).map(log => ({
-            id: log.id,
-            userId: log.user_id,
-            exerciseId: log.exercise_id,
-            weight: log.weight,
-            timestamp: log.timestamp,
-            note: log.note,
-          }));
-          setExerciseLogs(mappedLogs);
-        } catch (error) {
-          console.error('Error fetching exercise logs:', error);
-        }
-      }
+    if (!userId) {
       setLoading(false);
+      return;
+    }
+    void refreshData();
+    const refresh = () => {
+      void refreshData();
+      void queryClient.invalidateQueries({ queryKey: ["community"] });
     };
-
-    fetchData();
-
-    // --- Real-time subscriptions (deduplicated) ---
-    // Clean up previous subscriptions if they exist
-    if (exercisesSubRef.current) {
-      supabase.removeChannel(exercisesSubRef.current);
-      exercisesSubRef.current = null;
+    if (isDemo) {
+      window.addEventListener(DEMO_DATA_EVENT, refresh);
+      return () => {
+        cancelRequests();
+        window.removeEventListener(DEMO_DATA_EVENT, refresh);
+      };
     }
-    if (categoriesSubRef.current) {
-      supabase.removeChannel(categoriesSubRef.current);
-      categoriesSubRef.current = null;
-    }
-    if (exerciseLogsSubRef.current) {
-      supabase.removeChannel(exerciseLogsSubRef.current);
-      exerciseLogsSubRef.current = null;
-    }
-
-    // Subscribe to global tables (only once per mount)
-    exercisesSubRef.current = supabase
-      .channel('public:exercises')
+    const channel = supabase
+      .channel(`app-data:${userId}`)
       .on(
-        'postgres_changes',
+        "postgres_changes",
+        { event: "*", schema: "public", table: "categories" },
+        refresh,
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "exercises" },
+        refresh,
+      )
+      .on(
+        "postgres_changes",
         {
-          event: '*',
-          schema: 'public',
-          table: 'exercises',
+          event: "*",
+          schema: "public",
+          table: "exercise_logs",
+          filter: `user_id=eq.${userId}`,
         },
-        () => {
-          fetchExercises();
-        }
+        refresh,
       )
       .subscribe();
-    categoriesSubRef.current = supabase
-      .channel('public:categories')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'categories',
-        },
-        () => {
-          fetchCategories();
-        }
-      )
-      .subscribe();
-
-    // Subscribe to exercise_logs only if user exists
-    if (user) {
-      exerciseLogsSubRef.current = supabase
-        .channel('public:exercise_logs')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'exercise_logs',
-            filter: `user_id=eq.${user.id}`,
-          },
-          () => {
-            fetchExerciseLogs();
-          }
-        )
-        .subscribe();
-    }
-
-    // Cleanup on unmount or user change
+    window.addEventListener("online", refresh);
     return () => {
-      if (exercisesSubRef.current) {
-        supabase.removeChannel(exercisesSubRef.current);
-        exercisesSubRef.current = null;
-      }
-      if (categoriesSubRef.current) {
-        supabase.removeChannel(categoriesSubRef.current);
-        categoriesSubRef.current = null;
-      }
-      if (exerciseLogsSubRef.current) {
-        supabase.removeChannel(exerciseLogsSubRef.current);
-        exerciseLogsSubRef.current = null;
-      }
+      cancelRequests();
+      void supabase.removeChannel(channel);
+      window.removeEventListener("online", refresh);
     };
-  }, [user]);
+  }, [userId, isDemo, refreshData, queryClient, cancelRequests]);
 
-  // Remove user check from fetchExercises and fetchCategories
-  const fetchExerciseLogs = async () => {
-    if (!user) return;
-    try {
-      const { data, error } = await supabase
-        .from('exercise_logs')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('timestamp', { ascending: false });
-      if (error) throw error;
-      const mappedLogs: ExerciseLog[] = (data || []).map(log => ({
-        id: log.id,
-        userId: log.user_id,
-        exerciseId: log.exercise_id,
+  const requireUser = () => {
+    if (!userId) throw new Error("Please sign in to save a workout.");
+    if (!isDemo && !navigator.onLine)
+      throw new Error("You’re offline. Reconnect before saving this workout.");
+    return userId;
+  };
+  const afterMutation = async (result: {
+    error: { message: string } | null;
+  }) => {
+    if (result.error) throw new Error(result.error.message);
+    await refreshData();
+    void queryClient.invalidateQueries({ queryKey: ["community"] });
+  };
+  const addExerciseLog: AppContextType["addExerciseLog"] = async (log) => {
+    const id = requireUser();
+    await afterMutation(
+      await saveRow("exercise_logs", {
+        user_id: id,
+        exercise_id: log.exerciseId,
         weight: log.weight,
-        timestamp: log.timestamp,
         note: log.note,
-      }));
-      setExerciseLogs(mappedLogs);
-    } catch (error) {
-      console.error('Error fetching exercise logs:', error);
-    }
+      }),
+    );
   };
-
-  const fetchExercises = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('exercises')
-        .select('*')
-        .order('name');
-      if (error) throw error;
-      const mappedExercises: Exercise[] = (data || []).map(ex => ({
-        id: ex.id,
-        name: ex.name,
-        categoryId: ex.category_id,
-        description: ex.description,
-      }));
-      setExercises(mappedExercises);
-    } catch (error) {
-      console.error('Error fetching exercises:', error);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name');
-      if (error) throw error;
-      const mappedCategories: Category[] = (data || []).map(cat => ({
-        id: cat.id,
-        name: cat.name,
-        description: cat.description,
-      }));
-      setCategories(mappedCategories);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    }
-  };
-
-  const addExerciseLog = async (log: Omit<ExerciseLog, 'id' | 'timestamp'>) => {
-    if (!user) return;
-    
-    try {
-      const { error } = await supabase
-        .from('exercise_logs')
-        .insert({
-          user_id: user.id,
-          exercise_id: log.exerciseId,
-          weight: log.weight,
-          note: log.note,
-        });
-        
-      if (error) throw error;
-      
-      // Fetch updated logs
-      fetchExerciseLogs();
-    } catch (error) {
-      console.error('Error adding exercise log:', error);
-      throw error;
-    }
-  };
-
   const updateExerciseLog = async (log: ExerciseLog) => {
-    if (!user) return;
-    try {
-      const { error } = await supabase
-        .from('exercise_logs')
-        .update({
-          exercise_id: log.exerciseId,
-          weight: log.weight,
-          note: log.note,
-        })
-        .eq('id', log.id);
-      if (error) throw error;
-      fetchExerciseLogs();
-    } catch (error) {
-      console.error('Error updating exercise log:', error);
-      throw error;
-    }
+    requireUser();
+    if (!exerciseLogs.some((item) => item.id === log.id))
+      throw new Error("This workout no longer exists.");
+    await afterMutation(
+      await saveRow(
+        "exercise_logs",
+        { exercise_id: log.exerciseId, weight: log.weight, note: log.note },
+        log.id,
+      ),
+    );
   };
-
   const deleteExerciseLog = async (id: string) => {
-    if (!user) return;
-    try {
-      const { error } = await supabase
-        .from('exercise_logs')
-        .delete()
-        .eq('id', id);
-      if (error) throw error;
-      fetchExerciseLogs();
-    } catch (error) {
-      console.error('Error deleting exercise log:', error);
-      throw error;
-    }
+    requireUser();
+    if (!exerciseLogs.some((item) => item.id === id))
+      throw new Error("This workout no longer exists.");
+    await afterMutation(await deleteRow("exercise_logs", id));
   };
-
   return (
-    <AppContext.Provider 
+    <AppContext.Provider
       value={{
         categories,
         exercises,
@@ -322,14 +207,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         setSelectedCategory,
         selectedExercise,
         setSelectedExercise,
-        loading, // <-- provide loading
-        appReady,
-        setAppReady,
+        loading,
+        error,
+        refreshData,
       }}
     >
       {children}
     </AppContext.Provider>
   );
 };
-
-// useAppContext hook has been removed from this file and moved to useAppContext.ts

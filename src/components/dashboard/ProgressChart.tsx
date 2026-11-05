@@ -1,18 +1,28 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { MobileSlider } from '@/components/ui/mobile-slider';
-import { ProgressChartData } from '@/types';
-import { addDays, isBefore, parseISO } from 'date-fns';
-import { Calendar, Clock } from 'lucide-react';
-import AnimatedCounter from '@/components/ui/animated-counter';
-import './ProgressChart.css';
+import { metricNumber } from "@/lib/chart-utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { MobileSlider } from "@/components/ui/mobile-slider";
+import type { ChartDatum, ChartHoverData } from "@/types";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import "./ProgressChart.css";
 
 // Custom Legend Component with beautiful styling
-const CustomLegend = ({ payload, colors, appleStyle = false }: { 
-  payload?: any[], 
-  colors: string[], 
-  appleStyle?: boolean 
+const CustomLegend = ({
+  payload,
+  colors,
+  appleStyle = false,
+}: {
+  payload?: { value?: string | number }[];
+  colors: string[];
+  appleStyle?: boolean;
 }) => {
   if (!payload?.length) return null;
 
@@ -20,17 +30,15 @@ const CustomLegend = ({ payload, colors, appleStyle = false }: {
     <div className="custom-legend-container">
       <div className="custom-legend-wrapper">
         {payload.map((entry, index) => (
-          <div 
-            key={entry.value} 
-            className={`custom-legend-item ${appleStyle ? 'apple-style' : ''}`}
+          <div
+            key={entry.value}
+            className={`custom-legend-item ${appleStyle ? "apple-style" : ""}`}
           >
-            <div 
+            <div
               className="custom-legend-indicator"
               data-color={colors[index % colors.length]}
             />
-            <span className="custom-legend-text">
-              {entry.value}
-            </span>
+            <span className="custom-legend-text">{entry.value}</span>
           </div>
         ))}
       </div>
@@ -39,7 +47,7 @@ const CustomLegend = ({ payload, colors, appleStyle = false }: {
 };
 
 interface ProgressChartProps {
-  data: ProgressChartData[] | any[];
+  data: ChartDatum[];
   title?: string;
   exerciseId?: string;
   categoryId?: string; // Added to track if this is a category view
@@ -50,7 +58,7 @@ interface ProgressChartProps {
   blendWithBackground?: boolean; // New prop for Robinhood-style charts
   customColors?: string[]; // Allow custom colors to be passed in
   onTimeframeChange?: (timeframe: TimeframeOption, gain: number | null) => void; // Callback for timeframe changes
-  onHoverData?: (data: any) => void; // New callback for hover data
+  onHoverData?: (data: ChartHoverData | null) => void; // New callback for hover data
   hideTooltip?: boolean; // Option to hide traditional tooltip
   defaultTimeframe?: TimeframeOption; // Allow parent to set initial timeframe
   hideTimeframeControls?: boolean; // New prop to hide timeframe controls
@@ -59,33 +67,36 @@ interface ProgressChartProps {
 }
 
 // Define timeframe options
-type TimeframeOption = '2W' | '1M' | 'ALL';
+type TimeframeOption = "2W" | "1M" | "ALL";
 
 // Helper function to filter data based on timeframe
-const filterDataByTimeframe = (data: any[], timeframe: TimeframeOption) => {
-  if (timeframe === 'ALL' || !data.length) return data;
-  
+const filterDataByTimeframe = (
+  data: ChartDatum[],
+  timeframe: TimeframeOption,
+) => {
+  if (timeframe === "ALL" || !data.length) return data;
+
   const now = new Date();
   const cutoffDate = new Date();
-  
+
   switch (timeframe) {
-    case '2W':
+    case "2W":
       cutoffDate.setDate(now.getDate() - 14);
       break;
-    case '1M':
+    case "1M":
       cutoffDate.setMonth(now.getMonth() - 1);
       break;
   }
-  
-  return data.filter(item => new Date(item.date) >= cutoffDate);
+
+  return data.filter((item) => new Date(item.date) >= cutoffDate);
 };
 
 // Enhanced function to calculate percentage gain from chart start date (visible timeframe)
 const calculatePercentageFromChartStart = (
-  data: any[],
+  data: ChartDatum[],
   timeframe: TimeframeOption,
   multiple: boolean,
-  showPercentage: boolean
+  showPercentage: boolean,
 ): number | null => {
   if (!data || data.length === 0) return null;
 
@@ -99,62 +110,80 @@ const calculatePercentageFromChartStart = (
 
   if (multiple && showPercentage) {
     // For "Overall Progress" (all categories) - percentage data
-    const keys = Object.keys(chartEndPoint).filter(key => key !== 'date');
+    const keys = Object.keys(chartEndPoint).filter((key) => key !== "date");
     let totalGain = 0;
     let validGains = 0;
-    
-    keys.forEach(key => {
-      const startValue = chartStartPoint[key];
-      const endValue = chartEndPoint[key];
-      
+
+    keys.forEach((key) => {
+      const startValue = metricNumber(chartStartPoint[key]);
+      const endValue = metricNumber(chartEndPoint[key]);
+
       if (
-        startValue !== null && startValue !== undefined && !isNaN(startValue) &&
-        endValue !== null && endValue !== undefined && !isNaN(endValue)
+        startValue !== null &&
+        startValue !== undefined &&
+        !isNaN(startValue) &&
+        endValue !== null &&
+        endValue !== undefined &&
+        !isNaN(endValue)
       ) {
-        totalGain += (endValue - startValue);
+        totalGain += endValue - startValue;
         validGains++;
       }
     });
-    
+
     return validGains > 0 ? totalGain / validGains : 0;
   } else if (multiple && !showPercentage) {
     // For category-specific view with weight data
-    const keys = Object.keys(chartEndPoint).filter(key => key !== 'date');
+    const keys = Object.keys(chartEndPoint).filter((key) => key !== "date");
     let totalGain = 0;
     let validGains = 0;
-    
-    keys.forEach(key => {
-      const startValue = chartStartPoint[key];
-      const endValue = chartEndPoint[key];
-      
+
+    keys.forEach((key) => {
+      const startValue = metricNumber(chartStartPoint[key]);
+      const endValue = metricNumber(chartEndPoint[key]);
+
       if (
-        startValue !== null && startValue !== undefined && !isNaN(startValue) && startValue > 0 &&
-        endValue !== null && endValue !== undefined && !isNaN(endValue)
+        startValue !== null &&
+        startValue !== undefined &&
+        !isNaN(startValue) &&
+        startValue > 0 &&
+        endValue !== null &&
+        endValue !== undefined &&
+        !isNaN(endValue)
       ) {
         totalGain += ((endValue - startValue) / startValue) * 100;
         validGains++;
       }
     });
-    
+
     return validGains > 0 ? totalGain / validGains : 0;
   } else {
     // Single metric
     const key = showPercentage ? "percentGain" : "weight";
-    const startValue = chartStartPoint[key];
-    const endValue = chartEndPoint[key];
-    
+    const startValue = metricNumber(chartStartPoint[key]);
+    const endValue = metricNumber(chartEndPoint[key]);
+
     if (showPercentage) {
       if (
-        startValue !== null && startValue !== undefined && !isNaN(startValue) &&
-        endValue !== null && endValue !== undefined && !isNaN(endValue)
+        startValue !== null &&
+        startValue !== undefined &&
+        !isNaN(startValue) &&
+        endValue !== null &&
+        endValue !== undefined &&
+        !isNaN(endValue)
       ) {
         return endValue - startValue;
       }
       return 0;
     } else {
       if (
-        startValue !== null && startValue !== undefined && !isNaN(startValue) && startValue > 0 &&
-        endValue !== null && endValue !== undefined && !isNaN(endValue)
+        startValue !== null &&
+        startValue !== undefined &&
+        !isNaN(startValue) &&
+        startValue > 0 &&
+        endValue !== null &&
+        endValue !== undefined &&
+        !isNaN(endValue)
       ) {
         return ((endValue - startValue) / startValue) * 100;
       }
@@ -164,43 +193,57 @@ const calculatePercentageFromChartStart = (
 };
 
 // Helper function to calculate percentage gain for timeframe
-const calculateTimeframeGain = (data: any[], timeframe: TimeframeOption, multiple: boolean, showPercentage: boolean) => {
+const calculateTimeframeGain = (
+  data: ChartDatum[],
+  timeframe: TimeframeOption,
+  multiple: boolean,
+  showPercentage: boolean,
+) => {
   if (data.length === 0) return null;
   const filteredData = filterDataByTimeframe(data, timeframe);
   if (filteredData.length === 0) return null;
 
   // Use correct baseline: for ALL, use all-time first point; for others, use first point in filteredData
-  const baselinePoint = timeframe === 'ALL' ? data[0] : filteredData[0];
+  const baselinePoint = timeframe === "ALL" ? data[0] : filteredData[0];
   const lastPoint = filteredData[filteredData.length - 1];
 
   if (multiple && showPercentage) {
     // For "Overall Progress" (all categories) - percentage data
-    const keys = Object.keys(lastPoint).filter(key => key !== 'date');
+    const keys = Object.keys(lastPoint).filter((key) => key !== "date");
     let totalGain = 0;
     let validGains = 0;
-    keys.forEach(key => {
-      const baseline = baselinePoint[key];
-      const latest = lastPoint[key];
+    keys.forEach((key) => {
+      const baseline = metricNumber(baselinePoint[key]);
+      const latest = metricNumber(lastPoint[key]);
       if (
-        baseline !== null && baseline !== undefined && !isNaN(baseline) &&
-        latest !== null && latest !== undefined && !isNaN(latest)
+        baseline !== null &&
+        baseline !== undefined &&
+        !isNaN(baseline) &&
+        latest !== null &&
+        latest !== undefined &&
+        !isNaN(latest)
       ) {
-        totalGain += (latest - baseline);
+        totalGain += latest - baseline;
         validGains++;
       }
     });
     return validGains > 0 ? totalGain / validGains : 0;
   } else if (multiple && !showPercentage) {
     // For category-specific view with weight data
-    const keys = Object.keys(lastPoint).filter(key => key !== 'date');
+    const keys = Object.keys(lastPoint).filter((key) => key !== "date");
     let totalGain = 0;
     let validGains = 0;
-    keys.forEach(key => {
-      const baselineValue = baselinePoint[key];
-      const currentValue = lastPoint[key];
+    keys.forEach((key) => {
+      const baselineValue = metricNumber(baselinePoint[key]);
+      const currentValue = metricNumber(lastPoint[key]);
       if (
-        baselineValue !== null && baselineValue !== undefined && !isNaN(baselineValue) && baselineValue > 0 &&
-        currentValue !== null && currentValue !== undefined && !isNaN(currentValue)
+        baselineValue !== null &&
+        baselineValue !== undefined &&
+        !isNaN(baselineValue) &&
+        baselineValue > 0 &&
+        currentValue !== null &&
+        currentValue !== undefined &&
+        !isNaN(currentValue)
       ) {
         totalGain += ((currentValue - baselineValue) / baselineValue) * 100;
         validGains++;
@@ -210,20 +253,29 @@ const calculateTimeframeGain = (data: any[], timeframe: TimeframeOption, multipl
   } else {
     // Single metric
     const key = showPercentage ? "percentGain" : "weight";
-    const baselineValue = baselinePoint[key];
-    const currentValue = lastPoint[key];
+    const baselineValue = metricNumber(baselinePoint[key]);
+    const currentValue = metricNumber(lastPoint[key]);
     if (showPercentage) {
       if (
-        baselineValue !== null && baselineValue !== undefined && !isNaN(baselineValue) &&
-        currentValue !== null && currentValue !== undefined && !isNaN(currentValue)
+        baselineValue !== null &&
+        baselineValue !== undefined &&
+        !isNaN(baselineValue) &&
+        currentValue !== null &&
+        currentValue !== undefined &&
+        !isNaN(currentValue)
       ) {
         return currentValue - baselineValue;
       }
       return 0;
     } else {
       if (
-        baselineValue !== null && baselineValue !== undefined && !isNaN(baselineValue) && baselineValue > 0 &&
-        currentValue !== null && currentValue !== undefined && !isNaN(currentValue)
+        baselineValue !== null &&
+        baselineValue !== undefined &&
+        !isNaN(baselineValue) &&
+        baselineValue > 0 &&
+        currentValue !== null &&
+        currentValue !== undefined &&
+        !isNaN(currentValue)
       ) {
         return ((currentValue - baselineValue) / baselineValue) * 100;
       }
@@ -232,26 +284,27 @@ const calculateTimeframeGain = (data: any[], timeframe: TimeframeOption, multipl
   }
 };
 
-const ProgressChart: React.FC<ProgressChartProps> = ({ 
-  data, 
-  title, 
+const ProgressChart: React.FC<ProgressChartProps> = ({
+  data,
+  title,
   exerciseId,
   categoryId,
   multiple = false,
   showPercentage = false,
-  weightUnit = 'lb',
+  weightUnit = "lb",
   appleStyle = false,
   blendWithBackground = false,
   customColors,
   onTimeframeChange,
   onHoverData,
   hideTooltip = false,
-  defaultTimeframe = '2W',
+  defaultTimeframe = "2W",
   hideTimeframeControls = false,
   timeframe: externalTimeframe,
-  disableInternalTimeframeFilter = false // NEW
+  disableInternalTimeframeFilter = false, // NEW
 }) => {
-  const [internalTimeframe, setInternalTimeframe] = useState<TimeframeOption>(defaultTimeframe);
+  const [internalTimeframe, setInternalTimeframe] =
+    useState<TimeframeOption>(defaultTimeframe);
   const [dotVisible, setDotVisible] = useState(false);
   const [disableInitialAnimation, setDisableInitialAnimation] = useState(true);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null); // NEW
@@ -266,44 +319,55 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
   }, [data, currentTimeframe, disableInternalTimeframeFilter]);
 
   // Determine which data array to use for rendering (the chart displays this data)
-  const dataArrayForChart = disableInternalTimeframeFilter ? data : filteredData;
+  const dataArrayForChart = disableInternalTimeframeFilter
+    ? data
+    : filteredData;
 
   // Calculate percentage gain for current timeframe - using chart start date
   const timeframeGain = useMemo(() => {
     // Determine which data array to use for calculations
     const dataArrayToUse = disableInternalTimeframeFilter ? data : filteredData;
-    
+
     // If hovering, use hovered point for gain
     if (hoveredIndex !== null && dataArrayToUse.length > 0) {
       const chartStartPoint = dataArrayToUse[0];
       const hoveredPoint = dataArrayToUse[hoveredIndex];
       if (!hoveredPoint) return 0;
       if (multiple && showPercentage) {
-        const keys = Object.keys(hoveredPoint).filter(key => key !== 'date');
+        const keys = Object.keys(hoveredPoint).filter((key) => key !== "date");
         let totalGain = 0;
         let validGains = 0;
-        keys.forEach(key => {
-          const startValue = chartStartPoint[key];
-          const endValue = hoveredPoint[key];
+        keys.forEach((key) => {
+          const startValue = metricNumber(chartStartPoint[key]);
+          const endValue = metricNumber(hoveredPoint[key]);
           if (
-            startValue !== null && startValue !== undefined && !isNaN(startValue) &&
-            endValue !== null && endValue !== undefined && !isNaN(endValue)
+            startValue !== null &&
+            startValue !== undefined &&
+            !isNaN(startValue) &&
+            endValue !== null &&
+            endValue !== undefined &&
+            !isNaN(endValue)
           ) {
-            totalGain += (endValue - startValue);
+            totalGain += endValue - startValue;
             validGains++;
           }
         });
         return validGains > 0 ? totalGain / validGains : 0;
       } else if (multiple && !showPercentage) {
-        const keys = Object.keys(hoveredPoint).filter(key => key !== 'date');
+        const keys = Object.keys(hoveredPoint).filter((key) => key !== "date");
         let totalGain = 0;
         let validGains = 0;
-        keys.forEach(key => {
-          const startValue = chartStartPoint[key];
-          const endValue = hoveredPoint[key];
+        keys.forEach((key) => {
+          const startValue = metricNumber(chartStartPoint[key]);
+          const endValue = metricNumber(hoveredPoint[key]);
           if (
-            startValue !== null && startValue !== undefined && !isNaN(startValue) && startValue > 0 &&
-            endValue !== null && endValue !== undefined && !isNaN(endValue)
+            startValue !== null &&
+            startValue !== undefined &&
+            !isNaN(startValue) &&
+            startValue > 0 &&
+            endValue !== null &&
+            endValue !== undefined &&
+            !isNaN(endValue)
           ) {
             totalGain += ((endValue - startValue) / startValue) * 100;
             validGains++;
@@ -312,20 +376,29 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
         return validGains > 0 ? totalGain / validGains : 0;
       } else {
         const key = showPercentage ? "percentGain" : "weight";
-        const startValue = chartStartPoint[key];
-        const endValue = hoveredPoint[key];
+        const startValue = metricNumber(chartStartPoint[key]);
+        const endValue = metricNumber(hoveredPoint[key]);
         if (showPercentage) {
           if (
-            startValue !== null && startValue !== undefined && !isNaN(startValue) &&
-            endValue !== null && endValue !== undefined && !isNaN(endValue)
+            startValue !== null &&
+            startValue !== undefined &&
+            !isNaN(startValue) &&
+            endValue !== null &&
+            endValue !== undefined &&
+            !isNaN(endValue)
           ) {
             return endValue - startValue;
           }
           return 0;
         } else {
           if (
-            startValue !== null && startValue !== undefined && !isNaN(startValue) && startValue > 0 &&
-            endValue !== null && endValue !== undefined && !isNaN(endValue)
+            startValue !== null &&
+            startValue !== undefined &&
+            !isNaN(startValue) &&
+            startValue > 0 &&
+            endValue !== null &&
+            endValue !== undefined &&
+            !isNaN(endValue)
           ) {
             return ((endValue - startValue) / startValue) * 100;
           }
@@ -338,31 +411,40 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
     const chartStartPoint = dataArrayToUse[0];
     const chartEndPoint = dataArrayToUse[dataArrayToUse.length - 1];
     if (multiple && showPercentage) {
-      const keys = Object.keys(chartEndPoint).filter(key => key !== 'date');
+      const keys = Object.keys(chartEndPoint).filter((key) => key !== "date");
       let totalGain = 0;
       let validGains = 0;
-      keys.forEach(key => {
-        const startValue = chartStartPoint[key];
-        const endValue = chartEndPoint[key];
+      keys.forEach((key) => {
+        const startValue = metricNumber(chartStartPoint[key]);
+        const endValue = metricNumber(chartEndPoint[key]);
         if (
-          startValue !== null && startValue !== undefined && !isNaN(startValue) &&
-          endValue !== null && endValue !== undefined && !isNaN(endValue)
+          startValue !== null &&
+          startValue !== undefined &&
+          !isNaN(startValue) &&
+          endValue !== null &&
+          endValue !== undefined &&
+          !isNaN(endValue)
         ) {
-          totalGain += (endValue - startValue);
+          totalGain += endValue - startValue;
           validGains++;
         }
       });
       return validGains > 0 ? totalGain / validGains : 0;
     } else if (multiple && !showPercentage) {
-      const keys = Object.keys(chartEndPoint).filter(key => key !== 'date');
+      const keys = Object.keys(chartEndPoint).filter((key) => key !== "date");
       let totalGain = 0;
       let validGains = 0;
-      keys.forEach(key => {
-        const startValue = chartStartPoint[key];
-        const endValue = chartEndPoint[key];
+      keys.forEach((key) => {
+        const startValue = metricNumber(chartStartPoint[key]);
+        const endValue = metricNumber(chartEndPoint[key]);
         if (
-          startValue !== null && startValue !== undefined && !isNaN(startValue) && startValue > 0 &&
-          endValue !== null && endValue !== undefined && !isNaN(endValue)
+          startValue !== null &&
+          startValue !== undefined &&
+          !isNaN(startValue) &&
+          startValue > 0 &&
+          endValue !== null &&
+          endValue !== undefined &&
+          !isNaN(endValue)
         ) {
           totalGain += ((endValue - startValue) / startValue) * 100;
           validGains++;
@@ -371,27 +453,43 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
       return validGains > 0 ? totalGain / validGains : 0;
     } else {
       const key = showPercentage ? "percentGain" : "weight";
-      const startValue = chartStartPoint[key];
-      const endValue = chartEndPoint[key];
+      const startValue = metricNumber(chartStartPoint[key]);
+      const endValue = metricNumber(chartEndPoint[key]);
       if (showPercentage) {
         if (
-          startValue !== null && startValue !== undefined && !isNaN(startValue) &&
-          endValue !== null && endValue !== undefined && !isNaN(endValue)
+          startValue !== null &&
+          startValue !== undefined &&
+          !isNaN(startValue) &&
+          endValue !== null &&
+          endValue !== undefined &&
+          !isNaN(endValue)
         ) {
           return endValue - startValue;
         }
         return 0;
       } else {
         if (
-          startValue !== null && startValue !== undefined && !isNaN(startValue) && startValue > 0 &&
-          endValue !== null && endValue !== undefined && !isNaN(endValue)
+          startValue !== null &&
+          startValue !== undefined &&
+          !isNaN(startValue) &&
+          startValue > 0 &&
+          endValue !== null &&
+          endValue !== undefined &&
+          !isNaN(endValue)
         ) {
           return ((endValue - startValue) / startValue) * 100;
         }
         return 0;
       }
     }
-  }, [data, filteredData, hoveredIndex, multiple, showPercentage, disableInternalTimeframeFilter]);
+  }, [
+    data,
+    filteredData,
+    hoveredIndex,
+    multiple,
+    showPercentage,
+    disableInternalTimeframeFilter,
+  ]);
 
   // Notify parent component when timeframe or gain changes
   useEffect(() => {
@@ -401,30 +499,37 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
   }, [currentTimeframe, timeframeGain, onTimeframeChange]);
 
   // Handle chart hover for custom tooltip and percent gain
-  const handleChartHover = (data: any) => {
-    if (onHoverData && data && data.activePayload && data.activePayload.length > 0) {
-      const payload = data.activePayload[0].payload;
-      
+  const handleChartHover: NonNullable<
+    React.ComponentProps<typeof LineChart>["onMouseMove"]
+  > = (chartState) => {
+    if (onHoverData && chartState?.activePayload?.length) {
+      const payload = chartState.activePayload[0].payload as ChartDatum;
+
       // When showing multiple lines for category exercises, filter out exercises with no data (0 or null)
       const filteredPayload = { ...payload };
       if (multiple && !showPercentage && categoryId) {
-        Object.keys(filteredPayload).forEach(key => {
-          if (key !== 'date' && (filteredPayload[key] === null || filteredPayload[key] === 0)) {
+        Object.keys(filteredPayload).forEach((key) => {
+          if (
+            key !== "date" &&
+            (filteredPayload[key] === null || filteredPayload[key] === 0)
+          ) {
             delete filteredPayload[key];
           }
         });
       }
 
       // Find hovered index in the correct data array
-      const dataArrayToUse = disableInternalTimeframeFilter ? data : filteredData;
-      const idx = dataArrayToUse.findIndex(d => d.date === payload.date);
+      const dataArrayToUse = disableInternalTimeframeFilter
+        ? data
+        : filteredData;
+      const idx = dataArrayToUse.findIndex((d) => d.date === payload.date);
       setHoveredIndex(idx);
 
       onHoverData({
         date: payload.date,
         data: filteredPayload, // Use the filtered payload
-        label: data.label,
-        colors: colors // Pass the actual colors being used by the chart
+        label: String(chartState.activeLabel ?? payload.date),
+        colors: colors, // Pass the actual colors being used by the chart
       });
     }
   };
@@ -456,7 +561,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
     return (
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg">{title || 'Progress'}</CardTitle>
+          <CardTitle className="text-lg">{title || "Progress"}</CardTitle>
         </CardHeader>
         <CardContent className="h-[200px] flex items-center justify-center">
           <p className="text-gray-500">No progress data available</p>
@@ -466,18 +571,25 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
   }
 
   // Updated colors for Apple-style charts (more muted and elegant)
-  const colors = customColors || (appleStyle 
-    ? ['#34C759', '#5AC8FA', '#FF9500', '#FF2D55', '#AF52DE', '#000000']
-    : ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899']);
+  const colors =
+    customColors ||
+    (appleStyle
+      ? ["#34C759", "#5AC8FA", "#FF9500", "#FF2D55", "#AF52DE", "#000000"]
+      : ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"]);
 
-  const formatUnit = showPercentage ? '%' : weightUnit;
+  const formatUnit = showPercentage ? "%" : weightUnit;
 
   // Clean, minimal dot at the end of each line with fade-in
   // Pass filteredData to renderEndDot so it checks the correct data
-  const renderEndDot = (lineKey: string, dataArray: any[]) => {
-    return (props: any) => {
+  const renderEndDot = (lineKey: string, dataArray: ChartDatum[]) => {
+    return (props: {
+      cx?: number;
+      cy?: number;
+      index?: number;
+      stroke?: string;
+    }) => {
       const { cx, cy, index, stroke } = props;
-      if (typeof cx !== 'number' || typeof cy !== 'number') return null;
+      if (typeof cx !== "number" || typeof cy !== "number") return null;
       // If only one data point, always render the dot
       if (dataArray.length === 1 && index === 0) {
         return (
@@ -486,14 +598,17 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
             cy={cy}
             r={3}
             fill={stroke}
-            className={`progresschart-dot-clean${dotVisible ? ' visible' : ''}`}
+            className={`progresschart-dot-clean${dotVisible ? " visible" : ""}`}
           />
         );
       }
       // Find the last non-null index for this lineKey in the filtered data
       let lastIndex = -1;
       for (let i = dataArray.length - 1; i >= 0; i--) {
-        if (dataArray[i][lineKey] !== null && dataArray[i][lineKey] !== undefined) {
+        if (
+          dataArray[i][lineKey] !== null &&
+          dataArray[i][lineKey] !== undefined
+        ) {
           lastIndex = i;
           break;
         }
@@ -505,7 +620,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
             cy={cy}
             r={3}
             fill={stroke}
-            className={`progresschart-dot-clean${dotVisible ? ' visible' : ''}`}
+            className={`progresschart-dot-clean${dotVisible ? " visible" : ""}`}
           />
         );
       }
@@ -522,7 +637,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
         </div>
       )}
 
-      <div className={`relative ${blendWithBackground ? 'px-0' : 'p-0'}`}>
+      <div className={`relative ${blendWithBackground ? "px-0" : "p-0"}`}>
         <ResponsiveContainer width="100%" height={240}>
           <LineChart
             data={dataArrayForChart}
@@ -536,14 +651,22 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
             onMouseMove={onHoverData ? handleChartHover : undefined}
             onMouseLeave={onHoverData ? handleChartLeave : undefined}
           >
-            <CartesianGrid 
-              strokeDasharray={blendWithBackground ? "0 0" : appleStyle ? "0 0" : "3 3"} 
-              stroke={blendWithBackground ? "transparent" : appleStyle ? "#f5f5f7" : "#eee"} 
+            <CartesianGrid
+              strokeDasharray={
+                blendWithBackground ? "0 0" : appleStyle ? "0 0" : "3 3"
+              }
+              stroke={
+                blendWithBackground
+                  ? "transparent"
+                  : appleStyle
+                    ? "#f5f5f7"
+                    : "#eee"
+              }
               vertical={!blendWithBackground && !appleStyle}
             />
-            <XAxis 
-              dataKey="date" 
-              tick={{ fontSize: 10, fill: appleStyle ? '#8E8E93' : '#6B7280' }}
+            <XAxis
+              dataKey="date"
+              tick={{ fontSize: 10, fill: appleStyle ? "#8E8E93" : "#6B7280" }}
               tickFormatter={(value) => {
                 const date = new Date(value);
                 return `${date.getMonth() + 1}/${date.getDate()}`;
@@ -552,42 +675,62 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
               tickLine={!appleStyle}
               hide={false}
             />
-            <YAxis 
+            <YAxis
               tickFormatter={(value) => {
-                const roundedValue = typeof value === 'number' ? 
-                  (value % 1 === 0 ? value.toString() : value.toFixed(1)) : value;
+                const roundedValue =
+                  typeof value === "number"
+                    ? value % 1 === 0
+                      ? value.toString()
+                      : value.toFixed(1)
+                    : value;
                 return `${roundedValue}${formatUnit}`;
               }}
-              tick={{ fontSize: 10, fill: appleStyle ? '#8E8E93' : '#6B7280' }}
+              tick={{ fontSize: 10, fill: appleStyle ? "#8E8E93" : "#6B7280" }}
               axisLine={!appleStyle}
               tickLine={!appleStyle}
               hide={false}
-              domain={showPercentage ? ['dataMin', 'dataMax'] : ['dataMin', 'dataMax']}
+              domain={
+                showPercentage ? ["dataMin", "dataMax"] : ["dataMin", "dataMax"]
+              }
             />
-            <Tooltip 
+            <Tooltip
               formatter={(value, name) => {
-                const displayName = multiple ? name : (showPercentage ? 'Progress' : 'Weight');
+                const displayName = multiple
+                  ? name
+                  : showPercentage
+                    ? "Progress"
+                    : "Weight";
                 // Round percentage values to 1 decimal place, weight values to 1 decimal place
-                const roundedValue = typeof value === 'number' ? 
-                  (value % 1 === 0 ? value.toString() : value.toFixed(1)) : value;
+                const roundedValue =
+                  typeof value === "number"
+                    ? value % 1 === 0
+                      ? value.toString()
+                      : value.toFixed(1)
+                    : value;
                 return [`${roundedValue}${formatUnit}`, displayName];
               }}
               labelFormatter={(value) => `Date: ${value}`}
-              contentStyle={hideTooltip ? {
-                display: 'none'
-              } : (appleStyle || blendWithBackground ? { 
-                backgroundColor: 'rgba(255, 255, 255, 0.98)',
-                borderRadius: '12px',
-                border: 'none', 
-                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.12)',
-                padding: '12px 16px',
-                fontSize: '14px',
-                fontWeight: '500'
-              } : undefined)}
-              cursor={{ 
-                stroke: appleStyle ? '#8E8E93' : '#94A3B8', 
+              contentStyle={
+                hideTooltip
+                  ? {
+                      display: "none",
+                    }
+                  : appleStyle || blendWithBackground
+                    ? {
+                        backgroundColor: "rgba(255, 255, 255, 0.98)",
+                        borderRadius: "12px",
+                        border: "none",
+                        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.12)",
+                        padding: "12px 16px",
+                        fontSize: "14px",
+                        fontWeight: "500",
+                      }
+                    : undefined
+              }
+              cursor={{
+                stroke: appleStyle ? "#8E8E93" : "#94A3B8",
                 strokeWidth: 1.5,
-                strokeDasharray: '0' 
+                strokeDasharray: "0",
               }}
               animationDuration={0}
               allowEscapeViewBox={{ x: false, y: false }}
@@ -597,7 +740,7 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
             {multiple ? (
               <>
                 {Object.keys(dataArrayForChart[0] || {})
-                  .filter(key => key !== 'date')
+                  .filter((key) => key !== "date")
                   .map((key, index) => (
                     <Line
                       key={key}
@@ -618,9 +761,18 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
               <Line
                 type="monotone"
                 dataKey={showPercentage ? "percentGain" : "weight"}
-                stroke={customColors ? customColors[0] : (appleStyle ? "#34C759" : "#3b82f6")}
+                stroke={
+                  customColors
+                    ? customColors[0]
+                    : appleStyle
+                      ? "#34C759"
+                      : "#3b82f6"
+                }
                 strokeWidth={appleStyle ? 2.5 : 2}
-                dot={renderEndDot(showPercentage ? "percentGain" : "weight", dataArrayForChart)}
+                dot={renderEndDot(
+                  showPercentage ? "percentGain" : "weight",
+                  dataArrayForChart,
+                )}
                 activeDot={false}
                 animationDuration={disableInitialAnimation ? 0 : 800}
                 onAnimationEnd={() => setDotVisible(true)}
@@ -629,22 +781,22 @@ const ProgressChart: React.FC<ProgressChartProps> = ({
           </LineChart>
         </ResponsiveContainer>
       </div>
-      
+
       {/* Apple-style centered timeframe controls - only show if not hidden */}
       {!hideTimeframeControls && (
         <div className="flex justify-center mt-4 mb-2">
           <MobileSlider
             options={[
-              { id: '2W', label: '2W' },
-              { id: '1M', label: '1M' },
-              { id: 'ALL', label: 'ALL' }
+              { id: "2W", label: "2W" },
+              { id: "1M", label: "1M" },
+              { id: "ALL", label: "ALL" },
             ]}
             activeOption={currentTimeframe}
             onOptionChange={(optionId) => {
               const newTimeframe = optionId as TimeframeOption;
               if (externalTimeframe) {
                 // If timeframe is controlled externally, notify parent instead of updating internal state
-                onTimeframeChange && onTimeframeChange(newTimeframe, null);
+                onTimeframeChange?.(newTimeframe, null);
               } else {
                 setInternalTimeframe(newTimeframe);
               }

@@ -1,40 +1,55 @@
-import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { format, startOfWeek, endOfWeek, eachDayOfInterval, isSameDay, isToday, subDays, isThisWeek, isThisMonth, parseISO } from 'date-fns';
-import Layout from '@/components/Layout';
-import ExerciseLogCard from '@/components/ExerciseLogCard';
-import { Search, Calendar, Activity, Filter, X, TrendingUp, Clock, ChevronDown } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
-import { useAppContext } from '@/context/useAppContext';
-import { useAuth } from '@/context/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { getCategoryChartColors } from '@/utils/categoryColors';
-import '@/styles/index.css';
+import ExerciseLogCard from "@/components/ExerciseLogCard";
+import Layout from "@/components/Layout";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useAuth } from "@/context/AuthContext";
+import { useAppContext } from "@/context/useAppContext";
+import { useToast } from "@/hooks/use-toast";
+import "@/styles/index.css";
+import type { ExerciseLog } from "@/types";
+import { getCategoryChartColors } from "@/utils/categoryColors";
+import { format, isThisWeek, subDays } from "date-fns";
+import { Activity, Search, X } from "lucide-react";
+import React, { useCallback, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const History = () => {
-  const { exerciseLogs, exercises, categories, updateExerciseLog, deleteExerciseLog } = useAppContext();
+  const {
+    exerciseLogs,
+    exercises,
+    categories,
+    updateExerciseLog,
+    deleteExerciseLog,
+  } = useAppContext();
   const { profile } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   // State for filters and search
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [timeFilter, setTimeFilter] = useState('all'); // all, week, month, 3months
-  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest'>('newest');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [timeFilter, setTimeFilter] = useState("all"); // all, week, month, 3months
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
   const [showFilters, setShowFilters] = useState(false);
-  
+
   // Edit dialog state
   const [editLog, setEditLog] = useState(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [editForm, setEditForm] = useState({ weight: '', note: '' });
+  const [editForm, setEditForm] = useState({ weight: "", note: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Get category colors
@@ -44,16 +59,22 @@ const History = () => {
   };
 
   // Helper functions
-  const getExerciseName = (exerciseId: string) => {
-    const exercise = exercises.find(e => e.id === exerciseId);
-    return exercise?.name || 'Unknown Exercise';
-  };
+  const getExerciseName = useCallback(
+    (exerciseId: string) => {
+      const exercise = exercises.find((e) => e.id === exerciseId);
+      return exercise?.name || "Unknown Exercise";
+    },
+    [exercises],
+  );
 
-  const getCategoryForExercise = (exerciseId: string) => {
-    const exercise = exercises.find(e => e.id === exerciseId);
-    if (!exercise) return null;
-    return categories.find(c => c.id === exercise.categoryId);
-  };
+  const getCategoryForExercise = useCallback(
+    (exerciseId: string) => {
+      const exercise = exercises.find((e) => e.id === exerciseId);
+      if (!exercise) return null;
+      return categories.find((c) => c.id === exercise.categoryId);
+    },
+    [exercises, categories],
+  );
 
   // Filter and search logic
   const filteredLogs = useMemo(() => {
@@ -62,44 +83,46 @@ const History = () => {
     // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(log => {
+      filtered = filtered.filter((log) => {
         const exerciseName = getExerciseName(log.exerciseId).toLowerCase();
         const category = getCategoryForExercise(log.exerciseId);
-        const categoryName = category?.name.toLowerCase() || '';
-        const note = log.note?.toLowerCase() || '';
-        
-        return exerciseName.includes(query) || 
-               categoryName.includes(query) || 
-               note.includes(query);
+        const categoryName = category?.name.toLowerCase() || "";
+        const note = log.note?.toLowerCase() || "";
+
+        return (
+          exerciseName.includes(query) ||
+          categoryName.includes(query) ||
+          note.includes(query)
+        );
       });
     }
 
     // Category filter
-    if (selectedCategory !== 'all') {
-      filtered = filtered.filter(log => {
+    if (selectedCategory !== "all") {
+      filtered = filtered.filter((log) => {
         const category = getCategoryForExercise(log.exerciseId);
         return category?.id === selectedCategory;
       });
     }
 
     // Time filter
-    if (timeFilter !== 'all') {
+    if (timeFilter !== "all") {
       const now = new Date();
       const cutoffDate = new Date();
-      
+
       switch (timeFilter) {
-        case 'week':
+        case "week":
           cutoffDate.setDate(now.getDate() - 7);
           break;
-        case 'month':
+        case "month":
           cutoffDate.setMonth(now.getMonth() - 1);
           break;
-        case '3months':
+        case "3months":
           cutoffDate.setMonth(now.getMonth() - 3);
           break;
       }
-      
-      filtered = filtered.filter(log => {
+
+      filtered = filtered.filter((log) => {
         const logDate = new Date(log.timestamp);
         return logDate >= cutoffDate;
       });
@@ -109,20 +132,28 @@ const History = () => {
     filtered.sort((a, b) => {
       const dateA = new Date(a.timestamp);
       const dateB = new Date(b.timestamp);
-      return sortOrder === 'newest' 
+      return sortOrder === "newest"
         ? dateB.getTime() - dateA.getTime()
         : dateA.getTime() - dateB.getTime();
     });
 
     return filtered;
-  }, [exerciseLogs, searchQuery, selectedCategory, timeFilter, sortOrder, exercises, categories]);
+  }, [
+    exerciseLogs,
+    searchQuery,
+    selectedCategory,
+    timeFilter,
+    sortOrder,
+    getCategoryForExercise,
+    getExerciseName,
+  ]);
 
   // Group logs by date
   const groupedLogs = useMemo(() => {
     const grouped = {};
-    
-    filteredLogs.forEach(log => {
-      const dateKey = format(new Date(log.timestamp), 'yyyy-MM-dd');
+
+    filteredLogs.forEach((log) => {
+      const dateKey = format(new Date(log.timestamp), "yyyy-MM-dd");
       if (!grouped[dateKey]) {
         grouped[dateKey] = [];
       }
@@ -135,7 +166,7 @@ const History = () => {
   // Get sorted dates
   const sortedDates = useMemo(() => {
     return Object.keys(groupedLogs).sort((a, b) => {
-      return sortOrder === 'newest' 
+      return sortOrder === "newest"
         ? new Date(b).getTime() - new Date(a).getTime()
         : new Date(a).getTime() - new Date(b).getTime();
     });
@@ -144,8 +175,10 @@ const History = () => {
   // Stats for the header
   const stats = useMemo(() => {
     const totalWorkouts = filteredLogs.length;
-    const uniqueDays = new Set(filteredLogs.map(log => format(new Date(log.timestamp), 'yyyy-MM-dd'))).size;
-    const recentWorkouts = filteredLogs.filter(log => {
+    const uniqueDays = new Set(
+      filteredLogs.map((log) => format(new Date(log.timestamp), "yyyy-MM-dd")),
+    ).size;
+    const recentWorkouts = filteredLogs.filter((log) => {
       const logDate = new Date(log.timestamp);
       return logDate >= subDays(new Date(), 7);
     }).length;
@@ -159,17 +192,19 @@ const History = () => {
   };
 
   // Edit dialog handlers
-  const openEditDialog = (log: any) => {
+  const openEditDialog = (log: ExerciseLog) => {
     setEditLog(log);
-    setEditForm({ weight: log.weight.toString(), note: log.note || '' });
+    setEditForm({ weight: log.weight.toString(), note: log.note || "" });
     setEditDialogOpen(true);
   };
 
-  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleEditChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
-    
-    if (name === 'weight') {
-      if (value === '' || /^\d*\.?\d*$/.test(value)) {
+
+    if (name === "weight") {
+      if (value === "" || /^\d*\.?\d*$/.test(value)) {
         setEditForm({ ...editForm, [name]: value });
       }
     } else {
@@ -180,38 +215,38 @@ const History = () => {
   const handleEditSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editLog) return;
-    
+
     const weightValue = parseFloat(editForm.weight);
     if (!editForm.weight || isNaN(weightValue) || weightValue < 0) {
       toast({
-        title: 'Invalid weight',
-        description: 'Please enter a valid weight value.',
-        variant: 'destructive',
+        title: "Invalid weight",
+        description: "Please enter a valid weight value.",
+        variant: "destructive",
       });
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
-      await updateExerciseLog({ 
-        ...editLog, 
-        weight: weightValue, 
-        note: editForm.note 
+      await updateExerciseLog({
+        ...editLog,
+        weight: weightValue,
+        note: editForm.note,
       });
-      
+
       toast({
-        title: 'Log updated',
-        description: 'Your exercise log has been updated successfully!',
+        title: "Log updated",
+        description: "Your exercise log has been updated successfully!",
       });
-      
+
       setEditDialogOpen(false);
       setEditLog(null);
     } catch (error) {
       toast({
-        title: 'Error',
-        description: 'Failed to update log. Please try again.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to update log. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
@@ -219,18 +254,22 @@ const History = () => {
   };
 
   const handleDelete = async (logId: string) => {
-    if (window.confirm('Are you sure you want to delete this log? This action cannot be undone.')) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this log? This action cannot be undone.",
+      )
+    ) {
       try {
         await deleteExerciseLog(logId);
         toast({
-          title: 'Log deleted',
-          description: 'Your exercise log has been deleted successfully.',
+          title: "Log deleted",
+          description: "Your exercise log has been deleted successfully.",
         });
       } catch (error) {
         toast({
-          title: 'Error',
-          description: 'Failed to delete log. Please try again.',
-          variant: 'destructive',
+          title: "Error",
+          description: "Failed to delete log. Please try again.",
+          variant: "destructive",
         });
       }
     }
@@ -238,13 +277,17 @@ const History = () => {
 
   // Clear all filters
   const clearFilters = () => {
-    setSearchQuery('');
-    setSelectedCategory('all');
-    setTimeFilter('all');
-    setSortOrder('newest');
+    setSearchQuery("");
+    setSelectedCategory("all");
+    setTimeFilter("all");
+    setSortOrder("newest");
   };
 
-  const hasActiveFilters = searchQuery || selectedCategory !== 'all' || timeFilter !== 'all' || sortOrder !== 'newest';
+  const hasActiveFilters =
+    searchQuery ||
+    selectedCategory !== "all" ||
+    timeFilter !== "all" ||
+    sortOrder !== "newest";
 
   return (
     <Layout title="History">
@@ -272,7 +315,7 @@ const History = () => {
                 />
                 {searchQuery && (
                   <button
-                    onClick={() => setSearchQuery('')}
+                    onClick={() => setSearchQuery("")}
                     className="absolute right-4 top-1/2 -translate-y-1/2 p-1.5 rounded-lg
                              text-muted-foreground/60 hover:text-muted-foreground hover:bg-muted/30
                              transition-all duration-200 ease-out"
@@ -293,7 +336,10 @@ const History = () => {
                   {/* Category Filter */}
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Category</Label>
-                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <Select
+                      value={selectedCategory}
+                      onValueChange={setSelectedCategory}
+                    >
                       <SelectTrigger className="rounded-xl">
                         <SelectValue placeholder="All categories" />
                       </SelectTrigger>
@@ -327,7 +373,12 @@ const History = () => {
                   {/* Sort Order */}
                   <div className="space-y-2">
                     <Label className="text-sm font-medium">Sort By</Label>
-                    <Select value={sortOrder} onValueChange={(value: 'newest' | 'oldest') => setSortOrder(value)}>
+                    <Select
+                      value={sortOrder}
+                      onValueChange={(value: "newest" | "oldest") =>
+                        setSortOrder(value)
+                      }
+                    >
                       <SelectTrigger className="rounded-xl">
                         <SelectValue />
                       </SelectTrigger>
@@ -363,7 +414,9 @@ const History = () => {
           <Card>
             <CardContent className="p-12 text-center">
               <Activity className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">No Exercise History</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                No Exercise History
+              </h3>
               <p className="text-muted-foreground">
                 Start logging exercises to see your exercise history here!
               </p>
@@ -376,9 +429,12 @@ const History = () => {
           <Card>
             <CardContent className="p-12 text-center">
               <Search className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-foreground mb-2">No Results Found</h3>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                No Results Found
+              </h3>
               <p className="text-muted-foreground mb-4">
-                Try adjusting your search or filters to find what you're looking for.
+                Try adjusting your search or filters to find what you're looking
+                for.
               </p>
               <Button
                 variant="outline"
@@ -400,71 +456,90 @@ const History = () => {
               const date = new Date(dayLogs[0].timestamp);
               const isToday = new Date().toDateString() === date.toDateString();
               const isThisWeekDate = isThisWeek(date);
-              
+
               // Fixed category priority weights
               const categoryWeights = {
-                'chest': 3,
-                'back': 3,
-                'legs': 3,
-                'shoulders': 2,
-                'arms': 1,
-                'core': 0
+                chest: 3,
+                back: 3,
+                legs: 3,
+                shoulders: 2,
+                arms: 1,
+                core: 0,
               };
 
               // Get unique categories for this day
-              const dayCategories = [...new Set(dayLogs.map(log => {
-                const category = getCategoryForExercise(log.exerciseId);
-                return category?.id;
-              }).filter(Boolean))];
+              const dayCategories = [
+                ...new Set(
+                  dayLogs
+                    .map((log) => {
+                      const category = getCategoryForExercise(log.exerciseId);
+                      return category?.id;
+                    })
+                    .filter(Boolean),
+                ),
+              ];
 
               // Sort categories by fixed weight (descending), then alphabetically
               const sortedCategories = dayCategories.sort((a, b) => {
-                const categoryA = categories.find(cat => cat.id === a);
-                const categoryB = categories.find(cat => cat.id === b);
-                const weightA = categoryWeights[categoryA?.name?.toLowerCase()] || 0;
-                const weightB = categoryWeights[categoryB?.name?.toLowerCase()] || 0;
-                
+                const categoryA = categories.find((cat) => cat.id === a);
+                const categoryB = categories.find((cat) => cat.id === b);
+                const weightA =
+                  categoryWeights[categoryA?.name?.toLowerCase()] || 0;
+                const weightB =
+                  categoryWeights[categoryB?.name?.toLowerCase()] || 0;
+
                 if (weightB !== weightA) return weightB - weightA; // Higher weight first
-                const nameA = categoryA?.name || '';
-                const nameB = categoryB?.name || '';
+                const nameA = categoryA?.name || "";
+                const nameB = categoryB?.name || "";
                 return nameA.localeCompare(nameB); // Alphabetical as tiebreaker
               });
 
               // Create gradient colors for the badge (using sorted order)
-              const categoryColors = sortedCategories.map(catId => {
-                const categoryIndex = categories.findIndex(cat => cat.id === catId);
-                return categoryIndex >= 0 ? getCategoryColor(categoryIndex) : '#10b981';
+              const categoryColors = sortedCategories.map((catId) => {
+                const categoryIndex = categories.findIndex(
+                  (cat) => cat.id === catId,
+                );
+                return categoryIndex >= 0
+                  ? getCategoryColor(categoryIndex)
+                  : "#10b981";
               });
 
               // Get category names for badge text (prioritized by fixed weights)
-              const categoryNames = sortedCategories.map(catId => 
-                categories.find(cat => cat.id === catId)?.name
-              ).filter(Boolean);
-              
+              const categoryNames = sortedCategories
+                .map(
+                  (catId) => categories.find((cat) => cat.id === catId)?.name,
+                )
+                .filter(Boolean);
+
               // Create display text with +X after 3 categories
-              const badgeText = categoryNames.length > 3 
-                ? `${categoryNames.slice(0, 3).join('/')}+${categoryNames.length - 3}`
-                : categoryNames.join('/');
+              const badgeText =
+                categoryNames.length > 3
+                  ? `${categoryNames.slice(0, 3).join("/")}+${categoryNames.length - 3}`
+                  : categoryNames.join("/");
 
               // Create gradient string
-              const gradientBackground = categoryColors.length > 1 
-                ? `linear-gradient(45deg, ${categoryColors.join(', ')})`
-                : categoryColors[0] || 'transparent';
-              
+              const gradientBackground =
+                categoryColors.length > 1
+                  ? `linear-gradient(45deg, ${categoryColors.join(", ")})`
+                  : categoryColors[0] || "transparent";
+
               return (
                 <div key={dateKey} className="space-y-4">
                   {/* Date Header with category hint */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <h2 className="text-lg font-semibold text-foreground">
-                        {isToday ? 'Today' : isThisWeekDate ? format(date, 'EEEE') : format(date, 'EEEE, MMM d, yyyy')}
+                        {isToday
+                          ? "Today"
+                          : isThisWeekDate
+                            ? format(date, "EEEE")
+                            : format(date, "EEEE, MMM d, yyyy")}
                       </h2>
                     </div>
-                    <div 
+                    <div
                       className="px-3 py-1 rounded-full text-xs font-medium text-white shadow-sm"
-                      // eslint-disable-next-line react/forbid-dom-props
                       style={{ background: gradientBackground }}
-                      title={`${dayLogs.length} workout${dayLogs.length !== 1 ? 's' : ''} • Categories: ${categoryNames.join(', ')}`}
+                      title={`${dayLogs.length} workout${dayLogs.length !== 1 ? "s" : ""} • Categories: ${categoryNames.join(", ")}`}
                     >
                       {badgeText}
                     </div>
@@ -472,14 +547,19 @@ const History = () => {
 
                   {/* Workout Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {dayLogs.map(log => {
+                    {dayLogs.map((log) => {
                       const exerciseName = getExerciseName(log.exerciseId);
                       const category = getCategoryForExercise(log.exerciseId);
-                      const categoryIndex = categories.findIndex(cat => cat.id === category?.id);
-                      const categoryColor = categoryIndex >= 0 ? getCategoryColor(categoryIndex) : '#10b981';
-                      
+                      const categoryIndex = categories.findIndex(
+                        (cat) => cat.id === category?.id,
+                      );
+                      const categoryColor =
+                        categoryIndex >= 0
+                          ? getCategoryColor(categoryIndex)
+                          : "#10b981";
+
                       return (
-                        <div 
+                        <div
                           key={log.id}
                           className="group cursor-pointer"
                           onClick={() => handleExerciseClick(log.exerciseId)}
@@ -502,7 +582,7 @@ const History = () => {
                   {/* Workout Count at Bottom */}
                   <div className="text-center">
                     <div className="text-xs text-muted-foreground">
-                      {dayLogs.length} exercise{dayLogs.length !== 1 ? 's' : ''}
+                      {dayLogs.length} exercise{dayLogs.length !== 1 ? "s" : ""}
                     </div>
                   </div>
 
@@ -521,14 +601,18 @@ const History = () => {
           <DialogContent className="enhanced-dialog-content">
             <form onSubmit={handleEditSubmit}>
               <div className="enhanced-dialog-header">
-                <DialogTitle className="enhanced-dialog-title">Edit Exercise Log</DialogTitle>
+                <DialogTitle className="enhanced-dialog-title">
+                  Edit Exercise Log
+                </DialogTitle>
                 <DialogDescription className="enhanced-dialog-description">
                   Update the weight or note for this exercise entry.
                 </DialogDescription>
               </div>
-              
+
               <div className="enhanced-form-group">
-                <label htmlFor="weight" className="enhanced-label">Weight (lbs)</label>
+                <label htmlFor="weight" className="enhanced-label">
+                  Weight (lbs)
+                </label>
                 <input
                   id="weight"
                   name="weight"
@@ -541,9 +625,11 @@ const History = () => {
                   required
                 />
               </div>
-              
+
               <div className="enhanced-form-group">
-                <label htmlFor="note" className="enhanced-label">Note (optional)</label>
+                <label htmlFor="note" className="enhanced-label">
+                  Note (optional)
+                </label>
                 <textarea
                   id="note"
                   name="note"
@@ -554,16 +640,19 @@ const History = () => {
                   className="enhanced-textarea"
                 />
               </div>
-              
+
               {editLog && (
                 <div className="enhanced-form-group">
                   <label className="enhanced-label">Date & Time</label>
                   <div className="enhanced-info-display">
-                    {format(new Date(editLog.timestamp), 'EEEE, MMMM d, yyyy \'at\' h:mm a')}
+                    {format(
+                      new Date(editLog.timestamp),
+                      "EEEE, MMMM d, yyyy 'at' h:mm a",
+                    )}
                   </div>
                 </div>
               )}
-              
+
               <div className="enhanced-dialog-footer">
                 <button
                   type="button"
@@ -572,8 +661,8 @@ const History = () => {
                 >
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="enhanced-button-primary"
                   disabled={isSubmitting}
                 >
@@ -583,7 +672,7 @@ const History = () => {
                       Updating...
                     </div>
                   ) : (
-                    'Update Log'
+                    "Update Log"
                   )}
                 </button>
               </div>

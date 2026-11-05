@@ -1,433 +1,356 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
-import { useTheme } from '@/context/ThemeContext';
-import { useToast } from '@/components/ui/use-toast';
-import { Dumbbell, ChevronRight, Check, Mail, Lock, User, ArrowRight } from 'lucide-react';
-import '@/styles/components/auth.css';
-import { useAppContext } from '@/context/useAppContext';
+import { useEffect, useState, type FormEvent } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Dumbbell,
+  Eye,
+  EyeOff,
+  Loader2,
+  Play,
+  CheckCircle2,
+} from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
-const Auth = () => {
-  const { signIn, signUp, session, resetPasswordForEmail } = useAuth();
-  const { isDark } = useTheme();
+type Mode = "login" | "signup" | "forgot";
+
+export default function Auth() {
+  const {
+    signIn,
+    signUp,
+    user,
+    loading,
+    resetPasswordForEmail,
+    updatePassword,
+    startDemo,
+    signOut,
+    isDemo,
+  } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { setAppReady } = useAppContext();
-  
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [username, setUsername] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [signupStep, setSignupStep] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  const [showReset, setShowReset] = useState(false);
-  const [resetEmail, setResetEmail] = useState('');
-  const [resetLoading, setResetLoading] = useState(false);
-
-  // Redirect if already authenticated
-  useEffect(() => {
-    if (session) {
-      navigate('/');
-    }
-  }, [session, navigate]);
-
-  // Reset form when switching between login/signup
-  useEffect(() => {
-    setEmail('');
-    setPassword('');
-    setName('');
-    setUsername('');
-    setConfirmPassword('');
-    setSignupStep(1); // Reset to step 1 when switching to signup
-  }, [isLogin]);
-
-  // Force re-render of progress bar when step changes
-  useEffect(() => {
-    // This ensures the CSS class is properly applied
-    const progressLine = document.querySelector('.progress-line');
-    if (progressLine && !isLogin) {
-      progressLine.className = `progress-line step-${signupStep}`;
-    }
-  }, [signupStep, isLogin]);
+  const { pathname, search } = useLocation();
+  const recovery = pathname === "/reset-password";
+  const [mode, setMode] = useState<Mode>(() =>
+    new URLSearchParams(search).get("view") === "forgot" ? "forgot" : "login",
+  );
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
 
   useEffect(() => {
-    setAppReady(true);
-  }, [setAppReady]);
+    if (user && !recovery) navigate("/", { replace: true });
+  }, [user, recovery, navigate]);
+  useEffect(() => {
+    setError("");
+    setNotice("");
+    setPassword("");
+    setConfirmPassword("");
+    setShowPassword(false);
+  }, [mode, recovery]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (busy) return;
+    setError("");
+    setNotice("");
+    setBusy(true);
     try {
-      if (isLogin) {
-        const { error } = await signIn(email, password);
-        if (error) {
-          toast({
-            title: 'Authentication failed',
-            description: error.message || 'Please check your credentials',
-            variant: 'destructive',
-          });
-        } else {
-          toast({
-            title: 'Welcome back!',
-            description: 'Successfully signed in',
-          });
-          navigate('/');
+      if (recovery) {
+        if (password !== confirmPassword) {
+          setError("Your passwords do not match.");
+          return;
         }
+        const result = await updatePassword(password);
+        if (result.error) setError(result.error.message);
+        else navigate("/", { replace: true });
+      } else if (mode === "forgot") {
+        const result = await resetPasswordForEmail(email.trim());
+        if (result.error) setError(result.error.message);
+        else
+          setNotice(
+            "If an account exists for this email, a reset link is on its way. Check your inbox.",
+          );
+      } else if (mode === "signup") {
+        const result = await signUp(email.trim(), password, {
+          name: name.trim(),
+          username: username.trim(),
+        });
+        if (result.error) setError(result.error.message);
+        else if (result.needsConfirmation)
+          setNotice(
+            "Check your email to confirm your account, then come back to sign in.",
+          );
+        else navigate("/", { replace: true });
       } else {
-        if (signupStep === 1) {
-          // Validate email and move to step 2
-          if (email && email.includes('@')) {
-            setSignupStep(2);
-          } else {
-            toast({
-              title: 'Invalid email',
-              description: 'Please enter a valid email address',
-              variant: 'destructive',
-            });
-          }
-        } else if (signupStep === 2) {
-          // Validate name/username and move to step 3
-          if (name.trim() && username.trim()) {
-            setSignupStep(3);
-          } else {
-            toast({
-              title: 'Missing information',
-              description: 'Please provide both name and username',
-              variant: 'destructive',
-            });
-          }
-        } else {
-          // Complete signup
-          if (password !== confirmPassword) {
-            toast({
-              title: 'Passwords don\'t match',
-              description: 'Please make sure your passwords match',
-              variant: 'destructive',
-            });
-            return;
-          }
-          
-          const { error } = await signUp(email, password, { name, username });
-          if (error) {
-            toast({
-              title: 'Sign up failed',
-              description: error.message || 'Please try again',
-              variant: 'destructive',
-            });
-          } else {
-            toast({
-              title: 'Welcome to GrindSheet!',
-              description: 'Your account has been created successfully',
-            });
-            navigate('/');
-          }
-        }
+        const result = await signIn(email.trim(), password);
+        if (result.error) setError(result.error.message);
+        else navigate("/", { replace: true });
       }
-    } catch (error) {
-      console.error('Auth error:', error);
-      toast({
-        title: 'Something went wrong',
-        description: 'Please try again',
-        variant: 'destructive',
-      });
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.",
+      );
     } finally {
-      setIsLoading(false);
+      setBusy(false);
     }
   };
-
-  const getStepStatus = (step: number) => {
-    if (signupStep > step) return 'completed';
-    if (signupStep === step) return 'active';
-    return '';
-  };
-
-  const goBackStep = () => {
-    if (signupStep > 1) {
-      setSignupStep(signupStep - 1);
+  const tryDemo = () => {
+    try {
+      startDemo();
+    } catch {
+      setError("Allow browser storage to try the demo on this device.");
     }
   };
-
-  return (
-    <div className={`auth-container ${isDark ? 'dark' : 'light'}`}>
-      {/* Animated Background */}
-      <div className="auth-background" />
-      
-      {/* Main Card */}
-      <div className="auth-card">
-        {/* Header */}
-        <div className="auth-header">
-          <h1 className="auth-title">
-            {isLogin ? 'Welcome back' : signupStep === 1 ? 'Create account' : signupStep === 2 ? 'Tell us about you' : 'Secure your account'}
-          </h1>
-          <p className="auth-subtitle">
-            {isLogin 
-              ? 'Continue your strength journey' 
-              : signupStep === 1 
-                ? 'Simply track weights, compete with friends'
-                : signupStep === 2
-                  ? 'Personalize your experience'
-                  : 'Choose a strong password'
-            }
-          </p>
-        </div>
-
-        {/* Form Container */}
-        <div className="auth-form-container">
-          {/* Signup Progress */}
-          {!isLogin && (
-            <div className="signup-progress">
-              <div className="progress-steps">
-                <div 
-                  className={`progress-line step-${signupStep}`}
-                />
-                <div className={`progress-step ${getStepStatus(1)}`}>
-                  {signupStep > 1 ? <Check size={12} /> : <Mail size={12} />}
-                </div>
-                <div className={`progress-step ${getStepStatus(2)}`}>
-                  {signupStep > 2 ? <Check size={12} /> : <User size={12} />}
-                </div>
-                <div className={`progress-step ${getStepStatus(3)}`}>
-                  <Lock size={12} />
-                </div>
-              </div>
-              <div className="progress-labels">
-                <span className={`progress-label ${signupStep === 1 ? 'active' : ''}`}>
-                  Email
-                </span>
-                <span className={`progress-label ${signupStep === 2 ? 'active' : ''}`}>
-                  Profile
-                </span>
-                <span className={`progress-label ${signupStep === 3 ? 'active' : ''}`}>
-                  Password
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="auth-form">
-            {/* Login Form */}
-            {isLogin && !showReset && (
-              <>
-                <div className="input-group">
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email address"
-                    className="auth-input"
-                    required
-                  />
-                </div>
-                <div className="input-group">
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    className="auth-input"
-                    required
-                  />
-                </div>
-                <div className="auth-forgot-password">
-                  <button
-                    type="button"
-                    className="auth-forgot-btn"
-                    onClick={() => setShowReset(true)}
-                  >
-                    Forgot Password?
-                  </button>
-                </div>
-              </>
-            )}
-            {/* Password Reset View */}
-            {isLogin && showReset && (
-              <>
-                <div className="input-group">
-                  <input
-                    type="email"
-                    value={resetEmail}
-                    onChange={(e) => setResetEmail(e.target.value)}
-                    placeholder="Enter your email address"
-                    className="auth-input"
-                    required
-                  />
-                </div>
-                <div className="auth-nav-buttons">
-                  <button
-                    type="button"
-                    className="auth-submit-btn auth-back-btn"
-                    onClick={() => setShowReset(false)}
-                  >
-                    ←
-                  </button>
-                  <button
-                    type="button"
-                    className="auth-submit-btn primary"
-                    disabled={resetLoading}
-                    onClick={async () => {
-                      setResetLoading(true);
-                      try {
-                        const { error } = await resetPasswordForEmail(resetEmail, {
-                          redirectTo: window.location.origin + '/reset-password',
-                        });
-                        if (error) {
-                          toast({
-                            title: 'Reset failed',
-                            description: error.message || 'Please try again',
-                            variant: 'destructive',
-                          });
-                        } else {
-                          toast({
-                            title: 'Check your email',
-                            description: 'Password reset link sent',
-                          });
-                          setShowReset(false);
-                        }
-                      } catch (err) {
-                        toast({
-                          title: 'Something went wrong',
-                          description: 'Please try again',
-                          variant: 'destructive',
-                        });
-                      } finally {
-                        setResetLoading(false);
-                      }
-                    }}
-                  >
-                    {resetLoading ? 'Sending...' : 'Send Reset Link'}
-                  </button>
-                </div>
-              </>
-            )}
-
-            {/* Signup Form - Step 1: Email */}
-            {!isLogin && signupStep === 1 && (
-              <div className="input-group">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email address"
-                  className="auth-input"
-                  required
-                />
-              </div>
-            )}
-
-            {/* Signup Form - Step 2: Profile */}
-            {!isLogin && signupStep === 2 && (
-              <>
-                <div className="input-group">
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Your full name"
-                    className="auth-input"
-                    required
-                  />
-                </div>
-                <div className="input-group">
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Choose a username"
-                    className="auth-input"
-                    required
-                  />
-                </div>
-              </>
-            )}
-
-            {/* Signup Form - Step 3: Password */}
-            {!isLogin && signupStep === 3 && (
-              <>
-                <div className="input-group">
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Create a strong password"
-                    className="auth-input"
-                    required
-                  />
-                </div>
-                <div className="input-group">
-                  <input
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm your password"
-                    className="auth-input"
-                    required
-                  />
-                </div>
-              </>
-            )}
-
-            {/* Navigation Buttons */}
-            <div className="auth-nav-buttons">
-              {/* Back Button for Signup */}
-              {!isLogin && signupStep > 1 && (
-                <button 
-                  type="button"
-                  onClick={goBackStep}
-                  className="auth-submit-btn auth-back-btn"
-                >
-                  ←
-                </button>
-              )}
-
-              {/* Submit Button */}
-              <button 
-                type="submit" 
-                className="auth-submit-btn primary"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    Loading...
-                  </div>
-                ) : isLogin ? (
-                  <div className="flex items-center justify-center gap-2">
-                    Sign in <ArrowRight size={18} />
-                  </div>
-                ) : signupStep < 3 ? (
-                  <div className="flex items-center justify-center gap-2">
-                    Continue <ChevronRight size={18} />
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center gap-2">
-                    Create account <Check size={18} />
-                  </div>
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* Toggle Section */}
-        <div className="auth-toggle">
-          <p className="auth-toggle-text">
-            {isLogin ? "Don't have an account?" : "Already have an account?"}
-          </p>
-          <button 
+  const title = recovery
+    ? "Choose a new password"
+    : mode === "signup"
+      ? "Start your next chapter"
+      : mode === "forgot"
+        ? "Back in your corner"
+        : "Welcome back";
+  const subtitle = recovery
+    ? "Make it one you haven’t used before."
+    : mode === "signup"
+      ? "A little stronger, one workout at a time."
+      : mode === "forgot"
+        ? "We’ll email you a link to reset your password."
+        : "Your next personal best starts here.";
+  const passwordField = (confirmation = false) => (
+    <div className="auth-field">
+      <label htmlFor={confirmation ? "confirm-password" : "password"}>
+        {confirmation
+          ? "Confirm password"
+          : recovery
+            ? "New password"
+            : "Password"}
+      </label>
+      <div className="auth-password-wrap">
+        <input
+          id={confirmation ? "confirm-password" : "password"}
+          name={confirmation ? "confirm-password" : "password"}
+          type={showPassword ? "text" : "password"}
+          autoComplete={
+            mode === "signup" || recovery ? "new-password" : "current-password"
+          }
+          value={confirmation ? confirmPassword : password}
+          onChange={(e) =>
+            confirmation
+              ? setConfirmPassword(e.target.value)
+              : setPassword(e.target.value)
+          }
+          minLength={mode === "signup" || recovery ? 8 : undefined}
+          placeholder={
+            mode === "signup" || recovery
+              ? "At least 8 characters"
+              : "Enter your password"
+          }
+          required
+        />
+        {!confirmation && (
+          <button
             type="button"
-            onClick={() => setIsLogin(!isLogin)}
-            className="auth-toggle-btn"
+            className="auth-reveal"
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            aria-pressed={showPassword}
+            onClick={() => setShowPassword(!showPassword)}
           >
-            {isLogin ? 'Create account' : 'Sign in instead'}
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
-        </div>
+        )}
       </div>
     </div>
   );
-};
-
-export default Auth;
+  return (
+    <main className="auth-page">
+      <div className="auth-shell">
+        <Link to="/auth" className="auth-brand" aria-label="GrindSheet home">
+          <span className="auth-brand-mark">
+            <Dumbbell size={23} />
+          </span>
+          GrindSheet
+        </Link>
+        <section className="auth-panel" aria-labelledby="auth-title">
+          <header className="auth-heading">
+            <p className="auth-eyebrow">LOG. PROGRESS. REPEAT.</p>
+            <h1 id="auth-title">{title}</h1>
+            <p>{subtitle}</p>
+          </header>
+          {!recovery && mode !== "forgot" && (
+            <div className="auth-switch" aria-label="Account access">
+              <button
+                type="button"
+                aria-pressed={mode === "login"}
+                disabled={busy}
+                onClick={() => setMode("login")}
+              >
+                Sign in
+              </button>
+              <button
+                type="button"
+                aria-pressed={mode === "signup"}
+                disabled={busy}
+                onClick={() => setMode("signup")}
+              >
+                Create account
+              </button>
+            </div>
+          )}
+          {recovery && !loading && (!user || isDemo) ? (
+            <div className="auth-message" role="status">
+              Open the password reset link from your email to continue. If it
+              has expired,{" "}
+              <Link to="/auth?view=forgot">request a new link</Link>.
+            </div>
+          ) : (
+            <form onSubmit={submit} className="auth-form">
+              <fieldset disabled={busy || loading}>
+                {mode === "signup" && !recovery && (
+                  <div className="auth-profile-fields">
+                    <div className="auth-field">
+                      <label htmlFor="name">Name</label>
+                      <input
+                        id="name"
+                        name="name"
+                        autoComplete="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Your name"
+                        maxLength={60}
+                        pattern={".*\\S.*"}
+                        required
+                      />
+                    </div>
+                    <div className="auth-field">
+                      <label htmlFor="username">Username</label>
+                      <input
+                        id="username"
+                        name="username"
+                        autoComplete="username"
+                        autoCapitalize="none"
+                        spellCheck={false}
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="How friends find you"
+                        pattern="[a-zA-Z0-9_]{3,24}"
+                        title="3–24 letters, numbers, or underscores"
+                        required
+                      />
+                    </div>
+                  </div>
+                )}
+                {!recovery && (
+                  <div className="auth-field">
+                    <label htmlFor="email">Email address</label>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      inputMode="email"
+                      autoComplete="email"
+                      autoCapitalize="none"
+                      spellCheck={false}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      required
+                    />
+                  </div>
+                )}
+                {(recovery || mode !== "forgot") && passwordField()}
+                {recovery && passwordField(true)}
+                {mode === "login" && !recovery && (
+                  <button
+                    type="button"
+                    className="auth-text-button auth-forgot"
+                    onClick={() => setMode("forgot")}
+                  >
+                    Forgot password?
+                  </button>
+                )}
+                {error && (
+                  <p className="auth-message auth-error" role="alert">
+                    {error}
+                  </p>
+                )}
+                {notice && (
+                  <p className="auth-message" role="status">
+                    <CheckCircle2 size={18} aria-hidden="true" />
+                    {notice}
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  className="auth-primary"
+                  disabled={busy || loading || !!notice}
+                >
+                  {busy ? (
+                    <>
+                      <Loader2 size={18} className="animate-spin" />
+                      Please wait…
+                    </>
+                  ) : (
+                    <>
+                      {recovery
+                        ? "Save new password"
+                        : mode === "forgot"
+                          ? "Send reset link"
+                          : mode === "signup"
+                            ? "Create account"
+                            : "Sign in"}
+                      <ArrowRight size={18} />
+                    </>
+                  )}
+                </button>
+              </fieldset>
+            </form>
+          )}
+          {!recovery && mode !== "forgot" && (
+            <>
+              <div className="auth-divider">
+                <span>or take a look around</span>
+              </div>
+              <button
+                type="button"
+                className="auth-demo"
+                onClick={tryDemo}
+                disabled={busy || loading}
+              >
+                <Play size={17} />
+                Try demo<span>No account needed</span>
+              </button>
+              <p className="auth-demo-note">
+                Explore sample workouts, track progress, and try a friendly
+                competition.
+              </p>
+            </>
+          )}
+          {(mode === "forgot" || recovery) && (
+            <Link
+              className="auth-back"
+              to="/auth"
+              onClick={async (event) => {
+                if (recovery && user) {
+                  event.preventDefault();
+                  const result = await signOut();
+                  if (result.error) setError(result.error.message);
+                  else navigate("/auth", { replace: true });
+                } else setMode("login");
+              }}
+            >
+              <ArrowLeft size={16} />
+              Back to sign in
+            </Link>
+          )}
+        </section>
+        <p className="auth-footer">Small steps. Stronger you.</p>
+      </div>
+    </main>
+  );
+}

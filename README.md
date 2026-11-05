@@ -25,7 +25,7 @@ The application routes live in [`src/App.tsx`](src/App.tsx). Key views include [
 
 ## Run locally
 
-Requires a recent Node.js release and npm.
+Requires Node.js 22.15 or newer and npm.
 
 ```bash
 git clone https://github.com/vp-27/GrindSheet.git
@@ -39,10 +39,22 @@ Vite is configured to serve the app on **http://localhost:8080**. Other availabl
 ```bash
 npm run build   # production bundle
 npm run lint    # ESLint
+npm run typecheck # TypeScript application and build configuration
+npm test        # Regression checks without a browser
 npm run preview # preview a built bundle
 ```
 
-**Backend caveat:** This is not a fully self-contained offline demo. The Supabase client is configured in [`src/integrations/supabase/client.ts`](src/integrations/supabase/client.ts), and features such as sign-in and synced workout data depend on a working Supabase project, its database schema, and appropriate access policies. A fresh clone alone does not provision that backend. Do not use sensitive real-world data when testing an unverified deployment.
+## Try the demo
+
+Choose **Try demo** on the sign-in or create-account screen. The demo includes six weeks of sample workouts, personal records, and four competitors. Logging, editing, deleting, profile changes, and category/exercise management stay in browser storage and never write to Supabase. Demo mode survives a tab refresh; **Exit demo** returns to authentication. In Profile, **Reset demo data** restores fresh sample workouts.
+
+The production service worker caches the app, including its demo screens, after a successful first visit. Real account data still requires a working connection; offline account saves show an error and leave the form open. A new app version offers **Update** or **Later** instead of reloading an active workout form automatically. Service workers are disabled during local development.
+
+## Authentication setup
+
+Allow the deployed origin and `/reset-password` URL in the Supabase redirect allowlist. Signup displays a check-email state when email confirmation is enabled. Recovery links open a dedicated form for setting a new password. Verify email delivery and recovery against your configured Supabase project before publishing.
+
+**Backend caveat:** Real accounts are not a self-contained offline demo. The Supabase client is configured in [`src/integrations/supabase/client.ts`](src/integrations/supabase/client.ts), and features such as sign-in and synced workout data depend on a working Supabase project, its database schema, and appropriate access policies. A fresh clone alone does not provision that backend. Do not use sensitive real-world data when testing an unverified deployment.
 
 ## Project evolution
 
